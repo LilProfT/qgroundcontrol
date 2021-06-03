@@ -922,7 +922,7 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
         messageText.remove(0, 1);
         readAloud = true;
     }
-    else if (severity <= MAV_SEVERITY_NOTICE) {
+    else if (severity <= MAV_SEVERITY_INFO) {
         readAloud = true;
     }
 

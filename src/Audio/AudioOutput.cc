@@ -119,7 +119,7 @@ void AudioOutput::_play(QString& text) {
     }
 
     qDebug() << "tts ::: " << text;
-    _tts->say(text);
+    //_tts->say(text);
 };
 
 bool AudioOutput::getMillisecondString(const QString& string, QString& match, int& number) {

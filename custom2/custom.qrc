@@ -21,4 +21,18 @@
     <qresource prefix="/qmlimages">
 	<file alias="PaperPlane.svg">res/Images/CustomVehicleIcon.svg</file>
     </qresource>
+    <qresource prefix="Custom/Widgets">
+        <file alias="Custom/Widgets/CustomArtificialHorizon.qml">res/Custom/Widgets/CustomArtificialHorizon.qml</file>
+        <file alias="Custom/Widgets/CustomAttitudeWidget.qml">res/Custom/Widgets/CustomAttitudeWidget.qml</file>
+        <file alias="Custom/Widgets/CustomIconButton.qml">res/Custom/Widgets/CustomIconButton.qml</file>
+        <file alias="Custom/Widgets/CustomOnOffSwitch.qml">res/Custom/Widgets/CustomOnOffSwitch.qml</file>
+        <file alias="Custom/Widgets/CustomQuickButton.qml">res/Custom/Widgets/CustomQuickButton.qml</file>
+        <file alias="Custom/Widgets/CustomSignalStrength.qml">res/Custom/Widgets/CustomSignalStrength.qml</file>
+        <file alias="Custom/Widgets/CustomToolBarButton.qml">res/Custom/Widgets/CustomToolBarButton.qml</file>
+        <file alias="Custom/Widgets/CustomVehicleButton.qml">res/Custom/Widgets/CustomVehicleButton.qml</file>
+        <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
+    </qresource>
+    <qresource prefix="/qml">
+        <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">res/CustomFlyViewOverlay.qml</file>
+    </qresource>
 </RCC>
