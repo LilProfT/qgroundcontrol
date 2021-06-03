@@ -1,0 +1,45 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name" :                "ntripServerConnectEnable",
+    "shortDesc":            "Connect to NTRIP server",
+    "longDesc":             "Connect to NTRIP server using information provided",
+    "type":                 "bool",
+    "default":              "false",
+    "qgcRebootRequired":    true
+},
+{
+    "name" :                "ntripServerHostAddress",
+    "shortDesc":            "Host Address",
+    "type":                 "string",
+    "default":              "14.238.1.125"
+},
+{
+    "name" :                "ntripServerPort",
+    "shortDesc":            "Port",
+    "type":                 "string",
+    "default":              "2101"
+},
+{
+    "name" :                "ntripServerUserName",
+    "shortDesc":            "User Name",
+    "type":                 "string",
+    "default":              "username"
+},
+{
+    "name" :                "ntripServerPasswd",
+    "shortDesc":            "Password",
+    "type":                 "string",
+    "default":              ""
+},
+{
+    "name" :                "ntripServerMntpnt",
+    "shortDesc":            "Mountpoint",
+    "type":                 "string",
+    "default":              ""
+}
+]
+}
