@@ -23,6 +23,7 @@ SettingsManager::SettingsManager(QGCApplication* app, QGCToolbox* toolbox)
     , _videoSettings                (nullptr)
     , _flightMapSettings            (nullptr)
     , _rtkSettings                  (nullptr)
+    , _ntripSettings                (nullptr)
     , _flyViewSettings              (nullptr)
     , _planViewSettings             (nullptr)
     , _brandImageSettings           (nullptr)
@@ -48,6 +49,7 @@ void SettingsManager::setToolbox(QGCToolbox *toolbox)
     _videoSettings =                new VideoSettings               (this);
     _flightMapSettings =            new FlightMapSettings           (this);
     _rtkSettings =                  new RTKSettings                 (this);
+    _ntripSettings =                new NTRIPSettings               (this);
     _flyViewSettings =              new FlyViewSettings             (this);
     _planViewSettings =             new PlanViewSettings            (this);
     _brandImageSettings =           new BrandImageSettings          (this);

@@ -682,14 +682,15 @@ SetupPage {
                     QGCButton {
                         width:      _buttonWidth
                         text:       qsTr("CompassMot")
-                        visible:    globals.activeVehicle ? globals.activeVehicle.supportsMotorInterference : false
-
+                        //visible:    globals.activeVehicle ? globals.activeVehicle.supportsMotorInterference : false
+                        visible:    false
                         onClicked:  mainWindow.showComponentDialog(compassMotDialogComponent, qsTr("CompassMot - Compass Motor Interference Calibration"), mainWindow.showDialogFullWidth, StandardButton.Cancel | StandardButton.Ok)
                     }
 
                     QGCButton {
                         width:      _buttonWidth
                         text:       qsTr("Sensor Settings")
+                        visible:    false
                         onClicked:  showOrientationsDialog(_calTypeSet)
                     }
                 } // Column - Cal Buttons

@@ -235,6 +235,8 @@ contains(DEFINES, ENABLE_VERBOSE_OUTPUT) {
     CONFIG += silent
 }
 
+
+
 QT += \
     concurrent \
     gui \
@@ -394,6 +396,7 @@ INCLUDEPATH += \
     src/Joystick \
     src/PlanView \
     src/MissionManager \
+    src/NTRIP \
     src/PositionManager \
     src/QmlControls \
     src/QtLocationPlugin \
@@ -425,6 +428,7 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 #
 
 HEADERS += \
+    src/MissionManager/MissionModel.h \
     src/QmlControls/QmlUnitsConversion.h \
     src/Vehicle/VehicleEscStatusFactGroup.h \
     src/api/QGCCorePlugin.h \
@@ -439,6 +443,8 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 }
 
 SOURCES += \
+    src/MissionManager/MissionModel.cc \
+    src/MissionManager/SurveyComplexItem.mismart.cc \
     src/Vehicle/VehicleEscStatusFactGroup.cc \
     src/api/QGCCorePlugin.cc \
     src/api/QGCOptions.cc \
@@ -577,6 +583,9 @@ HEADERS += \
     src/Compression/QGCZlib.h \
     src/FirmwarePlugin/PX4/px4_custom_mode.h \
     src/FollowMe/FollowMe.h \
+    src/GPS/Drivers/src/rtcm.h \
+    src/GPS/RTCM/RTCMMavlink.h \
+    src/GPS/RTKProvider.h \
     src/Joystick/Joystick.h \
     src/Joystick/JoystickManager.h \
     src/JsonHelper.h \
@@ -622,9 +631,11 @@ HEADERS += \
     src/MissionManager/SurveyComplexItem.h \
     src/MissionManager/SurveyPlanCreator.h \
     src/MissionManager/TakeoffMissionItem.h \
+    src/MissionManager/TransectStyleFenceSupportedComplexItem.h \
     src/MissionManager/TransectStyleComplexItem.h \
     src/MissionManager/VisualMissionItem.h \
     src/MissionManager/VTOLLandingComplexItem.h \
+    src/NTRIP/NTRIP.h \
     src/PositionManager/PositionManager.h \
     src/PositionManager/SimulatedPosition.h \
     src/Geo/QGCGeo.h \
@@ -672,6 +683,7 @@ HEADERS += \
     src/Settings/FirmwareUpgradeSettings.h \
     src/Settings/FlightMapSettings.h \
     src/Settings/FlyViewSettings.h \
+    src/Settings/NTRIPSettings.h \
     src/Settings/OfflineMapsSettings.h \
     src/Settings/PlanViewSettings.h \
     src/Settings/RTKSettings.h \
@@ -779,14 +791,12 @@ HEADERS += \
 !MobileBuild {
 HEADERS += \
     src/GPS/Drivers/src/gps_helper.h \
-    src/GPS/Drivers/src/rtcm.h \
     src/GPS/Drivers/src/ashtech.h \
     src/GPS/Drivers/src/ubx.h \
     src/GPS/Drivers/src/sbf.h \
     src/GPS/GPSManager.h \
     src/GPS/GPSPositionMessage.h \
     src/GPS/GPSProvider.h \
-    src/GPS/RTCM/RTCMMavlink.h \
     src/GPS/definitions.h \
     src/GPS/satellite_info.h \
     src/GPS/vehicle_gps_position.h \
@@ -819,6 +829,9 @@ SOURCES += \
     src/Compression/QGCLZMA.cc \
     src/Compression/QGCZlib.cc \
     src/FollowMe/FollowMe.cc \
+    src/GPS/Drivers/src/rtcm.cpp \
+    src/GPS/RTCM/RTCMMavlink.cc \
+    src/GPS/RTKProvider.cc \
     src/Joystick/Joystick.cc \
     src/Joystick/JoystickManager.cc \
     src/JsonHelper.cc \
@@ -863,9 +876,11 @@ SOURCES += \
     src/MissionManager/SurveyComplexItem.cc \
     src/MissionManager/SurveyPlanCreator.cc \
     src/MissionManager/TakeoffMissionItem.cc \
+    src/MissionManager/TransectStyleFenceSupportedComplexItem.cc \
     src/MissionManager/TransectStyleComplexItem.cc \
     src/MissionManager/VisualMissionItem.cc \
     src/MissionManager/VTOLLandingComplexItem.cc \
+    src/NTRIP/NTRIP.cc \
     src/PositionManager/PositionManager.cpp \
     src/PositionManager/SimulatedPosition.cc \
     src/Geo/QGCGeo.cc \
@@ -911,6 +926,7 @@ SOURCES += \
     src/Settings/FirmwareUpgradeSettings.cc \
     src/Settings/FlightMapSettings.cc \
     src/Settings/FlyViewSettings.cc \
+    src/Settings/NTRIPSettings.cc \
     src/Settings/OfflineMapsSettings.cc \
     src/Settings/PlanViewSettings.cc \
     src/Settings/RTKSettings.cc \
@@ -1006,13 +1022,11 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 !MobileBuild {
 SOURCES += \
     src/GPS/Drivers/src/gps_helper.cpp \
-    src/GPS/Drivers/src/rtcm.cpp \
     src/GPS/Drivers/src/ashtech.cpp \
     src/GPS/Drivers/src/ubx.cpp \
     src/GPS/Drivers/src/sbf.cpp \
     src/GPS/GPSManager.cc \
     src/GPS/GPSProvider.cc \
-    src/GPS/RTCM/RTCMMavlink.cc \
     src/Joystick/JoystickSDL.cc \
     src/RunGuard.cc \
 }
@@ -1245,6 +1259,20 @@ contains (DEFINES, QGC_ENABLE_MAVLINK_INSPECTOR) {
         charts
 }
 
+
+#---------
+INCLUDEPATH += \
+    src/FlightHub \
+
+HEADERS += \
+    src/FlightHub/FlightHubManager.h \
+    src/FlightHub/FlightHubMqtt.h \
+
+SOURCES += \
+    src/FlightHub/FlightHubManager.cc \
+    src/FlightHub/FlightHubMqtt.cc \
+
+
 #-------------------------------------------------------------------------------------
 # Taisync
 contains (DEFINES, QGC_GST_TAISYNC_DISABLED) {
@@ -1463,3 +1491,5 @@ contains (CONFIG, QGC_DISABLE_INSTALLER_SETUP) {
 
 DISTFILES += \
     src/QmlControls/QGroundControl/Specific/qmldir
+
+QT += mqtt

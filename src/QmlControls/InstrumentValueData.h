@@ -51,6 +51,10 @@ public:
     Q_PROPERTY(double               currentOpacity      MEMBER _currentOpacity                              NOTIFY currentOpacityChanged)
     Q_PROPERTY(QString              currentIcon         MEMBER _currentIcon                                 NOTIFY currentIconChanged)
 
+    //Mismart: Custom unit and scaler
+    Q_PROPERTY(QString              customUnits         READ    customUnits         WRITE setCustomUnits    NOTIFY customUnitsChanged)
+    Q_PROPERTY(float                scaler              READ    scaler              WRITE setScaler         NOTIFY scalerChanged)
+
     Q_INVOKABLE void    setFact         (const QString& factGroupName, const QString& factName);
     Q_INVOKABLE void    clearFact       (void);
     Q_INVOKABLE bool    isValidColor    (const QColor& color)   { return color.isValid(); }
@@ -80,6 +84,12 @@ public:
     void            setRangeIcons           (const QVariantList& rangeIcons);
     void            setRangeOpacities       (const QVariantList& rangeOpacities);
 
+    //Mismart: Custom unit and scaler
+    QString         customUnits             (void) const { return _customUnits; }
+    void            setCustomUnits          (const QString& customUnits);
+    float           scaler                  (void) const { return _scaler; }
+    void            setScaler               (const float scaler);
+
 
     static const char*  vehicleFactGroupName;
 
@@ -100,6 +110,10 @@ signals:
     void currentColorChanged    (const QColor& currentColor);
     void currentOpacityChanged  (double currentOpacity);
     void currentIconChanged     (const QString& currentIcon);
+
+    //Mismart: Custom units and scaler
+    void customUnitsChanged     (QString customUnits);
+    void scalerChanged          (float scaler);
 
 private slots:
     void _resetRangeInfo        (void);
@@ -126,6 +140,10 @@ private:
     QColor                  _currentColor;
     double                  _currentOpacity =       1.0;
     QString                 _currentIcon;
+
+    //Mismart:  Custom units and scaler
+    QString                 _customUnits;
+    float                   _scaler =               1.0f;
 
     // Ranges allow you to specifiy semantics to apply when a value is within a certain range.
     // The limits for each section of the range are specified in _rangeValues. With the first

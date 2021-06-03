@@ -155,11 +155,37 @@ QGCPopupDialog {
             }
 
             QGCCheckBox {
+                id:                 showUnitsCheckbox
                 Layout.columnSpan:  2
                 text:               qsTr("Show Units")
                 checked:            instrumentValueData.showUnits
                 onClicked:          instrumentValueData.showUnits = checked
             }
+
+            //Mismart: Custom Units and scaler edit
+            QGCLabel { text: qsTr("Cus. unit") }
+
+            QGCTextField {
+                id:                     customUnitsTextField
+                Layout.fillWidth:       true
+                Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 10
+                text:                   instrumentValueData.customUnits
+                enabled:                showUnitsCheckbox.checked
+                onEditingFinished:      instrumentValueData.customUnits = text
+            }
+
+            //Mismart: Custom Units and scaler edit
+//            QGCLabel { text: qsTr("Scaler") }
+
+//            QGCTextField {
+//                id:                     scalerTextField
+//                Layout.fillWidth:       true
+//                Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 10
+//                text:                   instrumentValueData.scaler.toString
+//                enabled:                true
+//                onEditingFinished:      instrumentValueData.scaler = parseFloat(text)
+//            }
+
 
             QGCLabel { text: qsTr("Range") }
 

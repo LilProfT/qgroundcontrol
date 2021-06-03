@@ -108,6 +108,8 @@
 #include "ToolStripActionList.h"
 #include "QGCMAVLink.h"
 #include "VehicleLinkManager.h"
+#include "FlightHubManager.h"
+#include "NTRIP.h"
 
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"
@@ -358,6 +360,16 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
 
     _toolbox = new QGCToolbox(this);
     _toolbox->setChildToolboxes();
+
+//    _gpsRtkFactGroup = new GPSRTKFactGroup(this);
+   NTRIP *ntrip = _toolbox->ntrip();
+   if (ntrip) {
+       connect(ntrip, &NTRIP::onConnect,          this, &QGCApplication::_onGPSConnect);
+       connect(ntrip, &NTRIP::onDisconnect,       this, &QGCApplication::_onGPSDisconnect);
+       connect(ntrip, &NTRIP::surveyInStatus,     this, &QGCApplication::_gpsSurveyInStatus);
+       connect(ntrip, &NTRIP::satelliteUpdate,    this, &QGCApplication::_gpsNumSatellites);
+   }
+
 
 #ifndef __mobile__
     _gpsRtkFactGroup = new GPSRTKFactGroup(this);

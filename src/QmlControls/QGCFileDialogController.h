@@ -23,6 +23,9 @@ class QGCFileDialogController : public QObject
     Q_OBJECT
 
 public:
+    /// Remove accents from file name
+    Q_INVOKABLE QString removeAccent(const QString &filename);
+
     /// Return all file in the specified path which match the specified extension
     Q_INVOKABLE QStringList getFiles(const QString& directoryPath, const QStringList& nameFilters);
 
@@ -42,6 +45,10 @@ public:
     /// Returns the standard QGC location portion of a fully qualified folder path.
     /// Example: "/Users/Don/Document/QGroundControl/Missions" returns "QGroundControl/Missions"
     Q_INVOKABLE QString fullFolderPathToShortMobilePath(const QString& fullFolderPath);
+
+    /// Search files
+    Q_INVOKABLE QStringList searchFiles(const QString& searchText, const QStringList& files);
+
 };
 
 #endif

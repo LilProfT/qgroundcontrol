@@ -11,6 +11,7 @@
 import QtQuick      2.3
 import QtLocation   5.3
 
+import QGroundControl               1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Controls      1.0
 import QGroundControl.Vehicle       1.0
@@ -31,6 +32,7 @@ MapQuickItem {
         MissionItemIndexLabel {
             id:                 _label
             checked:            _isCurrentItem
+            visualType:         getVisualType()
             label:              missionItem.abbreviation
             index:              missionItem.abbreviation.charAt(0) > 'A' && missionItem.abbreviation.charAt(0) < 'z' ? -1 : missionItem.sequenceNumber
             gimbalYaw:          missionItem.missionGimbalYaw
@@ -40,6 +42,12 @@ MapQuickItem {
             onClicked:          _item.clicked()
             opacity:            _item.opacity
 
+            function getVisualType() {
+                if (missionItem) console.log(missionItem.sequenceNumber, missionItem.visualType, _visualType);
+                return _visualType;
+            }
+
             property bool _isCurrentItem:   missionItem ? missionItem.isCurrentItem || missionItem.hasCurrentChildItem : false
+            property int _visualType:       (missionItem && missionItem.visualType) ? missionItem.visualType : MissionItem.NORMAL
         }
 }

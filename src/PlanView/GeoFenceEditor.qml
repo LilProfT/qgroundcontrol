@@ -60,17 +60,17 @@ QGCFlickable {
                     anchors.left:       parent.left
                     anchors.right:      parent.right
                     wrapMode:           Text.WordWrap
-                    font.pointSize:     myGeoFenceController.supported ? ScreenTools.smallFontPointSize : ScreenTools.defaultFontPointSize
-                    text:               myGeoFenceController.supported ?
-                                            qsTr("GeoFencing allows you to set a virtual fence around the area you want to fly in.") :
-                                            qsTr("This vehicle does not support GeoFence.")
+                    font.pointSize:     /* myGeoFenceController.supported ? */ ScreenTools.smallFontPointSize /* : ScreenTools.defaultFontPointSize */
+                    // text:               myGeoFenceController.supported ?
+                    text:                   qsTr("GeoFencing allows you to set a virtual fence around the area you want to fly in.") // :
+                                            // qsTr("This vehicle does not support GeoFence.")
                 }
 
                 Column {
                     anchors.left:       parent.left
                     anchors.right:      parent.right
                     spacing:            _margin
-                    visible:            myGeoFenceController.supported
+                    visible:            true // myGeoFenceController.supported
 
                     Repeater {
                         model: myGeoFenceController.params
@@ -124,21 +124,21 @@ QGCFlickable {
                             var rect = Qt.rect(flightMap.centerViewport.x, flightMap.centerViewport.y, flightMap.centerViewport.width, flightMap.centerViewport.height)
                             var topLeftCoord = flightMap.toCoordinate(Qt.point(rect.x, rect.y), false /* clipToViewPort */)
                             var bottomRightCoord = flightMap.toCoordinate(Qt.point(rect.x + rect.width, rect.y + rect.height), false /* clipToViewPort */)
-                            myGeoFenceController.addInclusionPolygon(topLeftCoord, bottomRightCoord)
+                            myGeoFenceController.addExclusionPolygon(topLeftCoord, bottomRightCoord)
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Circular Fence")
+//                    QGCButton {
+//                        Layout.fillWidth:   true
+//                        text:               qsTr("Circular Fence")
 
-                        onClicked: {
-                            var rect = Qt.rect(flightMap.centerViewport.x, flightMap.centerViewport.y, flightMap.centerViewport.width, flightMap.centerViewport.height)
-                            var topLeftCoord = flightMap.toCoordinate(Qt.point(rect.x, rect.y), false /* clipToViewPort */)
-                            var bottomRightCoord = flightMap.toCoordinate(Qt.point(rect.x + rect.width, rect.y + rect.height), false /* clipToViewPort */)
-                            myGeoFenceController.addInclusionCircle(topLeftCoord, bottomRightCoord)
-                        }
-                    }
+//                        onClicked: {
+//                            var rect = Qt.rect(flightMap.centerViewport.x, flightMap.centerViewport.y, flightMap.centerViewport.width, flightMap.centerViewport.height)
+//                            var topLeftCoord = flightMap.toCoordinate(Qt.point(rect.x, rect.y), false /* clipToViewPort */)
+//                            var bottomRightCoord = flightMap.toCoordinate(Qt.point(rect.x + rect.width, rect.y + rect.height), false /* clipToViewPort */)
+//                            myGeoFenceController.addInclusionCircle(topLeftCoord, bottomRightCoord)
+//                        }
+//                    }
 
                     SectionHeader {
                         id:             polygonSection

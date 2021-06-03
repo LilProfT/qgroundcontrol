@@ -155,7 +155,8 @@ Rectangle {
                 anchors.left:   parent.left
                 anchors.right:  parent.right
                 text:           qsTr("Vehicle Info")
-                visible:        !_waypointsOnlyMode
+                // visible:        !_waypointsOnlyMode
+                visible: false
                 checked:        false
             }
 
@@ -165,7 +166,8 @@ Rectangle {
                 columnSpacing:  ScreenTools.defaultFontPixelWidth
                 rowSpacing:     columnSpacing
                 columns:        2
-                visible:        vehicleInfoSectionHeader.visible && vehicleInfoSectionHeader.checked
+                // visible:        vehicleInfoSectionHeader.visible && vehicleInfoSectionHeader.checked
+                visible: false
 
                 QGCLabel {
                     text:               _firmwareLabel
@@ -237,7 +239,8 @@ Rectangle {
                 anchors.left:   parent.left
                 anchors.right:  parent.right
                 text:           qsTr("Launch Position")
-                visible:        !_vehicleHasHomePosition
+                // visible:        !_vehicleHasHomePosition
+                visible: false
                 checked:        false
             }
 
@@ -245,7 +248,8 @@ Rectangle {
                 anchors.left:   parent.left
                 anchors.right:  parent.right
                 spacing:        _margin
-                visible:        plannedHomePositionSection.checked && !_vehicleHasHomePosition
+                // visible:        plannedHomePositionSection.checked && !_vehicleHasHomePosition
+                visible: false
 
                 GridLayout {
                     anchors.left:   parent.left

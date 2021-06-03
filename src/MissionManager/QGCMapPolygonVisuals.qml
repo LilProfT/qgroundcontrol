@@ -53,6 +53,7 @@ Item {
     function addCommonVisuals() {
         if (_objMgrCommonVisuals.empty) {
             _objMgrCommonVisuals.createObject(polygonComponent, mapControl, true)
+            _objMgrCommonVisuals.createObject(polygonBorderComponent, mapControl, true)
         }
     }
 
@@ -283,6 +284,16 @@ Item {
             color:          mapPolygon.showAltColor ? altColor : interiorColor
             opacity:        interiorOpacity
             border.color:   borderColor
+            border.width:   0
+            path:           mapPolygon.path
+        }
+    }
+
+    Component {
+        id: polygonBorderComponent
+
+        MapPolygon {
+            border.color:   borderColor
             border.width:   borderWidth
             path:           mapPolygon.path
         }
@@ -379,7 +390,7 @@ Item {
             z:              _zorderDragHandle
             sourceItem: Rectangle {
                 id:             dragHandle
-                width:          ScreenTools.defaultFontPixelHeight * 1.5
+                width:          !ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 1.5 : ScreenTools.defaultFontPixelHeight * 0.9
                 height:         width
                 radius:         width * 0.5
                 color:          Qt.rgba(1,1,1,0.8)
@@ -413,7 +424,7 @@ Item {
 
             sourceItem: Rectangle {
                 id:             dragHandle
-                width:          ScreenTools.defaultFontPixelHeight * 1.5
+                width:          !ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 1.5 : ScreenTools.defaultFontPixelHeight * 0.9
                 height:         width
                 radius:         width * 0.5
                 color:          Qt.rgba(1,1,1,0.8)
@@ -518,8 +529,10 @@ Item {
         id: toolbarComponent
 
         PlanEditToolbar {
-            anchors.horizontalCenter:       mapControl.left
-            anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
+            //anchors.horizontalCenter:       mapControl.left
+            //anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
+            anchors.left:                   mapControl.left
+            anchors.leftMargin:             mapControl.centerViewport.left
             y:                              mapControl.centerViewport.top
             availableWidth:                 mapControl.centerViewport.width
 
@@ -530,11 +543,18 @@ Item {
                 onClicked:          _resetPolygon()
             }
 
+//            QGCButton {
+//                _horizontalPadding: 0
+//                text:               qsTr("Circular")
+//                visible:            !mapPolygon.traceMode
+//                onClicked:          _resetCircle()
+//            }
+
             QGCButton {
                 _horizontalPadding: 0
-                text:               qsTr("Circular")
-                visible:            !mapPolygon.traceMode
-                onClicked:          _resetCircle()
+                text:               qsTr("Set from Vehicle")
+                visible:            mapPolygon.traceMode && QGroundControl.multiVehicleManager.activeVehicle && QGroundControl.multiVehicleManager.activeVehicle.coordinate.isValid
+                onClicked:          mapPolygon.setPositionFromVehicle()
             }
 
             QGCButton {
@@ -555,12 +575,12 @@ Item {
                 }
             }
 
-            QGCButton {
-                _horizontalPadding: 0
-                text:               qsTr("Load KML/SHP...")
-                onClicked:          kmlOrSHPLoadDialog.openForLoad()
-                visible:            !mapPolygon.traceMode
-            }
+//            QGCButton {
+//                _horizontalPadding: 0
+//                text:               qsTr("Load KML/SHP...")
+//                onClicked:          kmlOrSHPLoadDialog.openForLoad()
+//                visible:            !mapPolygon.traceMode
+//            }
         }
     }
 
@@ -592,7 +612,7 @@ Item {
 
             sourceItem: Rectangle {
                 id:         dragHandle
-                width:      ScreenTools.defaultFontPixelHeight * 1.5
+                width:      !ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 1.5 : ScreenTools.defaultFontPixelHeight * 0.9
                 height:     width
                 radius:     width / 2
                 color:      "white"

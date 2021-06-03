@@ -185,6 +185,7 @@
         <file alias="QGroundControl/Controls/TransectStyleComplexItemTerrainFollow.qml">src/PlanView/TransectStyleComplexItemTerrainFollow.qml</file>
         <file alias="QGroundControl/Controls/VehicleRotationCal.qml">src/QmlControls/VehicleRotationCal.qml</file>
         <file alias="QGroundControl/Controls/VehicleSummaryRow.qml">src/QmlControls/VehicleSummaryRow.qml</file>
+        <file alias="QGroundControl/Controls/SprayIndicator.qml">src/QmlControls/SprayIndicator.qml</file>
         <file alias="QGroundControl/Controls/VTOLLandingPatternMapVisual.qml">src/PlanView/VTOLLandingPatternMapVisual.qml</file>
         <file alias="QGroundControl/FactControls/AltitudeFactTextField.qml">src/FactSystem/FactControls/AltitudeFactTextField.qml</file>
         <file alias="QGroundControl/FactControls/FactBitmask.qml">src/FactSystem/FactControls/FactBitmask.qml</file>
@@ -212,6 +213,7 @@
         <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">src/FlightDisplay/FlyViewWidgetLayer.qml</file>
         <file alias="QGroundControl/FlightDisplay/GuidedActionActionList.qml">src/FlightDisplay/GuidedActionActionList.qml</file>
         <file alias="QGroundControl/FlightDisplay/GuidedActionConfirm.qml">src/FlightDisplay/GuidedActionConfirm.qml</file>
+        <file alias="QGroundControl/FlightDisplay/ResumeMission.qml">src/FlightDisplay/ResumeMission.qml</file>
         <file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">src/FlightDisplay/GuidedActionsController.qml</file>
         <file alias="QGroundControl/FlightDisplay/GuidedActionLand.qml">src/FlightDisplay/GuidedActionLand.qml</file>
         <file alias="QGroundControl/FlightDisplay/GuidedActionList.qml">src/FlightDisplay/GuidedActionList.qml</file>
@@ -222,10 +224,12 @@
         <file alias="QGroundControl/FlightDisplay/GuidedToolStripAction.qml">src/FlightDisplay/GuidedToolStripAction.qml</file>
         <file alias="QGroundControl/FlightDisplay/MultiVehicleList.qml">src/FlightDisplay/MultiVehicleList.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightBatteryCheck.qml">src/FlightDisplay/PreFlightBatteryCheck.qml</file>
+        <file alias="QGroundControl/FlightDisplay/PreFlightBattCellCheck.qml">src/FlightDisplay/PreFlightBattCellCheck.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightGPSCheck.qml">src/FlightDisplay/PreFlightGPSCheck.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightRCCheck.qml">src/FlightDisplay/PreFlightRCCheck.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightSensorsHealthCheck.qml">src/FlightDisplay/PreFlightSensorsHealthCheck.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightSoundCheck.qml">src/FlightDisplay/PreFlightSoundCheck.qml</file>
+        <file alias="QGroundControl/FlightDisplay/PreFlightPumpCheck.qml">src/FlightDisplay/PreFlightPumpCheck.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightCheckListShowAction.qml">src/FlightDisplay/PreFlightCheckListShowAction.qml</file>
         <file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">src/FlightDisplay/ProximityRadarValues.qml</file>
         <file alias="QGroundControl/FlightDisplay/ProximityRadarVideoView.qml">src/FlightDisplay/ProximityRadarVideoView.qml</file>
@@ -310,6 +314,7 @@
         <file alias="RallyPoint.FactMetaData.json">src/MissionManager/RallyPoint.FactMetaData.json</file>
         <file alias="RCToParamDialog.FactMetaData.json">src/QmlControls/RCToParamDialog.FactMetaData.json</file>
         <file alias="RTK.SettingsGroup.json">src/Settings/RTK.SettingsGroup.json</file>
+        <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
         <file alias="SpeedSection.FactMetaData.json">src/MissionManager/SpeedSection.FactMetaData.json</file>
         <file alias="StructureScan.SettingsGroup.json">src/MissionManager/StructureScan.SettingsGroup.json</file>
         <file alias="Survey.SettingsGroup.json">src/MissionManager/Survey.SettingsGroup.json</file>
@@ -334,6 +339,31 @@
         <file alias="Vehicle/WindFact.json">src/Vehicle/WindFact.json</file>
         <file alias="Video.SettingsGroup.json">src/Settings/Video.SettingsGroup.json</file>
         <file alias="VTOLLandingPattern.FactMetaData.json">src/MissionManager/VTOLLandingPattern.FactMetaData.json</file>
+    </qresource>
+    <qresource prefix="/audio">
+        <file alias="audioMap.json">resources/audio/audioMap.json</file>
+        <file alias="out_of_pest.wav">resources/audio/out_of_pest.wav</file>
+        <file alias="alert.wav">resources/audio/alert.wav</file>
+        <file alias="Communication_lost.wav">resources/audio/Communication_lost.wav</file>
+        <file alias="Communication_regained.wav">resources/audio/Communication_regained.wav</file>
+        <file alias="Stabilize.wav">resources/audio/Stabilize.wav</file>
+        <file alias="Loiter.wav">resources/audio/Loiter.wav</file>
+        <file alias="Alt-hold.wav">resources/audio/Alt-hold.wav</file>
+        <file alias="return_to_launch.wav">resources/audio/return_to_launch.wav</file>
+        <file alias="battery_low_mah_fs.wav">resources/audio/battery_low_mah_fs.wav</file>
+        <file alias="arm.wav">resources/audio/arm.wav</file>
+        <file alias="disarm.wav">resources/audio/disarm.wav</file>
+        <file alias="compass_inconsistent.wav">resources/audio/compass_inconsistent.wav</file>
+        <file alias="compass_not_calibrated.wav">resources/audio/compass_not_calibrated.wav</file>
+        <file alias="gps_glitch.wav">resources/audio/gps_glitch.wav</file>
+        <file alias="rc_failure.wav">resources/audio/rc_failure.wav</file>
+        <file alias="need_3D_fix.wav">resources/audio/need_3D_fix.wav</file>
+        <file alias="auto-fm.wav">resources/audio/auto-fm.wav</file>
+        <file alias="guided.wav">resources/audio/guided.wav</file>
+        <file alias="prearm_battery_fs.wav">resources/audio/prearm_battery_fs.wav</file>
+        <file alias="prearm_tank_fs.wav">resources/audio/prearm_tank_fs.wav</file>
+        <file alias="cell_drift_warning.wav">resources/audio/cell_drift_warning.wav</file>
+        <file alias="Proximity.wav">resources/audio/Proximity.wav</file>
     </qresource>
     <qresource prefix="/MockLink">
         <file alias="APMArduSubMockLink.params">src/comm/APMArduSubMockLink.params</file>

@@ -88,6 +88,20 @@
     "units":            "m"
 },
 {
+    "name":             "areaSprayed",
+    "shortDesc": "Area Sprayed",
+    "type":             "double",
+    "decimalPlaces":    1,
+    "units":            "m^2"
+},
+{
+    "name":             "spacing",
+    "shortDesc": "Spacing",
+    "type":             "double",
+    "decimalPlaces":    1,
+    "units":            "m"
+},
+{
     "name":             "distanceToHome",
     "shortDesc": "Distance to Home",
     "type":             "double",

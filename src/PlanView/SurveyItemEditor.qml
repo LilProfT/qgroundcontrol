@@ -86,13 +86,21 @@ Rectangle {
             spacing:        _margin
             visible:        !wizardColumn.visible
 
-            TransectStyleComplexItemTabBar {
+            QGCTabBar {
                 id:             tabBar
+                width:          parent.width
                 anchors.left:   parent.left
                 anchors.right:  parent.right
+
+                Component.onCompleted: currentIndex = QGroundControl.settingsManager.planViewSettings.displayPresetsTabFirst.rawValue ? 2 : 0
+
+                QGCTabButton { icon.source: "/qmlimages/PatternGrid.png"; icon.height: ScreenTools.defaultFontPixelHeight }
+                //QGCTabButton { icon.source: "/qmlimages/PatternTerrain.png"; icon.height: ScreenTools.defaultFontPixelHeight }
             }
 
+
             // Grid tab
+
             Column {
                 anchors.left:       parent.left
                 anchors.right:      parent.right
@@ -120,10 +128,98 @@ Rectangle {
                 }
 
                 SectionHeader {
+                    id:             sprayConfigHeader
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    text:           qsTr("Spray Configuration")
+                }
+
+                GridLayout {
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    columnSpacing:  _margin
+                    rowSpacing:     _margin
+                    columns:        2
+                    visible:        sprayConfigHeader.checked
+
+                    QGCLabel { text: qsTr("Application Rate") }
+                    FactTextField {
+                        fact:                   _missionItem.applicationRate
+                        Layout.fillWidth:       true
+                    }
+
+                    QGCLabel { text: qsTr("Settle Velocity") }
+                    FactTextField {
+                        fact:                   _missionItem.velocity
+                        Layout.fillWidth:       true
+                        onUpdated:              velocitySlider.value = _missionItem.velocity.value
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.velocity.value.toFixed(1) + " " + _missionItem.velocity.units
+//                        font.pointSize:     ScreenTools.mediumFontPointSize
+                        Layout.alignment:  Qt.AlignRight
+                    }
+
+                    QGCSlider {
+                        id:                     velocitySlider
+                        minimumValue:           4.0
+                        maximumValue:           7.0
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.velocity.value
+                        onValueChanged:         _missionItem.velocity.value = value
+                        Component.onCompleted:  value = _missionItem.velocity.value
+                        updateValueWhileDragging: true
+                    }
+
+                    QGCLabel { text: qsTr("Nozzle Rate"); visible: false }
+                    FactTextField {
+                        fact:                   _missionItem.nozzleRate
+                        Layout.fillWidth:       true
+                        visible:                false
+                    }
+
+                    QGCLabel { text: qsTr("Nozzle Offset"); visible: false }
+                    FactTextField {
+                        fact:                   _missionItem.nozzleOffset
+                        Layout.fillWidth:       true
+                        visible:                false
+                    }
+
+                    QGCLabel { text: qsTr("Spray Flow Rate") }
+                    FactTextField {
+                        fact:                   _missionItem.sprayFlowRate
+                        Layout.fillWidth:       true
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.sprayFlowRate.value.toFixed(2) + " " + _missionItem.sprayFlowRate.units
+                        font.pointSize:     ScreenTools.largeFontPointSize
+                        color:              qgcPal.globalTheme !== QGCPalette.Light ? "deepskyblue" : "forestgreen"
+                        Layout.alignment:   Qt.AlignHCenter
+                    }
+                }
+
+                SectionHeader {
                     id:             transectsHeader
                     anchors.left:   parent.left
                     anchors.right:  parent.right
                     text:           qsTr("Transects")
+                }
+
+                QGCCheckBox {
+                    text:               qsTr("Auto Optimize")
+                    checked:            _missionItem.autoOptimize.value
+                    onClicked:          _missionItem.autoOptimize.value = checked
+                }
+
+                QGCButton {
+                    text:               qsTr("Optimize")
+                    onClicked:          _missionItem.optimize();
                 }
 
                 GridLayout {
@@ -139,6 +235,12 @@ Rectangle {
                         fact:                   _missionItem.gridAngle
                         Layout.fillWidth:       true
                         onUpdated:              angleSlider.value = _missionItem.gridAngle.value
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.gridAngle.value.toFixed(1) + " " + _missionItem.gridAngle.units
+//                      font.pointSize:     ScreenTools.mediumFontPointSize
+                        Layout.alignment:   Qt.AlignRight
                     }
 
                     QGCSlider {
@@ -150,17 +252,47 @@ Rectangle {
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.gridAngle.value
                         onValueChanged:         _missionItem.gridAngle.value = value
                         Component.onCompleted:  value = _missionItem.gridAngle.value
                         updateValueWhileDragging: true
                     }
 
+                    QGCButton {
+                        text:               qsTr("Rotate Angle")
+                        onClicked:          _missionItem.rotateAngle();
+                    }
+
                     QGCLabel {
                         text:       qsTr("Turnaround dist")
+                        Layout.fillWidth:       true
                     }
                     FactTextField {
                         fact:               _missionItem.turnAroundDistance
                         Layout.fillWidth:   true
+                        onUpdated:          turnAroundDistSlider.value = _missionItem.turnAroundDistance.value
+                        visible:            false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.turnAroundDistance.value.toFixed(2) + " " + _missionItem.turnAroundDistance.units
+//                        font.pointSize:     ScreenTools.mediumFontPointSize
+                        Layout.alignment:   Qt.AlignRight
+                    }
+
+
+                    QGCSlider {
+                        id:                     turnAroundDistSlider
+                        minimumValue:           0
+                        maximumValue:           10
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.turnAroundDistance.value
+                        onValueChanged:         _missionItem.turnAroundDistance.value = value
+                        Component.onCompleted:  value = _missionItem.turnAroundDistance.value
+                        updateValueWhileDragging: true
                     }
                 }
 
@@ -173,7 +305,8 @@ Rectangle {
                     anchors.left:   parent.left
                     anchors.right:  parent.right
                     spacing:        _margin
-                    visible:        transectsHeader.checked
+                    //visible:        transectsHeader.checked
+                    visible:        false
 
                     QGCOptionsComboBox {
                         Layout.fillWidth: true
@@ -225,17 +358,18 @@ Rectangle {
                     anchors.left:   parent.left
                     anchors.right:  parent.right
                     text:           qsTr("Statistics")
+                    visible: false
                 }
 
                 TransectStyleComplexItemStats {
                     anchors.left:   parent.left
                     anchors.right:  parent.right
-                    visible:        statsHeader.checked
+                    visible:        false // statsHeader.checked
                 }
             } // Grid Column
 
             // Camera Tab
-            Column {
+            /*Column {
                 anchors.left:       parent.left
                 anchors.right:      parent.right
                 spacing:            _margin
@@ -244,19 +378,19 @@ Rectangle {
                 CameraCalcCamera {
                     cameraCalc: _missionItem.cameraCalc
                 }
-            } // Camera Column
+            }*/ // Camera Column
 
             // Terrain Tab
-            TransectStyleComplexItemTerrainFollow {
-                anchors.left:   parent.left
-                anchors.right:  parent.right
-                spacing:        _margin
-                visible:        tabBar.currentIndex === 2
-                missionItem:    _missionItem
-            }
+//            TransectStyleComplexItemTerrainFollow {
+//                anchors.left:   parent.left
+//                anchors.right:  parent.right
+//                spacing:        _margin
+//                visible:        tabBar.currentIndex === 1
+//                missionItem:    _missionItem
+//            }
 
             // Presets Tab
-            ColumnLayout {
+/*            ColumnLayout {
                 anchors.left:       parent.left
                 anchors.right:      parent.right
                 spacing:            _margin
@@ -365,7 +499,7 @@ Rectangle {
                     Layout.fillWidth:   true
                     visible:            presetsStatsHeader.checked
                 }
-            } // Main editing column
+            }*/ // Main editing column
         } // Top level  Column
 
         Component {

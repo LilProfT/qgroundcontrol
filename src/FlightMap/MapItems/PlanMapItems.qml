@@ -61,8 +61,10 @@ Item {
         id: missionLineViewComponent
 
         MapPolyline {
-            line.width: 3
-            line.color: "#be781c"                           // Hack, can't get palette to work in here
+            line.width: 4
+            //Mismart: Change orange polylines to yellow for better visual on the common "ricefields" map background
+            //line.color: "#be781c"                           //Hack, can't get palette to work in here
+            line.color: "yellow"
             z:          QGroundControl.zOrderWaypointLines
             path:       _missionController.waypointPath
         }

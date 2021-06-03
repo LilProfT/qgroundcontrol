@@ -33,16 +33,39 @@ Item {
     property bool _vehicleWasInMissionFlightMode:   false
     property bool _showMissionCompleteDialog:       _vehicleWasArmed && _vehicleWasInMissionFlightMode &&
                                                         (missionController.containsItems || geoFenceController.containsItems || rallyPointController.containsItems ||
-                                                        (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false))
+                                                        (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false)) &&
+                                                        globals.guidedControllerFlyView.showResumeMission
+    //Mismart: Hide the Dialog
+//    property bool _showMissionCompleteDialog:       false
+
+    //Mismart: Quick hack, reusing the qml codes for resetting the areaSprayed fact. A better method should be considered in the future
+    property bool _sprayComplete:                   _vehicleWasArmed && _vehicleWasInMissionFlightMode &&
+                                                        (missionController.containsItems || geoFenceController.containsItems || rallyPointController.containsItems ||
+                                                        (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false)) &&
+                                                        !globals.guidedControllerFlyView.showResumeMission
+    property bool _readyToResetAreaSprayed:         false
 
     on_VehicleArmedChanged: {
         if (_vehicleArmed) {
             _vehicleWasArmed = true
             _vehicleWasInMissionFlightMode = _vehicleInMissionFlightMode
+
+            //Mismart: Reset areaSprayed fact
+            if (_readyToResetAreaSprayed) {
+                _activeVehicle.areaSprayed.value = 0
+                _readyToResetAreaSprayed = false
+            }
+
         } else {
             if (_showMissionCompleteDialog) {
                 mainWindow.showComponentDialog(missionCompleteDialogComponent, qsTr("Flight Plan complete"), mainWindow.showDialogDefaultWidth, StandardButton.Close)
             }
+
+            //Mismart: Checking if the mission is really completed
+            if (_sprayComplete) {
+                _readyToResetAreaSprayed = true
+            }
+
             _vehicleWasArmed = false
             _vehicleWasInMissionFlightMode = false
         }
@@ -113,7 +136,7 @@ Item {
                         QGCButton {
                             Layout.fillWidth:   true
                             Layout.alignment:   Qt.AlignHCenter
-                            text:               qsTr("Resume Mission From Waypoint %1").arg(globals.guidedControllerFlyView._resumeMissionIndex)
+                            text:               qsTr("Resume Mission From Last RTL Point").arg(globals.guidedControllerFlyView._resumeMissionIndex)
 
                             onClicked: {
                                 globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMission, null, null)

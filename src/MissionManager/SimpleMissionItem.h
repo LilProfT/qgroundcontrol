@@ -37,9 +37,7 @@ public:
     Q_PROPERTY(QGroundControlQmlGlobal::AltitudeMode altitudeMode READ altitudeMode WRITE setAltitudeMode       NOTIFY altitudeModeChanged)
     Q_PROPERTY(Fact*            amslAltAboveTerrain     READ amslAltAboveTerrain                                CONSTANT)                           ///< Actual AMSL altitude for item if altitudeMode == AltitudeAboveTerrain
     Q_PROPERTY(int              command                 READ command                WRITE setCommand            NOTIFY commandChanged)
-    Q_PROPERTY(bool             isLoiterItem            READ isLoiterItem                                       NOTIFY isLoiterItemChanged)
-    Q_PROPERTY(bool             showLoiterRadius        READ showLoiterRadius                                   NOTIFY showLoiterRadiusChanged)
-    Q_PROPERTY(double           loiterRadius            READ loiterRadius           WRITE setRadius             NOTIFY loiterRadiusChanged)
+    Q_PROPERTY(MissionItem::VisualType visualType       READ visualType                                         NOTIFY visualTypeChanged)
 
     /// Optional sections
     Q_PROPERTY(QObject*         speedSection            READ speedSection                                       NOTIFY speedSectionChanged)
@@ -73,9 +71,8 @@ public:
     QGroundControlQmlGlobal::AltitudeMode altitudeMode(void) const { return _altitudeMode; }
     Fact*           altitude            (void) { return &_altitudeFact; }
     Fact*           amslAltAboveTerrain (void) { return &_amslAltAboveTerrainFact; }
-    bool            isLoiterItem        (void) const;
-    bool            showLoiterRadius    (void) const;
-    double          loiterRadius        (void) const;
+
+    MissionItem::VisualType visualType  (void) const { return _missionItem.visualType(); }
 
     CameraSection*  cameraSection       (void) { return _cameraSection; }
     SpeedSection*   speedSection        (void) { return _speedSection; }
@@ -147,7 +144,7 @@ signals:
     void isLoiterItemChanged        (void);
     void showLoiterRadiusChanged    (void);
     void loiterRadiusChanged        (double loiterRadius);
-
+ void visualTypeChanged          (MissionItem::VisualType value);
 private slots:
     void _setDirty                              (void);
     void _sectionDirtyChanged                   (bool dirty);
@@ -182,13 +179,15 @@ private:
     CameraSection*  _cameraSection =             nullptr;
 
     MissionCommandTree* _commandTree = nullptr;
-    bool _syncingHeadingDegreesAndParam4 = false;   ///< true: already in a sync signal, prevents signal loop
-
+    bool _syncingHeadingDegreesAndParam4 = false;   ///< true: already in a sync signal, prevents signal loop  
     Fact                _supportedCommandFact;
 
     QGroundControlQmlGlobal::AltitudeMode   _altitudeMode = QGroundControlQmlGlobal::AltitudeModeRelative;
     Fact                                    _altitudeFact;
     Fact                                    _amslAltAboveTerrainFact;
+    bool            isLoiterItem        (void) const;
+      bool            showLoiterRadius    (void) const;
+      double          loiterRadius        (void) const;
 
     QmlObjectListModel  _textFieldFacts;
     QmlObjectListModel  _nanFacts;

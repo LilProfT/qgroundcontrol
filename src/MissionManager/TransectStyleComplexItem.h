@@ -78,7 +78,7 @@ public:
     int _transectCount(void) const { return _transects.count(); }
 
     // Overrides from ComplexMissionItem
-    int     lastSequenceNumber  (void) const final;
+    int     lastSequenceNumber  (void) const override;
     QString mapVisualQML        (void) const override = 0;
     bool    load                (const QJsonObject& complexObject, int sequenceNumber, QString& errorString) override = 0;
     void    addKMLVisuals       (KMLPlanDomDocument& domDocument) final;
@@ -154,7 +154,7 @@ protected:
     void    _appendConditionGate            (QList<MissionItem*>& items, QObject* missionItemParent, int& seqNum, MAV_FRAME mavFrame, const QGeoCoordinate& coordinate);
     void    _appendCameraTriggerDistance    (QList<MissionItem*>& items, QObject* missionItemParent, int& seqNum, float triggerDistance);
     void    _appendCameraTriggerDistanceUpdatePoint(QList<MissionItem*>& items, QObject* missionItemParent, int& seqNum, MAV_FRAME mavFrame, const QGeoCoordinate& coordinate, bool useConditionGate, float triggerDistance);
-    void    _buildAndAppendMissionItems     (QList<MissionItem*>& items, QObject* missionItemParent);
+    virtual void    _buildAndAppendMissionItems     (QList<MissionItem*>& items, QObject* missionItemParent);
     void    _appendLoadedMissionItems       (QList<MissionItem*>& items, QObject* missionItemParent);
     void    _recalcComplexDistance          (void);
 
@@ -164,12 +164,12 @@ protected:
     QGCMapPolygon       _surveyAreaPolygon;
 
     enum CoordType {
-        CoordTypeInterior,              ///< Interior waypoint for flight path only (example: interior corridor point)
+        CoordTypeInterior,              ///< Interior waypoint for flight path only
         CoordTypeInteriorHoverTrigger,  ///< Interior waypoint for hover and capture trigger
         CoordTypeInteriorTerrainAdded,  ///< Interior waypoint added for terrain
         CoordTypeSurveyEntry,           ///< Waypoint at entry edge of survey polygon
         CoordTypeSurveyExit,            ///< Waypoint at exit edge of survey polygon
-        CoordTypeTurnaround,            ///< Turnaround extension waypoint
+        CoordTypeTurnaround,            ///< First turnaround waypoint
     };
 
     typedef struct {
@@ -177,8 +177,9 @@ protected:
         CoordType       coordType;
     } CoordInfo_t;
 
-    QVariantList                                _visualTransectPoints;  ///< Used to draw the flight path visuals on the screen
-    QList<QList<CoordInfo_t>>                   _transects;
+    QVariantList                                        _visualTransectPoints;
+    QList<QList<CoordInfo_t>>                           _transects;
+//    QList<QList<TerrainPathQuery::PathHeightInfo_t>>    _transectsPathHeightInfo;
     QList<TerrainPathQuery::PathHeightInfo_t>   _rgPathHeightInfo;      ///< Path height for each segment includes turn segments
     QList<CoordInfo_t>                          _rgFlightPathCoordInfo; ///< Fully calculated flight path (including terrain if needed)
 
@@ -223,6 +224,7 @@ private slots:
     void _updateFlightPathSegmentsDontCallDirectly  (void);
     void _segmentTerrainCollisionChanged            (bool terrainCollision) final;
 
+// haha, goddamn it
 private:
     typedef struct {
         bool imagesInTurnaround;
@@ -231,8 +233,10 @@ private:
         bool useConditionGate;
     } BuildMissionItemsState_t;
 
+protected:
     void    _queryTransectsPathHeightInfo   (void);
     void    _adjustTransectsForTerrain      (void);
+	void    _addInterstitialTerrainPoints   (QList<CoordInfo_t>& transect, const QList<TerrainPathQuery::PathHeightInfo_t>& transectPathHeightInfo);
     bool    _buildRawFlightPath             (void);
     void    _adjustForMaxRates              (void);
     void    _adjustForTolerance             (void);

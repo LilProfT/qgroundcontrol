@@ -10,6 +10,8 @@
 #include <QApplication>
 #include <QDebug>
 #include <QRegularExpression>
+#include <QFile>
+#include <QJsonDocument>
 
 #include "AudioOutput.h"
 #include "QGCApplication.h"
@@ -18,6 +20,7 @@
 
 AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool   (app, toolbox)
+    , _effect   (nullptr)
     , _tts      (nullptr)
 {
     if (qgcApp()->runningUnitTests()) {
@@ -26,6 +29,7 @@ AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
         return;
     }
 
+    // QTextToSpeech
     _tts = new QTextToSpeech(this);
 
     //-- Force TTS engine to English as all incoming messages from the autopilot
@@ -34,6 +38,16 @@ AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
     _tts->setLocale(QLocale("en_US"));
 #endif
     connect(_tts, &QTextToSpeech::stateChanged, this, &AudioOutput::_stateChanged);
+
+    // QSoundEffect
+    QFile file(":/audio/audioMap.json");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) qDebug() << "file cannot be opened";
+    _audioMap = QJsonDocument::fromJson(file.readAll()).object().toVariantMap();
+
+    _effect = new QSoundEffect(this);
+    _effect->setLoopCount(0);
+
+    connect(_effect, &QSoundEffect::playingChanged, this, &AudioOutput::_effectStateChanged);
 }
 
 void AudioOutput::say(const QString& inText)
@@ -55,22 +69,58 @@ void AudioOutput::say(const QString& inText)
                 }
                 _texts.append(text);
             }
+        } else if (_effect->isPlaying()) {
+            if(!_texts.contains(text)) {
+                //-- Some arbitrary limit
+                if(_texts.size() > 20) {
+                    _texts.removeFirst();
+                }
+                _texts.append(text);
+            }
         } else {
-            _tts->say(text);
+            _play(text);
         }
     }
 }
 
 void AudioOutput::_stateChanged(QTextToSpeech::State state)
 {
-    if(state == QTextToSpeech::Ready) {
-        if(_texts.size()) {
-            QString text = _texts.first();
-            _texts.removeFirst();
-            _tts->say(text);
-        }
+    if (state == QTextToSpeech::Ready) {
+        _next();
     }
 }
+
+void AudioOutput::_effectStateChanged()
+{
+    if (!_effect->isPlaying()) {
+        _next();
+    }
+}
+
+void AudioOutput::_next() {
+    if (_texts.size()) {
+        QString text = _texts.first();
+        _texts.removeFirst();
+        qDebug() << "say ::: " << text;
+        _play(text);
+    }
+}
+
+void AudioOutput::_play(QString& text) {
+    for (const QString& key: _audioMap.keys()) {
+        if (text.contains(key)) {
+            qDebug() << "wav ::: " << text;
+            QString wav = _audioMap.value(key).value<QString>();
+            QUrl url("qrc:/audio/" + wav);
+            _effect->setSource(url);
+            _effect->play();
+            return;
+        }
+    }
+
+    qDebug() << "tts ::: " << text;
+    _tts->say(text);
+};
 
 bool AudioOutput::getMillisecondString(const QString& string, QString& match, int& number) {
     static QRegularExpression re("([0-9]+ms)");
@@ -92,6 +142,10 @@ QString AudioOutput::fixTextMessageForAudio(const QString& string) {
     QString result = string;
 
     //-- Look for codified terms
+    if(result.contains("PROXIMITY", Qt::CaseInsensitive)) {
+        result = "Proximity Error";
+    }
+
     if(result.contains("ERR ", Qt::CaseInsensitive)) {
         result.replace("ERR ", "error ", Qt::CaseInsensitive);
     }

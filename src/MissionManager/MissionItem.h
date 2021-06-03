@@ -54,13 +54,30 @@ public:
                 bool            isCurrentItem,
                 QObject*        parent = nullptr);
 
+    MissionItem(int             sequenceNumber,
+                int             command,
+                MAV_FRAME       frame,
+                double          param1,
+                double          param2,
+                double          param3,
+                double          param4,
+                double          param5,
+                double          param6,
+                double          param7,
+                bool            autoContinue,
+                bool            isCurrentItem,
+                QObject*        parent = nullptr);
+
     MissionItem(const MissionItem& other, QObject* parent = nullptr);
 
     ~MissionItem();
 
+    Q_PROPERTY(VisualType visualType READ visualType WRITE setVisualType NOTIFY visualTypeChanged)
+
     const MissionItem& operator=(const MissionItem& other);
     
     MAV_CMD         command         (void) const { return (MAV_CMD)_commandFact.rawValue().toInt(); }
+    int             commandInt      (void) const { return _commandFact.rawValue().toInt(); }
     bool            isCurrentItem   (void) const { return _isCurrentItem; }
     int             sequenceNumber  (void) const { return _sequenceNumber; }
     MAV_FRAME       frame           (void) const { return (MAV_FRAME)_frameFact.rawValue().toInt(); }
@@ -85,6 +102,7 @@ public:
     double specifiedGimbalPitch(void) const;
 
     void setCommand         (MAV_CMD command);
+    void setCommandInt      (int command);
     void setSequenceNumber  (int sequenceNumber);
     void setIsCurrentItem   (bool isCurrentItem);
     void setFrame           (MAV_FRAME frame);
@@ -103,12 +121,23 @@ public:
 
     bool relativeAltitude(void) const { return frame() == MAV_FRAME_GLOBAL_RELATIVE_ALT; }
 
+    enum VisualType {
+        NORMAL,
+        ENTER,
+        EXIT
+    };
+    Q_ENUM(VisualType)
+
+    VisualType visualType() const { return _visualType; }
+    void setVisualType(VisualType value) { _visualType = value; emit visualTypeChanged(value); }
+
 signals:
     void isCurrentItemChanged       (bool isCurrentItem);
     void sequenceNumberChanged      (int sequenceNumber);
     void specifiedFlightSpeedChanged(double flightSpeed);
     void specifiedGimbalYawChanged  (double gimbalYaw);
     void specifiedGimbalPitchChanged(double gimbalPitch);
+    void visualTypeChanged          (VisualType value);
 
 private slots:
     void _param1Changed(QVariant value);
@@ -122,6 +151,7 @@ private:
     int     _sequenceNumber;
     int     _doJumpId;
     bool    _isCurrentItem;
+    VisualType _visualType;
 
     Fact    _autoContinueFact;
     Fact    _commandFact;

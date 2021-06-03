@@ -45,6 +45,7 @@
 #include "RallyPointManager.h"
 #include "FTPManager.h"
 #include "ImageProtocolManager.h"
+#include "FlightHubManager.h"
 
 class EventHandler;
 class UAS;
@@ -158,6 +159,7 @@ public:
     Q_PROPERTY(QGeoCoordinate       coordinate                  READ coordinate                                                     NOTIFY coordinateChanged)
     Q_PROPERTY(QGeoCoordinate       homePosition                READ homePosition                                                   NOTIFY homePositionChanged)
     Q_PROPERTY(QGeoCoordinate       armedPosition               READ armedPosition                                                  NOTIFY armedPositionChanged)
+    Q_PROPERTY(QGeoCoordinate       resumeCoordinate            READ resumeCoordinate                                               CONSTANT)
     Q_PROPERTY(bool                 armed                       READ armed                      WRITE setArmedShowError             NOTIFY armedChanged)
     Q_PROPERTY(bool                 autoDisarm                  READ autoDisarm                                                     NOTIFY autoDisarmChanged)
     Q_PROPERTY(bool                 flightModeSetAvailable      READ flightModeSetAvailable                                         CONSTANT)
@@ -290,6 +292,11 @@ public:
     Q_PROPERTY(Fact* altitudeTuning     READ altitudeTuning     CONSTANT)
     Q_PROPERTY(Fact* altitudeTuningSetpoint READ altitudeTuningSetpoint CONSTANT)
     Q_PROPERTY(Fact* flightDistance     READ flightDistance     CONSTANT)
+
+    //Mismart: Custom areaSprayed and spacing fact
+    Q_PROPERTY(Fact* areaSprayed        READ areaSprayed        CONSTANT)
+    Q_PROPERTY(Fact* spacing            READ spacing            CONSTANT)
+
     Q_PROPERTY(Fact* distanceToHome     READ distanceToHome     CONSTANT)
     Q_PROPERTY(Fact* missionItemIndex   READ missionItemIndex   CONSTANT)
     Q_PROPERTY(Fact* headingToNextWP    READ headingToNextWP    CONSTANT)
@@ -441,8 +448,15 @@ public:
 
     QGeoCoordinate coordinate() { return _coordinate; }
     QGeoCoordinate armedPosition    () { return _armedPosition; }
+    QGeoCoordinate resumeCoordinate() { return _resumeCoordinate; }
 
     void updateFlightDistance(double distance);
+
+    //Mismart: Area sprayed update function
+    void updateAreaSprayed(double distance);
+
+    //Mismart: Custom Area Sprayed Start and Stop function
+    bool _areaSprayedStart              ();
 
     bool joystickEnabled            () const;
     void setJoystickEnabled         (bool enabled);
@@ -628,6 +642,10 @@ public:
     Fact* altitudeTuning                    () { return &_altitudeTuningFact; }
     Fact* altitudeTuningSetpoint            () { return &_altitudeTuningSetpointFact; }
     Fact* flightDistance                    () { return &_flightDistanceFact; }
+    //Mismart: Custom areaSprayed and spacing fact
+    Fact* areaSprayed                       () { return &_areaSprayedFact; }
+    Fact* spacing                           () { return &_spacingFact;}
+
     Fact* distanceToHome                    () { return &_distanceToHomeFact; }
     Fact* missionItemIndex                  () { return &_missionItemIndexFact; }
     Fact* headingToNextWP                   () { return &_headingToNextWPFact; }
@@ -998,7 +1016,7 @@ private:
     EventHandler& _eventHandler         (uint8_t compid);
 
     static void _rebootCommandResultHandler(void* resultHandlerData, int compId, MAV_RESULT commandResult, MavCmdResultFailureCode_t failureCode);
-
+    void _saveResumeCoordinate(const QString& flightMode);
     int     _id;                    ///< Mavlink system id
     int     _defaultComponentId;
     bool    _offlineEditingVehicle = false; ///< true: This Vehicle is a "disconnected" vehicle for ui use while offline editing
@@ -1023,6 +1041,7 @@ private:
     QGeoCoordinate  _coordinate;
     QGeoCoordinate  _homePosition;
     QGeoCoordinate  _armedPosition;
+    QGeoCoordinate  _resumeCoordinate;
 
     UASInterface*   _mav = nullptr;
     int             _currentMessageCount = 0;
@@ -1252,6 +1271,11 @@ private:
     Fact _altitudeTuningFact;
     Fact _altitudeTuningSetpointFact;
     Fact _flightDistanceFact;
+
+    //Mismart: Custom areaSprayed and spacing Fact
+    Fact _areaSprayedFact;
+    Fact _spacingFact;
+
     Fact _flightTimeFact;
     Fact _distanceToHomeFact;
     Fact _missionItemIndexFact;
@@ -1284,6 +1308,7 @@ private:
     VehicleLinkManager*             _vehicleLinkManager         = nullptr;
     FTPManager*                     _ftpManager                 = nullptr;
     ImageProtocolManager*           _imageProtocolManager       = nullptr;
+	FlightHubManager*                     _flightHubManager                 = nullptr;
     InitialConnectStateMachine*     _initialConnectStateMachine = nullptr;
 
     static const char* _rollFactName;
@@ -1301,6 +1326,11 @@ private:
     static const char* _altitudeTuningFactName;
     static const char* _altitudeTuningSetpointFactName;
     static const char* _flightDistanceFactName;
+
+    //Mismart: Custom areaSprayed and spacing fact name
+    static const char* _areaSprayedFactName;
+    static const char* _spacingFactName;
+
     static const char* _flightTimeFactName;
     static const char* _distanceToHomeFactName;
     static const char* _missionItemIndexFactName;

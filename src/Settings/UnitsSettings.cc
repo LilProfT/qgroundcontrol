@@ -97,14 +97,14 @@ DECLARE_SETTINGSFACT_NO_FUNC(UnitsSettings, areaUnits)
         metaData->setShortDescription("Area units");
         metaData->setEnumInfo(enumStrings, enumValues);
 
-        AreaUnits defaultAreaUnit = AreaUnitsSquareMeters;
+        AreaUnits defaultAreaUnit = AreaUnitsHectares;
         switch(QLocale::system().measurementSystem()) {
             case QLocale::MetricSystem: {
-                defaultAreaUnit = AreaUnitsSquareMeters;
+                defaultAreaUnit = AreaUnitsHectares;
             } break;
             case QLocale::ImperialUSSystem:
             case QLocale::ImperialUKSystem:
-                defaultAreaUnit = AreaUnitsSquareMiles;
+                defaultAreaUnit = AreaUnitsAcres;
                 break;
         }
         metaData->setRawDefaultValue(defaultAreaUnit);

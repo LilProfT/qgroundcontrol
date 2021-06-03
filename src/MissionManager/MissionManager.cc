@@ -14,6 +14,7 @@
 #include "QGCApplication.h"
 #include "MissionCommandTree.h"
 #include "MissionCommandUIInfo.h"
+#include <QGeoCoordinate>
 
 QGC_LOGGING_CATEGORY(MissionManagerLog, "MissionManagerLog")
 
@@ -137,7 +138,22 @@ void MissionManager::generateResumeMission(int resumeIndex)
     int prefixCommandCount = 0;
     for (int i=0; i<_missionItems.count(); i++) {
         MissionItem* oldItem = _missionItems[i];
-        const MissionCommandUIInfo* uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), oldItem->command());
+    const MissionCommandUIInfo* uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), oldItem->command());
+
+        if (i == resumeIndex) {
+
+            QGeoCoordinate coordinate = _vehicle->resumeCoordinate();
+            // [UGLY] this monstrosity comes from SimpleMissionItem::setCoordinate
+            // There isn't MissionItem::setCoordinate (but MissionItem::coordinate exists, what the heck).
+            // And now I'm reluctant to write that method.
+            // Are there reasons upstream not do it ??
+            qDebug() << coordinate;
+            if (oldItem->param5() != coordinate.latitude() || oldItem->param6() != coordinate.longitude()) {
+                oldItem->setParam5(coordinate.latitude());
+                oldItem->setParam6(coordinate.longitude());
+            }
+            // [/UGLY]
+        };
         if ((i == 0 && addHomePosition) || i >= resumeIndex || includedResumeCommands.contains(oldItem->command()) || (uiInfo && uiInfo->isTakeoffCommand())) {
             if (i < resumeIndex) {
                 prefixCommandCount++;
@@ -259,14 +275,14 @@ void MissionManager::_updateMissionIndex(int index)
     }
 }
 
-void MissionManager::_handleHighLatency(const mavlink_message_t& message) 
+void MissionManager::_handleHighLatency(const mavlink_message_t& message)
 {
     mavlink_high_latency_t highLatency;
     mavlink_msg_high_latency_decode(&message, &highLatency);
     _updateMissionIndex(highLatency.wp_num);
 }
 
-void MissionManager::_handleHighLatency2(const mavlink_message_t& message) 
+void MissionManager::_handleHighLatency2(const mavlink_message_t& message)
 {
     mavlink_high_latency2_t highLatency2;
     mavlink_msg_high_latency2_decode(&message, &highLatency2);

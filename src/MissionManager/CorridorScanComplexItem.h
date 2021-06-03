@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "TransectStyleComplexItem.h"
+#include "TransectStyleFenceSupportedComplexItem.h"
 #include "MissionItem.h"
 #include "SettingsFact.h"
 #include "QGCLoggingCategory.h"
@@ -18,7 +18,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(CorridorScanComplexItemLog)
 
-class CorridorScanComplexItem : public TransectStyleComplexItem
+class CorridorScanComplexItem : public TransectStyleFenceSupportedComplexItem
 {
     Q_OBJECT
 
@@ -51,6 +51,9 @@ public:
     QString             abbreviation        (void) const final { return tr("C"); }
     ReadyForSaveState   readyForSaveState   (void) const final;
     double              additionalTimeDelay (void) const final { return 0; }
+
+    // [mismart] placeholder
+    double getYaw(void) override final { return 0.0; };
 
     static const QString name;
 

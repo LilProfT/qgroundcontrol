@@ -77,6 +77,10 @@ void InstrumentValueData::clearFact(void)
     _icon.clear();
     _showUnits = true;
 
+    //Mismart: Custom Units and scaler
+    _customUnits.clear();
+    _scaler = 1.0f;
+
     emit factValueNamesChanged  ();
     emit factChanged            (_fact);
     emit factNameChanged        (_factName);
@@ -84,6 +88,9 @@ void InstrumentValueData::clearFact(void)
     emit textChanged            (_text);
     emit iconChanged            (_icon);
     emit showUnitsChanged       (_showUnits);
+    //Mismart: Custom Units
+    emit customUnitsChanged     (_customUnits);
+    emit scalerChanged       (_scaler);
 }
 
 void InstrumentValueData::_setFactWorker(void)
@@ -379,3 +386,19 @@ QStringList InstrumentValueData::factValueNames(void) const
 
     return valueNames;
 }
+
+//Mismart: Custom Units and scaler
+void InstrumentValueData::setCustomUnits(const QString &customUnits) {
+    if (customUnits != _customUnits) {
+        _customUnits = customUnits;
+        emit customUnitsChanged(_customUnits);
+    }
+}
+
+void InstrumentValueData::setScaler(const float scaler) {
+    if (scaler != _scaler) {
+        _scaler = scaler;
+        emit scalerChanged(_scaler);
+    }
+}
+

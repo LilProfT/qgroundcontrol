@@ -16,17 +16,17 @@ TransectStyleComplexItemTest::TransectStyleComplexItemTest(void)
 
 void TransectStyleComplexItemTest::init(void)
 {
-    TransectStyleComplexItemTestBase::init();
+//    TransectStyleComplexItemTestBase::init();
 
-    _transectStyleItem = new TestTransectStyleItem(_masterController, this);
-    _transectStyleItem->cameraTriggerInTurnAround()->setRawValue(false);
-    _transectStyleItem->cameraCalc()->setCameraBrand(CameraCalc::canonicalManualCameraName());
-    _transectStyleItem->cameraCalc()->valueSetIsDistance()->setRawValue(true);
-    _transectStyleItem->cameraCalc()->distanceToSurface()->setRawValue(100);
-    _transectStyleItem->setDirty(false);
+//    _transectStyleItem = new TestTransectStyleItem(_masterController, this);
+//    _transectStyleItem->cameraTriggerInTurnAround()->setRawValue(false);
+//    _transectStyleItem->cameraCalc()->setCameraBrand(CameraCalc::canonicalManualCameraName());
+//    _transectStyleItem->cameraCalc()->valueSetIsDistance()->setRawValue(true);
+//    _transectStyleItem->cameraCalc()->distanceToSurface()->setRawValue(100);
+//    _transectStyleItem->setDirty(false);
 
-    _multiSpy = new MultiSignalSpyV2;
-    QVERIFY(_multiSpy->init(_transectStyleItem));
+//    _multiSpy = new MultiSignalSpyV2;
+//    QVERIFY(_multiSpy->init(_transectStyleItem));
 }
 
 void TransectStyleComplexItemTest::cleanup(void)

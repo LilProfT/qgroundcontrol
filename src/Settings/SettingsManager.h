@@ -20,6 +20,7 @@
 #include "VideoSettings.h"
 #include "FlightMapSettings.h"
 #include "RTKSettings.h"
+#include "NTRIPSettings.h"
 #include "FlyViewSettings.h"
 #include "PlanViewSettings.h"
 #include "BrandImageSettings.h"
@@ -49,6 +50,7 @@ public:
     Q_PROPERTY(QObject* videoSettings                   READ videoSettings                  CONSTANT)
     Q_PROPERTY(QObject* flightMapSettings               READ flightMapSettings              CONSTANT)
     Q_PROPERTY(QObject* rtkSettings                     READ rtkSettings                    CONSTANT)
+    Q_PROPERTY(QObject* ntripSettings                   READ ntripSettings                  CONSTANT)
     Q_PROPERTY(QObject* flyViewSettings                 READ flyViewSettings                CONSTANT)
     Q_PROPERTY(QObject* planViewSettings                READ planViewSettings               CONSTANT)
     Q_PROPERTY(QObject* brandImageSettings              READ brandImageSettings             CONSTANT)
@@ -70,6 +72,7 @@ public:
     VideoSettings*                  videoSettings               (void) { return _videoSettings; }
     FlightMapSettings*              flightMapSettings           (void) { return _flightMapSettings; }
     RTKSettings*                    rtkSettings                 (void) { return _rtkSettings; }
+    NTRIPSettings*                  ntripSettings               (void) { return _ntripSettings; }
     FlyViewSettings*                flyViewSettings             (void) { return _flyViewSettings; }
     PlanViewSettings*               planViewSettings            (void) { return _planViewSettings; }
     BrandImageSettings*             brandImageSettings          (void) { return _brandImageSettings; }
@@ -89,6 +92,7 @@ private:
     VideoSettings*                  _videoSettings;
     FlightMapSettings*              _flightMapSettings;
     RTKSettings*                    _rtkSettings;
+    NTRIPSettings*                  _ntripSettings;
     FlyViewSettings*                _flyViewSettings;
     PlanViewSettings*               _planViewSettings;
     BrandImageSettings*             _brandImageSettings;

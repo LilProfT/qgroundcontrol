@@ -69,7 +69,7 @@ Rectangle {
             Layout.preferredHeight: viewButtonRow.height
             icon.source:            "/res/QGCLogoFull"
             logo:                   true
-            onClicked:              mainWindow.showToolSelectDialog()
+            onClicked:              toolSelectDrawer.visible = true
         }
 
         MainStatusIndicator {
@@ -87,7 +87,7 @@ Rectangle {
 
     QGCFlickable {
         id:                     toolsFlickable
-        anchors.leftMargin:     ScreenTools.defaultFontPixelWidth * ScreenTools.largeFontPointRatio * 1.5
+        anchors.leftMargin:     ScreenTools.defaultFontPixelHeight / 2
         anchors.left:           viewButtonRow.right
         anchors.bottomMargin:   1
         anchors.top:            parent.top
@@ -98,7 +98,8 @@ Rectangle {
 
         Loader {
             id:                 indicatorLoader
-            anchors.left:       parent.left
+            anchors.leftMargin: currentToolbar !== planViewToolbar ? ScreenTools.defaultFontPixelHeight / 2 : 0
+            anchors.left:       parent.left//currentToolbar !== planViewToolbar ? valueArea.right : parent.left
             anchors.top:        parent.top
             anchors.bottom:     parent.bottom
             source:             currentToolbar === flyViewToolbar ?
@@ -114,7 +115,9 @@ Rectangle {
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
         anchors.margins:        ScreenTools.defaultFontPixelHeight * 0.66
-        visible:                currentToolbar !== planViewToolbar && _activeVehicle && !_communicationLost && x > (toolsFlickable.x + toolsFlickable.contentWidth + ScreenTools.defaultFontPixelWidth)
+        //visible:                currentToolbar !== planViewToolbar && _activeVehicle && !_communicationLost && x > (toolsFlickable.x + toolsFlickable.contentWidth + ScreenTools.defaultFontPixelWidth)
+        //Disabling logo
+        visible:                 false
         fillMode:               Image.PreserveAspectFit
         source:                 _outdoorPalette ? _brandImageOutdoor : _brandImageIndoor
         mipmap:                 true

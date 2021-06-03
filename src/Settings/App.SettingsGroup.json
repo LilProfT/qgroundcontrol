@@ -74,7 +74,7 @@
     "shortDesc": "Default value for altitude",
     "longDesc":  "This value specifies the default altitude for new items added to a mission.",
     "type":             "double",
-    "default":     50.0,
+    "default":     3.0,
     "min":              0.0,
     "units":            "m",
     "decimalPlaces":    1
@@ -136,14 +136,14 @@
     "shortDesc": "Use preflight checklist",
     "longDesc":  "If this option is enabled the preflight checklist will be used.",
     "type":             "bool",
-    "default":     false
+    "default":     true
 },
 {
     "name":             "enforceChecklist",
     "shortDesc": "Preflight checklist must pass before arming",
     "longDesc":  "If this option is enabled the preflight checklist must pass before arming.",
     "type":             "bool",
-    "default":     false
+    "default":      true
 },
 {
     "name":                 "appFontPointSize",
@@ -273,8 +273,8 @@
     "name":             "language",
     "shortDesc": "Language",
     "type":             "uint32",
-    "enumStrings":      "System,български (Bulgarian),中文 (Chinese),Nederlands (Dutch),English,Suomi (Finnish),Français (French),Deutsche (German),Ελληνικά (Greek), עברית (Hebrew),Italiano (Italian),日本人 (Japanese),한국어 (Korean),Norsk (Norwegian),Polskie (Polish),Português (Portuguese),Pусский (Russian),Español (Spanish),Svenska (Swedish),Türk (Turkish),Azerbaijani (Azerbaijani)",
-    "enumValues":       "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
+    "enumStrings":      "System,български (Bulgarian),中文 (Chinese),Nederlands (Dutch),English,Suomi (Finnish),Français (French),Deutsche (German),Ελληνικά (Greek), עברית (Hebrew),Italiano (Italian),日本人 (Japanese),한국어 (Korean),Norsk (Norwegian),Polskie (Polish),Português (Portuguese),Pусский (Russian),Español (Spanish),Svenska (Swedish),Türk (Turkish),Azerbaijani (Azerbaijani),Tiếng Việt (Vietnamese)",
+    "enumValues":       "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
     "default":     0
 },
 {

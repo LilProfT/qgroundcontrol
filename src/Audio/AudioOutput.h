@@ -14,6 +14,8 @@
 #include <QThread>
 #include <QStringList>
 #include <QTextToSpeech>
+#include <QSoundEffect>
+#include <QVariantMap>
 
 #include "QGCToolbox.h"
 
@@ -29,15 +31,22 @@ public:
     static bool     getMillisecondString    (const QString& string, QString& match, int& number);
     static QString  fixTextMessageForAudio  (const QString& string);
 
+private:
+    void            _next                   ();
+    void            _play                   (QString& text);
+
 public slots:
     /// Convert string to speech output and say it
     void            say                     (const QString& text);
 
 private slots:
     void            _stateChanged           (QTextToSpeech::State state);
+    void            _effectStateChanged           ();
 
 protected:
+    QSoundEffect*    _effect;
     QTextToSpeech*  _tts;
     QStringList     _texts;
+    QVariantMap     _audioMap;
 };
 

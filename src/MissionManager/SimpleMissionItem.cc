@@ -212,6 +212,7 @@ void SimpleMissionItem::_connectSignals(void)
     // Propogate signals from MissionItem up to SimpleMissionItem
     connect(&_missionItem,                      &MissionItem::sequenceNumberChanged,        this, &SimpleMissionItem::sequenceNumberChanged);
     connect(&_missionItem,                      &MissionItem::specifiedFlightSpeedChanged,  this, &SimpleMissionItem::specifiedFlightSpeedChanged);
+ connect(&_missionItem,                      &MissionItem::visualTypeChanged,            this, &SimpleMissionItem::visualTypeChanged);
 
     connect(_missionController,                 &MissionController::plannedHomePositionChanged, this, &SimpleMissionItem::_amslEntryAltChanged);
     connect(_missionController,                 &MissionController::plannedHomePositionChanged, this, &SimpleMissionItem::_amslExitAltChanged);
@@ -714,9 +715,7 @@ void SimpleMissionItem::_altitudeChanged(void)
     if (_altitudeMode == QGroundControlQmlGlobal::AltitudeModeCalcAboveTerrain || _altitudeMode == QGroundControlQmlGlobal::AltitudeModeTerrainFrame) {
         _amslAltAboveTerrainFact.setRawValue(qQNaN());
         _terrainAltChanged();
-    }
-
-    if (_altitudeMode != QGroundControlQmlGlobal::AltitudeModeCalcAboveTerrain) {
+    } else {
         _missionItem._param7Fact.setRawValue(_altitudeFact.rawValue());
     }
 }
@@ -1072,6 +1071,7 @@ double SimpleMissionItem::amslEntryAlt(void) const
     case QGroundControlQmlGlobal::AltitudeModeAbsolute:
         return _missionItem.param7();
     case QGroundControlQmlGlobal::AltitudeModeRelative:
+        // qDebug() << _missionItem.param7() << _masterController->missionController()->plannedHomePosition().isValid() << _masterController->missionController()->plannedHomePosition().latitude() << _masterController->missionController()->plannedHomePosition().altitude();
         return _missionItem.param7() + _masterController->missionController()->plannedHomePosition().altitude();
     case QGroundControlQmlGlobal::AltitudeModeNone:
         qWarning() << "Internal Error SimpleMissionItem::amslEntryAlt: Invalid altitudeMode:AltitudeModeNone";

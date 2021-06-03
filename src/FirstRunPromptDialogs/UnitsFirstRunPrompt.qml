@@ -45,7 +45,7 @@ FirstRunPrompt {
             _unitsSettings.verticalDistanceUnits.value = metric ? UnitsSettings.VerticalDistanceUnitsMeters : UnitsSettings.VerticalDistanceUnitsFeet
         }
         if (_unitsSettings.areaUnits.visible) {
-            _unitsSettings.areaUnits.value = metric ? UnitsSettings.AreaUnitsSquareMeters : UnitsSettings.AreaUnitsSquareFeet
+            _unitsSettings.areaUnits.value = metric ? UnitsSettings.AreaUnitsHectares : UnitsSettings.AreaUnitsAcres
         }
         if (_unitsSettings.speedUnits.visible) {
             _unitsSettings.speedUnits.value = metric ? UnitsSettings.SpeedUnitsMetersPerSecond : UnitsSettings.SpeedUnitsFeetPerSecond

@@ -18,7 +18,12 @@ Item {
 
     property var    missionItems:               _controllerValid ? _planMasterController.missionController.visualItems : undefined
     property real   missionDistance:            _controllerValid ? _planMasterController.missionController.missionDistance : NaN
-    property real   missionTime:                _controllerValid ? _planMasterController.missionController.missionTime : 0
+    property real   missionTime:                _controllerValid ? _planMasterController.missionController.missionTime : NaN
+    property real   area:                       _controllerValid ? _planMasterController.area : NaN
+    property real   applicationRate:            (_controllerValid && _planMasterController.applicationRate) ? _planMasterController.applicationRate.value : NaN
+    property real   flowRate:                   (_controllerValid && _planMasterController.flowRate) ? _planMasterController.flowRate.value : NaN
+    property real   spacing:                    (_controllerValid && _planMasterController.spacing) ? _planMasterController.spacing.value : NaN
+    property real   velocity:                   (_controllerValid && _planMasterController.velocity) ? _planMasterController.velocity.value : NaN
     property real   missionMaxTelemetry:        _controllerValid ? _planMasterController.missionController.missionMaxTelemetry : NaN
     property bool   missionDirty:               _controllerValid ? _planMasterController.missionController.dirty : false
 
@@ -26,6 +31,7 @@ Item {
     property bool   _controllerOffline:         _controllerValid ? _planMasterController.offline : true
     property var    _controllerDirty:           _controllerValid ? _planMasterController.dirty : false
     property var    _controllerSyncInProgress:  _controllerValid ? _planMasterController.syncInProgress : false
+    property var    _controllerIsSourcePlan:    _controllerValid ? _planMasterController.isSourcePlan : false
 
     property bool   _currentMissionItemValid:   _currentMissionItem && _currentMissionItem !== undefined && _currentMissionItem !== null
     property bool   _curreItemIsFlyThrough:     _currentMissionItemValid && _currentMissionItem.specifiesCoordinate && !_currentMissionItem.isStandaloneCoordinate
@@ -66,9 +72,12 @@ Item {
     property string _batteryChangePointText:    _batteryChangePoint < 0 ?       "N/A" : _batteryChangePoint
     property string _batteriesRequiredText:     _batteriesRequired < 0 ?        "N/A" : _batteriesRequired
 
+    //Mismart: Icons for the QGCLabels instead
+    property real   _iconWidth:                 _smallValueWidth / 2
+
     readonly property real _margins: ScreenTools.defaultFontPixelWidth
 
-    function getMissionTime() {
+   function getMissionTime() {
         if (!_missionTime) {
             return "00:00:00"
         }
@@ -83,6 +92,27 @@ Item {
             complete = days + " days " + Qt.formatTime(t, 'hh:mm:ss')
         }
         return complete
+    }
+
+
+    function getArea() {
+        var num
+        if (isNaN(area)) {
+            num = "0"
+        } else {
+            num = QGroundControl.unitsConversion.squareMetersToAppSettingsAreaUnits(area).toFixed(2)
+        }
+        return num + " " + QGroundControl.unitsConversion.appSettingsAreaUnitsString
+    }
+
+    function getSpacing() {
+        var num
+        if (isNaN(spacing)) {
+            return "?"
+        } else {
+            num = QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(spacing).toFixed(2)
+        }
+        return num + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
     }
 
     // Progress bar
@@ -129,6 +159,7 @@ Item {
         columns:                4
 
         GridLayout {
+            visible: false
             columns:                8
             rowSpacing:             _rowSpacing
             columnSpacing:          _labelToValueSpacing
@@ -183,18 +214,27 @@ Item {
         }
 
         GridLayout {
-            columns:                5
+            columns:                11
             rowSpacing:             _rowSpacing
             columnSpacing:          _labelToValueSpacing
             Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
 
             QGCLabel {
                 text:               qsTr("Total Mission")
-                Layout.columnSpan:  5
+                Layout.columnSpan:  11
                 font.pointSize:     ScreenTools.smallFontPointSize
             }
 
-            QGCLabel { text: qsTr("Distance:"); font.pointSize: _dataFontSize; }
+            //QGCLabel { text: qsTr("Distance:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/InstrumentValueIcons/travel-walk.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
             QGCLabel {
                 text:                   _missionDistanceText
                 font.pointSize:         _dataFontSize
@@ -203,16 +243,124 @@ Item {
 
             Item { width: 1; height: 1 }
 
-            QGCLabel { text: qsTr("Max telem dist:"); font.pointSize: _dataFontSize; }
+            //QGCLabel { text: qsTr("Max telem dist:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/InstrumentValueIcons/station.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
             QGCLabel {
                 text:                   _missionMaxTelemetryText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _largeValueWidth
             }
 
-            QGCLabel { text: qsTr("Time:"); font.pointSize: _dataFontSize; }
+            Item { width: 1; height: 1 }
+
+            //QGCLabel { text: qsTr("Application Rate:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/InstrumentValueIcons/tuning.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
+            QGCLabel {
+                text:                   applicationRate ? applicationRate.toFixed(2) + " l/ha" : "?"
+                font.pointSize:         _dataFontSize
+                Layout.minimumWidth:    _largeValueWidth
+            }
+
+            Item { width: 1; height: 1 }
+
+            //QGCLabel { text: qsTr("Spacing:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/qmlimages/PatternGrid.png"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
+            QGCLabel {
+                text:                   getSpacing()
+                font.pointSize:         _dataFontSize
+                Layout.minimumWidth:    _largeValueWidth
+            }
+
+            //QGCLabel { text: qsTr("Time:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/InstrumentValueIcons/timer.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
             QGCLabel {
                 text:                   getMissionTime()
+                font.pointSize:         _dataFontSize
+                Layout.minimumWidth:    _largeValueWidth
+            }
+
+            Item { width: 1; height: 1 }
+
+            //QGCLabel { text: qsTr("Area:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/InstrumentValueIcons/map.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
+            QGCLabel {
+                text:                   getArea()
+                font.pointSize:         _dataFontSize
+                Layout.minimumWidth:    _largeValueWidth
+            }
+
+            Item { width: 1; height: 1 }
+
+            //QGCLabel { text: qsTr("Flow Rate:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/InstrumentValueIcons/flowrate.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
+            QGCLabel {
+                text:                   flowRate ? flowRate.toFixed(2) + " l/min" : "?"
+                font.pointSize:         _dataFontSize
+                Layout.minimumWidth:    _largeValueWidth
+            }
+
+            Item { width: 1; height: 1 }
+
+            //QGCLabel { text: qsTr("Velocity:"); font.pointSize: _dataFontSize; }
+            QGCColoredImage {
+                width:              _iconWidth
+                height:             width
+                source:             "/InstrumentValueIcons/arrow-simple-right.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+            }
+
+            QGCLabel {
+                text:                   velocity ? velocity.toFixed(2) + " m/s" : "?"
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _largeValueWidth
             }
@@ -245,7 +393,7 @@ Item {
             id:          uploadButton
             text:        _controllerDirty ? qsTr("Upload Required") : qsTr("Upload")
             enabled:     !_controllerSyncInProgress
-            visible:     !_controllerOffline && !_controllerSyncInProgress && !uploadCompleteText.visible
+            visible:     _controllerIsSourcePlan && !_controllerOffline && !_controllerSyncInProgress && !uploadCompleteText.visible
             primary:     _controllerDirty
             onClicked:   _planMasterController.upload()
 

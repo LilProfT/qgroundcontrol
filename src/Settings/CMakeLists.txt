@@ -22,6 +22,8 @@ add_library(Settings
 	PlanViewSettings.h
 	RTKSettings.cc
 	RTKSettings.h
+	NTRIPSettings.cc
+	NTRIPSettings.h
 	SettingsGroup.cc
 	SettingsGroup.h
 	SettingsManager.cc

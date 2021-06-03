@@ -19,10 +19,11 @@
     "name":             "DistanceToSurface",
     "shortDesc":        "Distance vehicle is away from surface.",
     "type":             "double",
-    "min":              0.1,
+    "min":              1,
+    "max":              30,
     "units":            "m",
     "decimalPlaces":    2,
-    "default":          50.0
+    "default":          3.0
 },
 {
     "name":             "ImageDensity",
@@ -58,16 +59,18 @@
     "type":             "double",
     "decimalPlaces":    2,
     "min":              0,
+    "max":              0,
     "units":            "m",
-    "default":          25
+    "default":          0
 },
 {
     "name":             "AdjustedFootprintSide",
     "type":             "double",
     "decimalPlaces":    2,
-    "min":              0,
+    "min":              1,
+    "max":              15,
     "units":            "m",
-    "default":          25
+    "default":          6
 }
 ]
 }

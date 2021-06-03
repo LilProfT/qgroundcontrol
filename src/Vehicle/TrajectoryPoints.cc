@@ -27,6 +27,12 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
         if (distance > _distanceTolerance) {
             //-- Update flight distance
             _vehicle->updateFlightDistance(distance);
+
+            //Mismart: Throw in a sprayed area update function
+            if (_vehicle->_areaSprayedStart()) {
+                _vehicle->updateAreaSprayed(distance);
+            }
+
             // Vehicle has moved far enough from previous point for an update
             double newAzimuth = _lastPoint.azimuthTo(coordinate);
             if (qIsNaN(_lastAzimuth) || qAbs(newAzimuth - _lastAzimuth) > _azimuthTolerance) {
@@ -53,7 +59,7 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
 
 void TrajectoryPoints::start(void)
 {
-    clear();
+    //clear();
     connect(_vehicle, &Vehicle::coordinateChanged, this, &TrajectoryPoints::_vehicleCoordinateChanged);
 }
 

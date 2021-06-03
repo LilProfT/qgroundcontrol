@@ -16,12 +16,12 @@ Grid {
     QGCLabel { text: qsTr("Survey Area") }
     QGCLabel { text: QGroundControl.unitsConversion.squareMetersToAppSettingsAreaUnits(missionItem.coveredArea).toFixed(2) + " " + QGroundControl.unitsConversion.appSettingsAreaUnitsString }
 
-    QGCLabel { text: qsTr("Photo Count") }
-    QGCLabel { text: missionItem.cameraShots }
+    QGCLabel { text: qsTr("Photo Count"); visible: false }
+    QGCLabel { text: missionItem.cameraShots; visible: false }
 
-    QGCLabel { text: qsTr("Photo Interval") }
-    QGCLabel { text: missionItem.timeBetweenShots.toFixed(1) + " " + qsTr("secs") }
+    QGCLabel { text: qsTr("Photo Interval"); visible: false }
+    QGCLabel { text: missionItem.timeBetweenShots.toFixed(1) + " " + qsTr("secs"); visible: false }
 
-    QGCLabel { text: qsTr("Trigger Distance") }
-    QGCLabel { text: missionItem.cameraCalc.adjustedFootprintFrontal.valueString + " " + missionItem.cameraCalc.adjustedFootprintFrontal.units }
+    QGCLabel { text: qsTr("Trigger Distance"); visible: false }
+    QGCLabel { text: missionItem.cameraCalc.adjustedFootprintFrontal.valueString + " " + missionItem.cameraCalc.adjustedFootprintFrontal.units; visible: false }
 }

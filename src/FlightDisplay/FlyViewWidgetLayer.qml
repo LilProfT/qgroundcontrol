@@ -120,31 +120,20 @@ Item {
     }
 
     PhotoVideoControl {
-        id:                     photoVideoControl
         anchors.margins:        _toolsMargin
+        anchors.verticalCenter: parent.verticalCenter
         anchors.right:          parent.right
         width:                  _rightPanelWidth
-        state:                  _verticalCenter ? "verticalCenter" : "topAnchor"
-        states: [
-            State {
-                name: "verticalCenter"
-                AnchorChanges {
-                    target:                 photoVideoControl
-                    anchors.top:            undefined
-                    anchors.verticalCenter: _root.verticalCenter
-                }
-            },
-            State {
-                name: "topAnchor"
-                AnchorChanges {
-                    target:                 photoVideoControl
-                    anchors.verticalCenter: undefined
-                    anchors.top:            instrumentPanel.bottom
-                }
-            }
-        ]
+        visible:                false
+    }
 
-        property bool _verticalCenter: !QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel.rawValue
+    //Mismart: Spray progress indicator
+    SprayIndicator {
+        anchors.margins:        _toolsMargin
+        //anchors.verticalCenter: parent.verticalCenter
+        anchors.bottom:         telemetryPanel.top
+        anchors.right:          parent.right
+        width:                  _rightPanelWidth * 0.5 //TODO: get the width to dynamically resize with the length of the string
     }
 
     TelemetryValuesBar {
@@ -152,6 +141,9 @@ Item {
         x:                  recalcXPosition()
         anchors.margins:    _toolsMargin
         anchors.bottom:     parent.bottom
+        // Put the telemetry bar to the right
+        anchors.right:      parent.right
+
 
         function recalcXPosition() {
             // First try centered

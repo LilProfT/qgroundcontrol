@@ -50,6 +50,7 @@
 #include "InitialConnectStateMachine.h"
 #include "VehicleBatteryFactGroup.h"
 #include "EventHandler.h"
+#include "NTRIP.h"
 #ifdef QT_DEBUG
 #include "MockLink.h"
 #endif
@@ -84,6 +85,11 @@ const char* Vehicle::_altitudeAMSLFactName =        "altitudeAMSL";
 const char* Vehicle::_altitudeTuningFactName =      "altitudeTuning";
 const char* Vehicle::_altitudeTuningSetpointFactName = "altitudeTuningSetpoint";
 const char* Vehicle::_flightDistanceFactName =      "flightDistance";
+
+//Mismart: Custom areaSprayed and spacing Fact name
+const char* Vehicle::_areaSprayedFactName =         "areaSprayed";
+const char* Vehicle::_spacingFactName =             "spacing";
+
 const char* Vehicle::_flightTimeFactName =          "flightTime";
 const char* Vehicle::_distanceToHomeFactName =      "distanceToHome";
 const char* Vehicle::_missionItemIndexFactName =    "missionItemIndex";
@@ -143,6 +149,11 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _altitudeTuningFact           (0, _altitudeTuningFactName,    FactMetaData::valueTypeDouble)
     , _altitudeTuningSetpointFact   (0, _altitudeTuningSetpointFactName, FactMetaData::valueTypeDouble)
     , _flightDistanceFact           (0, _flightDistanceFactName,    FactMetaData::valueTypeDouble)
+
+    //Mismart: Custom areaSprayed and spacing fact
+    , _areaSprayedFact              (0, _areaSprayedFactName,       FactMetaData::valueTypeDouble)
+    , _spacingFact                  (0, _spacingFactName,           FactMetaData::valueTypeDouble)
+
     , _flightTimeFact               (0, _flightTimeFactName,        FactMetaData::valueTypeElapsedTimeInSeconds)
     , _distanceToHomeFact           (0, _distanceToHomeFactName,    FactMetaData::valueTypeDouble)
     , _missionItemIndexFact         (0, _missionItemIndexFactName,  FactMetaData::valueTypeUint16)
@@ -207,6 +218,9 @@ Vehicle::Vehicle(LinkInterface*             link,
         }
     }
 #endif
+    if (_flightHubManager == nullptr) {
+        _flightHubManager               = new FlightHubManager(this);
+    }
 
     _autopilotPlugin = _firmwarePlugin->autopilotPlugin(this);
     _autopilotPlugin->setParent(this);
@@ -256,6 +270,8 @@ Vehicle::Vehicle(LinkInterface*             link,
     // Start csv logger
     connect(&_csvLogTimer, &QTimer::timeout, this, &Vehicle::_writeCsvLine);
     _csvLogTimer.start(1000);
+
+    connect(this, &Vehicle::flightModeChanged, this, &Vehicle::_saveResumeCoordinate);
 }
 
 // Disconnected Vehicle for offline editing
@@ -295,6 +311,11 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _altitudeTuningFact               (0, _altitudeTuningFactName,    FactMetaData::valueTypeDouble)
     , _altitudeTuningSetpointFact       (0, _altitudeTuningSetpointFactName, FactMetaData::valueTypeDouble)
     , _flightDistanceFact               (0, _flightDistanceFactName,    FactMetaData::valueTypeDouble)
+
+    //Mismart: Custom areaSprayed and spacing fact
+    , _areaSprayedFact                  (0, _areaSprayedFactName,       FactMetaData::valueTypeDouble)
+    , _spacingFact                      (0, _spacingFactName,           FactMetaData::valueTypeDouble)
+
     , _flightTimeFact                   (0, _flightTimeFactName,        FactMetaData::valueTypeElapsedTimeInSeconds)
     , _distanceToHomeFact               (0, _distanceToHomeFactName,    FactMetaData::valueTypeDouble)
     , _missionItemIndexFact             (0, _missionItemIndexFactName,  FactMetaData::valueTypeUint16)
@@ -354,6 +375,7 @@ void Vehicle::_commonInit()
     connect(this, &Vehicle::coordinateChanged,      this, &Vehicle::_updateDistanceToGCS);
     connect(this, &Vehicle::homePositionChanged,    this, &Vehicle::_updateDistanceHeadingToHome);
     connect(this, &Vehicle::hobbsMeterChanged,      this, &Vehicle::_updateHobbsMeter);
+    connect(this, &Vehicle::coordinateChanged,      _toolbox->ntrip(), &NTRIP::_coordinateChanged);
 
     connect(_toolbox->qgcPositionManager(), &QGCPositionManager::gcsPositionChanged, this, &Vehicle::_updateDistanceToGCS);
 
@@ -365,8 +387,8 @@ void Vehicle::_commonInit()
     connect(_missionManager, &MissionManager::currentIndexChanged,      this, &Vehicle::_updateHeadingToNextWP);
     connect(_missionManager, &MissionManager::currentIndexChanged,      this, &Vehicle::_updateMissionItemIndex);
 
-    connect(_missionManager, &MissionManager::sendComplete,             _trajectoryPoints, &TrajectoryPoints::clear);
-    connect(_missionManager, &MissionManager::newMissionItemsAvailable, _trajectoryPoints, &TrajectoryPoints::clear);
+//    connect(_missionManager, &MissionManager::sendComplete,             _trajectoryPoints, &TrajectoryPoints::clear);
+//    connect(_missionManager, &MissionManager::newMissionItemsAvailable, _trajectoryPoints, &TrajectoryPoints::clear);
 
     _componentInformationManager    = new ComponentInformationManager   (this);
     _initialConnectStateMachine     = new InitialConnectStateMachine    (this);
@@ -414,6 +436,11 @@ void Vehicle::_commonInit()
     _addFact(&_altitudeTuningFact,       _altitudeTuningFactName);
     _addFact(&_altitudeTuningSetpointFact, _altitudeTuningSetpointFactName);
     _addFact(&_flightDistanceFact,      _flightDistanceFactName);
+
+    //Mismart: Custom areaSprayed and spacing fact group
+    _addFact(&_areaSprayedFact,         _areaSprayedFactName);
+    _addFact(&_spacingFact,             _spacingFactName);
+
     _addFact(&_flightTimeFact,          _flightTimeFactName);
     _addFact(&_distanceToHomeFact,      _distanceToHomeFactName);
     _addFact(&_missionItemIndexFact,    _missionItemIndexFactName);
@@ -450,6 +477,10 @@ void Vehicle::_commonInit()
     }
 
     _flightDistanceFact.setRawValue(0);
+
+    // Mismart: Custom areaSprayed init fact
+    _areaSprayedFact.setRawValue(0);
+
     _flightTimeFact.setRawValue(0);
     _flightTimeUpdater.setInterval(1000);
     _flightTimeUpdater.setSingleShot(false);
@@ -2180,6 +2211,22 @@ void Vehicle::_flightTimerStop()
     _flightTimeUpdater.stop();
 }
 
+//Mismart: Custom areaSprayed start and stop functions
+bool Vehicle::_areaSprayedStart()
+{
+    if (batteries()->count() == 4) //Mismart AGR drone config, 4 batteries
+    {
+        if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() > 1) //Arbitrary number
+        {
+            return (flightMode() == missionFlightMode()); //Only records when AUTO mode is used
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 void Vehicle::_updateFlightTime()
 {
     _flightTimeFact.setRawValue((double)_flightTimer.elapsed() / 1000.0);
@@ -3861,6 +3908,14 @@ void Vehicle::updateFlightDistance(double distance)
     _flightDistanceFact.setRawValue(_flightDistanceFact.rawValue().toDouble() + distance);
 }
 
+// Mismart: Custom areaSprayed update function
+// A very crude and simple calculation method was used, literally spraying distance * spacing for area
+// A better method should be considered
+void Vehicle::updateAreaSprayed(double distance)
+{
+    _areaSprayedFact.setRawValue(_areaSprayedFact.rawValue().toDouble() + distance * _spacingFact.rawValue().toDouble());
+}
+
 void Vehicle::sendParamMapRC(const QString& paramName, double scale, double centerValue, int tuningID, double minValue, double maxValue)
 {
     SharedLinkInterfacePtr  sharedLink = vehicleLinkManager()->primaryLink().lock();
@@ -3963,4 +4018,11 @@ void Vehicle::triggerSimpleCamera()
                    true,                        // show errors
                    0.0, 0.0, 0.0, 0.0,          // param 1-4 unused
                    1.0);                        // trigger camera
+}
+
+void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
+    if (flightMode == this->rtlFlightMode()) {
+        qDebug() << "save RTL coord";
+        _resumeCoordinate = this->coordinate();
+    };
 }

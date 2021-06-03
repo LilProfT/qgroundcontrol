@@ -34,12 +34,13 @@ Item {
     property var    _paramCircleFenceComponent
     property var    _polygons:                  myGeoFenceController.polygons
     property var    _circles:                   myGeoFenceController.circles
-    property color  _borderColor:               "orange"
+    property color  _borderColorInclusion:      "orange"
+    property color  _borderColorExclusion:      "black"
     property int    _borderWidthInclusion:      2
-    property int    _borderWidthExclusion:      0
+    property int    _borderWidthExclusion:      2
     property color  _interiorColorExclusion:    "orange"
     property color  _interiorColorInclusion:    "transparent"
-    property real   _interiorOpacityExclusion:  0.2 * opacity
+    property real   _interiorOpacityExclusion:  0.4 * opacity
     property real   _interiorOpacityInclusion:  1 * opacity
 
     function addPolygon(inclusionPolygon) {
@@ -101,7 +102,7 @@ Item {
             mapControl:         map
             mapPolygon:         object
             borderWidth:        object.inclusion ? _borderWidthInclusion : _borderWidthExclusion
-            borderColor:        _borderColor
+            borderColor:        object.inclusion ? _borderColorInclusion : _borderColorExclusion
             interiorColor:      object.inclusion ? _interiorColorInclusion : _interiorColorExclusion
             interiorOpacity:    object.inclusion ? _interiorOpacityInclusion : _interiorOpacityExclusion
             interactive:        _root.interactive && mapPolygon && mapPolygon.interactive
@@ -130,7 +131,7 @@ Item {
         MapCircle {
             color:          _interiorColorInclusion
             opacity:        _interiorOpacityInclusion
-            border.color:   _borderColor
+            border.color:   _borderColorInclusion
             border.width:   _borderWidthInclusion
             center:         homePosition
             radius:         _radius

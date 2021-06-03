@@ -17,7 +17,7 @@
 #include "CameraSection.h"
 #include "SpeedSection.h"
 
-Q_DECLARE_LOGGING_CATEGORY(MissionSettingsItemLog)
+Q_DECLARE_LOGGING_CATEGORY(MissionSettingsComplexItemLog)
 
 class PlanMasterController;
 
@@ -71,8 +71,8 @@ public:
     bool            isStandaloneCoordinate      (void) const final { return false; }
     bool            specifiesCoordinate         (void) const final;
     bool            specifiesAltitudeOnly       (void) const final { return false; }
-    QString         commandDescription          (void) const final { return "Mission Start"; }
-    QString         commandName                 (void) const final { return "Mission Start"; }
+    QString         commandDescription          (void) const final { return "Bắt đầu Nhiệm vụ"; }
+    QString         commandName                 (void) const final { return "Bắt đầu Nhiệm vụ"; }
     QString         abbreviation                (void) const final;
     QGeoCoordinate  coordinate                  (void) const final { return _plannedHomePositionCoordinate; } // Includes altitude
     QGeoCoordinate  exitCoordinate              (void) const final { return _plannedHomePositionCoordinate; }

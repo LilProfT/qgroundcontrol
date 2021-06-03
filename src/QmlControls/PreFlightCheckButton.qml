@@ -39,6 +39,7 @@ QGCButton {
     property int _horizontalPadding:    ScreenTools.defaultFontPixelWidth
     property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight / 2)
     property real _stateFlagWidth:      ScreenTools.defaultFontPixelWidth * 4
+    property real _dummySkipButton:     _stateFlagWidth * 3
 
     readonly property int _statePending:    0   ///< Telemetry check is failing or manual check not yet verified, user can click to make it pass
     readonly property int _stateFailed:     1   ///< Telemetry check is failing, user cannot click to make it pass
@@ -64,7 +65,20 @@ QGCButton {
     topPadding:     _verticalPadding
     bottomPadding:  _verticalPadding
     leftPadding:    (_horizontalPadding * 2) + _stateFlagWidth
-    rightPadding:   _horizontalPadding
+    rightPadding:   {
+        if (telemetryFailure && !allowTelemetryFailureOverride) {
+            return _horizontalPadding
+        }
+        if (telemetryFailure && allowTelemetryFailureOverride && _telemetryState !== _statePassed) {
+            return ((_horizontalPadding * 2) + _dummySkipButton)
+        }
+        if (manualText !== "" && _manualState !== _statePassed) {
+            return ((_horizontalPadding * 2) + _dummySkipButton)
+        }
+        else {
+            return _horizontalPadding
+        }
+    }
 
     background: Rectangle {
         color:          qgcPal.button
@@ -76,6 +90,38 @@ QGCButton {
             anchors.top:    parent.top
             anchors.bottom: parent.bottom
             width:          _stateFlagWidth
+        }
+
+        Rectangle {
+            visible: {
+                    if (telemetryFailure && !allowTelemetryFailureOverride) {
+                        return false
+                    }
+                    if (telemetryFailure && allowTelemetryFailureOverride && _telemetryState !== _statePassed) {
+                        return true
+                    }
+                    if (manualText !== "" && _manualState !== _statePassed) {
+                        return true
+                    }
+                    else {
+                        return false
+                    }
+            }
+
+            color:          _color
+            anchors.right:  parent.right
+            anchors.top:    parent.top
+            anchors.bottom: parent.bottom
+            width:          _dummySkipButton;
+
+            QGCLabel {
+                color:          "#FFFFFF"
+                horizontalAlignment:    Text.AlignHCenter
+                verticalAlignment:      Text.AlignVCenter
+                font.bold:      true
+                anchors.fill:   parent
+                text:           (telemetryFailure && allowTelemetryFailureOverride && _telemetryState !== _statePassed) ? qsTr("SKIP") : qsTr("OK")
+            }
         }
     }
 

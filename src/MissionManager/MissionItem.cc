@@ -35,6 +35,7 @@ MissionItem::MissionItem(QObject* parent)
     , _sequenceNumber(0)
     , _doJumpId(-1)
     , _isCurrentItem(false)
+    , _visualType(MissionItem::VisualType::NORMAL)
     , _autoContinueFact             (0, "AutoContinue",                 FactMetaData::valueTypeUint32)
     , _commandFact                  (0, "",                             FactMetaData::valueTypeUint32)
     , _frameFact                    (0, "",                             FactMetaData::valueTypeUint32)
@@ -89,6 +90,54 @@ MissionItem::MissionItem(int             sequenceNumber,
     _frameFact.setRawValue(MAV_FRAME_GLOBAL_RELATIVE_ALT);
 
     setCommand(command);
+    setFrame(frame);
+    setAutoContinue(autoContinue);
+
+    _param1Fact.setRawValue(param1);
+    _param2Fact.setRawValue(param2);
+    _param3Fact.setRawValue(param3);
+    _param4Fact.setRawValue(param4);
+    _param5Fact.setRawValue(param5);
+    _param6Fact.setRawValue(param6);
+    _param7Fact.setRawValue(param7);
+
+    connect(&_param2Fact, &Fact::rawValueChanged, this, &MissionItem::_param2Changed);
+    connect(&_param3Fact, &Fact::rawValueChanged, this, &MissionItem::_param3Changed);
+}
+
+// [mismart] remove MAV_CMD enum constrain
+MissionItem::MissionItem(int             sequenceNumber,
+                         int             command, // <- here
+                         MAV_FRAME       frame,
+                         double          param1,
+                         double          param2,
+                         double          param3,
+                         double          param4,
+                         double          param5,
+                         double          param6,
+                         double          param7,
+                         bool            autoContinue,
+                         bool            isCurrentItem,
+                         QObject*        parent)
+    : QObject(parent)
+    , _sequenceNumber(sequenceNumber)
+    , _doJumpId(-1)
+    , _isCurrentItem(isCurrentItem)
+    , _commandFact                  (0, "",                             FactMetaData::valueTypeUint32)
+    , _frameFact                    (0, "",                             FactMetaData::valueTypeUint32)
+    , _param1Fact                   (0, "Param1:",                      FactMetaData::valueTypeDouble)
+    , _param2Fact                   (0, "Param2:",                      FactMetaData::valueTypeDouble)
+    , _param3Fact                   (0, "Param3:",                      FactMetaData::valueTypeDouble)
+    , _param4Fact                   (0, "Param4:",                      FactMetaData::valueTypeDouble)
+    , _param5Fact                   (0, "Lat/X:",                       FactMetaData::valueTypeDouble)
+    , _param6Fact                   (0, "Lon/Y:",                       FactMetaData::valueTypeDouble)
+    , _param7Fact                   (0, "Alt/Z:",                       FactMetaData::valueTypeDouble)
+{
+    // Need a good command and frame before we start passing signals around
+    _commandFact.setRawValue(MAV_CMD_NAV_WAYPOINT);
+    _frameFact.setRawValue(MAV_FRAME_GLOBAL_RELATIVE_ALT);
+
+    setCommandInt(command);
     setFrame(frame);
     setAutoContinue(autoContinue);
 
@@ -334,6 +383,14 @@ void MissionItem::setSequenceNumber(int sequenceNumber)
 void MissionItem::setCommand(MAV_CMD command)
 {
     if ((MAV_CMD)this->command() != command) {
+        _commandFact.setRawValue(command);
+    }
+}
+
+// [mismart]
+void MissionItem::setCommandInt(int command)
+{
+    if (_commandFact.rawValue().toInt() != command) {
         _commandFact.setRawValue(command);
     }
 }

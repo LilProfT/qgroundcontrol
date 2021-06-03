@@ -32,6 +32,10 @@ const char* FactValueGrid::_rangeOpacitiesKey   = "rangeOpacities";
 
 const char* FactValueGrid::_deprecatedGroupKey =  "ValuesWidget";
 
+//Mismart: Custom Units and scaler
+const char* FactValueGrid::_customUnitsKey      = "customUnits";
+const char* FactValueGrid::_scalerKey           = "scaler";
+
 QStringList FactValueGrid::_iconNames;
 
 // Important: The indices of these strings must match the FactValueGrid::FontSize enum
@@ -118,6 +122,10 @@ void FactValueGrid::_saveValueData(QSettings& settings, InstrumentValueData* val
     settings.setValue(_iconKey,         value->icon());
     settings.setValue(_rangeTypeKey,    value->rangeType());
 
+    //Mismart: Custom Units and scaler
+    settings.setValue(_customUnitsKey,  value->customUnits());
+    settings.setValue(_scalerKey,       value->scaler());
+
     if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
         settings.setValue(_rangeValuesKey, value->rangeValues());
     }
@@ -136,8 +144,16 @@ void FactValueGrid::_saveValueData(QSettings& settings, InstrumentValueData* val
         break;
     }
 
-    settings.setValue(_factGroupNameKey,    value->factGroupName());
-    settings.setValue(_factNameKey,         value->factName());
+    //Copying the recent merge request of original QGC, should be merged in the future
+//    if (value->fact()) {
+//        settings.setValue(_factGroupNameKey,    value->factGroupName());
+//        settings.setValue(_factNameKey,         value->factName());
+//    } else {
+//        settings.setValue(_factGroupNameKey,    "");
+//        settings.setValue(_factNameKey,         "");
+//    }
+      settings.setValue(_factGroupNameKey,    value->factGroupName());
+      settings.setValue(_factNameKey,         value->factName());
 }
 
 void FactValueGrid::_loadValueData(QSettings& settings, InstrumentValueData* value)
@@ -151,6 +167,10 @@ void FactValueGrid::_loadValueData(QSettings& settings, InstrumentValueData* val
     value->setShowUnits (settings.value(_showUnitsKey, true).toBool());
     value->setIcon      (settings.value(_iconKey).toString());
     value->setRangeType (settings.value(_rangeTypeKey, InstrumentValueData::NoRangeInfo).value<InstrumentValueData::RangeType>());
+
+    //Mismart: Custom Units and scaler
+    value->setCustomUnits(settings.value(_customUnitsKey).toString());
+    value->setScaler(settings.value(_scalerKey).toFloat());
 
     if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
         value->setRangeValues(settings.value(_rangeValuesKey).value<QVariantList>());
@@ -182,6 +202,10 @@ void FactValueGrid::_connectSaveSignals(InstrumentValueData* value)
     connect(value, &InstrumentValueData::rangeColorsChanged,    this, &FactValueGrid::_saveSettings);
     connect(value, &InstrumentValueData::rangeOpacitiesChanged, this, &FactValueGrid::_saveSettings);
     connect(value, &InstrumentValueData::rangeIconsChanged,     this, &FactValueGrid::_saveSettings);
+
+    //Mismart: Custom Units and scaler
+    connect(value, &InstrumentValueData::customUnitsChanged,    this, &FactValueGrid::_saveSettings);
+    connect(value, &InstrumentValueData::scalerChanged,         this, &FactValueGrid::_saveSettings);
 }
 
 void FactValueGrid::appendRow(void)

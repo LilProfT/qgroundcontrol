@@ -125,6 +125,10 @@ private:
     static const char* _rangeOpacitiesKey;
 
     static const char* _deprecatedGroupKey;
+
+    //Mismart: Custom Units and scaler
+    static const char* _customUnitsKey;
+    static const char* _scalerKey;
 };
 
 QML_DECLARE_TYPE(FactValueGrid)

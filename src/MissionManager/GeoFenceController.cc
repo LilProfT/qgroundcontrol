@@ -406,7 +406,7 @@ bool GeoFenceController::showPlanFromManagerVehicle(void)
     }
 }
 
-void GeoFenceController::addInclusionPolygon(QGeoCoordinate topLeft, QGeoCoordinate bottomRight)
+void GeoFenceController::addExclusionPolygon(QGeoCoordinate topLeft, QGeoCoordinate bottomRight)
 {
     QGeoCoordinate topRight(topLeft.latitude(), bottomRight.longitude());
     QGeoCoordinate bottomLeft(bottomRight.latitude(), topLeft.longitude());
@@ -428,7 +428,7 @@ void GeoFenceController::addInclusionPolygon(QGeoCoordinate topLeft, QGeoCoordin
     bottomLeft =        center.atDistanceAndAzimuth(halfWidthMeters, -90).atDistanceAndAzimuth(halfHeightMeters, 180);
     bottomRight =       center.atDistanceAndAzimuth(halfWidthMeters, 90).atDistanceAndAzimuth(halfHeightMeters, 180);
 
-    QGCFencePolygon* polygon = new QGCFencePolygon(true /* inclusion */, this);
+    QGCFencePolygon* polygon = new QGCFencePolygon(false /* inclusion */, this);
     polygon->appendVertex(topLeft);
     polygon->appendVertex(topRight);
     polygon->appendVertex(bottomRight);

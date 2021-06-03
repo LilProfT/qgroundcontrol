@@ -188,8 +188,11 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
             i = 1;
         }
 
+        MissionItem* lastWaypoint = nullptr;
+        MissionItem* exitWaypoint = nullptr;
+        bool enterMarked = false;
         for (; i < newMissionItems.count(); i++) {
-            const MissionItem* missionItem = newMissionItems[i];
+            MissionItem* missionItem = newMissionItems[i];
             SimpleMissionItem* simpleItem = new SimpleMissionItem(_masterController, _flyView, *missionItem, this);
             if (TakeoffMissionItem::isTakeoffCommand(static_cast<MAV_CMD>(simpleItem->command()))) {
                 // This needs to be a TakeoffMissionItem
@@ -198,6 +201,24 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
                 simpleItem = _takeoffMissionItem;
             }
             newControllerMissionItems->append(simpleItem);
+
+            qDebug() << "[parse mission] " << simpleItem->missionItem().commandInt();
+            if (
+                   (simpleItem->missionItem().commandInt() == 216 /* MAV_CMD_DO_SPRAYER */)
+                && (lastWaypoint)
+            ) {
+                if (enterMarked == false) {
+                    lastWaypoint->setVisualType(MissionItem::VisualType::ENTER);
+                    enterMarked = true;
+                    qDebug() << "[parse mission] entering waypoint found";
+                };
+                exitWaypoint = lastWaypoint;
+            }
+            if (simpleItem->missionItem().commandInt() == 16 /* MAV_CMD_NAV_WAYPOINT */) lastWaypoint = &(simpleItem->missionItem());
+        }
+        if (exitWaypoint) {
+            exitWaypoint->setVisualType(MissionItem::VisualType::EXIT);
+            qDebug() << "[parse mission] exit waypoint found";
         }
 
         _visualItems = newControllerMissionItems;
@@ -325,7 +346,7 @@ VisualMissionItem* MissionController::_insertSimpleMissionItemWorker(QGeoCoordin
 
             if (_findPreviousAltitude(visualItemIndex, &prevAltitude, &prevAltitudeMode)) {
                 newItem->altitude()->setRawValue(prevAltitude);
-                if (globalAltitudeMode() == QGroundControlQmlGlobal::AltitudeModeMixed) {
+                if (globalAltitudeMode() == QGroundControlQmlGlobal::AltitudeModeNone) {
                     // We are in mixed altitude modes, so copy from previous. Otherwise alt mode will be set from global setting.
                     newItem->setAltitudeMode(static_cast<QGroundControlQmlGlobal::AltitudeMode>(prevAltitudeMode));
                 }
@@ -618,7 +639,7 @@ bool MissionController::_loadJsonMissionFileV1(const QJsonObject& json, QmlObjec
         return false;
     }
 
-    setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeModeMixed);
+    setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeModeNone);   // Mixed mode
 
     // Read complex items
     QList<SurveyComplexItem*> surveyItems;
@@ -723,7 +744,7 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         return false;
     }
 
-    setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeModeMixed);
+    setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeModeNone);   // Mixed mode
 
     qCDebug(MissionControllerLog) << "MissionController::_loadJsonMissionFileV2 itemCount:" << json[_jsonItemsKey].toArray().count();
 
@@ -1057,7 +1078,7 @@ bool MissionController::loadTextFile(QFile& file, QString& errorString)
     QByteArray  bytes = file.readAll();
     QTextStream stream(bytes);
 
-    setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeModeMixed);
+    setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeModeNone);   // Mixed mode
 
     QmlObjectListModel* loadedVisualItems = new QmlObjectListModel(this);
     if (!_loadTextMissionFile(stream, loadedVisualItems, errorStr)) {
@@ -1154,32 +1175,22 @@ double MissionController::_calcDistanceToHome(VisualMissionItem* currentItem, Vi
 
 FlightPathSegment* MissionController::_createFlightPathSegmentWorker(VisualItemPair& pair)
 {
-    // The takeoff goes straight up from ground to alt and then over to specified position at same alt. Which means
-    // that coord 1 altitude is the same as coord altitude.
-    bool                takeoffStraightUp   = pair.second->isTakeoffItem() && !_controllerVehicle->fixedWing();
+    QGeoCoordinate      coord1 =            pair.first->isSimpleItem() ? pair.first->coordinate() : pair.first->exitCoordinate();
+    QGeoCoordinate      coord2 =            pair.second->coordinate();
+    double              coord1Alt =         pair.first->isSimpleItem() ? pair.first->amslEntryAlt() : pair.first->amslExitAlt();
+    double              coord2Alt =         pair.second->amslEntryAlt();
 
-    QGeoCoordinate      coord1              = pair.first->exitCoordinate();
-    QGeoCoordinate      coord2              = pair.second->coordinate();
-    double              coord2AMSLAlt       = pair.second->amslEntryAlt();
-    double              coord1AMSLAlt       = takeoffStraightUp ? coord2AMSLAlt : pair.first->amslExitAlt();
+    FlightPathSegment*  segment =           new FlightPathSegment(FlightPathSegment::SegmentTypeGeneric, coord1, coord1Alt, coord2, coord2Alt, !_flyView /* queryTerrainData */,  this);
 
-    FlightPathSegment::SegmentType segmentType = FlightPathSegment::SegmentTypeGeneric;
-    if (pair.second->isTakeoffItem()) {
-        segmentType = FlightPathSegment::SegmentTypeTakeoff;
-    } else if (pair.second->isLandCommand()) {
-        segmentType = FlightPathSegment::SegmentTypeLand;
-    }
+    auto                coord1Notifier =    pair.first->isSimpleItem() ? &VisualMissionItem::coordinateChanged : &VisualMissionItem::exitCoordinateChanged;
+    auto                coord2Notifier =    &VisualMissionItem::coordinateChanged;
+    auto                coord1AltNotifier = pair.first->isSimpleItem() ? &VisualMissionItem::amslEntryAltChanged : &VisualMissionItem::amslExitAltChanged;
+    auto                coord2AltNotifier = &VisualMissionItem::amslEntryAltChanged;
 
-    FlightPathSegment* segment = new FlightPathSegment(segmentType, coord1, coord1AMSLAlt, coord2, coord2AMSLAlt, !_flyView /* queryTerrainData */,  this);
-
-    if (takeoffStraightUp) {
-        connect(pair.second, &VisualMissionItem::amslEntryAltChanged, segment, &FlightPathSegment::setCoord1AMSLAlt);
-    } else {
-        connect(pair.first, &VisualMissionItem::amslExitAltChanged, segment, &FlightPathSegment::setCoord1AMSLAlt);
-    }
-    connect(pair.first,  &VisualMissionItem::exitCoordinateChanged, segment,    &FlightPathSegment::setCoordinate1);
-    connect(pair.second, &VisualMissionItem::coordinateChanged,     segment,    &FlightPathSegment::setCoordinate2);
-    connect(pair.second, &VisualMissionItem::amslEntryAltChanged,   segment,    &FlightPathSegment::setCoord2AMSLAlt);
+    connect(pair.first,  coord1Notifier,                                segment,    &FlightPathSegment::setCoordinate1);
+    connect(pair.second, coord2Notifier,                                segment,    &FlightPathSegment::setCoordinate2);
+    connect(pair.first,  coord1AltNotifier,                             segment,    &FlightPathSegment::setCoord1AMSLAlt);
+    connect(pair.second, coord2AltNotifier,                             segment,    &FlightPathSegment::setCoord2AMSLAlt);
 
     connect(pair.second, &VisualMissionItem::coordinateChanged,         this,       &MissionController::_recalcMissionFlightStatusSignal, Qt::QueuedConnection);
 
@@ -1276,7 +1287,7 @@ void MissionController::_recalcFlightPathSegments(void)
     _incompleteComplexItemLines.clearAndDeleteContents();
 
     // Mission Settings item needs to start with no segment
-    lastFlyThroughVI->clearSimpleFlighPathSegment();
+    lastFlyThroughVI->setSimpleFlighPathSegment(nullptr);
 
     // Grovel through the list of items keeping track of things needed to correctly draw waypoints lines
 
@@ -1285,7 +1296,7 @@ void MissionController::_recalcFlightPathSegments(void)
         SimpleMissionItem*  simpleItem =    qobject_cast<SimpleMissionItem*>(visualItem);
         ComplexMissionItem* complexItem =   qobject_cast<ComplexMissionItem*>(visualItem);
 
-        visualItem->clearSimpleFlighPathSegment();
+        visualItem->setSimpleFlighPathSegment(nullptr);
 
         if (simpleItem) {
             if (roiActive) {
@@ -1398,15 +1409,13 @@ void MissionController::_recalcFlightPathSegments(void)
             // Pair already exists in old table, pull from old to new and reuse
             _flightPathSegmentHashTable[lastSegmentVisualItemPair] = coordVector = oldSegmentTable.take(lastSegmentVisualItemPair);
         } else {
-            // Create a new segment. Since this is the fly view there is no need to wire change signals or worry about correct SegmentType
-            coordVector = new FlightPathSegment(
-                        FlightPathSegment::SegmentTypeGeneric,
-                        lastSegmentVisualItemPair.first->isSimpleItem() ? lastSegmentVisualItemPair.first->coordinate() : lastSegmentVisualItemPair.first->exitCoordinate(),
-                        lastSegmentVisualItemPair.first->isSimpleItem() ? lastSegmentVisualItemPair.first->amslEntryAlt() : lastSegmentVisualItemPair.first->amslExitAlt(),
-                        lastSegmentVisualItemPair.second->coordinate(),
-                        lastSegmentVisualItemPair.second->amslEntryAlt(),
-                        !_flyView /* queryTerrainData */,
-                        this);
+            // Create a new segment. Since this is the fly view there is no need to wire change signals.
+            coordVector = new FlightPathSegment(FlightPathSegment::SegmentTypeGeneric, lastSegmentVisualItemPair.first->isSimpleItem() ? lastSegmentVisualItemPair.first->coordinate() : lastSegmentVisualItemPair.first->exitCoordinate(),
+                                                lastSegmentVisualItemPair.first->isSimpleItem() ? lastSegmentVisualItemPair.first->amslEntryAlt() : lastSegmentVisualItemPair.first->amslExitAlt(),
+                                                lastSegmentVisualItemPair.second->coordinate(),
+                                                lastSegmentVisualItemPair.second->amslEntryAlt(),
+                                                !_flyView /* queryTerrainData */,
+                                                this);
             _flightPathSegmentHashTable[lastSegmentVisualItemPair] = coordVector;
         }
 
@@ -1517,7 +1526,7 @@ void MissionController::_recalcMissionFlightStatus()
     lastFlyThroughVI->setDistance(0);
     lastFlyThroughVI->setDistanceFromStart(0);
 
-    _minAMSLAltitude = _maxAMSLAltitude = qQNaN();
+    _minAMSLAltitude = _maxAMSLAltitude = _settingsItem->coordinate().altitude();
 
     _resetMissionFlightStatus();
 
@@ -1594,14 +1603,14 @@ void MissionController::_recalcMissionFlightStatus()
                 // Keep track of the min/max AMSL altitude for entire mission so we can calculate altitude percentages in terrain status display
                 if (simpleItem) {
                     double amslAltitude = item->amslEntryAlt();
-                    _minAMSLAltitude = std::fmin(_minAMSLAltitude, amslAltitude);
-                    _maxAMSLAltitude = std::fmax(_maxAMSLAltitude, amslAltitude);
+                    _minAMSLAltitude = std::min(_minAMSLAltitude, amslAltitude);
+                    _maxAMSLAltitude = std::max(_maxAMSLAltitude, amslAltitude);
                 } else {
                     // Complex item
                     double complexMinAMSLAltitude = complexItem->minAMSLAltitude();
                     double complexMaxAMSLAltitude = complexItem->maxAMSLAltitude();
-                    _minAMSLAltitude = std::fmin(_minAMSLAltitude, complexMinAMSLAltitude);
-                    _maxAMSLAltitude = std::fmax(_maxAMSLAltitude, complexMaxAMSLAltitude);
+                    _minAMSLAltitude = std::min(_minAMSLAltitude, complexMinAMSLAltitude);
+                    _maxAMSLAltitude = std::max(_maxAMSLAltitude, complexMaxAMSLAltitude);
                 }
 
                 if (!item->isStandaloneCoordinate()) {
@@ -2518,19 +2527,14 @@ void MissionController::_updateTimeout()
                 case MAV_CMD_NAV_WAYPOINT:
                 case MAV_CMD_NAV_LAND:
                     if(pSimpleItem->coordinate().isValid()) {
-                        double alt = 0.0;
-                        if (!pSimpleItem->altitude()->rawValue().isNull() && !qIsNaN(pSimpleItem->altitude()->rawValue().toDouble())) {
-                            alt = pSimpleItem->altitude()->rawValue().toDouble();
-                        }
                         if((MAV_CMD)pSimpleItem->command() == MAV_CMD_NAV_TAKEOFF) {
                             takeoffCoordinate = pSimpleItem->coordinate();
-                            takeoffCoordinate.setAltitude(alt);
-                            minAlt = maxAlt = alt;
                         } else if(!firstCoordinate.isValid()) {
                             firstCoordinate = pSimpleItem->coordinate();
                         }
                         double lat = pSimpleItem->coordinate().latitude()  + 90.0;
                         double lon = pSimpleItem->coordinate().longitude() + 180.0;
+                        double alt = pSimpleItem->coordinate().altitude();
                         north  = fmax(north, lat);
                         south  = fmin(south, lat);
                         east   = fmax(east,  lon);
@@ -2647,7 +2651,7 @@ QGroundControlQmlGlobal::AltitudeMode MissionController::globalAltitudeMode(void
 
 QGroundControlQmlGlobal::AltitudeMode MissionController::globalAltitudeModeDefault(void)
 {
-    if (_globalAltMode == QGroundControlQmlGlobal::AltitudeModeMixed) {
+    if (_globalAltMode == QGroundControlQmlGlobal::AltitudeModeNone) {
         return QGroundControlQmlGlobal::AltitudeModeRelative;
     } else {
         return _globalAltMode;

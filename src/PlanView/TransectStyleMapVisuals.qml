@@ -30,6 +30,8 @@ Item {
     property var    _mapPolygon:                object.surveyAreaPolygon
     property bool   _currentItem:               object.isCurrentItem
     property var    _transectPoints:            _missionItem.visualTransectPoints
+    property var    _angleEdge:                 _missionItem.angleEdge ? _missionItem.angleEdge : []
+    property var    _avoidances:                _missionItem.visualAvoidances
     property int    _transectCount:             _transectPoints.length / (_hasTurnaround ? 4 : 2)
     property bool   _hasTurnaround:             _missionItem.turnAroundDistance.rawValue !== 0
     property int    _firstTrueTransectIndex:    _hasTurnaround ? 1 : 0
@@ -48,6 +50,23 @@ Item {
         var toAdd = [ fullTransectsComponent, entryTransectComponent, exitTransectComponent, entryPointComponent, exitPointComponent,
                      entryArrow1Component, entryArrow2Component, exitArrow1Component, exitArrow2Component ]
         objMgr.createObjects(toAdd, map, true /* parentObjectIsMap */)
+
+        console.log(_missionItem.angleEdge);
+        console.log(_angleEdge);
+
+//        console.log(_avoidances)
+        for (var i=0; i<_avoidances.count; i++) {
+            var avoidance = _avoidances[i];
+            console.log(avoidance);
+            var obj = avoidanceTransectsComponent.createObject(map, { avoidance });
+
+            if (obj.status === Component.Error) {
+                console.log(obj.errorString())
+            };
+
+            objMgr.rgDynamicObjects.push(obj);
+            map.addMapItem(obj);
+        }
     }
 
     function _destroyVisualElements() {
@@ -72,11 +91,20 @@ Item {
         mapControl:         map
         mapPolygon:         _mapPolygon
         interactive:        polygonInteractive && _missionItem.isCurrentItem && _root.interactive
-        borderWidth:        1
-        borderColor:        "black"
+        borderWidth:        4
+        borderColor:        "white"
         interiorColor:      QGroundControl.globalPalette.surveyPolygonInterior
         altColor:           QGroundControl.globalPalette.surveyPolygonTerrainCollision
-        interiorOpacity:    0.5 * _root.opacity
+        interiorOpacity:    0.3 * _root.opacity
+    }
+
+    MapPolyline {
+        line.color: "red"
+        line.width: 4
+        path:       _angleEdge
+        visible:    _currentItem
+        opacity:    _root.opacity
+        z: 100
     }
 
     // Full set of transects lines. Shown when item is selected.
@@ -84,9 +112,21 @@ Item {
         id: fullTransectsComponent
 
         MapPolyline {
-            line.color: "white"
-            line.width: 2
+            line.color: "yellow"
+            line.width: 4
             path:       _transectPoints
+            visible:    _currentItem
+            opacity:    _root.opacity
+        }
+    }
+
+    // Geofence avoidances lines.
+    Component {
+        id: avoidanceTransectsComponent
+        MapPolyline {
+            line.color: "magenta"
+            line.width: 2
+            path:       avoidance
             visible:    _currentItem
             opacity:    _root.opacity
         }
@@ -131,6 +171,7 @@ Item {
             sourceItem: MissionItemIndexLabel {
                 index:      _missionItem.sequenceNumber
                 checked:    _missionItem.isCurrentItem
+                visualType: MissionItem.ENTER
                 onClicked:  if(_root.interactive) _root.clicked(_missionItem.sequenceNumber)
             }
         }
@@ -203,6 +244,7 @@ Item {
             sourceItem: MissionItemIndexLabel {
                 index:      _missionItem.lastSequenceNumber
                 checked:    _missionItem.isCurrentItem
+                visualType: MissionItem.EXIT
                 onClicked:  if(_root.interactive) _root.clicked(_missionItem.sequenceNumber)
             }
         }

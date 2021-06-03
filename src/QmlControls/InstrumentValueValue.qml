@@ -42,7 +42,22 @@ ColumnLayout {
 
         function valueText() {
             if (instrumentValueData.fact) {
-                return instrumentValueData.fact.enumOrValueString + (instrumentValueData.showUnits ? " " + instrumentValueData.fact.units : "")
+                //Mismart: Special cases
+
+                if (instrumentValueData.text === "FLR" || instrumentValueData.icon === "flowrate.svg") {
+                    return (instrumentValueData.fact.rawValue / 60).toFixed(2) + (instrumentValueData.showUnits ?
+                                                                             (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
+                                                                             "")
+                }
+                else if (instrumentValueData.text === "VOL" || instrumentValueData.icon === "tank.svg") {
+                    return (instrumentValueData.fact.rawValue * 0.2).toFixed(1) + (instrumentValueData.showUnits ?
+                                                                             (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
+                                                                             "")
+                } else {
+                    return instrumentValueData.fact.enumOrValueString + (instrumentValueData.showUnits ?
+                                                                             (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
+                                                                             "")
+                }
             } else {
                 return qsTr("--.--")
             }

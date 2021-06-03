@@ -12,6 +12,7 @@ FlyViewToolStrip                1.0 FlyViewToolStrip.qml
 FlyViewToolStripActionList      1.0 FlyViewToolStripActionList.qml
 FlyViewVideo                    1.0 FlyViewVideo.qml
 FlyViewWidgetLayer              1.0 FlyViewWidgetLayer.qml
+ResumeMission                   1.0 ResumeMission.qml
 GuidedActionActionList          1.0 GuidedActionActionList.qml
 GuidedActionConfirm             1.0 GuidedActionConfirm.qml
 GuidedActionsController         1.0 GuidedActionsController.qml
@@ -24,10 +25,12 @@ GuidedActionTakeoff             1.0 GuidedActionTakeoff.qml
 GuidedToolStripAction           1.0 GuidedToolStripAction.qml
 MultiVehicleList                1.0 MultiVehicleList.qml
 PreFlightBatteryCheck           1.0 PreFlightBatteryCheck.qml
+PreFlightBattCellCheck          1.0 PreFlightBattCellCheck.qml
 PreFlightGPSCheck               1.0 PreFlightGPSCheck.qml
 PreFlightRCCheck                1.0 PreFlightRCCheck.qml
 PreFlightSensorsHealthCheck     1.0 PreFlightSensorsHealthCheck.qml
 PreFlightSoundCheck             1.0 PreFlightSoundCheck.qml
+PreFlightPumpCheck              1.0 PreFlightPumpCheck.qml
 ProximityRadarValues            1.0 ProximityRadarValues.qml
 ProximityRadarVideoView         1.0 ProximityRadarVideoView.qml
 TerrainProgress                 1.0 TerrainProgress.qml

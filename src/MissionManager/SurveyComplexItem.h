@@ -9,7 +9,10 @@
 
 #pragma once
 
-#include "TransectStyleComplexItem.h"
+#include <QTimer>
+
+// #include "TransectStyleComplexItem.h"
+#include "TransectStyleFenceSupportedComplexItem.h"
 #include "MissionItem.h"
 #include "SettingsFact.h"
 #include "QGCLoggingCategory.h"
@@ -18,7 +21,7 @@ Q_DECLARE_LOGGING_CATEGORY(SurveyComplexItemLog)
 
 class PlanMasterController;
 
-class SurveyComplexItem : public TransectStyleComplexItem
+class SurveyComplexItem : public TransectStyleFenceSupportedComplexItem
 {
     Q_OBJECT
 
@@ -28,27 +31,46 @@ public:
     SurveyComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlOrShpFile, QObject* parent);
 
     Q_PROPERTY(Fact* gridAngle              READ gridAngle              CONSTANT)
+    Q_PROPERTY(Fact* velocity               READ velocity               CONSTANT)
+    Q_PROPERTY(Fact* applicationRate        READ applicationRate        CONSTANT)
+    Q_PROPERTY(Fact* sprayFlowRate          READ sprayFlowRate          CONSTANT)
+    Q_PROPERTY(Fact* nozzleRate             READ nozzleRate             CONSTANT)
+    Q_PROPERTY(Fact* nozzleOffset           READ nozzleOffset           CONSTANT)
+    Q_PROPERTY(Fact* autoOptimize           READ autoOptimize           CONSTANT)
     Q_PROPERTY(Fact* flyAlternateTransects  READ flyAlternateTransects  CONSTANT)
     Q_PROPERTY(Fact* splitConcavePolygons   READ splitConcavePolygons   CONSTANT)
+    Q_PROPERTY(QVariantList  angleEdge      READ angleEdge              NOTIFY angleEdgeChanged)
 
     Fact* gridAngle             (void) { return &_gridAngleFact; }
+    Fact* velocity              (void) { return &_velocityFact; }
+    Fact* applicationRate       (void) { return &_applicationRateFact; }
+    Fact* sprayFlowRate         (void) { return &_sprayFlowRateFact; }
+    Fact* nozzleRate            (void) { return &_nozzleRateFact; }
+    Fact* nozzleOffset          (void) { return &_nozzleOffsetFact; }
+    Fact* autoOptimize          (void) { return &_autoOptimizeFact; }
     Fact* flyAlternateTransects (void) { return &_flyAlternateTransectsFact; }
     Fact* splitConcavePolygons  (void) { return &_splitConcavePolygonsFact; }
+    Fact* gridSpacing           (void) { return _cameraCalc.adjustedFootprintSide(); }
 
+    QVariantList angleEdge() { return _angleEdge; }
+
+    Q_INVOKABLE void optimize(void);
     Q_INVOKABLE void rotateEntryPoint(void);
+    Q_INVOKABLE void rotateAngle(void);
 
     // Overrides from ComplexMissionItem
     QString patternName         (void) const final { return name; }
     bool    load                (const QJsonObject& complexObject, int sequenceNumber, QString& errorString) final;
     QString mapVisualQML        (void) const final { return QStringLiteral("SurveyMapVisual.qml"); }
-    QString presetsSettingsGroup(void) { return settingsGroup; }
-    void    savePreset          (const QString& name);
-    void    loadPreset          (const QString& name);
+    QString presetsSettingsGroup(void) override { return settingsGroup; }
+    void    savePreset          (const QString& name) override;
+    void    loadPreset          (const QString& name) override;
 
     // Overrides from TransectStyleComplexItem
     void    save                (QJsonArray&  planItems) final;
     bool    specifiesCoordinate (void) const final { return true; }
     double  timeBetweenShots    (void) final;
+    double  getYaw              (void) override final;
 
     // Overrides from VisualMissionionItem
     QString             commandDescription  (void) const final { return tr("Survey"); }
@@ -72,6 +94,12 @@ public:
     static const char* jsonComplexItemTypeValue;
     static const char* settingsGroup;
     static const char* gridAngleName;
+    static const char* velocityName;
+    static const char* applicationRateName;
+    static const char* sprayFlowRateName;
+    static const char* nozzleRateName;
+    static const char* nozzleOffsetName;
+    static const char* autoOptimizeName;
     static const char* gridEntryLocationName;
     static const char* flyAlternateTransectsName;
     static const char* splitConcavePolygonsName;
@@ -80,6 +108,10 @@ public:
 
 signals:
     void refly90DegreesChanged(bool refly90Degrees);
+    void angleEdgeChanged     (void);
+
+protected:
+    void _buildAndAppendMissionItems (QList<MissionItem*>& items, QObject* missionItemParent) override;
 
 private slots:
     void _updateWizardMode              (void);
@@ -130,17 +162,34 @@ private:
     bool _VertexCanSeeOther(const QPolygonF& polygon, const QPointF* vertexA, const QPointF* vertexB);
     bool _VertexIsReflex(const QPolygonF& polygon, const QPointF* vertex);
 
+    void _updateSprayFlowRate(void);
+    void _optimize_Angle_EntryPoint(void);
+    void _optimize_EntryPoint(void);
+    void _toggleAutoOptimize(QVariant value);
+
     QMap<QString, FactMetaData*> _metaDataMap;
 
     SettingsFact    _gridAngleFact;
+    SettingsFact    _velocityFact;
+    SettingsFact    _applicationRateFact;
+    SettingsFact    _sprayFlowRateFact;
+    SettingsFact    _nozzleRateFact;
+    SettingsFact    _nozzleOffsetFact;
+    SettingsFact    _autoOptimizeFact;
     SettingsFact    _flyAlternateTransectsFact;
     SettingsFact    _splitConcavePolygonsFact;
     int             _entryPoint;
+    int             _edgeIndex = 0;
+    QVariantList    _angleEdge;
+
+    QTimer _timer_optimize_Angle_EntryPoint;
 
     static const char* _jsonGridAngleKey;
     static const char* _jsonEntryPointKey;
     static const char* _jsonFlyAlternateTransectsKey;
     static const char* _jsonSplitConcavePolygonsKey;
+    static const char* _jsonApplicationRateKey;
+    static const char* _jsonVelocityKey;
 
     static const char* _jsonV3GridObjectKey;
     static const char* _jsonV3GridAltitudeKey;

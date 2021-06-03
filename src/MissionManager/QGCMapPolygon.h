@@ -65,6 +65,21 @@ public:
     /// Offsets the current polygon edges by the specified distance in meters
     Q_INVOKABLE void offset(double distance);
 
+    // typedef struct {
+    //     int above_from;
+    //     int beyond_to;
+    //     QList<QGeoCoordinate> replacement;
+    // } Avoidance_t;
+
+    // ATTENTION not to be confuse with TransectStyleComplexItem::CoordInfo_t
+    typedef struct {
+        bool modified = false;
+        QGeoCoordinate coord;
+    } CoordInfo_t;
+
+    /// Returns avoidances must be made to follow edges of the (fence) polygon, stay away from a distance
+    QList<CoordInfo_t> followEdges(const QList<CoordInfo_t>& path, float distance);
+
     /// Loads a polygon from a KML/SH{ file
     /// @return true: success
     Q_INVOKABLE bool loadKMLOrSHPFile(const QString& file);
@@ -80,6 +95,9 @@ public:
 
     Q_INVOKABLE void beginReset (void);
     Q_INVOKABLE void endReset   (void);
+
+    /// Add position from vehicle
+    Q_INVOKABLE void setPositionFromVehicle(void);
 
     /// Saves the polygon to the json object.
     ///     @param json Json object to save to
@@ -126,6 +144,8 @@ public:
     void setTraceMode   (bool traceMode);
     void setShowAltColor(bool showAltColor);
     void selectVertex   (int index);
+
+    QPolygonF       toPolygonF             (void) const;
 
     static const char* jsonPolygonKey;
 

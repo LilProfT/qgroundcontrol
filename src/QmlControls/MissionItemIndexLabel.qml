@@ -1,6 +1,7 @@
 import QtQuick          2.3
 import QtQuick.Controls 1.2
 
+import QGroundControl             1.0
 import QGroundControl.ScreenTools 1.0
 import QGroundControl.Palette     1.0
 
@@ -12,13 +13,38 @@ Canvas {
 
     signal clicked
 
+    function getColor() {
+        if (visualType == MissionItem.ENTER) return "lawngreen";
+        if (visualType == MissionItem.EXIT)  return "#ff5552"; // light red
+        if (checked)                         return "green";
+        if (child)                           return qgcPal.mapIndicatorChild;
+        //Mismart: Change the orange hue to yellow for each waypoint dots
+        if (index === 0 || index === -1)     return qgcPal.mapIndicator;
+        //return qgcPal.mapIndicator;
+        return "yellow";
+    }
+
+    function getIndicatorRadius() {
+        if (!small)     return _normalRadius;
+        if (_isSpecial) return _specialRadius;
+        return _smallRadius;
+    }
+
+    function getIsSpecial() {
+        if (visualType == MissionItem.ENTER) return true;
+        if (visualType == MissionItem.EXIT)  return true;
+        return false;
+    }
+
     property string label                           ///< Label to show to the side of the index indicator
     property int    index:                  0       ///< Index to show in the indicator, 0 will show single char label instead, -1 first char of label in indicator full label to the side
     property bool   checked:                false
+    property int    visualType:             MissionItem.NORMAL
     property bool   small:                  !checked
     property bool   child:                  false
     property bool   highlightSelected:      false
-    property var    color:                  checked ? "green" : (child ? qgcPal.mapIndicatorChild : qgcPal.mapIndicator)
+    property var    color:                  getColor()
+    property var    textColor:              _isSpecial ? "black" : "white"
     property real   anchorPointX:           _height / 2
     property real   anchorPointY:           _height / 2
     property bool   specifiesCoordinate:    true
@@ -31,16 +57,20 @@ Canvas {
     property real   _height:            showGimbalYaw ? _gimbalYawWidth : (labelControl.visible ? labelControl.height : indicator.height)
     property real   _gimbalYawRadius:   ScreenTools.defaultFontPixelHeight
     property real   _gimbalYawWidth:    _gimbalYawRadius * 2
-    property real   _smallRadiusRaw:    Math.ceil((ScreenTools.defaultFontPixelHeight * ScreenTools.smallFontPointRatio) / 2)
-    property real   _smallRadius:       _smallRadiusRaw + ((_smallRadiusRaw % 2 == 0) ? 1 : 0) // odd number for better centering
-    property real   _normalRadiusRaw:   Math.ceil(ScreenTools.defaultFontPixelHeight * 0.66)
+    property real   _smallRadiusRaw:    Math.ceil((ScreenTools.defaultFontPixelHeight * ScreenTools.smallFontPointRatio) / 3)
+    property real   _smallRadius:       (_smallRadiusRaw + ((_smallRadiusRaw % 2 == 0) ? 1 : 0)) * 0.7 // odd number for better centering
+    property real   _normalRadiusRaw:   Math.ceil(ScreenTools.defaultFontPixelHeight * 0.35)
     property real   _normalRadius:      _normalRadiusRaw + ((_normalRadiusRaw % 2 == 0) ? 1 : 0)
-    property real   _indicatorRadius:   small ? _smallRadius : _normalRadius
+    property real   _specialRadiusRaw:  _smallRadiusRaw * 2.1
+    property real   _specialRadius:     _specialRadiusRaw + ((_specialRadiusRaw % 2 == 0) ? 1 : 0)
+    property real   _indicatorRadius:   getIndicatorRadius()
     property real   _gimbalRadians:     degreesToRadians(vehicleYaw + gimbalYaw - 90)
     property real   _labelMargin:       2
     property real   _labelRadius:       _indicatorRadius + _labelMargin
     property string _label:             label.length > 1 ? label : ""
     property string _index:             index === 0 || index === -1 ? label.charAt(0) : (showSequenceNumbers ? index : "")
+
+    property bool   _isSpecial:         getIsSpecial()
 
     onColorChanged:         requestPaint()
     onShowGimbalYawChanged: requestPaint()
@@ -115,10 +145,11 @@ Canvas {
             anchors.fill:           parent
             horizontalAlignment:    Text.AlignHCenter
             verticalAlignment:      Text.AlignVCenter
-            color:                  "white"
+            color:                  textColor
             font.pointSize:         ScreenTools.defaultFontPointSize
             fontSizeMode:           Text.Fit
             text:                   _index
+            visible:                index === 0 || index === -1
         }
     }
 

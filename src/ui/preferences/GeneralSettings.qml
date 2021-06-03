@@ -134,16 +134,21 @@ Rectangle {
 
                             RowLayout {
                                 spacing: ScreenTools.defaultFontPixelWidth
+                                visible: false
 
                                 FactCheckBox {
                                     text:       qsTr("Virtual Joystick")
-                                    visible:    _virtualJoystick.visible
+                                    //visible:    _virtualJoystick.visible
+                                    //Virtual joystick is not really needed
+                                    visible:    false
                                     fact:       _virtualJoystick
                                 }
 
                                 FactCheckBox {
                                     text:       qsTr("Auto-Center Throttle")
-                                    visible:    _virtualJoystickAutoCenterThrottle.visible
+                                    //visible:    _virtualJoystickAutoCenterThrottle.visible
+                                    //Same as above
+                                    visible:    false
                                     enabled:    _virtualJoystick.rawValue
                                     fact:       _virtualJoystickAutoCenterThrottle
                                 }
@@ -175,7 +180,9 @@ Rectangle {
 
                             FactCheckBox {
                                 text:       qsTr("Show simple camera controls (DIGICAM_CONTROL)")
-                                visible:    _showDumbCameraControl.visible
+                                //visible:    _showDumbCameraControl.visible
+                                //We are not using a controllable camera
+                                visible:    false
                                 fact:       _showDumbCameraControl
 
                                 property Fact _showDumbCameraControl: QGroundControl.settingsManager.flyViewSettings.showSimpleCameraControl
@@ -381,22 +388,28 @@ Rectangle {
                                     fact:                   QGroundControl.settingsManager.appSettings.defaultMissionItemAltitude
                                 }
 
-                                QGCLabel { text: qsTr("VTOL TransitionDistance") }
+                                //QGCLabel { text: qsTr("VTOL TransitionDistance") }
                                 FactTextField {
                                     Layout.preferredWidth:  _valueFieldWidth
                                     fact:                   QGroundControl.settingsManager.planViewSettings.vtolTransitionDistance
+                                    //Not flying VTOL, disabled
+                                    visible: false
                                 }
                             }
 
                             FactCheckBox {
                                 text:   qsTr("Use MAV_CMD_CONDITION_GATE for pattern generation")
                                 fact:   QGroundControl.settingsManager.planViewSettings.useConditionGate
+                                //What the hell is this?
+                                visible: false
                             }
 
                             FactCheckBox {
                                 text:       qsTr("Missions Do Not Require Takeoff Item")
                                 fact:       _planViewSettings.takeoffItemNotRequired
-                                visible:    _planViewSettings.takeoffItemNotRequired.visible
+                                //visible:    _planViewSettings.takeoffItemNotRequired.visible
+                                //Require a takeoff item, left the param as default
+                                visible:    false
                             }
                         }
                     }
@@ -617,7 +630,9 @@ Rectangle {
                                 FactCheckBox {
                                     text:       qsTr("Check for Internet connection")
                                     fact:       _checkInternet
-                                    visible:    _checkInternet && _checkInternet.visible
+                                    //visible:    _checkInternet && _checkInternet.visible
+                                    //Deactivate Check internet checkbox, leave as always check
+                                    visible:    false
                                     property Fact _checkInternet: QGroundControl.settingsManager.appSettings.checkInternet
                                 }
 
@@ -844,13 +859,14 @@ Rectangle {
                     QGCLabel {
                         id:         rtkSectionLabel
                         text:       qsTr("RTK GPS")
-                        visible:    QGroundControl.settingsManager.rtkSettings.visible
+                        //Disable RTK Base Config on mobile builds
+                        visible:    QGroundControl.settingsManager.rtkSettings.visible && !ScreenTools.isMobile
                     }
                     Rectangle {
                         Layout.preferredHeight: rtkGrid.height + (_margins * 2)
                         Layout.preferredWidth:  rtkGrid.width + (_margins * 2)
                         color:                  qgcPal.windowShade
-                        visible:                rtkSectionLabel.visible
+                        visible:                rtkSectionLabel.visible && !ScreenTools.isMobile
                         Layout.fillWidth:       true
 
                         GridLayout {
@@ -974,17 +990,116 @@ Rectangle {
                         }
                     }
 
+                    Item { width: 1; height: _margins; visible: ntripSectionLabel.visible }
+                    QGCLabel {
+                        id:         ntripSectionLabel
+                        text:       qsTr("NTRIP / RTCM")
+                        visible:    QGroundControl.settingsManager.ntripSettings.visible
+                    }
+                    Rectangle {
+                        Layout.preferredHeight: ntripGrid.height + (_margins * 2)
+                        Layout.preferredWidth:  ntripGrid.width + (_margins * 2)
+                        color:                  qgcPal.windowShade
+                        visible:                ntripSectionLabel.visible
+                        Layout.fillWidth:       true
+
+                        GridLayout {
+                            id:                         ntripGrid
+                            anchors.topMargin:          _margins
+                            anchors.top:                parent.top
+                            Layout.fillWidth:           true
+                            anchors.horizontalCenter:   parent.horizontalCenter
+                            columns:                    2
+
+                            property var  ntripSettings:    QGroundControl.settingsManager.ntripSettings
+
+
+                            FactCheckBox {
+                                fact:                   ntripGrid.ntripSettings.ntripServerConnectEnable
+                                text:                   ntripGrid.ntripSettings.ntripServerConnectEnable.shortDescription
+                                visible:                ntripGrid.ntripSettings.ntripServerConnectEnable.visible
+                                Layout.columnSpan:      2
+                            }
+
+                            QGCLabel {
+                                text:               ntripGrid.ntripSettings.ntripServerHostAddress.shortDescription
+                                visible:            ntripGrid.ntripSettings.ntripServerHostAddress.visible
+                                enabled:            ntripGrid.ntripSettings.ntripServerConnectEnable.value
+
+                            }
+                            FactTextField {
+                                fact:                   ntripGrid.ntripSettings.ntripServerHostAddress
+                                visible:                ntripGrid.ntripSettings.ntripServerHostAddress.visible
+                                Layout.fillWidth:       true
+                                enabled:                ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                            }
+
+                            QGCLabel {
+                                text:               ntripGrid.ntripSettings.ntripServerPort.shortDescription
+                                visible:            ntripGrid.ntripSettings.ntripServerPort.visible
+                                enabled:            ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                            }
+                            FactTextField {
+                                fact:                   ntripGrid.ntripSettings.ntripServerPort
+                                visible:                ntripGrid.ntripSettings.ntripServerPort.visible
+                                Layout.fillWidth:       true
+                                enabled:                ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                            }
+                            QGCLabel {
+                                text:               ntripGrid.ntripSettings.ntripServerUserName.shortDescription
+                                visible:            ntripGrid.ntripSettings.ntripServerUserName.visible
+                                enabled:            ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                            }
+                            FactTextField {
+                                fact:                   ntripGrid.ntripSettings.ntripServerUserName
+                                visible:                ntripGrid.ntripSettings.ntripServerUserName.visible
+                                Layout.fillWidth:       true
+                                enabled:                ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                                showHelp:               false
+                            }
+                            QGCLabel {
+                                text:               ntripGrid.ntripSettings.ntripServerPasswd.shortDescription
+                                visible:            ntripGrid.ntripSettings.ntripServerPasswd.visible
+                                enabled:            ntripGrid.ntripSettings.ntripServerConnectEnable.value
+
+                            }
+                            FactTextField {
+                                fact:                   ntripGrid.ntripSettings.ntripServerPasswd
+                                echoMode:               TextInput.Password
+                                visible:                ntripGrid.ntripSettings.ntripServerPasswd.visible
+                                Layout.fillWidth:       true
+                                enabled:                ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                                showHelp:               false
+                            }
+                            QGCLabel {
+                                text:               ntripGrid.ntripSettings.ntripServerMntpnt.shortDescription
+                                visible:            ntripGrid.ntripSettings.ntripServerMntpnt.visible
+                                enabled:            ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                            }
+                            FactTextField {
+                                fact:                   ntripGrid.ntripSettings.ntripServerMntpnt
+                                visible:                ntripGrid.ntripSettings.ntripServerMntpnt.visible
+                                Layout.fillWidth:       true
+                                enabled:                ntripGrid.ntripSettings.ntripServerConnectEnable.value
+                                showHelp:               false
+                            }
+                        }
+                    }
+
                     Item { width: 1; height: _margins; visible: adsbSectionLabel.visible }
                     QGCLabel {
                         id:         adsbSectionLabel
                         text:       qsTr("ADSB Server")
-                        visible:    QGroundControl.settingsManager.adsbVehicleManagerSettings.visible
+                        //visible:    QGroundControl.settingsManager.adsbVehicleManagerSettings.visible
+                        //Disable ADSB
+                        visible:    false
                     }
                     Rectangle {
                         Layout.preferredHeight: adsbGrid.y + adsbGrid.height + _margins
                         Layout.preferredWidth:  adsbGrid.width + (_margins * 2)
                         color:                  qgcPal.windowShade
-                        visible:                adsbSectionLabel.visible
+                        //visible:                adsbSectionLabel.visible
+                        visible:                false
                         Layout.fillWidth:       true
 
                         QGCLabel {

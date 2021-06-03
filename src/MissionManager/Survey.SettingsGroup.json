@@ -14,6 +14,58 @@
     "default":     0
 },
 {
+    "name":             "Velocity",
+    "shortDesc": "Settle horizontal velocity.",
+    "type":             "double",
+    "units":            "m/s",
+    "min":              4.0,
+    "max":              7.0,
+    "decimalPlaces":    1,
+    "default":     5.0
+},
+{
+    "name":             "ApplicationRate",
+    "shortDesc": "Application Rate.",
+    "type":             "double",
+    "units":            "l/ha",
+    "min":              0.0,
+    "max":              30.0,
+    "decimalPlaces":    1,
+    "default":     12.0
+},
+{
+    "name":             "SprayFlowRate",
+    "shortDesc": "Spray Flow Rate.",
+    "type":             "double",
+    "units":            "l/min",
+    "min":              0.0,
+    "max":              100.0,
+    "decimalPlaces":    2,
+    "default":     0.0
+},
+{
+    "name":             "NozzleRate",
+    "shortDesc": "Nozzle Rate.",
+    "type":             "double",
+    "units":            "",
+    "decimalPlaces":    3,
+    "default":     0.055
+},
+{
+    "name":             "NozzleOffset",
+    "shortDesc": "Nozzle Offset.",
+    "type":             "double",
+    "units":            "",
+    "decimalPlaces":    3,
+    "default":     -0.4
+},
+{
+    "name":             "AutoOptimize",
+    "shortDesc": "Auto optimize flight path while editing.",
+    "type":             "bool",
+    "default":     true
+},
+{
     "name":             "FlyAlternateTransects",
     "shortDesc": "Fly every other transect in each pass.",
     "type":             "bool",

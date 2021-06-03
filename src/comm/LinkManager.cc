@@ -24,14 +24,16 @@
 #include "TCPLink.h"
 #include "SettingsManager.h"
 #include "LogReplayLink.h"
+#include "NTRIP.h"
+
 #ifdef QGC_ENABLE_BLUETOOTH
 #include "BluetoothLink.h"
 #endif
 
 #ifndef __mobile__
 #include "GPSManager.h"
-#include "PositionManager.h"
 #endif
+#include "PositionManager.h"
 
 #ifdef QT_DEBUG
 #include "MockLink.h"
@@ -447,6 +449,9 @@ void LinkManager::_updateAutoConnectLinks(void)
     }
 #endif
 #endif
+    //if (_ntripSettings->ntripServerConnectEnable()->rawValue().toBool()){
+    _toolbox->ntrip()->connectGPSNTRIP();
+    //}
 
 #ifndef NO_SERIAL_LINK
     QStringList                 currentPorts;

@@ -21,6 +21,7 @@ Rectangle {
     color:      qgcPal.window
     opacity:    0.80
     clip:       true
+    visible: false
 
     property var missionController
 
@@ -57,6 +58,7 @@ Rectangle {
         anchors.left:       parent.left
         anchors.right:      parent.right
         clip:               true
+        visible:            false
 
         Item {
             height: terrainProfileFlickable.height

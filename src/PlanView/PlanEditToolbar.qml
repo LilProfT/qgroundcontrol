@@ -69,6 +69,7 @@ Item {
         QGCLabel {
             id:             instructionLabel
             text:           _instructionText
+            visible:        false
         }
     }
 }

@@ -17,7 +17,7 @@ import QGroundControl.ScreenTools   1.0
 
 Slider {
     id:             _root
-    implicitHeight: ScreenTools.implicitSliderHeight
+    implicitHeight: !ScreenTools.isMobile ? ScreenTools.implicitSliderHeight : ScreenTools.implicitSliderHeight / 2
 
     // Value indicator starts display from zero instead of min value
     property bool zeroCentered: false

@@ -142,6 +142,36 @@ Column {
         FactTextField {
             Layout.fillWidth:   true
             fact:               cameraCalc.adjustedFootprintSide
+            onUpdated:          {
+                sideDistanceSlider.value = cameraCalc.adjustedFootprintSide.value
+                cameraCalc.adjustedFootprintSide.value = _vehicle.spacing.value
+            }
+            visible:            false
+        }
+        QGCLabel {
+            text:                   cameraCalc.adjustedFootprintSide.value.toFixed(2) + " " + cameraCalc.adjustedFootprintSide.units
+            Layout.alignment:       Qt.AlignRight
+        }
+        QGCSlider {
+            id:                     sideDistanceSlider
+            minimumValue:           3
+            maximumValue:           10
+            stepSize:               0.1
+            tickmarksEnabled:       false
+            Layout.fillWidth:       true
+            Layout.columnSpan:      2
+            Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+            value:                  cameraCalc.adjustedFootprintSide.value
+            onValueChanged:         {
+                cameraCalc.adjustedFootprintSide.value = value
+                //Mismart: Carbon-copy of the cameraCalc spacing, should be improved in the future
+                _vehicle.spacing.value = cameraCalc.adjustedFootprintSide.value
+            }
+            Component.onCompleted:  {
+                value = cameraCalc.adjustedFootprintSide.value
+                _vehicle.spacing.value = cameraCalc.adjustedFootprintSide.value
+            }
+            updateValueWhileDragging: true
         }
     } // GridLayout
 } // Column

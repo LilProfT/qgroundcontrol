@@ -90,19 +90,21 @@ SetupPage {
                             Layout.fillWidth:   true
                         }
 
-                        QGCLabel { text: qsTr("Low voltage threshold:") }
+                        //QGCLabel { text: qsTr("Low voltage threshold:") }
                         FactTextField {
                             fact:               failsafeBattLowVoltage
                             showUnits:          true
                             Layout.fillWidth:   true
+                            visible:            false
                         }
 
 
-                        QGCLabel { text: qsTr("Critical voltage threshold:") }
+                        //QGCLabel { text: qsTr("Critical voltage threshold:") }
                         FactTextField {
                             fact:               failsafeBattCritVoltage
                             showUnits:          true
                             Layout.fillWidth:   true
+                            visible:            false
                         }
 
                         QGCLabel { text: qsTr("Low mAh threshold:") }
@@ -122,6 +124,64 @@ SetupPage {
                 } // Column
             }
 
+            Component {
+                id: tankFailsafeComponent
+
+                Column {
+                    spacing: _margins
+
+                    GridLayout {
+                        id:             gridLayout
+                        columnSpacing:  _margins
+                        rowSpacing:     _margins
+                        columns:        2
+                        QGCLabel { text: qsTr("Low action:") }
+                        FactComboBox {
+                            fact:               failsafeBattLowAct
+                            indexModel:         false
+                            Layout.fillWidth:   true
+                        }
+
+                        QGCLabel { text: qsTr("Critical action:") }
+                        FactComboBox {
+                            fact:               failsafeBattCritAct
+                            indexModel:         false
+                            Layout.fillWidth:   true
+                        }
+
+                        //QGCLabel { text: qsTr("Low voltage threshold:") }
+                        FactTextField {
+                            fact:               failsafeBattLowVoltage
+                            showUnits:          true
+                            Layout.fillWidth:   true
+                            visible:            false
+                        }
+
+
+                        //QGCLabel { text: qsTr("Critical voltage threshold:") }
+                        FactTextField {
+                            fact:               failsafeBattCritVoltage
+                            showUnits:          true
+                            Layout.fillWidth:   true
+                            visible:            false
+                        }
+
+                        QGCLabel { text: qsTr("Low liters threshold:") }
+                        FactTextField {
+                            fact:               failsafeBattLowMah
+                            showUnits:          false
+                            Layout.fillWidth:   true
+                        }
+
+                        QGCLabel { text: qsTr("Critical liters threshold:") }
+                        FactTextField {
+                            fact:               failsafeBattCritMah
+                            showUnits:          false
+                            Layout.fillWidth:   true
+                        }
+                    } // GridLayout
+                } // Column
+            }
             Component {
                 id: restartRequiredComponent
 
@@ -144,7 +204,7 @@ SetupPage {
                 visible: _batt1MonitorEnabled
 
                 QGCLabel {
-                    text:       qsTr("Battery1 Failsafe Triggers")
+                    text:       qsTr("Battery Failsafe Triggers")
                     font.family: ScreenTools.demiboldFontFamily
                 }
 
@@ -178,7 +238,7 @@ SetupPage {
                 visible: _batt2MonitorEnabled
 
                 QGCLabel {
-                    text:       qsTr("Battery2 Failsafe Triggers")
+                    text:       qsTr("Tank Failsafe Triggers")
                     font.family: ScreenTools.demiboldFontFamily
                 }
 
@@ -192,7 +252,7 @@ SetupPage {
                         anchors.margins:    _margins
                         anchors.top:        parent.top
                         anchors.left:       parent.left
-                        sourceComponent:    _batt2ParamsAvailable ? batteryFailsafeComponent : restartRequiredComponent
+                        sourceComponent:    _batt2ParamsAvailable ? tankFailsafeComponent : restartRequiredComponent
 
                         property Fact battMonitor:              _batt2Monitor
                         property bool battParamsAvailable:      _batt2ParamsAvailable
@@ -307,7 +367,7 @@ SetupPage {
                                 indexModel:         false
                             }
 
-                            QGCLabel { text: qsTr("PWM threshold:") }
+                            //QGCLabel { text: qsTr("PWM threshold:") }
                             FactTextField {
                                 Layout.fillWidth:   true
                                 fact:               _failsafeThrValue
@@ -380,11 +440,12 @@ SetupPage {
                                     onActivated: _failsafeThrEnable.value = index
                                 }
 
-                                QGCLabel { text: qsTr("PWM threshold:") }
+                                //QGCLabel { text: qsTr("PWM threshold:") }
                                 FactTextField {
                                     fact:               _failsafeThrValue
                                     showUnits:          true
                                     Layout.fillWidth:   true
+                                    visible:            false
                                 }
                             } // GridLayout
                         } // Column
@@ -725,6 +786,7 @@ SetupPage {
 
             Column {
                 spacing: _margins / 2
+                visible: false
 
                 QGCLabel {
                     text:           qsTr("Arming Checks")

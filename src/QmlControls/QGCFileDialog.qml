@@ -106,13 +106,46 @@ Item {
         onRejected: _root.rejected()
     }
 
+    property var    _bufferList:    controller.getFiles(folder, _rgExtensions)
+
     Component {
         id: mobileFileOpenDialog
 
         QGCViewDialog {
+            Row {
+                id:             header
+                anchors.top:    parent.top
+                anchors.left:   parent.left
+                anchors.right:  parent.right
+                spacing:        ScreenTools.defaultFontPixelWidth / 2
+
+                QGCLabel {
+                    id:                     searchLabel
+                    anchors.verticalCenter: searchText.verticalCenter
+                    text:                   qsTr("Search:") }
+
+                QGCTextField {
+                    id:                     searchText
+                }
+            }
+
+            QGCLabel {
+                id:                 filePath
+                anchors.top:        header.bottom
+                anchors.left:       parent.left
+                anchors.right:      parent.right
+                text:               qsTr("Path: %1").arg(_mobileShortPath)
+            }
+
             QGCFlickable {
-                anchors.fill:   parent
-                contentHeight:  fileOpenColumn.height
+                anchors.top:        filePath.bottom
+                anchors.bottom:     parent.bottom
+                anchors.left:       parent.left
+                anchors.right:      parent.right
+                clip:               true
+                pixelAligned:       true
+                contentHeight:      fileOpenColumn.height
+                flickableDirection: Flickable.VerticalFlick
 
                 Column {
                     id:             fileOpenColumn
@@ -120,11 +153,9 @@ Item {
                     anchors.right:  parent.right
                     spacing:        ScreenTools.defaultFontPixelHeight / 2
 
-                    QGCLabel { text: qsTr("Path: %1").arg(_mobileShortPath) }
-
                     Repeater {
                         id:     fileRepeater
-                        model:  controller.getFiles(folder, _rgExtensions)
+                        model:  controller.searchFiles(searchText.displayText,_bufferList)
 
                         FileButton {
                             id:             fileButton
@@ -154,7 +185,7 @@ Item {
                                     text:           qsTr("Delete")
                                     onTriggered: {
                                         controller.deleteFile(hamburgerMenu.fileToDelete)
-                                        fileRepeater.model = controller.getFiles(folder, _rgExtensions)
+                                        _bufferList = controller.getFiles(folder, _rgExtensions)
                                     }
                                 }
                             }
@@ -185,6 +216,8 @@ Item {
                     }
                 }
                 _root.acceptedForSave(controller.fullyQualifiedFilename(folder, filenameTextField.text, _rgExtensions))
+                //Rebuild index
+                _bufferList = controller.getFiles(folder, _rgExtensions)
                 hideDialog()
             }
 
@@ -248,6 +281,8 @@ Item {
                             onClicked: {
                                 hideDialog()
                                 _root.acceptedForSave(controller.fullyQualifiedFilename(folder, modelData))
+                                //Rebuild index
+                                _bufferList = controller.getFiles(folder, _rgExtensions)
                             }
 
                             onHamburgerClicked: {

@@ -19,6 +19,84 @@
 
 QGC_LOGGING_CATEGORY(QGCFileDialogControllerLog, "QGCFileDialogControllerLog")
 
+//Should the lookup tables be called outside the function?
+QString QGCFileDialogController::removeAccent(const QString &filename)
+{
+    QString output;
+
+    //Lookup tables, Vietnamese only
+    //Maybe the normalization method is superior?
+    QString diacriticLetters = QString::fromUtf8("ÁÃÀẢẠ"
+                                                "ÂẤẪẦẨẬ"
+                                                "ĂẮẴẰẲẶ"
+                                                "áãàảạ"
+                                                "âấẫầẩậ"
+                                                "ăắẵằẳặ"
+                                                "Đđ"
+                                                "ÉẼÈẺẸ"
+                                                "ÊẾỄỀỂỆ"
+                                                "éẽèẻẹ"
+                                                "êếễềểệ"
+                                                "ÍĨÌỈỊ"
+                                                "íĩìỉị"
+                                                "ÓÕÒỎỌ"
+                                                "ÔỐỖỒỔỘ"
+                                                "ƠỚỠỜỞỢ"
+                                                "óõòỏọ"
+                                                "ôốỗồổộ"
+                                                "ơớỡờởợ"
+                                                "ÚŨÙỦỤ"
+                                                "ƯỨỮỪỬỰ"
+                                                "úũùủụ"
+                                                "ưứữừửự"
+                                                "ÝỸỲỶỴ"
+                                                "ýỹỳỷỵ");
+
+    QString noDiacriticLetters = QString::fromUtf8("AAAAA"
+                                                   "AAAAAA"
+                                                   "AAAAAA"
+                                                   "aaaaa"
+                                                   "aaaaaa"
+                                                   "aaaaaa"
+                                                   "Dd"
+                                                   "EEEEE"
+                                                   "EEEEEE"
+                                                   "eeeee"
+                                                   "eeeeee"
+                                                   "IIIII"
+                                                   "iiiii"
+                                                   "OOOOO"
+                                                   "OOOOOO"
+                                                   "OOOOOO"
+                                                   "ooooo"
+                                                   "oooooo"
+                                                   "oooooo"
+                                                   "UUUUU"
+                                                   "UUUUUU"
+                                                   "uuuuu"
+                                                   "uuuuuu"
+                                                   "YYYYY"
+                                                   "yyyyy");
+
+    for (int i = 0 ; i < filename.length(); i++)
+    {
+        int filename_index = diacriticLetters.indexOf(filename[i]);
+
+        //Return -1 if char is not found
+        if (filename_index < 0)
+        {
+            output.append(filename[i]);
+        } else {
+            QChar replacement_char = noDiacriticLetters[filename_index];
+
+            output.append(replacement_char);
+        }
+    }
+
+    return output;
+}
+
+//Adding search function
 QStringList QGCFileDialogController::getFiles(const QString& directoryPath, const QStringList& nameFilters)
 {
     qCDebug(QGCFileDialogControllerLog) << "getFiles" << directoryPath << nameFilters;
@@ -80,6 +158,28 @@ QString QGCFileDialogController::fullyQualifiedFilename(const QString& directory
 void QGCFileDialogController::deleteFile(const QString& filename)
 {
     QFile::remove(filename);
+}
+
+QStringList QGCFileDialogController::searchFiles(const QString &searchText, const QStringList& files)
+{
+    QStringList newlist;
+
+    if (searchText.isEmpty())
+    {
+        return files;
+    } else {
+        for (int i = 0; i < files.size(); i++ )
+        {
+            if (removeAccent(files[i]).contains(removeAccent(searchText), Qt::CaseInsensitive))
+            {
+                newlist << files[i];
+            }
+        }
+    }
+
+    newlist.sort();
+
+    return newlist;
 }
 
 QString QGCFileDialogController::fullFolderPathToShortMobilePath(const QString& fullFolderPath)

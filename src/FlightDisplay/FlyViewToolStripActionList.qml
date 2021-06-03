@@ -18,16 +18,23 @@ ToolStripActionList {
     signal displayPreFlightChecklist
 
     model: [
-        ToolStripAction {
+        /*ToolStripAction {
             text:           qsTr("Plan")
             iconSource:     "/qmlimages/Plan.svg"
             onTriggered:    mainWindow.showPlanView()
-        },
+        },*/
         PreFlightCheckListShowAction { onTriggered: displayPreFlightChecklist() },
         GuidedActionTakeoff { },
         GuidedActionLand { },
         GuidedActionRTL { },
         GuidedActionPause { },
-        GuidedActionActionList { }
+        GuidedActionActionList { },
+        ResumeMission { },
+        ToolStripAction {
+            text:        qsTr("Clear")
+            iconSource:  "/qmlimages/Eraser.svg"
+            visible:     _activeVehicle && _activeVehicle.trajectoryPoints
+            onTriggered: _activeVehicle.trajectoryPoints.clear()
+        }
     ]
 }

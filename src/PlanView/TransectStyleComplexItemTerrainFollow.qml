@@ -21,8 +21,7 @@ ColumnLayout {
         text:       qsTr("Vehicle follows terrain")
         checked:    missionItem.followTerrain
         onClicked:  missionItem.followTerrain = checked
-
-        Binding on checkedState {
+	Binding on checkedState {
             value: missionItem.followTerrain ? Qt.Checked : Qt.Unchecked
         }
     }

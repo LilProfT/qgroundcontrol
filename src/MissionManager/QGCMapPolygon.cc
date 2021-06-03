@@ -142,6 +142,11 @@ QPointF QGCMapPolygon::_pointFFromCoord(const QGeoCoordinate& coordinate) const
     return QPointF();
 }
 
+QPolygonF QGCMapPolygon::toPolygonF(void) const
+{
+    return _toPolygonF();
+}
+
 QPolygonF QGCMapPolygon::_toPolygonF(void) const
 {
     QPolygonF polygon;
@@ -650,4 +655,303 @@ void QGCMapPolygon::selectVertex(int index)
     }
 
     emit selectedVertexChanged(_selectedVertexIndex);
+}
+
+typedef struct {
+    bool modified = false;
+    QPointF point;
+} PointInfo_t;
+
+void proceedAvoidance(const QPointF& vertex, QList<PointInfo_t>& path, qreal* avoidDistance) {
+    QLineF line(path.last().point, vertex);
+    *avoidDistance += line.length();
+    PointInfo_t toAppend;
+    toAppend.modified = true;
+    toAppend.point = vertex;
+    path.append(toAppend);
+}
+
+QList<QGCMapPolygon::CoordInfo_t> QGCMapPolygon::followEdges(const QList<QGCMapPolygon::CoordInfo_t>& path, float distance)
+{
+#ifdef Q_OS_ANDROID
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsometimes-uninitialized"
+#endif
+
+    if (count() < 3) {
+        qWarning() << "QGCMapPolygon::followEdges less than 3 vertices";
+    };
+
+    // the name `ned` here is legacy, NED is different from QPointF, see below
+    // TODO rename it to pathF, also everything with `ned` prefix here
+    QList<PointInfo_t> nedPath;
+
+    // brute force save an altitude
+    // suppose all altitudes are the same
+    qreal baseAltitude = path[0].coord.altitude();
+    _polygonPath[0].value<QGeoCoordinate>().setAltitude(baseAltitude);
+
+    // convert path from Geo to PointF
+    for (int i=0; i < path.count(); i++) {
+        PointInfo_t toAppend;
+        toAppend.modified = path[i].modified;
+        toAppend.point = _pointFFromCoord(path[i].coord);
+        nedPath.append(toAppend);
+    }
+
+    verifyClockwiseWinding();
+
+    // list of vertices of the extend polygon
+    QPolygonF nedExtendedPolygon;
+    // [COPY `QGCMapPolygon::offset`]
+    // but don't modified this polygon like the original
+    // we just need QPolygonF to use here
+    // yep, QPolygonF, not the fucking nedPolygon, they are different
+
+    // >>>>>>>> DIFF HERE <<<<<<<<<
+    QPolygonF rgNedVertices = _toPolygonF();
+    // >>>>>>>> DIFF HERE <<<<<<<<<
+
+    // Walk the edges, offsetting by the specified distance
+    QList<QLineF> rgOffsetEdges;
+    for (int i=0; i<rgNedVertices.count(); i++) {
+        int     lastIndex = i == rgNedVertices.count() - 1 ? 0 : i + 1;
+        QLineF  offsetEdge;
+        QLineF  originalEdge(rgNedVertices[i], rgNedVertices[lastIndex]);
+
+        QLineF workerLine = originalEdge;
+        workerLine.setLength(distance);
+        workerLine.setAngle(workerLine.angle() + 90.0);
+        offsetEdge.setP1(workerLine.p2());
+
+        workerLine.setPoints(originalEdge.p2(), originalEdge.p1());
+        workerLine.setLength(distance);
+        workerLine.setAngle(workerLine.angle() - 90.0);
+        offsetEdge.setP2(workerLine.p2());
+
+        rgOffsetEdges.append(offsetEdge);
+    }
+
+    // Intersect the offset edges to generate new vertices
+    QPointF         newVertex;
+    QGeoCoordinate  tangentOrigin = vertexCoordinate(0);
+    for (int i=0; i<rgOffsetEdges.count(); i++) {
+        int prevIndex = i == 0 ? rgOffsetEdges.count() - 1 : i - 1;
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+        auto intersect = rgOffsetEdges[prevIndex].intersect(rgOffsetEdges[i], &newVertex);
+#else
+        auto intersect = rgOffsetEdges[prevIndex].intersects(rgOffsetEdges[i], &newVertex);
+#endif
+        if (intersect == QLineF::NoIntersection) {
+            // FIXME: Better error handling?
+            qWarning("Intersection failed");
+        }
+        // >>>>>>>> DIFF HERE <<<<<<<<<
+        nedExtendedPolygon.append(newVertex);
+        // >>>>>>>> DIFF HERE <<<<<<<<<
+    };
+    // [/COPY]
+
+    if (nedExtendedPolygon.containsPoint(nedPath.first().point, Qt::OddEvenFill) || nedExtendedPolygon.containsPoint(nedPath.last().point, Qt::OddEvenFill)) {
+        qWarning() << "QGCMapPolygon::followEdges >>> impossible <<<";
+        QList<QGCMapPolygon::CoordInfo_t> empty;
+        return empty;
+    };
+
+    // now let modify the path
+    QList<PointInfo_t> nedModifiedPath;
+    PointInfo_t currentPoint, previousPoint;
+    nedModifiedPath.append(nedPath.first());
+    bool modifying = false; // just 2 states
+    PointInfo_t startFollowPoint;
+    int startFollowEdgeIndex; // the edge that intersects with our path line
+
+    // the list change while looping, so don't calc length beforehand
+    //                      vvvvvvv
+    for (int i=1; i<nedPath.count(); i++) {
+        //   ^
+        // the index change too, you can see it with
+        // qDebug() << i;
+
+        currentPoint = nedPath[i];
+        previousPoint = nedPath[i-1];
+
+        if (!modifying) {
+            if (!nedExtendedPolygon.containsPoint(currentPoint.point, Qt::OddEvenFill)) {
+                // whether the line cross the polygon ?
+                // ATTENTION convex polygon please
+                QLineF pathLine(previousPoint.point, currentPoint.point);
+                QPointF first;
+                QPointF second;
+                for (int j=1; j<=nedExtendedPolygon.count(); j++) {
+                    int j_ = (j == nedExtendedPolygon.count()) ? 0 : j; // handle last edge (count - 1, 0)
+                    QLineF edge(nedExtendedPolygon[j-1], nedExtendedPolygon[j_]);
+                    QPointF intersectPoint;
+                    if (pathLine.intersect(edge, &intersectPoint) == QLineF::BoundedIntersection) {
+                        if (first.isNull()) {
+                            first = intersectPoint;
+                            continue;
+                        };
+                        if (second.isNull()) {
+                            second = intersectPoint;
+                            continue;
+                        };
+                        break;
+                    };
+                };
+
+                if ((!first.isNull()) && (!second.isNull())) {
+                    // got the start and end following point
+                    // we want to use the code below for the case of inbound point
+                    // so let add a fake inbound point in between
+                    QLineF cross(first, second);
+                    QPointF fakePoint = cross.center();
+                    PointInfo_t toAppend;
+                    toAppend.modified = true;
+                    toAppend.point = fakePoint;
+                    nedPath.insert(i, toAppend);
+
+                    // hold index to process fakePoint
+                    i--;
+                    continue;
+                };
+
+                // the point is already valid and reachable
+                // so don't modified
+                nedModifiedPath.append(currentPoint);
+                continue;
+            } else {
+                // start following
+                modifying = true;
+                // find intersected edge and point
+                QLineF pathLine(previousPoint.point, currentPoint.point);
+                for (int j=1; j<=nedExtendedPolygon.count(); j++) {
+                    int j_ = (j == nedExtendedPolygon.count()) ? 0 : j; // handle last edge (count - 1, 0)
+                    QLineF edge(nedExtendedPolygon[j-1], nedExtendedPolygon[j_]);
+                    QPointF intersectPoint;
+                    if (pathLine.intersect(edge, &intersectPoint) == QLineF::BoundedIntersection) {
+                        startFollowPoint.modified = true;
+                        startFollowPoint.point = intersectPoint;
+                        startFollowEdgeIndex = j_;
+                        break;
+                    };
+                };
+            };
+        } else { // following here
+            // of course don't collect inbound path point
+            if (nedExtendedPolygon.containsPoint(currentPoint.point, Qt::OddEvenFill)) continue;
+
+            // but wait until we exit
+            // end following
+            modifying = false;
+
+            // find intersected edge and point
+            PointInfo_t endFollowPoint;
+            int endFollowEdgeIndex;
+            previousPoint = nedPath[i-1];
+            QLineF pathLine(previousPoint.point, currentPoint.point);
+            for (int j=1; j<=nedExtendedPolygon.count(); j++) {
+                int j_ = (j == nedExtendedPolygon.count()) ? 0 : j; // handle last edge (count - 1, 0)
+                QLineF edge(nedExtendedPolygon[j-1], nedExtendedPolygon[j_]);
+                QPointF intersectPoint;
+                if (pathLine.intersect(edge, &intersectPoint) == QLineF::BoundedIntersection) {
+                    endFollowPoint.modified = true;
+                    endFollowPoint.point = intersectPoint;
+                    endFollowEdgeIndex = j_;
+                    break;
+                };
+            };
+
+            QList<PointInfo_t> clockwisePath;
+            qreal clockwiseAvoidDistance = 0;
+            QList<PointInfo_t> invClockwisePath;
+            qreal invClockwiseAvoidDistance = 0;
+
+            // now collecting
+            {
+                // clockwise: collect start vertex but not end vertex
+                clockwisePath.append(startFollowPoint);
+
+                // 2 phase mean passing index 0
+                bool twoPhase = (startFollowEdgeIndex > endFollowEdgeIndex);
+                if (twoPhase) {
+                    for (int j=startFollowEdgeIndex; j<nedExtendedPolygon.count(); j++)
+                    {
+                        proceedAvoidance(nedExtendedPolygon[j], clockwisePath, &clockwiseAvoidDistance);
+                    }
+                    for (int j=0; j<endFollowEdgeIndex; j++)
+                    {
+                        proceedAvoidance(nedExtendedPolygon[j], clockwisePath, &clockwiseAvoidDistance);
+                    }
+                } else {
+                    for (int j=startFollowEdgeIndex; j<endFollowEdgeIndex; j++)
+                    {
+                        proceedAvoidance(nedExtendedPolygon[j], clockwisePath, &clockwiseAvoidDistance);
+                    }
+                }
+
+                clockwisePath.append(endFollowPoint);
+                QLineF line(clockwisePath.last().point, endFollowPoint.point);
+                clockwiseAvoidDistance += line.length();
+                qDebug() << "clockwiseAvoidDistance: " << clockwiseAvoidDistance;
+            };
+            {
+                // inverse clockwise: collect end vertex but not start vertex
+                invClockwisePath.append(startFollowPoint);
+
+                bool twoPhase = (startFollowEdgeIndex < endFollowEdgeIndex);
+                if (twoPhase) {
+                    for (int j=startFollowEdgeIndex-1; j>=0; j--)
+                    {
+                        proceedAvoidance(nedExtendedPolygon[j], invClockwisePath, &invClockwiseAvoidDistance);
+                    }
+                    for (int j=nedExtendedPolygon.count()-1; j>=endFollowEdgeIndex; j--)
+                    {
+                        proceedAvoidance(nedExtendedPolygon[j], invClockwisePath, &invClockwiseAvoidDistance);
+                    }
+                } else {
+                    for (int j=startFollowEdgeIndex-1; j>=endFollowEdgeIndex; j--)
+                    {
+                        proceedAvoidance(nedExtendedPolygon[j], invClockwisePath, &invClockwiseAvoidDistance);
+                    }
+                }
+
+                invClockwisePath.append(endFollowPoint);
+                QLineF line(invClockwisePath.last().point, endFollowPoint.point);
+                invClockwiseAvoidDistance += line.length();
+                qDebug() << "invClockwiseAvoidDistance: " << invClockwiseAvoidDistance;
+            };
+
+            bool clockwise = clockwiseAvoidDistance <= invClockwiseAvoidDistance;
+            nedModifiedPath << (clockwise ? clockwisePath : invClockwisePath);
+
+            nedModifiedPath.append(currentPoint);
+        }
+    }
+    
+    // convert modified path from QPointF to Geo
+    QList<CoordInfo_t> modifiedPath;
+    for (int i=0; i < nedModifiedPath.count(); i++) {
+        CoordInfo_t toAppend;
+        toAppend.modified = nedModifiedPath[i].modified;
+        toAppend.coord = _coordFromPointF(nedModifiedPath[i].point);
+
+        // brute force set same altitude for all
+        toAppend.coord.setAltitude(baseAltitude);
+
+        modifiedPath.append(toAppend);
+    };
+
+    return modifiedPath;
+#ifdef Q_OS_ANDROID
+#pragma GCC diagnostic pop
+#endif
+}
+
+void QGCMapPolygon::setPositionFromVehicle(void) 
+{
+    QGeoCoordinate coordinate = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle()->coordinate();
+    _polygonPath.append(QVariant::fromValue(coordinate));
+    _polygonModel.append(new QGCQGeoCoordinate(coordinate, this));
+    emit pathChanged();
 }

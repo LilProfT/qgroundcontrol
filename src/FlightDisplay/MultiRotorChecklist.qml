@@ -34,6 +34,9 @@ Item {
                 allowFailurePercentOverride:    false
             }
 
+            PreFlightBattCellCheck {
+            }
+
             PreFlightSensorsHealthCheck {
             }
 
@@ -44,7 +47,12 @@ Item {
 
             PreFlightRCCheck {
             }
+
+            PreFlightPumpCheck {
+                failurePercent:                 5
+            }
         }
+
 
         PreFlightCheckGroup {
             name: qsTr("Please arm the vehicle here")

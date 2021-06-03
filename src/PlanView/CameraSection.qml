@@ -27,6 +27,7 @@ Column {
         anchors.left:   parent.left
         anchors.right:  parent.right
         text:           qsTr("Camera")
+        visible:        false
         checked:        false
     }
 

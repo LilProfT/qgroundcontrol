@@ -13,6 +13,7 @@
 
 #include "MissionController.h"
 #include "GeoFenceController.h"
+#include "SurveyComplexItem.h"
 #include "RallyPointController.h"
 #include "Vehicle.h"
 #include "MultiVehicleManager.h"
@@ -41,10 +42,16 @@ public:
     Q_PROPERTY(MissionController*       missionController       READ missionController                      CONSTANT)
     Q_PROPERTY(GeoFenceController*      geoFenceController      READ geoFenceController                     CONSTANT)
     Q_PROPERTY(RallyPointController*    rallyPointController    READ rallyPointController                   CONSTANT)
+    Q_PROPERTY(double                   area                    READ area                                   NOTIFY areaChanged)
+    Q_PROPERTY(Fact*                    applicationRate         READ applicationRate                        NOTIFY surveyInited)
+    Q_PROPERTY(Fact*                    flowRate                READ flowRate                               NOTIFY surveyInited)
+    Q_PROPERTY(Fact*                    spacing                 READ spacing                                NOTIFY surveyInited)
+    Q_PROPERTY(Fact*                    velocity                READ velocity                               NOTIFY surveyInited)
     Q_PROPERTY(bool                     offline                 READ offline                                NOTIFY offlineChanged)          ///< true: controller is not connected to an active vehicle
     Q_PROPERTY(bool                     containsItems           READ containsItems                          NOTIFY containsItemsChanged)    ///< true: Elemement is non-empty
     Q_PROPERTY(bool                     syncInProgress          READ syncInProgress                         NOTIFY syncInProgressChanged)   ///< true: Information is currently being saved/sent, false: no active save/send in progress
     Q_PROPERTY(bool                     dirty                   READ dirty                  WRITE setDirty  NOTIFY dirtyChanged)            ///< true: Unsaved/sent changes are present, false: no changes since last save/send
+    Q_PROPERTY(bool                     isSourcePlan            READ isSourcePlan     WRITE setIsSourcePlan NOTIFY isSourcePlanChanged)
     Q_PROPERTY(QString                  fileExtension           READ fileExtension                          CONSTANT)                       ///< File extension for missions
     Q_PROPERTY(QString                  kmlFileExtension        READ kmlFileExtension                       CONSTANT)
     Q_PROPERTY(QString                  currentPlanFile         READ currentPlanFile                        NOTIFY currentPlanFileChanged)
@@ -81,15 +88,26 @@ public:
     Q_INVOKABLE void removeAll(void);                       ///< Removes all from controller only, synce required to remove from vehicle
     Q_INVOKABLE void removeAllFromVehicle(void);            ///< Removes all from vehicle and controller
 
+    Q_INVOKABLE void setParam(void);
+
     MissionController*      missionController(void)     { return &_missionController; }
     GeoFenceController*     geoFenceController(void)    { return &_geoFenceController; }
     RallyPointController*   rallyPointController(void)  { return &_rallyPointController; }
+
+    SurveyComplexItem* _surveyComplexItem = nullptr;
+    double      area            (void) const;
+    Fact*       applicationRate (void) { return _surveyComplexItem ? _surveyComplexItem->applicationRate() : nullptr; }
+    Fact*       flowRate        (void) { return _surveyComplexItem ? _surveyComplexItem->sprayFlowRate() : nullptr; }
+    Fact*       spacing         (void) { return _surveyComplexItem ? _surveyComplexItem->gridSpacing() : nullptr; }
+    Fact*       velocity        (void) { return _surveyComplexItem ? _surveyComplexItem->velocity() : nullptr; }
 
     bool        offline         (void) const { return _offline; }
     bool        containsItems   (void) const;
     bool        syncInProgress  (void) const;
     bool        dirty           (void) const;
     void        setDirty        (bool dirty);
+    bool        isSourcePlan    (void) const { return _isSourcePlan; };
+    void        setIsSourcePlan (bool value) { _isSourcePlan = value; emit isSourcePlanChanged(value); };
     QString     fileExtension   (void) const;
     QString     kmlFileExtension(void) const;
     QString     currentPlanFile (void) const { return _currentPlanFile; }
@@ -114,11 +132,14 @@ signals:
     void containsItemsChanged               (bool containsItems);
     void syncInProgressChanged              (void);
     void dirtyChanged                       (bool dirty);
+    void isSourcePlanChanged                (bool isSourcePlan);
     void offlineChanged                     (bool offlineEditing);
     void currentPlanFileChanged             (void);
     void planCreatorsChanged                (QmlObjectListModel* planCreators);
     void managerVehicleChanged              (Vehicle* managerVehicle);
     void promptForPlanUsageOnVehicleChange  (void);
+    void areaChanged                        (void);
+    void surveyInited                       (void);
 
 private slots:
     void _activeVehicleChanged      (Vehicle* activeVehicle);
@@ -152,4 +173,5 @@ private:
     QString                 _currentPlanFile;
     bool                    _deleteWhenSendCompleted =  false;
     QmlObjectListModel*     _planCreators =             nullptr;
+    bool                    _isSourcePlan;
 };

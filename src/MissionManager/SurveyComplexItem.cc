@@ -17,18 +17,27 @@
 #include "AppSettings.h"
 #include "PlanMasterController.h"
 #include "QGCApplication.h"
+#include "TakeoffMissionItem.h"
 
 #include <QPolygonF>
+#include <QSignalBlocker>
+#include <QTimer>
 
 QGC_LOGGING_CATEGORY(SurveyComplexItemLog, "SurveyComplexItemLog")
 
-const QString SurveyComplexItem::name(tr("Survey"));
+const QString SurveyComplexItem::name(tr("Tưới"));
 
 const char* SurveyComplexItem::jsonComplexItemTypeValue =   "survey";
 const char* SurveyComplexItem::jsonV3ComplexItemTypeValue = "survey";
 
 const char* SurveyComplexItem::settingsGroup =              "Survey";
 const char* SurveyComplexItem::gridAngleName =              "GridAngle";
+const char* SurveyComplexItem::velocityName =               "Velocity";
+const char* SurveyComplexItem::applicationRateName =        "ApplicationRate";
+const char* SurveyComplexItem::sprayFlowRateName =          "SprayFlowRate";
+const char* SurveyComplexItem::nozzleRateName =             "NozzleRate";
+const char* SurveyComplexItem::nozzleOffsetName =           "NozzleOffset";
+const char* SurveyComplexItem::autoOptimizeName =           "AutoOptimize";
 const char* SurveyComplexItem::gridEntryLocationName =      "GridEntryLocation";
 const char* SurveyComplexItem::flyAlternateTransectsName =  "FlyAlternateTransects";
 const char* SurveyComplexItem::splitConcavePolygonsName =   "SplitConcavePolygons";
@@ -61,18 +70,29 @@ const char* SurveyComplexItem::_jsonV3ManualGridKey =                   "manualG
 const char* SurveyComplexItem::_jsonV3CameraOrientationLandscapeKey =   "orientationLandscape";
 const char* SurveyComplexItem::_jsonV3FixedValueIsAltitudeKey =         "fixedValueIsAltitude";
 const char* SurveyComplexItem::_jsonV3Refly90DegreesKey =               "refly90Degrees";
-const char* SurveyComplexItem::_jsonFlyAlternateTransectsKey =          "flyAlternateTransects";
+const char* SurveyComplexItem::_jsonFlyAlternateTransectsKey =          "flyaAlternateTransects";
 const char* SurveyComplexItem::_jsonSplitConcavePolygonsKey =           "splitConcavePolygons";
+const char* SurveyComplexItem::_jsonApplicationRateKey =                "applicationRate";
+const char* SurveyComplexItem::_jsonVelocityKey =                       "velocity";
 
 SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlOrShpFile, QObject* parent)
-    : TransectStyleComplexItem  (masterController, flyView, settingsGroup, parent)
+    : TransectStyleFenceSupportedComplexItem  (masterController, flyView, settingsGroup, parent)
     , _metaDataMap              (FactMetaData::createMapFromJsonFile(QStringLiteral(":/json/Survey.SettingsGroup.json"), this))
     , _gridAngleFact            (settingsGroup, _metaDataMap[gridAngleName])
+    , _velocityFact             (settingsGroup, _metaDataMap[velocityName])
+    , _applicationRateFact      (settingsGroup, _metaDataMap[applicationRateName])
+    , _sprayFlowRateFact        (settingsGroup, _metaDataMap[sprayFlowRateName])
+    , _nozzleRateFact           (settingsGroup, _metaDataMap[nozzleRateName])
+    , _nozzleOffsetFact         (settingsGroup, _metaDataMap[nozzleOffsetName])
+    , _autoOptimizeFact         (settingsGroup, _metaDataMap[autoOptimizeName])
     , _flyAlternateTransectsFact(settingsGroup, _metaDataMap[flyAlternateTransectsName])
     , _splitConcavePolygonsFact (settingsGroup, _metaDataMap[splitConcavePolygonsName])
     , _entryPoint               (EntryLocationTopLeft)
+    , _timer_optimize_Angle_EntryPoint       (this)
 {
     _editorQml = "qrc:/qml/SurveyItemEditor.qml";
+    masterController->_surveyComplexItem = this;
+    emit masterController->surveyInited();
 
     // If the user hasn't changed turnaround from the default (which is a fixed wing default) and we are multi-rotor set the multi-rotor default.
     // NULL check since object creation during unit testing passes NULL for vehicle
@@ -80,6 +100,8 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
         // Note this is set to 10 meters to work around a problem with PX4 Pro turnaround behavior. Don't change unless firmware gets better as well.
         _turnAroundDistanceFact.setRawValue(10);
     }
+    //<Mismart>:
+    _turnAroundDistanceFact.setRawValue(0);
 
     if (_controllerVehicle && !(_controllerVehicle->fixedWing() || _controllerVehicle->vtol())) {
         // Only fixed wing flight paths support alternate transects
@@ -92,6 +114,11 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     }
 
     connect(&_gridAngleFact,            &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_velocityFact,             &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_applicationRateFact,      &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_sprayFlowRateFact,        &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_nozzleRateFact,           &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_nozzleOffsetFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_flyAlternateTransectsFact,&Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_splitConcavePolygonsFact, &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_setDirty);
@@ -103,6 +130,22 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
 
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::isValidChanged,             this, &SurveyComplexItem::_updateWizardMode);
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::traceModeChanged,           this, &SurveyComplexItem::_updateWizardMode);
+
+    connect(&_velocityFact,             &Fact::valueChanged,                        this, &SurveyComplexItem::_updateSprayFlowRate);
+    connect(&_applicationRateFact,      &Fact::valueChanged,                        this, &SurveyComplexItem::_updateSprayFlowRate);
+    connect(&_nozzleRateFact,           &Fact::valueChanged,                        this, &SurveyComplexItem::_updateSprayFlowRate);
+    connect(&_nozzleOffsetFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_updateSprayFlowRate);
+    connect(_cameraCalc.adjustedFootprintSide(),
+                                        &Fact::valueChanged,                        this, &SurveyComplexItem::_updateSprayFlowRate);
+    connect(&_autoOptimizeFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_toggleAutoOptimize);
+
+    _timer_optimize_Angle_EntryPoint.setSingleShot(true);
+    _timer_optimize_Angle_EntryPoint.setInterval(0);
+    connect(&_timer_optimize_Angle_EntryPoint,       &QTimer::timeout,                           this, &SurveyComplexItem::_optimize_Angle_EntryPoint);
+    connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                &_timer_optimize_Angle_EntryPoint, QOverload<>::of(&QTimer::start));
+    connect(_masterController->missionController()->takeoffMissionItem(), &TakeoffMissionItem::launchCoordinateChanged, this, &SurveyComplexItem::_optimize_EntryPoint);
+
+    connect(this, &TransectStyleComplexItem::coveredAreaChanged, _masterController, &PlanMasterController::areaChanged);
 
     if (!kmlOrShpFile.isEmpty()) {
         _surveyAreaPolygon.loadKMLOrSHPFile(kmlOrShpFile);
@@ -138,6 +181,8 @@ void SurveyComplexItem::_saveWorker(QJsonObject& saveObject)
     saveObject[_jsonFlyAlternateTransectsKey] =                 _flyAlternateTransectsFact.rawValue().toBool();
     saveObject[_jsonSplitConcavePolygonsKey] =                  _splitConcavePolygonsFact.rawValue().toBool();
     saveObject[_jsonEntryPointKey] =                            _entryPoint;
+    saveObject[_jsonApplicationRateKey] =                 _applicationRateFact.rawValue().toDouble();
+    saveObject[_jsonVelocityKey] =                 _velocityFact.rawValue().toDouble();
 
     // Polygon shape
     _surveyAreaPolygon.saveToJson(saveObject);
@@ -209,6 +254,9 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         { _jsonEntryPointKey,                           QJsonValue::Double, true },
         { _jsonGridAngleKey,                            QJsonValue::Double, true },
         { _jsonFlyAlternateTransectsKey,                QJsonValue::Bool,   false },
+        { _jsonApplicationRateKey,                            QJsonValue::Double, true },
+        { _jsonVelocityKey,                            QJsonValue::Double, true },
+
     };
 
     if(version == 5) {
@@ -245,6 +293,10 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
 
     _gridAngleFact.setRawValue              (complexObject[_jsonGridAngleKey].toDouble());
     _flyAlternateTransectsFact.setRawValue  (complexObject[_jsonFlyAlternateTransectsKey].toBool(false));
+    _applicationRateFact.setRawValue              (complexObject[_jsonApplicationRateKey].toDouble());
+    _velocityFact.setRawValue              (complexObject[_jsonVelocityKey].toDouble());
+
+    qDebug() << " _jsonVelocityKey: " << complexObject[_jsonVelocityKey].toDouble() ;
 
     if (version == 5) {
         _splitConcavePolygonsFact.setRawValue   (complexObject[_jsonSplitConcavePolygonsKey].toBool(true));
@@ -312,6 +364,8 @@ bool SurveyComplexItem::_loadV3(const QJsonObject& complexObject, int sequenceNu
 
     _gridAngleFact.setRawValue          (gridObject[_jsonV3GridAngleKey].toDouble());
     _turnAroundDistanceFact.setRawValue (gridObject[_jsonV3TurnaroundDistKey].toDouble());
+    //<MiSmart>:
+    _turnAroundDistanceFact.setRawValue(0);
 
     if (gridObject.contains(_jsonEntryPointKey)) {
         _entryPoint = gridObject[_jsonEntryPointKey].toInt();
@@ -708,6 +762,13 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
         _loadedMissionItemsParent = nullptr;
     }
 
+    // First pass will clear old transect data, refly will append to existing data
+    if (!refly) {
+        _transects.clear();
+        _rgPathHeightInfo.clear();
+        _rgFlightPathCoordInfo.clear();
+    }
+
     if (_surveyAreaPolygon.count() < 3) {
         return;
     }
@@ -922,6 +983,13 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSplitPolygons(bool refly)
         _loadedMissionItems.clear();
         _loadedMissionItemsParent->deleteLater();
         _loadedMissionItemsParent = nullptr;
+    }
+
+    // First pass will clear old transect data, refly will append to existing data
+    if (!refly) {
+        _transects.clear();
+        _rgPathHeightInfo.clear();
+        _rgFlightPathCoordInfo.clear();
     }
 
     if (_surveyAreaPolygon.count() < 3) {

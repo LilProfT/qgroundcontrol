@@ -15,6 +15,8 @@
 #include "AppSettings.h"
 #include "JsonHelper.h"
 #include "MissionManager.h"
+#include "ParameterManager.h"
+#include "MAVLinkProtocol.h"
 #include "KMLPlanDomDocument.h"
 #include "SurveyPlanCreator.h"
 #include "StructureScanPlanCreator.h"
@@ -27,6 +29,7 @@
 #include <QDomDocument>
 #include <QJsonDocument>
 #include <QFileInfo>
+#include <QtMath>
 
 QGC_LOGGING_CATEGORY(PlanMasterControllerLog, "PlanMasterControllerLog")
 
@@ -236,6 +239,7 @@ void PlanMasterController::loadFromVehicle(void)
         qCDebug(PlanMasterControllerLog) << "PlanMasterController::loadFromVehicle calling _missionController.loadFromVehicle";
         _missionController.loadFromVehicle();
         setDirty(false);
+        setIsSourcePlan(false);
     }
 }
 
@@ -424,6 +428,7 @@ void PlanMasterController::loadFromFile(const QString& filename)
 
     if(success){
         _currentPlanFile = QString::asprintf("%s/%s.%s", fileInfo.path().toLocal8Bit().data(), fileInfo.completeBaseName().toLocal8Bit().data(), AppSettings::planFileExtension);
+        setIsSourcePlan(true);
     } else {
         _currentPlanFile.clear();
     }
@@ -638,20 +643,8 @@ void PlanMasterController::_updatePlanCreatorsList(void)
     if (!_flyView) {
         if (!_planCreators) {
             _planCreators = new QmlObjectListModel(this);
-            _planCreators->append(new BlankPlanCreator(this, this));
             _planCreators->append(new SurveyPlanCreator(this, this));
-            _planCreators->append(new CorridorScanPlanCreator(this, this));
             emit planCreatorsChanged(_planCreators);
-        }
-
-        if (_managerVehicle->fixedWing()) {
-            if (_planCreators->count() == 4) {
-                _planCreators->removeAt(_planCreators->count() - 1);
-            }
-        } else {
-            if (_planCreators->count() != 4) {
-                _planCreators->append(new StructureScanPlanCreator(this, this));
-            }
         }
     }
 }
@@ -667,4 +660,25 @@ void PlanMasterController::showPlanFromManagerVehicle(void)
         qCDebug(PlanMasterControllerLog) << "showPlanFromManagerVehicle: Plan View - New vehicle available, show plan from new manager vehicle";
         _showPlanFromManagerVehicle();
     }
+}
+
+void PlanMasterController::setParam()
+{
+    float velocity = this->_surveyComplexItem->velocity()->property("value").toFloat();   
+    float x = this->_surveyComplexItem->sprayFlowRate()->property("value").toFloat();
+    float y = (x < 2.72) ?
+        23.880029817856098 :
+        // y = 4.9601x4 - 75.444x3 + 424.44x2 - 1033.8x + 942.35
+        (4.9601 * qPow(x, 4.0)) + (-75.444 * qPow(x, 3.0)) + (424.44 * qPow(x, 2.0)) + (-1033.8 * x) + 942.35;
+    if (y > 65.0) y = 65.0;
+    this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "SPRAY_PUMP_RATE")->setProperty("value", y);
+    this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WPNAV_SPEED")->setProperty("value", (100 * velocity));
+    this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WP_YAW_BEHAVIOR")->setProperty("value", 0);
+};
+
+double PlanMasterController::area() const
+{
+    return _surveyComplexItem ?
+        _surveyComplexItem->coveredArea() :
+        0.0;
 }
