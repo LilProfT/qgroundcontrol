@@ -2216,7 +2216,7 @@ bool Vehicle::_areaSprayedStart()
 {
     if (batteries()->count() == 4) //Mismart AGR drone config, 4 batteries
     {
-        if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() > 1) //Arbitrary number
+        if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() >= 50) //Arbitrary number
         {
             return (flightMode() == missionFlightMode()); //Only records when AUTO mode is used
         } else {

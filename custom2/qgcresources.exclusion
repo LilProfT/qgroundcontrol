@@ -1,0 +1,3 @@
+        <file alias="PaperPlane.svg">src/ui/toolbar/Images/PaperPlane.svg</file>
+        <file>resources/icons/qgroundcontrol.ico</file>
+		<file alias="QGCLogoFull">resources/QGCLogoFull.svg</file>

@@ -36,7 +36,7 @@ Item {
                                                         (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false)) &&
                                                         globals.guidedControllerFlyView.showResumeMission
     //Mismart: Hide the Dialog
-//    property bool _showMissionCompleteDialog:       false
+    //property bool _showMissionCompleteDialog:       false
 
     //Mismart: Quick hack, reusing the qml codes for resetting the areaSprayed fact. A better method should be considered in the future
     property bool _sprayComplete:                   _vehicleWasArmed && _vehicleWasInMissionFlightMode &&

@@ -123,7 +123,7 @@ Rectangle {
                     distanceToSurfaceAltitudeMode:  _missionItem.followTerrain ?
                                                         QGroundControl.AltitudeModeCalcAboveTerrain :
                                                         (_missionItem.cameraCalc.distanceToSurfaceRelative ? QGroundControl.AltitudeModeRelative : QGroundControl.AltitudeModeAbsolute)
-                    frontalDistanceLabel:           qsTr("Trigger Dist")
+                    //frontalDistanceLabel:           qsTr("Trigger Dist")
                     sideDistanceLabel:              qsTr("Spacing")
                 }
 
@@ -266,6 +266,7 @@ Rectangle {
                     QGCLabel {
                         text:       qsTr("Turnaround dist")
                         Layout.fillWidth:       true
+			visible:            false
                     }
                     FactTextField {
                         fact:               _missionItem.turnAroundDistance
@@ -277,6 +278,7 @@ Rectangle {
                         text:               _missionItem.turnAroundDistance.value.toFixed(2) + " " + _missionItem.turnAroundDistance.units
 //                        font.pointSize:     ScreenTools.mediumFontPointSize
                         Layout.alignment:   Qt.AlignRight
+			visible:            false
                     }
 
 
@@ -293,6 +295,7 @@ Rectangle {
                         onValueChanged:         _missionItem.turnAroundDistance.value = value
                         Component.onCompleted:  value = _missionItem.turnAroundDistance.value
                         updateValueWhileDragging: true
+			visible:            false
                     }
                 }
 

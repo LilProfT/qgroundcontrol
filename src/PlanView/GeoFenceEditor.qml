@@ -220,11 +220,13 @@ QGCFlickable {
                         anchors.left:   parent.left
                         anchors.right:  parent.right
                         text:           qsTr("Circular Fences")
+			visible: false
                     }
 
                     QGCLabel {
                         text:       qsTr("None")
-                        visible:    circleSection.checked && myGeoFenceController.circles.count === 0
+                        //visible:    circleSection.checked && myGeoFenceController.circles.count === 0
+			visible: false
                     }
 
                     GridLayout {
@@ -232,8 +234,9 @@ QGCFlickable {
                         anchors.right:      parent.right
                         columns:            4
                         flow:               GridLayout.TopToBottom
-                        visible:            polygonSection.checked && myGeoFenceController.circles.count > 0
-
+                        //visible:            polygonSection.checked && myGeoFenceController.circles.count > 0
+			visible: false
+			
                         QGCLabel {
                             text:               qsTr("Inclusion")
                             Layout.column:      0
@@ -312,12 +315,14 @@ QGCFlickable {
                         anchors.left:   parent.left
                         anchors.right:  parent.right
                         text:           qsTr("Breach Return Point")
+			visible: false
                     }
 
                     QGCButton {
                         text:               qsTr("Add Breach Return Point")
-                        visible:            breachReturnSection.visible && !myGeoFenceController.breachReturnPoint.isValid
-                        anchors.left:       parent.left
+                        //visible:            breachReturnSection.visible && !myGeoFenceController.breachReturnPoint.isValid
+                        visible: false
+			anchors.left:       parent.left
                         anchors.right:      parent.right
 
                         onClicked: myGeoFenceController.breachReturnPoint = flightMap.center
@@ -325,10 +330,10 @@ QGCFlickable {
 
                     QGCButton {
                         text:               qsTr("Remove Breach Return Point")
-                        visible:            breachReturnSection.visible && myGeoFenceController.breachReturnPoint.isValid
+                        //visible:            breachReturnSection.visible && myGeoFenceController.breachReturnPoint.isValid
                         anchors.left:       parent.left
                         anchors.right:      parent.right
-
+			visible: false
                         onClicked: myGeoFenceController.breachReturnPoint = QtPositioning.coordinate()
                     }
 
@@ -336,8 +341,9 @@ QGCFlickable {
                         anchors.left:       parent.left
                         anchors.right:      parent.right
                         spacing:            _margin
-                        visible:            breachReturnSection.visible && myGeoFenceController.breachReturnPoint.isValid
-
+                        //visible:            breachReturnSection.visible && myGeoFenceController.breachReturnPoint.isValid
+			visible: false
+			
                         QGCLabel {
                             text: qsTr("Altitude")
                         }

@@ -130,13 +130,35 @@ Column {
             fact:                       cameraCalc.distanceToSurface
             altitudeMode:               distanceToSurfaceAltitudeMode
             Layout.fillWidth:           true
+            onUpdated:                  distanceToSurfaceSlider.value = cameraCalc.distanceToSurface.value
+            visible:                    false
+        }
+        QGCLabel {
+            text:                   cameraCalc.distanceToSurface.value.toFixed(2) + " " + cameraCalc.distanceToSurface.units
+            Layout.alignment:       Qt.AlignRight
+        }
+        QGCSlider {
+            id:                     distanceToSurfaceSlider
+            minimumValue:           2
+            maximumValue:           20
+            stepSize:               0.2
+            tickmarksEnabled:       false
+            Layout.fillWidth:       true
+            Layout.columnSpan:      2
+            Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+            value:                  cameraCalc.distanceToSurface.value
+            onValueChanged:         cameraCalc.distanceToSurface.value = value
+            Component.onCompleted:  value = cameraCalc.distanceToSurface.value
+            updateValueWhileDragging: true
         }
 
-        QGCLabel { text: frontalDistanceLabel }
-        FactTextField {
-            Layout.fillWidth:   true
-            fact:               cameraCalc.adjustedFootprintFrontal
-        }
+        // haven't been able to set spacing at fixed 6m, so enable again
+        // FIXME set fixed 6m
+//        QGCLabel { text: frontalDistanceLabel }
+//        FactTextField {
+//            Layout.fillWidth:   true
+//            fact:               cameraCalc.adjustedFootprintFrontal
+//        }
 
         QGCLabel { text: sideDistanceLabel }
         FactTextField {
