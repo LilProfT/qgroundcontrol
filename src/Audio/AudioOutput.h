@@ -41,6 +41,7 @@ public slots:
 
 private slots:
     void            _stateChanged           (QTextToSpeech::State state);
+    void            _effectPlayingChanged           ();
     void            _effectStateChanged           ();
 
 protected:

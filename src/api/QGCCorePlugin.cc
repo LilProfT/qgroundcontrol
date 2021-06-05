@@ -311,6 +311,8 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     if (includeFWValues) {
         factValueGrid.appendColumn();
     }
+    factValueGrid.appendColumn();
+
     factValueGrid.appendRow();
 
     int                 rowIndex    = 0;
@@ -321,12 +323,14 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     value->setIcon("arrow-thick-up.svg");
     value->setText(value->fact()->shortDescription());
     value->setShowUnits(true);
+    value -> setCustomUnits("");
 
     value = column->value<InstrumentValueData*>(rowIndex++);
     value->setFact("Vehicle", "DistanceToHome");
     value->setIcon("bookmark copy 3.svg");
     value->setText(value->fact()->shortDescription());
     value->setShowUnits(true);
+    value -> setCustomUnits("");
 
     rowIndex    = 0;
     column      = factValueGrid.columns()->value<QmlObjectListModel*>(1);
@@ -336,12 +340,14 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     value->setIcon("arrow-simple-up.svg");
     value->setText(value->fact()->shortDescription());
     value->setShowUnits(true);
+    value -> setCustomUnits("");
 
     value = column->value<InstrumentValueData*>(rowIndex++);
     value->setFact("Vehicle", "GroundSpeed");
     value->setIcon("arrow-simple-right.svg");
     value->setText(value->fact()->shortDescription());
     value->setShowUnits(true);
+    value -> setCustomUnits("");
 
 
     if (includeFWValues) {
@@ -352,11 +358,13 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
         value->setFact("Vehicle", "AirSpeed");
         value->setText("AirSpd");
         value->setShowUnits(true);
+        value -> setCustomUnits("");
 
         value = column->value<InstrumentValueData*>(rowIndex++);
         value->setFact("Vehicle", "ThrottlePct");
         value->setText("Thr");
         value->setShowUnits(true);
+        value -> setCustomUnits("");
     }
 
     rowIndex    = 0;
@@ -373,6 +381,26 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     value->setIcon("travel-walk.svg");
     value->setText(value->fact()->shortDescription());
     value->setShowUnits(true);
+    value -> setCustomUnits("");
+
+    //Adding tank and flow rate instruments
+    rowIndex    = 0;
+    column      = factValueGrid.columns()->value<QmlObjectListModel*>(includeFWValues ? 4 : 3);
+
+    value = column->value<InstrumentValueData*>(rowIndex++);
+    value -> setFact("battery1","percentRemaining");
+    value -> setIcon("tank.svg");
+    //value -> setText(value->fact()->shortDescription());
+    value -> setShowUnits(true);
+    value -> setCustomUnits("L");
+
+    value = column->value<InstrumentValueData*>(rowIndex++);
+    value -> setFact("battery2","current");
+    value -> setIcon("flowrate.svg");
+    //value -> setText(value->fact()->shortDescription());
+    value -> setShowUnits(true);
+    value -> setCustomUnits("L/min");
+
 }
 
 QQmlApplicationEngine* QGCCorePlugin::createQmlApplicationEngine(QObject* parent)

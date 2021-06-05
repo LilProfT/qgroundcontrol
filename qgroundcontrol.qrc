@@ -364,6 +364,13 @@
         <file alias="prearm_tank_fs.wav">resources/audio/prearm_tank_fs.wav</file>
         <file alias="cell_drift_warning.wav">resources/audio/cell_drift_warning.wav</file>
         <file alias="Proximity.wav">resources/audio/Proximity.wav</file>
+        <file alias="Readytofly.wav">resources/audio/Readytofly.wav</file>      
+        <file alias="avoidprox_HIGH.wav">resources/audio/avoidprox_HIGH.wav</file>      
+        <file alias="avoidprox_LOW.wav">resources/audio/avoidprox_LOW.wav</file>      
+        <file alias="Pump_on.wav">resources/audio/Pump_on.wav</file>      
+        <file alias="Pump_off.wav">resources/audio/Pump_off.wav</file>      
+        <file alias="Proximity_avoidance_warning.wav">resources/audio/Proximity_avoidance_warning.wav</file>  
+	<file alias="Upload_done.wav">resources/audio/Upload_done.wav</file>                              
     </qresource>
     <qresource prefix="/MockLink">
         <file alias="APMArduSubMockLink.params">src/comm/APMArduSubMockLink.params</file>

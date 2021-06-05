@@ -272,7 +272,7 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
 #ifdef DAILY_BUILD
         // This gives daily builds their own separate settings space. Allowing you to use daily and stable builds
         // side by side without daily screwing up your stable settings.
-        applicationName = QStringLiteral("%1 Daily").arg(QGC_APPLICATION_NAME);
+        applicationName = QGC_APPLICATION_NAME;
 #else
         applicationName = QGC_APPLICATION_NAME;
 #endif
@@ -465,6 +465,9 @@ void QGCApplication::setLanguage()
         case 20:
             _locale = QLocale(QLocale::Azerbaijani);
             break;
+        case 21:
+            _locale = QLocale(QLocale::Vietnamese);
+            break;
         }
     }
     //-- We have specific fonts for Korean
@@ -542,6 +545,7 @@ void QGCApplication::_initCommon()
     qmlRegisterUncreatableType<QGCVideoStreamInfo>      (kQGCVehicle,                       1, 0, "QGCVideoStreamInfo",         kRefOnly);
     qmlRegisterUncreatableType<LinkInterface>           (kQGCVehicle,                       1, 0, "LinkInterface",              kRefOnly);
     qmlRegisterUncreatableType<VehicleLinkManager>      (kQGCVehicle,                       1, 0, "VehicleLinkManager",         kRefOnly);
+    qmlRegisterUncreatableType<FlightHubManager>        (kQGCVehicle,                       1, 0, "FlightHubManager",           kRefOnly);
 
     qmlRegisterUncreatableType<MissionController>       (kQGCControllers,                   1, 0, "MissionController",          kRefOnly);
     qmlRegisterUncreatableType<GeoFenceController>      (kQGCControllers,                   1, 0, "GeoFenceController",         kRefOnly);

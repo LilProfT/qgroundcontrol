@@ -156,7 +156,9 @@ double SurveyComplexItem::getYaw(void)
 {
     float gridAngle = _gridAngleFact.property("value").value<qreal>();
     QGeoCoordinate center = _surveyAreaPolygon.center();
-    QGeoCoordinate takeoffWaypoint = _masterController->missionController()->takeoffMissionItem()->launchCoordinate();
+    TakeoffMissionItem* takeoffItem = _masterController->missionController()->takeoffMissionItem();
+    if (!takeoffItem) return gridAngle;
+    QGeoCoordinate takeoffWaypoint = takeoffItem->launchCoordinate();
     float azimuth = takeoffWaypoint.azimuthTo(center);
 
     float yaw;

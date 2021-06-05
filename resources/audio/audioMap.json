@@ -31,5 +31,12 @@
     "pre arm: RC not calibrated": "rc_failure.wav",
     "pre arm: Need 3D Fix": "need_3D_fix.wav",
     "pre arm: Need Position Estimate": "need_3D_fix.wav",
-    "Proximity Error": "Proximity.wav"
+    "Proximity Error": "Proximity.wav",
+    "Ready to Fly": "Readytofly.wav",
+    "AvoidProximity High": "avoidprox_HIGH.wav",
+    "AvoidProximity Low": "avoidprox_LOW.wav",
+    "Pump On": "Pump_on.wav",
+    "Pump Off": "Pump_off.wav",
+    "Proximity Avoidance Warning": "Proximity_avoidance_warning.wav",
+    "Upload done": "Upload_done.wav"
 }

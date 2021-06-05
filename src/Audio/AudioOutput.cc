@@ -47,7 +47,9 @@ AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
     _effect = new QSoundEffect(this);
     _effect->setLoopCount(0);
 
-    connect(_effect, &QSoundEffect::playingChanged, this, &AudioOutput::_effectStateChanged);
+    connect(_effect, &QSoundEffect::playingChanged, this, &AudioOutput::_effectPlayingChanged);
+    connect(_effect, &QSoundEffect::statusChanged, this, &AudioOutput::_effectStateChanged);
+
 }
 
 void AudioOutput::say(const QString& inText)
@@ -61,20 +63,23 @@ void AudioOutput::say(const QString& inText)
     muted |= qgcApp()->runningUnitTests();
     if (!muted && !qgcApp()->runningUnitTests()) {
         QString text = fixTextMessageForAudio(inText);
-        if(_tts->state() == QTextToSpeech::Speaking) {
+//        if(_tts->state() == QTextToSpeech::Speaking) {
+//            if(!_texts.contains(text)) {
+//                //-- Some arbitrary limit
+//                if(_texts.size() > 20) {
+//                    _texts.removeFirst();
+//                }
+//                _texts.append(text);
+//            }
+//        } else
+        if (_effect->isPlaying() || _effect->status() == QSoundEffect::Loading) {
             if(!_texts.contains(text)) {
                 //-- Some arbitrary limit
                 if(_texts.size() > 20) {
                     _texts.removeFirst();
                 }
-                _texts.append(text);
-            }
-        } else if (_effect->isPlaying()) {
-            if(!_texts.contains(text)) {
-                //-- Some arbitrary limit
-                if(_texts.size() > 20) {
-                    _texts.removeFirst();
-                }
+                qDebug() << "append ::: " << text;
+
                 _texts.append(text);
             }
         } else {
@@ -90,10 +95,21 @@ void AudioOutput::_stateChanged(QTextToSpeech::State state)
     }
 }
 
-void AudioOutput::_effectStateChanged()
+void AudioOutput::_effectPlayingChanged()
 {
+    qDebug() << "_effectPlayingChanged ::: " << _effect->isPlaying();
+
     if (!_effect->isPlaying()) {
         _next();
+    }
+}
+
+void AudioOutput::_effectStateChanged()
+{
+    qDebug() << "_effectStateChanged ::: " << _effect->status();
+
+    if (_effect->status() == QSoundEffect::Ready) {
+        _effect->play();
     }
 }
 
@@ -107,19 +123,23 @@ void AudioOutput::_next() {
 }
 
 void AudioOutput::_play(QString& text) {
+    qDebug() << "_play ::: " << text;
+
     for (const QString& key: _audioMap.keys()) {
-        if (text.contains(key)) {
-            qDebug() << "wav ::: " << text;
+        qDebug() << "wav ::: " << key;
+
+        if (text.contains(key) || QString::compare(text, key, Qt::CaseInsensitive) == 0) {
+            qDebug() << "contains wav ::: " << text;
             QString wav = _audioMap.value(key).value<QString>();
             QUrl url("qrc:/audio/" + wav);
+            qDebug() << "url wav ::: " << url.toString();
+
+            //QSound::play(url.toString());
+
             _effect->setSource(url);
-            _effect->play();
             return;
         }
     }
-
-    qDebug() << "tts ::: " << text;
-    //_tts->say(text);
 };
 
 bool AudioOutput::getMillisecondString(const QString& string, QString& match, int& number) {
@@ -140,11 +160,15 @@ QString AudioOutput::fixTextMessageForAudio(const QString& string) {
     QString match;
     QString newNumber;
     QString result = string;
+    qDebug() << "fixTextMessageForAudio ::: " << string;
 
     //-- Look for codified terms
     if(result.contains("PROXIMITY", Qt::CaseInsensitive)) {
-        result = "Proximity Error";
+        if (!(QString::compare(result, "AvoidProximity High", Qt::CaseInsensitive) == 0 ||
+            QString::compare(result, "AvoidProximity Low", Qt::CaseInsensitive) == 0))
+            result = "Proximity Error";
     }
+    qDebug() << "result ::: " << result;
 
     if(result.contains("ERR ", Qt::CaseInsensitive)) {
         result.replace("ERR ", "error ", Qt::CaseInsensitive);

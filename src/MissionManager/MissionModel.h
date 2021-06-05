@@ -25,6 +25,11 @@ public:
         HOLD_YAW,      // hold yaw unchanged at a value until next HOLD_YAW
         HOLD_ALTITUDE, // same as HOLD_YAW, but for altitude
     };
+    // NOTE: implementing limitation
+    // HOLDs should be put before WAYPOINT
+    // for ex:
+    //     this: SPRAY HOLD_YAW HOLD_ALTITUDE WAYPOINT
+    // not this: HOLD_YAW SPRAY HOLD_ALTITUDE WAYPOINT
 
     virtual Type type() const = 0;
     virtual QString repr() const = 0;

@@ -11,7 +11,6 @@
 #include <QDateTime>
 #include <QLocale>
 #include <QQuaternion>
-
 #include <Eigen/Eigen>
 
 #include "Vehicle.h"
@@ -917,13 +916,23 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
     // If the message is NOTIFY or higher severity, or starts with a '#',
     // then read it aloud.
     bool readAloud = false;
+    //messageText = "AvoidProximity";
 
     if (messageText.startsWith("#")) {
         messageText.remove(0, 1);
         readAloud = true;
     }
-    else if (severity <= MAV_SEVERITY_INFO) {
+    else if (severity <= MAV_SEVERITY_CRITICAL) {
         readAloud = true;
+    } else if (severity == MAV_SEVERITY_INFO){
+        if (messageText.startsWith("AvoidProximity")) {
+            readAloud = true;
+            severity = MAV_SEVERITY_CRITICAL;
+        }
+//        else if (messageText.startsWith("RangeFinder")) {
+//            readAloud = true;
+//            severity = MAV_SEVERITY_CRITICAL;
+//        }
     }
 
     if (readAloud) {
@@ -1371,6 +1380,9 @@ void Vehicle::_handleSysStatus(mavlink_message_t& message)
     if (sysStatus.onboard_control_sensors_enabled & MAV_SYS_STATUS_PREARM_CHECK) {
         if (!_readyToFlyAvailable) {
             _readyToFlyAvailable = true;
+            //if (!skipSpoken) {
+            qgcApp()->toolbox()->audioOutput()->say("Ready To Fly");
+            //}
             emit readyToFlyAvailableChanged(true);
         }
 

@@ -142,9 +142,29 @@ QPointF QGCMapPolygon::_pointFFromCoord(const QGeoCoordinate& coordinate) const
     return QPointF();
 }
 
-QPolygonF QGCMapPolygon::toPolygonF(void) const
+QPointF QGCMapPolygon::_pointFFromCoord(const QGeoCoordinate& coordinate, QGeoCoordinate& tangentOrigin) const
 {
-    return _toPolygonF();
+    if (_polygonPath.count() > 0) {
+        double y, x, down;
+
+        convertGeoToNed(coordinate, tangentOrigin, &y, &x, &down);
+        return QPointF(x, -y);
+    }
+
+    return QPointF();
+}
+
+QPolygonF QGCMapPolygon::toPolygonF(QGeoCoordinate& tangentOrigin) const
+{
+    QPolygonF polygon;
+
+    if (_polygonPath.count() > 2) {
+        for (int i=0; i<_polygonPath.count(); i++) {
+            polygon.append(_pointFFromCoord(_polygonPath[i].value<QGeoCoordinate>(), tangentOrigin));
+        }
+    }
+
+    return polygon;
 }
 
 QPolygonF QGCMapPolygon::_toPolygonF(void) const

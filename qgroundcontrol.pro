@@ -444,6 +444,7 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 
 SOURCES += \
     src/MissionManager/MissionModel.cc \
+    src/MissionManager/MissionModel.fence.cc \
     src/MissionManager/SurveyComplexItem.mismart.cc \
     src/Vehicle/VehicleEscStatusFactGroup.cc \
     src/api/QGCCorePlugin.cc \

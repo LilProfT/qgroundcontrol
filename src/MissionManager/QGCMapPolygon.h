@@ -145,7 +145,7 @@ public:
     void setShowAltColor(bool showAltColor);
     void selectVertex   (int index);
 
-    QPolygonF       toPolygonF             (void) const;
+    QPolygonF       toPolygonF             (QGeoCoordinate& tangentOrigin) const;
 
     static const char* jsonPolygonKey;
 
@@ -173,6 +173,7 @@ private:
     QPolygonF       _toPolygonF             (void) const;
     QGeoCoordinate  _coordFromPointF        (const QPointF& point) const;
     QPointF         _pointFFromCoord        (const QGeoCoordinate& coordinate) const;
+    QPointF         _pointFFromCoord        (const QGeoCoordinate& coordinate, QGeoCoordinate& tangentOrigin) const;
     void            _beginResetIfNotActive  (void);
     void            _endResetIfNotActive    (void);
 
