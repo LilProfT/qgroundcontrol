@@ -52,6 +52,8 @@
         <file alias="XDeleteBlack.svg">resources/XDeleteBlack.svg</file>
         <file alias="waypoint.svg">resources/waypoint.svg</file>
         <file alias="compass.svg">resources/compass.svg</file>
+	    <file alias="expand.svg">resources/expand.svg</file>
+	    <file alias="colapse.svg">resources/colapse.svg</file>
         <file>resources/icons/qgroundcontrol.ico</file>
     </qresource>
     <qresource prefix="/res/firmware">
