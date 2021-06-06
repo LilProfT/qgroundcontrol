@@ -37,6 +37,10 @@ public:
     Q_PROPERTY(QGroundControlQmlGlobal::AltitudeMode altitudeMode READ altitudeMode WRITE setAltitudeMode       NOTIFY altitudeModeChanged)
     Q_PROPERTY(Fact*            amslAltAboveTerrain     READ amslAltAboveTerrain                                CONSTANT)                           ///< Actual AMSL altitude for item if altitudeMode == AltitudeAboveTerrain
     Q_PROPERTY(int              command                 READ command                WRITE setCommand            NOTIFY commandChanged)
+    Q_PROPERTY(bool             isLoiterItem            READ isLoiterItem                                       NOTIFY isLoiterItemChanged)
+    Q_PROPERTY(bool             showLoiterRadius        READ showLoiterRadius                                   NOTIFY showLoiterRadiusChanged)
+    Q_PROPERTY(double           loiterRadius            READ loiterRadius           WRITE setRadius             NOTIFY loiterRadiusChanged)
+
     Q_PROPERTY(MissionItem::VisualType visualType       READ visualType                                         NOTIFY visualTypeChanged)
 
     /// Optional sections
@@ -71,6 +75,10 @@ public:
     QGroundControlQmlGlobal::AltitudeMode altitudeMode(void) const { return _altitudeMode; }
     Fact*           altitude            (void) { return &_altitudeFact; }
     Fact*           amslAltAboveTerrain (void) { return &_amslAltAboveTerrainFact; }
+    bool            isLoiterItem        (void) const;
+    bool            showLoiterRadius    (void) const;
+    double          loiterRadius        (void) const;
+
 
     MissionItem::VisualType visualType  (void) const { return _missionItem.visualType(); }
 
@@ -185,9 +193,6 @@ private:
     QGroundControlQmlGlobal::AltitudeMode   _altitudeMode = QGroundControlQmlGlobal::AltitudeModeRelative;
     Fact                                    _altitudeFact;
     Fact                                    _amslAltAboveTerrainFact;
-    bool            isLoiterItem        (void) const;
-      bool            showLoiterRadius    (void) const;
-      double          loiterRadius        (void) const;
 
     QmlObjectListModel  _textFieldFacts;
     QmlObjectListModel  _nanFacts;
