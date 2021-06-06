@@ -40,6 +40,21 @@ void MissionModel::setExclusionFences(QmlObjectListModel* fences)
     _integrity = false;
 }
 
+int MissionModel::endSeqNum() const
+{
+    int result = 0;
+    for (Step* step: _steps) {
+        if (step->type() == Step::Type::WAYPOINT) {
+            result += 1;
+        } else if (step->type() == Step::Type::SPRAY) {
+            result += 1; // FIXME: WRONG HERE, we don't know before gen
+        } else if (step->type() == Step::Type::HOLD_YAW) {
+            result += 2;
+        }
+    }
+    return result;
+}
+
 void MissionModel::pregenIntegrate()
 {
     if (_integrity) return;

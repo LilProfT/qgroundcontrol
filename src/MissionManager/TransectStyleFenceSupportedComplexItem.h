@@ -26,10 +26,6 @@ protected slots:
     void _listenFences      (void);
 
 protected:
-    void _buildAndAppendMissionItems (QList<MissionItem*>& items, QObject* missionItemParent) override;
-    void _appendSprayControl(QList<MissionItem*>& items, QObject* missionItemParent, int& seqNum, MAV_FRAME mavFrame, bool enable);
-
-    QList<QGCMapPolygon::CoordInfo_t> _wholepath;
     QList<QVariantList> _visualAvoidances;
 
     MissionModel _model;

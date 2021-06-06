@@ -135,13 +135,15 @@ void MissionManager::generateResumeMission(int resumeIndex)
 
     bool addHomePosition = _vehicle->firmwarePlugin()->sendHomePositionToVehicle();
 
+    MissionItem* changeYawItem;
     int prefixCommandCount = 0;
     for (int i=0; i<_missionItems.count(); i++) {
         MissionItem* oldItem = _missionItems[i];
-    const MissionCommandUIInfo* uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), oldItem->command());
-
+        if (oldItem->command() == MAV_CMD_CONDITION_YAW) {
+            changeYawItem = oldItem;
+        }
         if (i == resumeIndex) {
-
+            
             QGeoCoordinate coordinate = _vehicle->resumeCoordinate();
             // [UGLY] this monstrosity comes from SimpleMissionItem::setCoordinate
             // There isn't MissionItem::setCoordinate (but MissionItem::coordinate exists, what the heck).
@@ -158,6 +160,17 @@ void MissionManager::generateResumeMission(int resumeIndex)
             if (i < resumeIndex) {
                 prefixCommandCount++;
             }
+            MissionItem* newItem = new MissionItem(*oldItem, this);
+            newItem->setIsCurrentItem(false);
+            resumeMission.append(newItem);
+        }
+        if (i == resumeIndex) {
+            if (changeYawItem) {
+                MissionItem* newChangeYawItem = new MissionItem(*changeYawItem, this);
+                newChangeYawItem->setIsCurrentItem(false);
+                resumeMission.append(newChangeYawItem);
+            }
+
             MissionItem* newItem = new MissionItem(*oldItem, this);
             newItem->setIsCurrentItem(false);
             resumeMission.append(newItem);

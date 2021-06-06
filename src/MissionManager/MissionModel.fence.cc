@@ -109,6 +109,7 @@ void MissionModel::_integrateFences()
 
         // >>>>>>>> DIFF HERE <<<<<<<<<
         QPolygonF rgNedVertices = fence->toPolygonF(_tangentOrigin);
+        const double distance = _avoidDistance;
         // >>>>>>>> DIFF HERE <<<<<<<<<
 
         // Walk the edges, offsetting by the specified distance
@@ -156,7 +157,6 @@ void MissionModel::_integrateFences()
         QList<int> waypointIndices;
         QList<int> sprayIndices;
         const int l = inputSteps.count();
-        qDebug() << "l: " << l;
 
         // filtering
         for (int i=0; i<l; i++) {
