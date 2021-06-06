@@ -131,7 +131,8 @@ void MissionManager::generateResumeMission(int resumeIndex)
                            << MAV_CMD_VIDEO_START_CAPTURE
                            << MAV_CMD_VIDEO_STOP_CAPTURE
                            << MAV_CMD_DO_CHANGE_SPEED
-                           << MAV_CMD_SET_CAMERA_MODE;
+                           << MAV_CMD_SET_CAMERA_MODE
+                           << MAV_CMD_NAV_TAKEOFF;
 
     bool addHomePosition = _vehicle->firmwarePlugin()->sendHomePositionToVehicle();
 
