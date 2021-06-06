@@ -99,6 +99,8 @@ public:
 //    void setInclusionFences(QList<QGCFencePolygon> fences); // unimplemented
     void setStartSeqNum(int value) { _startSeqNum = value; };
     void setMissionItemParent(QObject* value) { _missionItemParent = value; };
+    void setAvoidDistance(double value) { _avoidDistance = value; }
+    int  endSeqNum() const;
 
     void pregenIntegrate();
     void postgenIntegrate();
@@ -128,7 +130,7 @@ private:
     QObject* _missionItemParent;
 
     QGeoCoordinate _tangentOrigin;
-    double distance = 3.0; // TODO gridSpacing / 2
+    double _avoidDistance;
 
     bool _integrity = true;
 };

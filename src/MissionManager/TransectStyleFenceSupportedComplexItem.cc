@@ -52,12 +52,12 @@ void TransectStyleFenceSupportedComplexItem::_rebuildTransects (void)
         _minAMSLAltitude = _maxAMSLAltitude = requestedAltitude + (_cameraCalc.distanceToSurfaceRelative() ? _missionController->plannedHomePosition().altitude() : 0);
     }
 
-    // [mismart] try
     double requestedAltitude = _cameraCalc.distanceToSurface()->rawValue().toDouble();
     double yaw = getYaw();
-//    double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
+    double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
 
     _model.setExclusionFences(_masterController->geoFenceController()->polygons());
+    _model.setAvoidDistance(gridSpacing / 2);
 
     _model.clearStep();
     _model.appendHoldAltitude(requestedAltitude);
@@ -69,10 +69,7 @@ void TransectStyleFenceSupportedComplexItem::_rebuildTransects (void)
         _model.appendWaypoint(transect[1].coord);
     }
 
-    qDebug() << "before integrate" << _model;
     _model.pregenIntegrate();
-    qDebug() << "after integrate" << _model;
-    // [/mismart] try
 
     // Calc bounding cube
     double north = 0.0;
@@ -128,73 +125,16 @@ void TransectStyleFenceSupportedComplexItem::_rebuildTransects (void)
     _amslExitAltChanged();
 }
 
-void TransectStyleFenceSupportedComplexItem::_buildAndAppendMissionItems(QList<MissionItem*>& items, QObject* missionItemParent)
-{
-    // [ATTENTION] This method is OVERIDEN in SurveyComplexItem
-    // [COPY] from base class, simplify, remove all the image capture feature
-    qCDebug(TransectStyleFenceSupportedComplexItemLog) << "_buildAndAppendMissionItems >>> mismart <<<";
-
-    // Now build the mission items from the transect points
-
-    int seqNum =                    _sequenceNumber;
-
-    MAV_FRAME mavFrame = followTerrain() || !_cameraCalc.distanceToSurfaceRelative() ? MAV_FRAME_GLOBAL : MAV_FRAME_GLOBAL_RELATIVE_ALT;
-
-    // Note: The code below is written to be understable as oppose to being compact and/or remove duplicate code
-    // [mismart] use the flattened _wholepath
-
-    bool spraying = false;
-    bool isFirst = true;
-    for (const QGCMapPolygon::CoordInfo_t& coordInfo: _wholepath) {
-        if ((!isFirst) && (spraying == false) && (coordInfo.modified == false)) {
-            spraying = true;
-            _appendSprayControl(items, missionItemParent, seqNum, mavFrame, spraying);
-        };
-
-        _appendWaypoint(items, missionItemParent, seqNum, mavFrame, 0 /* holdTime */, coordInfo.coord);
-
-        if ((spraying == true) && (coordInfo.modified == true)) {
-            spraying = false;
-            _appendSprayControl(items, missionItemParent, seqNum, mavFrame, spraying);
-        };
-
-        isFirst = false;
-    }
-    _appendSprayControl(items, missionItemParent, seqNum, mavFrame, false);
-}
-
 int TransectStyleFenceSupportedComplexItem::lastSequenceNumber(void) const
 {
     if (_loadedMissionItems.count()) {
         // We have stored mission items, just use those
         return _sequenceNumber + _loadedMissionItems.count() - 1;
-    } else if (_transects.count() == 0) {
+    } else if (_model.steps().isEmpty()) {
         // Polygon has not yet been set so we just return back a one item complex item for now
         return _sequenceNumber;
     } else {
         // We have to determine from transects
-        // [mismart] no, from _wholepath
-        int itemCount = 0;
-        QGCMapPolygon::CoordInfo_t prev;
-        for (const QGCMapPolygon::CoordInfo_t& coordInfo: _wholepath) {
-            itemCount++;
-            if (coordInfo.modified != prev.modified) itemCount++;
-            prev = coordInfo;
-        }
-
-        return _sequenceNumber + itemCount - 1;
+        return _model.endSeqNum();
     }
-}
-
-void TransectStyleFenceSupportedComplexItem::_appendSprayControl(QList<MissionItem*>& items, QObject* missionItemParent, int& seqNum, MAV_FRAME mavFrame, bool enable)
-{
-    MissionItem* item = new MissionItem(seqNum++,
-                                        216, // MAV_CMD_DO_SPRAYER,
-                                        mavFrame,
-                                        enable ? 1.0 : 0.0,
-                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
-                                        true,                                        // autoContinue
-                                        false,                                       // isCurrentItem
-                                        missionItemParent);
-    items.append(item);
 }

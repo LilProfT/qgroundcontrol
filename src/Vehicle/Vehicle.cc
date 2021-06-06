@@ -929,10 +929,6 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
             readAloud = true;
             severity = MAV_SEVERITY_CRITICAL;
         }
-//        else if (messageText.startsWith("RangeFinder")) {
-//            readAloud = true;
-//            severity = MAV_SEVERITY_CRITICAL;
-//        }
     }
 
     if (readAloud) {
