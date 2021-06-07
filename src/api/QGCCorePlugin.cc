@@ -311,7 +311,7 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     if (includeFWValues) {
         factValueGrid.appendColumn();
     }
-    factValueGrid.appendColumn();
+    //factValueGrid.appendColumn();
 
     factValueGrid.appendRow();
 
@@ -335,12 +335,12 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     rowIndex    = 0;
     column      = factValueGrid.columns()->value<QmlObjectListModel*>(1);
 
-    value = column->value<InstrumentValueData*>(rowIndex++);
-    value->setFact("Vehicle", "ClimbRate");
-    value->setIcon("arrow-simple-up.svg");
-    value->setText(value->fact()->shortDescription());
-    value->setShowUnits(true);
-    value -> setCustomUnits("");
+//    value = column->value<InstrumentValueData*>(rowIndex++);
+//    value->setFact("Vehicle", "ClimbRate");
+//    value->setIcon("arrow-simple-up.svg");
+//    value->setText(value->fact()->shortDescription());
+//    value->setShowUnits(true);
+//    value -> setCustomUnits("");
 
     value = column->value<InstrumentValueData*>(rowIndex++);
     value->setFact("Vehicle", "GroundSpeed");
@@ -348,6 +348,12 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     value->setText(value->fact()->shortDescription());
     value->setShowUnits(true);
     value -> setCustomUnits("");
+
+    value = column->value<InstrumentValueData*>(rowIndex++);
+    value->setFact("Vehicle", "FlightTime");
+    value->setIcon("timer.svg");
+    value->setText(value->fact()->shortDescription());
+    value->setShowUnits(false);
 
 
     if (includeFWValues) {
@@ -367,32 +373,25 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
         value -> setCustomUnits("");
     }
 
-    rowIndex    = 0;
-    column      = factValueGrid.columns()->value<QmlObjectListModel*>(includeFWValues ? 3 : 2);
+//    rowIndex    = 0;
+//    column      = factValueGrid.columns()->value<QmlObjectListModel*>(includeFWValues ? 3 : 2);
 
-    value = column->value<InstrumentValueData*>(rowIndex++);
-    value->setFact("Vehicle", "FlightTime");
-    value->setIcon("timer.svg");
-    value->setText(value->fact()->shortDescription());
-    value->setShowUnits(false);
+//    value = column->value<InstrumentValueData*>(rowIndex++);
+//    value->setFact("Vehicle", "FlightTime");
+//    value->setIcon("timer.svg");
+//    value->setText(value->fact()->shortDescription());
+//    value->setShowUnits(false);
 
-    value = column->value<InstrumentValueData*>(rowIndex++);
-    value->setFact("Vehicle", "FlightDistance");
-    value->setIcon("travel-walk.svg");
-    value->setText(value->fact()->shortDescription());
-    value->setShowUnits(true);
-    value -> setCustomUnits("");
+//    value = column->value<InstrumentValueData*>(rowIndex++);
+//    value->setFact("Vehicle", "FlightDistance");
+//    value->setIcon("travel-walk.svg");
+//    value->setText(value->fact()->shortDescription());
+//    value->setShowUnits(true);
+//    value -> setCustomUnits("");
 
     //Adding tank and flow rate instruments
     rowIndex    = 0;
-    column      = factValueGrid.columns()->value<QmlObjectListModel*>(includeFWValues ? 4 : 3);
-
-    value = column->value<InstrumentValueData*>(rowIndex++);
-    value -> setFact("battery1","percentRemaining");
-    value -> setIcon("tank.svg");
-    //value -> setText(value->fact()->shortDescription());
-    value -> setShowUnits(true);
-    value -> setCustomUnits("L");
+    column      = factValueGrid.columns()->value<QmlObjectListModel*>(includeFWValues ? 3 : 2);
 
     value = column->value<InstrumentValueData*>(rowIndex++);
     value -> setFact("battery2","current");
@@ -400,6 +399,13 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     //value -> setText(value->fact()->shortDescription());
     value -> setShowUnits(true);
     value -> setCustomUnits("L/min");
+
+    value = column->value<InstrumentValueData*>(rowIndex++);
+    value -> setFact("battery1","percentRemaining");
+    value -> setIcon("tank.svg");
+    //value -> setText(value->fact()->shortDescription());
+    value -> setShowUnits(true);
+    value -> setCustomUnits("L");
 
 }
 
