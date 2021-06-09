@@ -18,8 +18,8 @@ void SurveyComplexItem::_updateSprayFlowRate(void)
     qDebug() << "update spray flow rate";
     double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
     double applicationRate = _applicationRateFact.property("value").toFloat();
-    double velocity = _velocityFact.property("value").toFloat();
-    _sprayFlowRateFact.setProperty("value", 0.006 * applicationRate * gridSpacing * velocity);
+    //double velocity = _velocityFact.property("value").toFloat();
+    _sprayFlowRateFact.setProperty("value", 0.006 * applicationRate * gridSpacing);
 }
 
 void SurveyComplexItem::_optimize_Angle_EntryPoint(void)
