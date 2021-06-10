@@ -632,7 +632,6 @@ HEADERS += \
     src/MissionManager/SurveyComplexItem.h \
     src/MissionManager/SurveyPlanCreator.h \
     src/MissionManager/TakeoffMissionItem.h \
-    src/MissionManager/TransectStyleFenceSupportedComplexItem.h \
     src/MissionManager/TransectStyleComplexItem.h \
     src/MissionManager/VisualMissionItem.h \
     src/MissionManager/VTOLLandingComplexItem.h \
@@ -877,7 +876,6 @@ SOURCES += \
     src/MissionManager/SurveyComplexItem.cc \
     src/MissionManager/SurveyPlanCreator.cc \
     src/MissionManager/TakeoffMissionItem.cc \
-    src/MissionManager/TransectStyleFenceSupportedComplexItem.cc \
     src/MissionManager/TransectStyleComplexItem.cc \
     src/MissionManager/VisualMissionItem.cc \
     src/MissionManager/VTOLLandingComplexItem.cc \

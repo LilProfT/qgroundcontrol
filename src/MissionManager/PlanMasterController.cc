@@ -670,7 +670,8 @@ void PlanMasterController::setParam()
         23.880029817856098 :
         // y = 4.9601x4 - 75.444x3 + 424.44x2 - 1033.8x + 942.35
         (4.9601 * qPow(x, 4.0)) + (-75.444 * qPow(x, 3.0)) + (424.44 * qPow(x, 2.0)) + (-1033.8 * x) + 942.35;
-    if (y > 65.0) y = 65.0;
+    //<toanpt>
+    y = y / velocity;
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "SPRAY_PUMP_RATE")->setProperty("value", y);
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WPNAV_SPEED")->setProperty("value", (100 * velocity));
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WP_YAW_BEHAVIOR")->setProperty("value", 0);

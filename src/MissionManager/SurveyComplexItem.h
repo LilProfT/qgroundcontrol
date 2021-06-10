@@ -11,8 +11,7 @@
 
 #include <QTimer>
 
-// #include "TransectStyleComplexItem.h"
-#include "TransectStyleFenceSupportedComplexItem.h"
+#include "TransectStyleComplexItem.h"
 #include "MissionItem.h"
 #include "SettingsFact.h"
 #include "QGCLoggingCategory.h"
@@ -21,7 +20,7 @@ Q_DECLARE_LOGGING_CATEGORY(SurveyComplexItemLog)
 
 class PlanMasterController;
 
-class SurveyComplexItem : public TransectStyleFenceSupportedComplexItem
+class SurveyComplexItem : public TransectStyleComplexItem
 {
     Q_OBJECT
 

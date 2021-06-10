@@ -23,9 +23,9 @@ const StateMachine::StateFn InitialConnectStateMachine::_rgStates[] = {
     InitialConnectStateMachine::_stateRequestProtocolVersion,
     InitialConnectStateMachine::_stateRequestCompInfo,
     InitialConnectStateMachine::_stateRequestParameters,
-    InitialConnectStateMachine::_stateRequestMission,
-    InitialConnectStateMachine::_stateRequestGeoFence,
-    InitialConnectStateMachine::_stateRequestRallyPoints,
+    //InitialConnectStateMachine::_stateRequestMission,
+    //InitialConnectStateMachine::_stateRequestGeoFence,
+    //InitialConnectStateMachine::_stateRequestRallyPoints,
     InitialConnectStateMachine::_stateSignalInitialConnectComplete
 };
 
@@ -34,9 +34,9 @@ const int InitialConnectStateMachine::_rgProgressWeights[] = {
     1, //_stateRequestProtocolVersion
     5, //_stateRequestCompInfo
     5, //_stateRequestParameters
-    2, //_stateRequestMission
-    1, //_stateRequestGeoFence
-    1, //_stateRequestRallyPoints
+    //2, //_stateRequestMission
+    //1, //_stateRequestGeoFence
+    //1, //_stateRequestRallyPoints
     1, //_stateSignalInitialConnectComplete
 };
 

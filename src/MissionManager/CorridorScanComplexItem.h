@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "TransectStyleFenceSupportedComplexItem.h"
+#include "TransectStyleComplexItem.h"
 #include "MissionItem.h"
 #include "SettingsFact.h"
 #include "QGCLoggingCategory.h"
@@ -18,7 +18,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(CorridorScanComplexItemLog)
 
-class CorridorScanComplexItem : public TransectStyleFenceSupportedComplexItem
+class CorridorScanComplexItem : public TransectStyleComplexItem
 {
     Q_OBJECT
 

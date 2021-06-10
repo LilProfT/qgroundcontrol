@@ -55,7 +55,8 @@ class TestTransectStyleItem : public TransectStyleComplexItem
 public:
     TestTransectStyleItem(PlanMasterController* masterController, QObject* parent = nullptr);
 
-    void adjustSurveAreaPolygon(void);
+    // [mismart] placeholder
+    double getYaw(void) override final { return 0.0; };
 
     // Overrides from ComplexMissionItem
     QString patternName         (void) const final { return QString(); }

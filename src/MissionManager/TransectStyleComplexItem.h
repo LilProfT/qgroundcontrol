@@ -17,6 +17,7 @@
 #include "QGCMapPolygon.h"
 #include "CameraCalc.h"
 #include "TerrainQuery.h"
+#include "MissionModel.h"
 
 Q_DECLARE_LOGGING_CATEGORY(TransectStyleComplexItemLog)
 
@@ -113,6 +114,7 @@ public:
     double              amslExitAlt                 (void) const final;
     double              minAMSLAltitude             (void) const final;
     double              maxAMSLAltitude             (void) const final;
+	virtual double getYaw(void) = 0;
 
     static const char* turnAroundDistanceName;
     static const char* turnAroundDistanceMultiRotorName;
@@ -137,6 +139,7 @@ protected slots:
     void _updateCoordinateAltitudes         (void);
     void _polyPathTerrainData               (bool success, const QList<TerrainPathQuery::PathHeightInfo_t>& rgPathHeightInfo);
     void _rebuildTransects                  (void);
+    void _listenFences      (void);
 
 protected:
     virtual void _rebuildTransectsPhase1    (void) = 0; ///< Rebuilds the _transects array
@@ -182,7 +185,7 @@ protected:
 //    QList<QList<TerrainPathQuery::PathHeightInfo_t>>    _transectsPathHeightInfo;
     QList<TerrainPathQuery::PathHeightInfo_t>   _rgPathHeightInfo;      ///< Path height for each segment includes turn segments
     QList<CoordInfo_t>                          _rgFlightPathCoordInfo; ///< Fully calculated flight path (including terrain if needed)
-
+	
     bool            _ignoreRecalc =     false;
     double          _complexDistance =  qQNaN();
     int             _cameraShots =      0;
@@ -192,6 +195,7 @@ protected:
     bool            _followTerrain =    false;
     double          _minAMSLAltitude =  qQNaN();
     double          _maxAMSLAltitude =  qQNaN();
+    MissionModel _model;
 
     QObject*            _loadedMissionItemsParent = nullptr;	///< Parent for all items in _loadedMissionItems for simpler delete
     QList<MissionItem*> _loadedMissionItems;                    ///< Mission items loaded from plan file

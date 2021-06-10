@@ -142,13 +142,13 @@ void MissionModel::_processHoldYaws()
             );
             step->items.append(changeYawItem);
 
-            // hold at position for 5 sec, for yaw to finish changing
+            // hold at position for 2 sec
             QGeoCoordinate coordinate = qobject_cast<WaypointStep*>(step)->coord;
             MissionItem* holdingWaypointItem = new MissionItem(
                         0,   // set it later
                         MAV_CMD_NAV_WAYPOINT,
                         _mavFrame,
-                        5.0, // hold time
+                        2.0, // hold time
                         0.0,                                         // No acceptance radius specified
                         0.0,                                         // Pass through waypoint
                         std::numeric_limits<double>::quiet_NaN(),    // Yaw unchanged
@@ -160,6 +160,19 @@ void MissionModel::_processHoldYaws()
                         _missionItemParent
             );
             step->items.append(holdingWaypointItem);
+
+            MissionItem* anotherChangeYawItem = new MissionItem(
+                        0,   // set it later
+                        MAV_CMD_CONDITION_YAW,
+                        _mavFrame,
+                        yaw,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,                // empty
+                        true,                                        // autoContinue
+                        false,                                       // isCurrentItem
+                        _missionItemParent
+            );
+            step->items.append(anotherChangeYawItem);
+
             toChange = false;
         }
     }

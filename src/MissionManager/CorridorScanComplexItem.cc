@@ -31,7 +31,7 @@ const char* CorridorScanComplexItem::_jsonEntryPointKey =       "EntryPoint";
 const char* CorridorScanComplexItem::jsonComplexItemTypeValue = "CorridorScan";
 
 CorridorScanComplexItem::CorridorScanComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlFile, QObject* parent)
-    : TransectStyleFenceSupportedComplexItem  (masterController, flyView, settingsGroup, parent)
+    : TransectStyleComplexItem  (masterController, flyView, settingsGroup, parent)
     , _entryPoint               (0)
     , _metaDataMap              (FactMetaData::createMapFromJsonFile(QStringLiteral(":/json/CorridorScan.SettingsGroup.json"), this))
     , _corridorWidthFact        (settingsGroup, _metaDataMap[corridorWidthName])

@@ -45,6 +45,7 @@ const char* TransectStyleComplexItem::_jsonCameraShotsKey =                 "Cam
 TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterController, bool flyView, QString settingsGroup, QObject* parent)
     : ComplexMissionItem                (masterController, flyView, parent)
     , _cameraCalc                       (masterController, settingsGroup)
+    , _model                            (_sequenceNumber, followTerrain() || !_cameraCalc.distanceToSurfaceRelative() ? MAV_FRAME_GLOBAL : MAV_FRAME_GLOBAL_RELATIVE_ALT, this /* temporary missionItemParent */, this)
     , _metaDataMap                      (FactMetaData::createMapFromJsonFile(QStringLiteral(":/json/TransectStyle.SettingsGroup.json"), this))
     , _turnAroundDistanceFact           (settingsGroup, _metaDataMap[_controllerVehicle->multiRotor() ? turnAroundDistanceMultiRotorName : turnAroundDistanceName])
     , _cameraTriggerInTurnAroundFact    (settingsGroup, _metaDataMap[cameraTriggerInTurnAroundName])
@@ -121,6 +122,10 @@ TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterC
     connect(&_cameraCalc,                               &CameraCalc::distanceToSurfaceRelativeChanged,          this, &TransectStyleComplexItem::maxAMSLAltitudeChanged);
 
     connect(&_surveyAreaPolygon,                        &QGCMapPolygon::isValidChanged, this, &TransectStyleComplexItem::readyForSaveStateChanged);
+
+    auto fences = _masterController->geoFenceController()->polygons();
+    connect(fences, &QmlObjectListModel::countChanged, this, &TransectStyleComplexItem::_rebuildTransects);
+    connect(fences, &QmlObjectListModel::countChanged, this, &TransectStyleComplexItem::_listenFences);
 
     setDirty(false);
 }
@@ -386,7 +391,7 @@ bool TransectStyleComplexItem::hoverAndCaptureAllowed(void) const
     return _controllerVehicle->multiRotor() || _controllerVehicle->vtol();
 }
 
-void TransectStyleComplexItem::_rebuildTransects(void)
+void TransectStyleComplexItem::_rebuildTransects (void)
 {
     if (_ignoreRecalc) {
         return;
@@ -407,6 +412,24 @@ void TransectStyleComplexItem::_rebuildTransects(void)
         // Not following terrain so we can build the flight path now
         _buildRawFlightPath();
     }
+    double requestedAltitude = _cameraCalc.distanceToSurface()->rawValue().toDouble();
+    double yaw = getYaw();
+    double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
+
+    _model.setExclusionFences(_masterController->geoFenceController()->polygons());
+    _model.setAvoidDistance(gridSpacing / 2);
+
+    _model.clearStep();
+    _model.appendHoldAltitude(requestedAltitude);
+    _model.appendHoldYaw(yaw);
+
+    for (const QList<CoordInfo_t>& transect: _transects) {
+        _model.appendWaypoint(transect[0].coord);
+        _model.appendSpray();
+        _model.appendWaypoint(transect[1].coord);
+    }
+
+    _model.pregenIntegrate();
 
     // Calc bounding cube
     double north = 0.0;
@@ -417,19 +440,20 @@ void TransectStyleComplexItem::_rebuildTransects(void)
     double top = 0.;
     // Generate the visuals transect representation
     _visualTransectPoints.clear();
-    for (const QList<CoordInfo_t>& transect: _transects) {
-        for (const CoordInfo_t& coordInfo: transect) {
-            _visualTransectPoints.append(QVariant::fromValue(coordInfo.coord));
-            double lat = coordInfo.coord.latitude()  + 90.0;
-            double lon = coordInfo.coord.longitude() + 180.0;
+    for (Step* step: _model.steps()) {
+            if (step->type() != Step::Type::WAYPOINT) continue;
+            QGeoCoordinate coord = qobject_cast<WaypointStep*>(step)->coord;
+            _visualTransectPoints.append(QVariant::fromValue(coord));
+            double lat = coord.latitude()  + 90.0;
+            double lon = coord.longitude() + 180.0;
             north   = fmax(north, lat);
             south   = fmin(south, lat);
             east    = fmax(east,  lon);
             west    = fmin(west,  lon);
-            bottom  = fmin(bottom, coordInfo.coord.altitude());
-            top     = fmax(top, coordInfo.coord.altitude());
-        }
+            bottom  = fmin(bottom, coord.altitude());
+            top     = fmax(top, coord.altitude());
     }
+
     //-- Update bounding cube for airspace management control
     _setBoundingCube(QGCGeoBoundingCube(
                          QGeoCoordinate(north - 90.0, west - 180.0, bottom),
@@ -868,7 +892,7 @@ int TransectStyleComplexItem::lastSequenceNumber(void) const
     if (_loadedMissionItems.count()) {
         // We have stored mission items, just use those
         return _sequenceNumber + _loadedMissionItems.count() - 1;
-    } else if (_transects.count() == 0) {
+    } else if (_model.steps().isEmpty()) {
         // Polygon has not yet been set so we just return back a one item complex item for now
         return _sequenceNumber;
     } else if (_rgFlightPathCoordInfo.count()) {
@@ -925,15 +949,8 @@ int TransectStyleComplexItem::lastSequenceNumber(void) const
 
         return _sequenceNumber + itemCount - 1;
     } else {
-        // We can end up hear if we are follow terrain and the flight path isn't ready yet. So we just return an inaccurate number until
-        // we know the real one.
-        int itemCount = 0;
-
-        for (const QList<CoordInfo_t>& rgCoordInfo: _transects) {
-            itemCount += rgCoordInfo.count();
-        }
-
-        return _sequenceNumber + itemCount - 1;
+        // We have to determine from transects
+        return _model.endSeqNum();
     }
 }
 
@@ -1231,5 +1248,15 @@ double TransectStyleComplexItem::maxAMSLAltitude(void) const
         return _maxAMSLAltitude;
     } else {
         return _cameraCalc.distanceToSurface()->rawValue().toDouble() + (_cameraCalc.distanceToSurfaceRelative() ? _missionController->plannedHomePosition().altitude() : 0);
+    }
+}
+
+void TransectStyleComplexItem::_listenFences (void)
+{
+    auto fences = _masterController->geoFenceController()->polygons();
+    for (int i=0; i < fences->count(); i++) {
+        QGCFencePolygon* fence = qobject_cast<QGCFencePolygon*>(fences->get(i));
+        connect(fence, &QGCMapPolygon::pathChanged, this, &TransectStyleComplexItem::_rebuildTransects, Qt::UniqueConnection);
+        connect(fence, &QGCFencePolygon::inclusionChanged, this, &TransectStyleComplexItem::_rebuildTransects, Qt::UniqueConnection);
     }
 }

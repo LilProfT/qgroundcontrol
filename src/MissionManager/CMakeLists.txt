@@ -131,8 +131,6 @@ add_library(MissionManager
 	TakeoffMissionItem.h
 	TransectStyleComplexItem.cc
 	TransectStyleComplexItem.h
-	TransectStyleFenceSupportedComplexItem.cc
-	TransectStyleFenceSupportedComplexItem.h
 	VisualMissionItem.cc
 	VisualMissionItem.h
 	VTOLLandingComplexItem.cc

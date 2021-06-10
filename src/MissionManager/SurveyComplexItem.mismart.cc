@@ -18,8 +18,8 @@ void SurveyComplexItem::_updateSprayFlowRate(void)
     qDebug() << "update spray flow rate";
     double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
     double applicationRate = _applicationRateFact.property("value").toFloat();
-    //double velocity = _velocityFact.property("value").toFloat();
-    _sprayFlowRateFact.setProperty("value", 0.006 * applicationRate * gridSpacing);
+    double velocity = _velocityFact.property("value").toFloat();
+    _sprayFlowRateFact.setProperty("value", 0.006 * applicationRate * gridSpacing * velocity);
 }
 
 void SurveyComplexItem::_optimize_Angle_EntryPoint(void)
@@ -126,7 +126,7 @@ void SurveyComplexItem::_toggleAutoOptimize(QVariant value) {
 void SurveyComplexItem::_buildAndAppendMissionItems (QList<MissionItem*>& items, QObject* missionItemParent)
 {
     // [COPY] from TransectStyleComplexItem, simplify, remove all the image capture feature
-    qCDebug(TransectStyleFenceSupportedComplexItemLog) << "_buildAndAppendMissionItems >>> mismart <<<";
+    qCDebug(TransectStyleComplexItemLog) << "_buildAndAppendMissionItems >>> mismart <<<";
 
     _model.setMissionItemParent(missionItemParent);
     items.append(_model.generateItems());
