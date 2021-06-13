@@ -23,9 +23,9 @@ const StateMachine::StateFn InitialConnectStateMachine::_rgStates[] = {
     InitialConnectStateMachine::_stateRequestProtocolVersion,
     InitialConnectStateMachine::_stateRequestCompInfo,
     InitialConnectStateMachine::_stateRequestParameters,
-    //InitialConnectStateMachine::_stateRequestMission,
-    //InitialConnectStateMachine::_stateRequestGeoFence,
-    //InitialConnectStateMachine::_stateRequestRallyPoints,
+    InitialConnectStateMachine::_stateRequestMission,
+    InitialConnectStateMachine::_stateRequestGeoFence,
+    InitialConnectStateMachine::_stateRequestRallyPoints,
     InitialConnectStateMachine::_stateSignalInitialConnectComplete
 };
 
@@ -34,9 +34,9 @@ const int InitialConnectStateMachine::_rgProgressWeights[] = {
     1, //_stateRequestProtocolVersion
     5, //_stateRequestCompInfo
     5, //_stateRequestParameters
-    //2, //_stateRequestMission
-    //1, //_stateRequestGeoFence
-    //1, //_stateRequestRallyPoints
+    2, //_stateRequestMission
+    1, //_stateRequestGeoFence
+    1, //_stateRequestRallyPoints
     1, //_stateSignalInitialConnectComplete
 };
 
@@ -306,18 +306,21 @@ void InitialConnectStateMachine::_stateRequestMission(StateMachine* stateMachine
     disconnect(vehicle->_parameterManager, &ParameterManager::loadProgressChanged, connectMachine,
             &InitialConnectStateMachine::gotProgressUpdate);
 
-    if (!sharedLink) {
-        qCDebug(InitialConnectStateMachineLog) << "_stateRequestMission: Skipping first mission load request due to no primary link";
-        connectMachine->advance();
-    } else {
-        if (sharedLink->linkConfiguration()->isHighLatency() || sharedLink->isPX4Flow() || sharedLink->isLogReplay()) {
-            qCDebug(InitialConnectStateMachineLog) << "_stateRequestMission: Skipping first mission load request due to link type";
-            vehicle->_firstMissionLoadComplete();
-        } else {
-            qCDebug(InitialConnectStateMachineLog) << "_stateRequestMission";
-            vehicle->_missionManager->loadFromVehicle();
-        }
-    }
+    qCDebug(InitialConnectStateMachineLog) << "_stateRequestMission: Skipping first mission load request due to link type";
+    vehicle->_firstMissionLoadComplete();
+
+//    if (!sharedLink) {
+//        qCDebug(InitialConnectStateMachineLog) << "_stateRequestMission: Skipping first mission load request due to no primary link";
+//        connectMachine->advance();
+//    } else {
+//        if (sharedLink->linkConfiguration()->isHighLatency() || sharedLink->isPX4Flow() || sharedLink->isLogReplay()) {
+//            qCDebug(InitialConnectStateMachineLog) << "_stateRequestMission: Skipping first mission load request due to link type";
+//            vehicle->_firstMissionLoadComplete();
+//        } else {
+//            qCDebug(InitialConnectStateMachineLog) << "_stateRequestMission";
+//            vehicle->_missionManager->loadFromVehicle();
+//        }
+//    }
 }
 
 void InitialConnectStateMachine::_stateRequestGeoFence(StateMachine* stateMachine)
@@ -326,23 +329,26 @@ void InitialConnectStateMachine::_stateRequestGeoFence(StateMachine* stateMachin
     Vehicle*                    vehicle         = connectMachine->_vehicle;
     SharedLinkInterfacePtr      sharedLink      = vehicle->vehicleLinkManager()->primaryLink().lock();
 
-    if (!sharedLink) {
-        qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence: Skipping first geofence load request due to no primary link";
-        connectMachine->advance();
-    } else {
-        if (sharedLink->linkConfiguration()->isHighLatency() || sharedLink->isPX4Flow() || sharedLink->isLogReplay()) {
-            qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence: Skipping first geofence load request due to link type";
-            vehicle->_firstGeoFenceLoadComplete();
-        } else {
-            if (vehicle->_geoFenceManager->supported()) {
-                qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence";
-                vehicle->_geoFenceManager->loadFromVehicle();
-            } else {
-                qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence: skipped due to no support";
-                vehicle->_firstGeoFenceLoadComplete();
-            }
-        }
-    }
+    qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence: Skipping first geofence load request due to link type";
+    vehicle->_firstGeoFenceLoadComplete();
+
+//    if (!sharedLink) {
+//        qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence: Skipping first geofence load request due to no primary link";
+//        connectMachine->advance();
+//    } else {
+//        if (sharedLink->linkConfiguration()->isHighLatency() || sharedLink->isPX4Flow() || sharedLink->isLogReplay()) {
+//            qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence: Skipping first geofence load request due to link type";
+//            vehicle->_firstGeoFenceLoadComplete();
+//        } else {
+//            if (vehicle->_geoFenceManager->supported()) {
+//                qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence";
+//                vehicle->_geoFenceManager->loadFromVehicle();
+//            } else {
+//                qCDebug(InitialConnectStateMachineLog) << "_stateRequestGeoFence: skipped due to no support";
+//                vehicle->_firstGeoFenceLoadComplete();
+//            }
+//        }
+//    }
 }
 
 void InitialConnectStateMachine::_stateRequestRallyPoints(StateMachine* stateMachine)
@@ -351,22 +357,25 @@ void InitialConnectStateMachine::_stateRequestRallyPoints(StateMachine* stateMac
     Vehicle*                    vehicle         = connectMachine->_vehicle;
     SharedLinkInterfacePtr      sharedLink      = vehicle->vehicleLinkManager()->primaryLink().lock();
 
-    if (!sharedLink) {
-        qCDebug(InitialConnectStateMachineLog) << "_stateRequestRallyPoints: Skipping first rally point load request due to no primary link";
-        connectMachine->advance();
-    } else {
-        if (sharedLink->linkConfiguration()->isHighLatency() || sharedLink->isPX4Flow() || sharedLink->isLogReplay()) {
-            qCDebug(InitialConnectStateMachineLog) << "_stateRequestRallyPoints: Skipping first rally point load request due to link type";
-            vehicle->_firstRallyPointLoadComplete();
-        } else {
-            if (vehicle->_rallyPointManager->supported()) {
-                vehicle->_rallyPointManager->loadFromVehicle();
-            } else {
-                qCDebug(InitialConnectStateMachineLog) << "_stateRequestRallyPoints: skipping due to no support";
-                vehicle->_firstRallyPointLoadComplete();
-            }
-        }
-    }
+    qCDebug(InitialConnectStateMachineLog) << "_stateRequestRallyPoints: Skipping first rally point load request due to link type";
+    vehicle->_firstRallyPointLoadComplete();
+
+//    if (!sharedLink) {
+//        qCDebug(InitialConnectStateMachineLog) << "_stateRequestRallyPoints: Skipping first rally point load request due to no primary link";
+//        connectMachine->advance();
+//    } else {
+//        if (sharedLink->linkConfiguration()->isHighLatency() || sharedLink->isPX4Flow() || sharedLink->isLogReplay()) {
+//            qCDebug(InitialConnectStateMachineLog) << "_stateRequestRallyPoints: Skipping first rally point load request due to link type";
+//            vehicle->_firstRallyPointLoadComplete();
+//        } else {
+//            if (vehicle->_rallyPointManager->supported()) {
+//                vehicle->_rallyPointManager->loadFromVehicle();
+//            } else {
+//                qCDebug(InitialConnectStateMachineLog) << "_stateRequestRallyPoints: skipping due to no support";
+//                vehicle->_firstRallyPointLoadComplete();
+//            }
+//        }
+//    }
 }
 
 void InitialConnectStateMachine::_stateSignalInitialConnectComplete(StateMachine* stateMachine)

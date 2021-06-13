@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <manifest package="ai.mismart.gcs" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="3.0.0-243-gd759437" android:versionCode="300243" android:installLocation="auto">
-    <application android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Mismart Ground Station" android:icon="@drawable/icon" android:requestLegacyExternalStorage="true">
+    <application android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Mismart Ground Station" android:icon="@drawable/icon" android:requestLegacyExternalStorage="true" android:largeHeap="true">
         <activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation" android:name="org.mavlink.qgroundcontrol.QGCActivity" android:label="Mismart Ground Station" android:screenOrientation="sensorLandscape" android:launchMode="singleTask" android:keepScreenOn="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
