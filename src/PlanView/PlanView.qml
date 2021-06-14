@@ -27,6 +27,8 @@ import QGroundControl.ShapeFileHelper   1.0
 import QGroundControl.Airspace          1.0
 import QGroundControl.Airmap            1.0
 
+import QGroundControl.FlightDisplay     1.0
+
 Item {
     id: _root
 
@@ -57,6 +59,11 @@ Item {
 
     //Mismart stuffs:
     property bool   _missionEditorTabVisible:           true
+    property real   _fullItemZorder:                    0
+    property real   _pipItemZorder:                     QGroundControl.zOrderWidgets
+    property bool   _mainWindowIsMap:                   editorMap.pipState.state === editorMap.pipState.fullState
+    property bool   _isFullWindowItemDark:              _mainWindowIsMap ? editorMap.isSatelliteMap : true
+
 
     readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints]
 
@@ -421,7 +428,7 @@ Item {
 
         FlightMap {
             id:                         editorMap
-            anchors.fill:               parent
+            //anchors.fill:               parent
             mapName:                    "MissionEditor"
             allowGCSLocationCenter:     true
             allowVehicleLocationCenter: true
@@ -437,14 +444,41 @@ Item {
             property real _rightToolWidth:      rightPanel.width + rightPanel.anchors.rightMargin
             property real _nonInteractiveOpacity:  0.5
 
+            // Mismart: Add a camera view for plan view
+            property Item   pipState:                   _pipState
+            property bool   _saveZoomLevelSetting:      true
+            property bool   pipMode:                    !_mainWindowIsMap
+
+            QGCPipState {
+                id:         _pipState
+                pipOverlay: _pipOverlay
+                isDark:     _isFullWindowItemDark
+            }
+
+            function _adjustMapZoomForPipMode() {
+                _saveZoomLevelSetting = false
+                if (pipMode) {
+                    if (QGroundControl.flightMapZoom > 3) {
+                        zoomLevel = QGroundControl.flightMapZoom - 3
+                    }
+                } else {
+                    zoomLevel = QGroundControl.flightMapZoom
+                }
+                _saveZoomLevelSetting = true
+            }
+
+            onPipModeChanged: _adjustMapZoomForPipMode()
+
             // Initial map position duplicates Fly view position
             Component.onCompleted: editorMap.center = QGroundControl.flightMapPosition
 
             QGCMapPalette { id: mapPal; lightColors: editorMap.isSatelliteMap }
 
             onZoomLevelChanged: {
-                QGroundControl.flightMapZoom = zoomLevel
-                updateAirspace(false)
+                if (_saveZoomLevelSetting) {
+                    QGroundControl.flightMapZoom = zoomLevel
+                    updateAirspace(false)
+                }
             }
             onCenterChanged: {
                 QGroundControl.flightMapPosition = center
@@ -610,6 +644,37 @@ Item {
                     border.width:   object.lineWidth
                 }
             }
+            MapScale {
+                id:                 videoMapScale
+                anchors.margins:    _toolsMargin
+                anchors.left:       parent.left
+                anchors.top:        parent.top
+                mapControl:         editorMap
+                buttonsOnLeft:      false
+                visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && editorMap.pipState.state === editorMap.pipState.windowState
+
+                property real centerInset: visible ? parent.height - y : 0
+            }
+        }
+
+        //-----------------------------------------------------------
+        //Mismart: Add a camera view in Plan View, testing
+        FlyViewVideo {
+            id: videoControl
+        }
+
+        QGCPipOverlay {
+            id:                     _pipOverlay
+            anchors.left:           parent.left
+            anchors.bottom:         parent.bottom
+            anchors.margins:        _toolsMargin
+            item1IsFullSettingsKey: "MainPlanWindowIsMap"
+            item1:                  editorMap
+            item2:                  QGroundControl.videoManager.hasVideo ? videoControl : null
+            fullZOrder:             _fullItemZorder
+            pipZOrder:              _pipItemZorder
+            show:                   !QGroundControl.videoManager.fullScreen &&
+                                        (videoControl.pipState.state === videoControl.pipState.pipState || editorMap.pipState.state === editorMap.pipState.pipState)
         }
 
         //-----------------------------------------------------------
@@ -983,6 +1048,7 @@ Item {
             terrainButtonVisible:   _editingLayer === _layerMission
             terrainButtonChecked:   terrainStatus.visible
             onTerrainButtonClicked: terrainStatus.toggleVisible()
+            visible:                false
         }
     }
 
