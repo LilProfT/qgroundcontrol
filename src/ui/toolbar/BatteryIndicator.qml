@@ -30,7 +30,7 @@ Item {
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
     //Mismart: Custom, hard-coded UI for only a single battery
-    property var battery: _activeVehicle && _activeVehicle.batteries.count ? _activeVehicle.batteries.get(0) : 0
+    property var battery: _activeVehicle && _activeVehicle.batteries.count ? _activeVehicle.batteries.get(0) : undefined
 
     function getBatteryColor() {
         switch (battery.chargeState.rawValue) {
