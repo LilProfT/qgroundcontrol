@@ -670,10 +670,20 @@ void PlanMasterController::setParam()
 {
     float velocity = this->_surveyComplexItem->velocity()->property("value").toFloat();   
     float x = this->_surveyComplexItem->sprayFlowRate()->property("value").toFloat();
-    float y = (x < 2.72) ?
-        23.880029817856098 :
-        // y = 4.9601x4 - 75.444x3 + 424.44x2 - 1033.8x + 942.35
-        (4.9601 * qPow(x, 4.0)) + (-75.444 * qPow(x, 3.0)) + (424.44 * qPow(x, 2.0)) + (-1033.8 * x) + 942.35;
+    float y = 0;
+    if (x >= 4.8) {
+       y = 75.0;
+    } else if (x < 2.08) {
+       y = 25.0;
+    } else {
+        // y =  -1.525x4 + 22.794x3 - 118.86x2 +  271.63x - 202.45
+       y = (-1.525 * qPow(x, 4.0)) + (22.794 * qPow(x, 3.0)) + (- 118.86 * qPow(x, 2.0)) + (271.63 * x)  +  (- 202.45);
+    }
+
+//    float y = (x < 2.08) ?
+//        25.0 :
+//        // y =  -1.525x4 + 22.794x3 - 118.86x2 +  271.63x - 202.45
+//        (-1.525 * qPow(x, 4.0)) + (22.794 * qPow(x, 3.0)) + (- 118.86 * qPow(x, 2.0)) + (271.63 * x)  +  (- 202.45);
     //<toanpt>
     y = y / velocity;
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "SPRAY_PUMP_RATE")->setProperty("value", y);

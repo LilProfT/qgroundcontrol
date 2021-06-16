@@ -35,8 +35,8 @@
     "Ready to Fly": "Readytofly.wav",
     "AvoidProximity High": "avoidprox_HIGH.wav",
     "AvoidProximity Low": "avoidprox_LOW.wav",
-    "Pump On": "Pump_on.wav",
-    "Pump Off": "Pump_off.wav",
-    "Proximity Avoidance Warning": "Proximity_avoidance_warning.wav",
+    "Sprayer High": "Pump_on.wav",
+    "Sprayer Low": "Pump_off.wav",
+    "Obstacle is too close. Braking": "Proximity_avoidance_warning.wav",
     "Upload done": "Upload_done.wav"
 }

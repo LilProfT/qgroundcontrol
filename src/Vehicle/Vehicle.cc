@@ -916,7 +916,6 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
     // If the message is NOTIFY or higher severity, or starts with a '#',
     // then read it aloud.
     bool readAloud = false;
-    //messageText = "AvoidProximity";
 
     if (messageText.startsWith("#")) {
         messageText.remove(0, 1);
@@ -928,8 +927,18 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
         if (messageText.startsWith("AvoidProximity")) {
             readAloud = true;
             severity = MAV_SEVERITY_CRITICAL;
+        } else if (messageText.startsWith("Pump On")) {
+            readAloud = true;
+            severity = MAV_SEVERITY_CRITICAL;
+        } else if (messageText.startsWith("Pump Off")) {
+            readAloud = true;
+            severity = MAV_SEVERITY_CRITICAL;
         }
     }
+
+    //readAloud = true;
+    //messageText = "Battery 2 is low ";
+
 
     if (readAloud) {
         if (!skipSpoken) {
@@ -1377,7 +1386,6 @@ void Vehicle::_handleSysStatus(mavlink_message_t& message)
         if (!_readyToFlyAvailable) {
             _readyToFlyAvailable = true;
             //if (!skipSpoken) {
-            qgcApp()->toolbox()->audioOutput()->say("Ready To Fly");
             //}
             emit readyToFlyAvailableChanged(true);
         }
@@ -1385,6 +1393,8 @@ void Vehicle::_handleSysStatus(mavlink_message_t& message)
         bool newReadyToFly = sysStatus.onboard_control_sensors_health & MAV_SYS_STATUS_PREARM_CHECK;
         if (newReadyToFly != _readyToFly) {
             _readyToFly = newReadyToFly;
+            qgcApp()->toolbox()->audioOutput()->say("Ready To Fly");
+
             emit readyToFlyChanged(_readyToFly);
         }
     }
