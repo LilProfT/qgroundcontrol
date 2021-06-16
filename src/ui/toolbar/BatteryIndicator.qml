@@ -29,78 +29,22 @@ Item {
 
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
-    //Mismart: Custom, hard-coded UI for only a single battery
-    property var battery: _activeVehicle && _activeVehicle.batteries.count ? _activeVehicle.batteries.get(0) : undefined
-
-    function getBatteryColor() {
-        switch (battery.chargeState.rawValue) {
-        case MAVLink.MAV_BATTERY_CHARGE_STATE_OK:
-            return qgcPal.text
-        case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
-            return qgcPal.colorOrange
-        case MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL:
-        case MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY:
-        case MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED:
-        case MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY:
-            return qgcPal.colorRed
-        default:
-            return qgcPal.text
-        }
-    }
-
-    function getBatteryPercentageText() {
-        if (!isNaN(battery.percentRemaining.rawValue)) {
-            if (battery.percentRemaining.rawValue > 98.9) {
-                return qsTr("100%")
-            } else {
-                return battery.percentRemaining.valueString + battery.percentRemaining.units
-            }
-        } else if (!isNaN(battery.voltage.rawValue)) {
-            return battery.voltage.valueString + battery.voltage.units
-        } else if (battery.chargeState.rawValue !== MAVLink.MAV_BATTERY_CHARGE_STATE_UNDEFINED) {
-            return battery.chargeState.enumStringValue
-        }
-        return ""
-    }
-
     Row {
         id:             batteryIndicatorRow
         anchors.top:    parent.top
         anchors.bottom: parent.bottom
 
-//        Repeater {
-//            model: _activeVehicle ? _activeVehicle.batteries : 0
+        Repeater {
+            model: _activeVehicle ? _activeVehicle.batteries : 0
 
-//            //Mismart: Hiding the remaining "batteries"
-//            onItemAdded: {
-//                if (index > 1) {
-//                    item.visible = false
-//                }
-//            }
+            Loader {
+                anchors.top:        parent.top
+                anchors.bottom:     parent.bottom
+                sourceComponent:    batteryVisual
+                visible:            model.index === 0
 
-//            Loader {
-//                anchors.top:        parent.top
-//                anchors.bottom:     parent.bottom
-//                sourceComponent:    batteryVisual
-
-//                property var battery: object
-//            }
-
-        QGCColoredImage {
-            anchors.top:        parent.top
-            anchors.bottom:     parent.bottom
-            width:              height
-            sourceSize.width:   width
-            source:             "/qmlimages/Battery.svg"
-            fillMode:           Image.PreserveAspectFit
-            color:              getBatteryColor()
-        }
-
-        QGCLabel {
-            text:                   getBatteryPercentageText()
-            font.pointSize:         ScreenTools.mediumFontPointSize
-            color:                  getBatteryColor()
-            anchors.verticalCenter: parent.verticalCenter
+                property var battery: object
+            }
         }
     }
 //    MouseArea {
@@ -148,43 +92,11 @@ Item {
                 return ""
             }
 
-            function getBatteryText() {
-                var id = battery.id.rawValue;
-                if (id == 0) {
-                    return getBatteryPercentageText();
-                } else if (id == 1) {
-                    if (!isNaN(battery.percentRemaining.rawValue)) {
-                        return (battery.percentRemaining.rawValue * 20).toString() +  " lit";
-                    }
-                } else if (id == 2) {
-                    if (!isNaN(battery.current.rawValue)) {
-                        return battery.current.valueString +  "lit/min";
-                    }
-                } else {
-                    // fallback
-                    return getBatteryPercentageText();
-                }
-
-                return ""
-            }
-
-            function getBatteryImage() {
-                var id = battery.id.rawValue;
-                console.log(id);
-                var images = {
-                    0: "/qmlimages/Battery.svg",
-                    1: "/qmlimages/Flowrate.svg",
-                    2: "/qmlimages/Tank.svg"
-                };
-                return images[id];
-            }
-
             QGCColoredImage {
                 anchors.top:        parent.top
                 anchors.bottom:     parent.bottom
                 width:              height
                 sourceSize.width:   width
-                //source:             getBatteryImage()
                 source:             "/qmlimages/Battery.svg"
                 fillMode:           Image.PreserveAspectFit
                 color:              getBatteryColor()
@@ -221,9 +133,6 @@ Item {
             radius:         ScreenTools.defaultFontPixelHeight / 2
             color:          qgcPal.window
             border.color:   qgcPal.text
-
-            //Mismart: Pretty unneeded imo, since we are only using "percentage"
-            visible:        false
 
             ColumnLayout {
                 id:                 mainLayout
