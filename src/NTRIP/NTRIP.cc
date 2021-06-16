@@ -71,6 +71,19 @@ void NTRIP::_coordinateChanged(QGeoCoordinate coordinate)
         _rtkProvider->vhcPosition = _vhcPosition;
 }
 
+void NTRIP::_syncInProgressChanged(bool syncInProgress)
+{
+    qCWarning(RTKGPSLog) << "_syncInProgressChanged";
+    qCWarning(RTKGPSLog) << syncInProgress;
+
+    if (_rtkProvider != nullptr) {
+        qCWarning(RTKGPSLog) << "syncInProgress: ";
+        qCWarning(RTKGPSLog) << syncInProgress;
+
+        _rtkProvider->syncInProgress = syncInProgress;
+    }
+}
+
 void NTRIP::_tcpError(const QString errorMsg)
 {
     qgcApp()->showAppMessage(tr("NTRIP Server Error: %1").arg(errorMsg));

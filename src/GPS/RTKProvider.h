@@ -93,7 +93,7 @@ public:
                 const std::atomic_bool& requestStop);
     ~RTKProvider();
     QGeoCoordinate          vhcPosition;
-
+    bool                    syncInProgress;
     /**
      * this is called by the callback method
      */

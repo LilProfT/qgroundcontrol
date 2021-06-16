@@ -71,7 +71,10 @@ RTKProvider::~RTKProvider()
 
 void RTKProvider::gotRTCMData(QByteArray data)
 {
-    emit RTCMDataUpdate(data);
+    if (!syncInProgress) {
+        qCWarning(RTKGPSLog) << "RTCMDataUpdate";
+        emit RTCMDataUpdate(data);
+    }
 }
 
 //------------------------------------------------------------------------------//

@@ -113,6 +113,16 @@ void AudioOutput::_effectStateChanged()
     }
 }
 
+void AudioOutput::_timerSlot()
+{
+    _effect->play();
+}
+
+void AudioOutput::_playAfter(int interval)
+{
+    QTimer::singleShot(interval, this, &AudioOutput::_timerSlot);
+}
+
 void AudioOutput::_next() {
     if (_texts.size()) {
         QString text = _texts.first();

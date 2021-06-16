@@ -47,6 +47,7 @@ private slots:
 public slots:
     void _tcpError          (const QString errorMsg);
     void _coordinateChanged(QGeoCoordinate coordinate);
+    void _syncInProgressChanged(bool syncInProgress);
 
 private slots:
 

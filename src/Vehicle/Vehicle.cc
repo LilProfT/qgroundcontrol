@@ -927,10 +927,10 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
         if (messageText.startsWith("AvoidProximity")) {
             readAloud = true;
             severity = MAV_SEVERITY_CRITICAL;
-        } else if (messageText.startsWith("Pump On")) {
+        } else if (messageText.startsWith("Sprayer LOW")) {
             readAloud = true;
             severity = MAV_SEVERITY_CRITICAL;
-        } else if (messageText.startsWith("Pump Off")) {
+        } else if (messageText.startsWith("Sprayer HIGH")) {
             readAloud = true;
             severity = MAV_SEVERITY_CRITICAL;
         }

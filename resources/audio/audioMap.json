@@ -16,7 +16,7 @@
     "chế độ bay  Return To Launch": "return_to_launch.wav",
     "Battery 1 is low ": "battery_low_mah_fs.wav",
     "pre arm: Battery 1 low capacity failsafe": "prearm_battery_fs.wav",
-    "Battery 2 is low ": "out_of_pest.wav",
+    "Pesticide tank empty, returning to launch": "out_of_pest.wav",
     "pre arm: Battery 2 low capacity failsafe": "prearm_tank_fs.wav",
     "Battery 5 is low ": "cell_drift_warning.wav",
     "pre arm: Battery 5 low capacity failsafe": "cell_drift_warning.wav",
@@ -35,8 +35,8 @@
     "Ready to Fly": "Readytofly.wav",
     "AvoidProximity High": "avoidprox_HIGH.wav",
     "AvoidProximity Low": "avoidprox_LOW.wav",
-    "Sprayer High": "Pump_on.wav",
-    "Sprayer Low": "Pump_off.wav",
+    "Sprayer HIGH": "Pump_on.wav",
+    "Sprayer LOW": "Pump_off.wav",
     "Obstacle is too close. Braking": "Proximity_avoidance_warning.wav",
     "Upload done": "Upload_done.wav"
 }

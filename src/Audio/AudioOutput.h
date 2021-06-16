@@ -43,7 +43,8 @@ private slots:
     void            _stateChanged           (QTextToSpeech::State state);
     void            _effectPlayingChanged           ();
     void            _effectStateChanged           ();
-
+    void            _playAfter(int interval);
+    void            _timerSlot();
 protected:
     QSoundEffect*    _effect;
     QTextToSpeech*  _tts;

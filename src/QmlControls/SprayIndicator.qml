@@ -38,7 +38,7 @@ Rectangle {
 
         QGCLabel {
             id:                         _value
-            text:                       _vehicle.areaSprayed.value.toFixed(1) + " "
+            text:                       _vehicle.areaSprayed.value.toFixed(2) + " "
             font.pointSize:             ScreenTools.largeFontPointSize * 1.5 //King sized
             font.bold:                  true
         }
