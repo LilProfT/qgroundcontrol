@@ -290,10 +290,10 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             //TODO: Restore the following when upstreamed in Driver repo
             //uint16_t id = _rtcm_parsing->messageId();
             u_int16_t id = ((u_int8_t)message[3] << 4) | ((u_int8_t)message[4] >> 4);
-            qCWarning(RTKGPSLog) << QString::fromStdString(message.toStdString());
+            qCDebug(RTKGPSLog) << QString::fromStdString(message.toStdString());
 
             emit gotRTCMData(message);
-            qCWarning(NTRIPLog) << "Sending " << id << "of size " << message.length();
+            qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
 
             _rtcm_parsing->reset();
         }

@@ -73,9 +73,6 @@ void NTRIP::_coordinateChanged(QGeoCoordinate coordinate)
 
 void NTRIP::_syncInProgressChanged(bool syncInProgress)
 {
-    qCWarning(RTKGPSLog) << "_syncInProgressChanged";
-    qCWarning(RTKGPSLog) << syncInProgress;
-
     if (_rtkProvider != nullptr) {
         qCWarning(RTKGPSLog) << "syncInProgress: ";
         qCWarning(RTKGPSLog) << syncInProgress;

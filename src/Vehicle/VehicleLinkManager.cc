@@ -334,6 +334,8 @@ void VehicleLinkManager::closeVehicle(void)
 
     QList<LinkInfo_t> rgLinkInfoCopy = _rgLinkInfo;
     for (const LinkInfo_t& linkInfo: rgLinkInfoCopy) {
+        qCDebug(VehicleLog) << "_rgLinkInfo linkInfo" << linkInfo.link.get();
+
         _removeLink(linkInfo.link.get());
     }
 

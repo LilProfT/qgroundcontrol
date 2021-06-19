@@ -660,7 +660,7 @@ Item {
         //-----------------------------------------------------------
         //Mismart: Add a camera view in Plan View, testing
         FlyViewVideo {
-            id: videoControl2
+            id: videoControl
         }
 
         QGCPipOverlay {
@@ -670,11 +670,11 @@ Item {
             anchors.margins:        _toolsMargin
             item1IsFullSettingsKey: "MainPlanWindowIsMap"
             item1:                  editorMap
-            item2:                  QGroundControl.videoManager.hasVideo ? videoControl2 : null
+            item2:                  QGroundControl.videoManager.hasVideo ? videoControl : null
             fullZOrder:             _fullItemZorder
             pipZOrder:              _pipItemZorder
             show:                   !QGroundControl.videoManager.fullScreen &&
-                                        (videoControl2.pipState.state === videoControl2.pipState.pipState || editorMap.pipState.state === editorMap.pipState.pipState)
+                                        (videoControl.pipState.state === videoControl.pipState.pipState || editorMap.pipState.state === editorMap.pipState.pipState)
         }
 
         //-----------------------------------------------------------
