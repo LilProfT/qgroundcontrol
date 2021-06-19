@@ -90,6 +90,7 @@ Rectangle {
             visible:            _activeVehicle && _communicationLost && currentToolbar === flyViewToolbar
         }
 
+        //Mismart: Manual reconnect button
         QGCButton {
             id:                 reconnectButton
             text:               qsTr("Reconnect")
@@ -97,7 +98,7 @@ Rectangle {
                 _vehicleDisconnected = false;
                 QGroundControl.linkManager.startAutoConnectedLinks();
             }
-            visible:            !_activeVehicle && _vehicleDisconnected
+            visible:            !_activeVehicle && _vehicleDisconnected && currentToolbar === flyViewToolbar
         }
     }
 
