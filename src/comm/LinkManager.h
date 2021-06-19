@@ -129,7 +129,9 @@ public:
 
     SharedLinkConfigurationPtr addConfiguration(LinkConfiguration* config);
 
-    void startAutoConnectedLinks(void);
+    //void startAutoConnectedLinks(void);
+    /// Mismart: Exposing this function as Q_INVOKABLE to connect it with QML
+    Q_INVOKABLE void startAutoConnectedLinks(void);
 
     static const char*  settingsGroup;
 

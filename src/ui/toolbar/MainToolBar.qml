@@ -33,6 +33,9 @@ Rectangle {
     property bool   _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
     property color  _mainStatusBGColor: qgcPal.brandingPurple
 
+    //Mismart: a bool variable for checking if vehicle has been disconnected
+    property bool   _vehicleDisconnected:   false
+
     QGCPalette { id: qgcPal }
 
     /// Bottom single pixel divider
@@ -80,8 +83,21 @@ Rectangle {
         QGCButton {
             id:                 disconnectButton
             text:               qsTr("Disconnect")
-            onClicked:          _activeVehicle.closeVehicle()
+            onClicked:          {
+                _vehicleDisconnected = true;
+                _activeVehicle.closeVehicle();
+            }
             visible:            _activeVehicle && _communicationLost && currentToolbar === flyViewToolbar
+        }
+
+        QGCButton {
+            id:                 reconnectButton
+            text:               qsTr("Reconnect")
+            onClicked:          {
+                _vehicleDisconnected = false;
+                QGroundControl.linkManager.startAutoConnectedLinks();
+            }
+            visible:            !_activeVehicle && _vehicleDisconnected
         }
     }
 
