@@ -159,6 +159,8 @@ void PlanMasterController::_activeVehicleChanged(Vehicle* activeVehicle)
         connect(_managerVehicle->missionManager(),      &MissionManager::sendComplete,              this, &PlanMasterController::_sendMissionComplete);
         connect(_managerVehicle->geoFenceManager(),     &GeoFenceManager::sendComplete,             this, &PlanMasterController::_sendGeoFenceComplete);
         connect(_managerVehicle->rallyPointManager(),   &RallyPointManager::sendComplete,           this, &PlanMasterController::_sendRallyPointsComplete);
+        connect(_managerVehicle->missionManager(),      &MissionManager::autoSaved,              this, &PlanMasterController::_saveToCurrentAutosaved);
+
     }
 
     _offline = newOffline;
@@ -476,6 +478,14 @@ PlanMasterController::saveToCurrent()
     }
 }
 
+void
+PlanMasterController::_saveToCurrentAutosaved()
+{
+    if(!_currentPlanFile.isEmpty()) {
+        _saveToFileAutoSaved(_currentPlanFile);
+    }
+}
+
 void PlanMasterController::saveToFile(const QString& filename)
 {
     if (filename.isEmpty()) {
@@ -500,6 +510,42 @@ void PlanMasterController::saveToFile(const QString& filename)
             _currentPlanFile = planFilename;
             emit currentPlanFileChanged();
         }
+    }
+
+    // Only clear dirty bit if we are offline
+    if (offline()) {
+        setDirty(false);
+    }
+}
+
+void PlanMasterController::_saveToFileAutoSaved(const QString& filename)
+{
+    if (filename.isEmpty()) {
+        return;
+    }
+    qCWarning(MissionControllerLog) << "before: " << filename;
+    QString curentAutosavedPlanFile = filename;
+    if (curentAutosavedPlanFile.contains("autosaved", Qt::CaseInsensitive) == false)
+        curentAutosavedPlanFile = QString("%1_%2").arg(curentAutosavedPlanFile.split(".").at(0)).arg("autosaved");
+
+    if (!QFileInfo(curentAutosavedPlanFile).fileName().contains(".")) {
+        curentAutosavedPlanFile += QString(".%1").arg(fileExtension());
+    }
+
+    qCWarning(MissionControllerLog) << "after: " << curentAutosavedPlanFile;
+    QFile file(curentAutosavedPlanFile);
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qgcApp()->showAppMessage(tr("Plan save error %1 : %2").arg(curentAutosavedPlanFile).arg(file.errorString()));
+        curentAutosavedPlanFile.clear();
+        emit currentPlanFileChanged();
+    } else {
+        QJsonDocument saveDoc = saveToJson();
+        file.write(saveDoc.toJson());
+        //if(curentAutosavedPlanFile != planFilename) {
+        //    curentAutosavedPlanFile = planFilename;
+        emit currentPlanFileChanged();
+        //}
     }
 
     // Only clear dirty bit if we are offline

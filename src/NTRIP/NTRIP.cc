@@ -34,8 +34,8 @@ void NTRIP::connectGPSNTRIP()
 {
     NTRIPSettings* ntripSettings = qgcApp()->toolbox()->settingsManager()->ntripSettings();
     QGeoCoordinate gcsPosition = _toolbox->qgcPositionManager()->gcsPosition();
-    qCWarning(RTKGPSLog) << "connectGPSNTRIP";
-    qCWarning(RTKGPSLog) << gcsPosition.longitude();
+    //qCWarning(RTKGPSLog) << "connectGPSNTRIP";
+    //qCWarning(RTKGPSLog) << gcsPosition.longitude();
     _positionChanged++;
     if (ntripSettings->ntripServerConnectEnable()->rawValue().toBool() && (gcsPosition.longitude() == gcsPosition.longitude()) && _positionChanged >= 10 ){
         if (!_rtkProvider) {

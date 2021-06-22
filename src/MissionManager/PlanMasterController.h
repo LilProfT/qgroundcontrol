@@ -150,6 +150,9 @@ private slots:
     void _sendGeoFenceComplete      (void);
     void _sendRallyPointsComplete   (void);
     void _updatePlanCreatorsList    (void);
+    void _saveToCurrentAutosaved    (void);
+    void _saveToFileAutoSaved(const QString& filename);
+
 #if defined(QGC_AIRMAP_ENABLED)
     void _startFlightPlanning       (void);
 #endif

@@ -449,6 +449,7 @@ public:
     QGeoCoordinate coordinate() { return _coordinate; }
     QGeoCoordinate armedPosition    () { return _armedPosition; }
     QGeoCoordinate resumeCoordinate() { return _resumeCoordinate; }
+    void  updateResumeCoordinate(const QGeoCoordinate rsCoordinate) { _resumeCoordinate = rsCoordinate; }
 
     void updateFlightDistance(double distance);
 

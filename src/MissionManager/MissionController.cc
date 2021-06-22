@@ -47,6 +47,8 @@ const char* MissionController::_jsonCruiseSpeedKey =            "cruiseSpeed";
 const char* MissionController::_jsonHoverSpeedKey =             "hoverSpeed";
 const char* MissionController::_jsonParamsKey =                 "params";
 const char* MissionController::_jsonGlobalPlanAltitudeModeKey = "globalPlanAltitudeMode";
+const char* MissionController::_jsonResumePositionKey =             "resumePositionKey";
+const char* MissionController::_jsonResumeIndexKey =             "resumeIndexKey";
 
 // Deprecated V1 format keys
 const char* MissionController::_jsonComplexItemsKey =           "complexItems";
@@ -739,6 +741,8 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         { _jsonCruiseSpeedKey,              QJsonValue::Double, false },
         { _jsonHoverSpeedKey,               QJsonValue::Double, false },
         { _jsonGlobalPlanAltitudeModeKey,   QJsonValue::Double, false },
+        { _jsonResumePositionKey,      QJsonValue::Array,  false },
+        { _jsonResumeIndexKey,             QJsonValue::Double, false },
     };
     if (!JsonHelper::validateKeys(json, rootKeyInfoList, errorString)) {
         return false;
@@ -784,6 +788,28 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
     if (!JsonHelper::loadGeoCoordinate(json[_jsonPlannedHomePositionKey], true /* altitudeRequired */, homeCoordinate, errorString)) {
         return false;
     }
+
+    QGeoCoordinate resumeCoordinate;
+    if (JsonHelper::loadGeoCoordinate(json[_jsonResumePositionKey], true /* altitudeRequired */, resumeCoordinate, errorString)) {
+        qCWarning(MissionControllerLog) << "json resumeIndex: " << json[_jsonResumeIndexKey];
+        int resumeIndex = -1;
+        if (json.contains(_jsonResumeIndexKey)) {
+            resumeIndex = json[_jsonResumeIndexKey].toInt();
+            qCWarning(MissionControllerLog) << "resumeIndex: " << resumeIndex;
+        }
+
+        qCWarning(MissionControllerLog) << "resumeCoordinate isValid: " << resumeCoordinate.isValid() << resumeCoordinate;
+        if (resumeCoordinate.isValid() && resumeIndex >= 0) {
+            _managerVehicle->updateResumeCoordinate(resumeCoordinate);
+
+            _missionManager->loadResumeFromFile(true);
+
+            //QTimer::singleShot(5000, this, &MissionController::_timerSlot);
+
+            //resumeMission(resumeIndex);
+        }
+    }
+
     MissionSettingsItem* settingsItem = new MissionSettingsItem(_masterController, _flyView, visualItems);
     settingsItem->setCoordinate(homeCoordinate);
     visualItems->insert(0, settingsItem);
@@ -1115,6 +1141,16 @@ void MissionController::save(QJsonObject& json)
         return;
     }
     QJsonValue coordinateValue;
+    QJsonValue resumeCoordinateValue;
+
+    qCWarning(MissionControllerLog) << "resumeCoordinate: " << _managerVehicle->resumeCoordinate();
+    qCWarning(MissionControllerLog) << "resumeMissionIndex: " << _missionManager->cacheResumeIndex();
+    if (_managerVehicle->resumeCoordinate().isValid()) {
+        JsonHelper::saveGeoCoordinate(_managerVehicle->resumeCoordinate(), true /* writeAltitude */, resumeCoordinateValue);
+        json[_jsonResumePositionKey]            = resumeCoordinateValue;
+        json[_jsonResumeIndexKey]               = _missionManager->cacheResumeIndex();
+    }
+
     JsonHelper::saveGeoCoordinate(settingsItem->coordinate(), true /* writeAltitude */, coordinateValue);
     json[_jsonPlannedHomePositionKey]       = coordinateValue;
     json[_jsonFirmwareTypeKey]              = _controllerVehicle->firmwareType();
@@ -2664,4 +2700,11 @@ void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeM
         _globalAltMode = altMode;
         emit globalAltitudeModeChanged();
     }
+}
+
+void MissionController::_timerSlot()
+{
+    qCWarning(MissionControllerLog) << "timerSlot";
+    resumeMission(9);
+
 }

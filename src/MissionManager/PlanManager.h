@@ -87,6 +87,7 @@ signals:
     void sendComplete               (bool error);
     void resumeMissionReady         (void);
     void resumeMissionUploadFail    (void);
+    void autoSaved                  (void);
 
 private slots:
     void _mavlinkMessageReceived(const mavlink_message_t& message);

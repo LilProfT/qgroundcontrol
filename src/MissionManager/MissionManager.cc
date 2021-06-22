@@ -20,7 +20,7 @@ QGC_LOGGING_CATEGORY(MissionManagerLog, "MissionManagerLog")
 
 MissionManager::MissionManager(Vehicle* vehicle)
     : PlanManager               (vehicle, MAV_MISSION_TYPE_MISSION)
-    , _cachedLastCurrentIndex   (-1)
+    , _cachedLastCurrentIndex   (-1), _cachedResumeIndex(-1), _loadResumeFromFile(false)
 {
     connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &MissionManager::_mavlinkMessageReceived);
 }
@@ -81,6 +81,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
     if (_vehicle->isOfflineEditingVehicle()) {
         return;
     }
+    resumeIndex = 9;
 
     if (inProgress()) {
         qCDebug(MissionManagerLog) << "generateResumeMission called while transaction in progress";
@@ -97,6 +98,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
 
     // Be anal about crap input
     resumeIndex = qMax(0, qMin(resumeIndex, _missionItems.count() - 1));
+    qCWarning(MissionManagerLog) << "resumeIndex: " << resumeIndex;
 
     // Adjust resume index to be a location based command
     const MissionCommandUIInfo* uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), _missionItems[resumeIndex]->command());
@@ -112,6 +114,9 @@ void MissionManager::generateResumeMission(int resumeIndex)
         }
     }
     resumeIndex = qMax(0, resumeIndex);
+    _cachedResumeIndex = resumeIndex;
+
+    qCWarning(MissionManagerLog) << "_cachedResumeIndex: " << _cachedResumeIndex;
 
     QList<MissionItem*> resumeMission;
 
@@ -150,7 +155,9 @@ void MissionManager::generateResumeMission(int resumeIndex)
             // There isn't MissionItem::setCoordinate (but MissionItem::coordinate exists, what the heck).
             // And now I'm reluctant to write that method.
             // Are there reasons upstream not do it ??
-            qDebug() << coordinate;
+            qCWarning(MissionManagerLog) << "coordinate: " << coordinate << "at resumeIndex: " << resumeIndex;
+
+            //qDebug() << coordinate;
             if (oldItem->param5() != coordinate.latitude() || oldItem->param6() != coordinate.longitude()) {
                 oldItem->setParam5(coordinate.latitude());
                 oldItem->setParam6(coordinate.longitude());
@@ -245,6 +252,13 @@ void MissionManager::generateResumeMission(int resumeIndex)
     }
     _resumeMission = true;
     _writeMissionItemsWorker();
+    qCWarning(MissionManagerLog) << "_loadResumeFromFile: " << _loadResumeFromFile;
+
+    if (_loadResumeFromFile == false) {
+        emit autoSaved();
+    } else {
+        _loadResumeFromFile = false;
+    }
 }
 
 /// Called when a new mavlink message for out vehicle is received
