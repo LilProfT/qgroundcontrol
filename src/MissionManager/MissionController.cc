@@ -619,12 +619,18 @@ void MissionController::removeAll(void)
         _visualItems->deleteLater();
         _settingsItem = nullptr;
         _takeoffMissionItem = nullptr;
+
         _visualItems = new QmlObjectListModel(this);
         _addMissionSettings(_visualItems);
         _initAllVisualItems();
         setDirty(true);
         _resetMissionFlightStatus();
         _allItemsRemoved();
+
+        QGeoCoordinate coordinate;
+        _managerVehicle->updateResumeCoordinate(coordinate);
+        _missionManager->loadResumeFromFile(false);
+        _missionManager->updateCacheResumeIndex(-1);
     }
 }
 
@@ -799,14 +805,12 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         }
 
         qCWarning(MissionControllerLog) << "resumeCoordinate isValid: " << resumeCoordinate.isValid() << resumeCoordinate;
-        if (resumeCoordinate.isValid() && resumeIndex >= 0) {
+        if (resumeCoordinate.isValid() && resumeIndex > 0) {
             _managerVehicle->updateResumeCoordinate(resumeCoordinate);
-
             _missionManager->loadResumeFromFile(true);
+            _missionManager->updateCacheResumeIndex(resumeIndex);
+            qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
 
-            //QTimer::singleShot(5000, this, &MissionController::_timerSlot);
-
-            //resumeMission(resumeIndex);
         }
     }
 
@@ -2153,18 +2157,30 @@ int MissionController::resumeMissionIndex(void) const
 {
 
     int resumeIndex = 0;
+    qCWarning(MissionControllerLog) << "_resumeMissionIndex(void)";
+    qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
 
     if (_flyView) {
-        resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
-        if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
-            // Resume at the item previous to the item we were heading towards
-            resumeIndex--;
+        if (_missionManager->cacheResumeIndex() > 0) {
+            qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _missionManager->cacheResumeIndex();
+            resumeIndex = _missionManager->cacheResumeIndex();
         } else {
-            resumeIndex = 0;
+            resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
+            if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
+                // Resume at the item previous to the item we were heading towards
+                resumeIndex--;
+            } else {
+                resumeIndex = 0;
+            }
         }
     }
 
     return resumeIndex;
+}
+
+int MissionController::resumeMissionIndexFromFile(void) const
+{
+    return _resumeMissionIndexFromFile;
 }
 
 int MissionController::currentMissionIndex(void) const
@@ -2288,6 +2304,8 @@ void MissionController::resumeMission(int resumeIndex)
     if (!_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle()) {
         resumeIndex--;
     }
+    qCWarning(MissionManagerLog) << "resumeMission resumeIndex: " << resumeIndex;
+
     _missionManager->generateResumeMission(resumeIndex);
 }
 
@@ -2700,11 +2718,4 @@ void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeM
         _globalAltMode = altMode;
         emit globalAltitudeModeChanged();
     }
-}
-
-void MissionController::_timerSlot()
-{
-    qCWarning(MissionControllerLog) << "timerSlot";
-    resumeMission(9);
-
 }

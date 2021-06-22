@@ -37,6 +37,7 @@ public:
     void generateResumeMission(int resumeIndex);
     int cacheResumeIndex() {return _cachedResumeIndex; };
     void loadResumeFromFile(bool load) {_loadResumeFromFile = load; };
+    void updateCacheResumeIndex(int resumeIndex) {_cachedResumeIndex = resumeIndex; };
 
 private slots:
     void _mavlinkMessageReceived(const mavlink_message_t& message);

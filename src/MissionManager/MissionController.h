@@ -240,6 +240,7 @@ public:
     int resumeMissionIndex          (void) const;
     int currentPlanViewSeqNum       (void) const { return _currentPlanViewSeqNum; }
     int currentPlanViewVIIndex      (void) const { return _currentPlanViewVIIndex; }
+    int resumeMissionIndexFromFile          (void) const;
 
     double  missionDistance         (void) const { return _missionFlightStatus.totalDistance; }
     double  missionTime             (void) const { return _missionFlightStatus.totalTime; }
@@ -397,6 +398,7 @@ private:
     double                      _minAMSLAltitude =              0;
     double                      _maxAMSLAltitude =              0;
     bool                        _missionContainsVTOLTakeoff =   false;
+    int                        _resumeMissionIndexFromFile =   0;
 
     QGroundControlQmlGlobal::AltitudeMode _globalAltMode = QGroundControlQmlGlobal::AltitudeModeRelative;
 

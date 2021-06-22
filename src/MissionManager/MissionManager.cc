@@ -81,7 +81,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
     if (_vehicle->isOfflineEditingVehicle()) {
         return;
     }
-    resumeIndex = 9;
+    qCWarning(MissionManagerLog) << "before resumeIndex: " << resumeIndex;
 
     if (inProgress()) {
         qCDebug(MissionManagerLog) << "generateResumeMission called while transaction in progress";
@@ -254,7 +254,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
     _writeMissionItemsWorker();
     qCWarning(MissionManagerLog) << "_loadResumeFromFile: " << _loadResumeFromFile;
 
-    if (_loadResumeFromFile == false) {
+    if (!_loadResumeFromFile) {
         emit autoSaved();
     } else {
         _loadResumeFromFile = false;

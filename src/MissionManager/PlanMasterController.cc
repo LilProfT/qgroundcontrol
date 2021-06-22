@@ -159,7 +159,7 @@ void PlanMasterController::_activeVehicleChanged(Vehicle* activeVehicle)
         connect(_managerVehicle->missionManager(),      &MissionManager::sendComplete,              this, &PlanMasterController::_sendMissionComplete);
         connect(_managerVehicle->geoFenceManager(),     &GeoFenceManager::sendComplete,             this, &PlanMasterController::_sendGeoFenceComplete);
         connect(_managerVehicle->rallyPointManager(),   &RallyPointManager::sendComplete,           this, &PlanMasterController::_sendRallyPointsComplete);
-        connect(_managerVehicle->missionManager(),      &MissionManager::autoSaved,              this, &PlanMasterController::_saveToCurrentAutosaved);
+        connect(_managerVehicle->missionManager(),      &MissionManager::autoSaved,              this, &PlanMasterController::saveToCurrent);
 
     }
 
@@ -372,7 +372,6 @@ void PlanMasterController::loadFromFile(const QString& filename)
 
     removeAll();
 
-
     QFileInfo fileInfo(filename);
     QFile file(filename);
 
@@ -542,10 +541,7 @@ void PlanMasterController::_saveToFileAutoSaved(const QString& filename)
     } else {
         QJsonDocument saveDoc = saveToJson();
         file.write(saveDoc.toJson());
-        //if(curentAutosavedPlanFile != planFilename) {
-        //    curentAutosavedPlanFile = planFilename;
-        emit currentPlanFileChanged();
-        //}
+        emit currentPlanFileChanged();        
     }
 
     // Only clear dirty bit if we are offline
