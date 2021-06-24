@@ -79,6 +79,14 @@ void SurveyComplexItem::_optimize_Angle_EntryPoint(void)
     _optimize_EntryPoint();
 }
 
+void SurveyComplexItem::_updateAngle() {
+    if (_isEdgeIndexFromFile) {
+        rotateAngle();
+        rotateEntryPoint();
+        _isEdgeIndexFromFile = false;
+    }
+}
+
 void SurveyComplexItem::_optimize_EntryPoint(void) {
     QGeoCoordinate takeoffWaypoint = _masterController->missionController()->takeoffMissionItem()->launchCoordinate();;
     if (!takeoffWaypoint.isValid()) {
@@ -134,9 +142,13 @@ void SurveyComplexItem::_buildAndAppendMissionItems (QList<MissionItem*>& items,
 
 void SurveyComplexItem::rotateAngle(void)
 {
-    _edgeIndex += 1;
-    if (_edgeIndex == _surveyAreaPolygon.count()) _edgeIndex = 0;
+    qDebug() << " rotateAngle _isEdgeIndexFromFile: " << _isEdgeIndexFromFile ;
 
+    if (!_isEdgeIndexFromFile) {
+        _edgeIndex += 1;
+        if (_edgeIndex == _surveyAreaPolygon.count()) _edgeIndex = 0;
+
+    }
     int i_A = _edgeIndex;
     int i_B = (_edgeIndex == _surveyAreaPolygon.count() - 1) ? 0 : _edgeIndex + 1;
     QGeoCoordinate A, B;

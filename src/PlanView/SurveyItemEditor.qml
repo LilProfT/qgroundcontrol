@@ -213,8 +213,9 @@ Rectangle {
 
                 QGCCheckBox {
                     text:               qsTr("Auto Optimize")
-                    checked:            _missionItem.autoOptimize.value
+                    checked:            false
                     onClicked:          _missionItem.autoOptimize.value = checked
+                    visible: false
                 }
 
                 QGCButton {

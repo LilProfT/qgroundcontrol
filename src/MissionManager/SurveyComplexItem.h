@@ -165,6 +165,7 @@ private:
     void _optimize_Angle_EntryPoint(void);
     void _optimize_EntryPoint(void);
     void _toggleAutoOptimize(QVariant value);
+    void _updateAngle(void);
 
     QMap<QString, FactMetaData*> _metaDataMap;
 
@@ -179,6 +180,8 @@ private:
     SettingsFact    _splitConcavePolygonsFact;
     int             _entryPoint;
     int             _edgeIndex = 0;
+    bool            _isEdgeIndexFromFile = false;
+
     QVariantList    _angleEdge;
 
     QTimer _timer_optimize_Angle_EntryPoint;
@@ -189,6 +192,8 @@ private:
     static const char* _jsonSplitConcavePolygonsKey;
     static const char* _jsonApplicationRateKey;
     static const char* _jsonVelocityKey;
+    static const char* _jsonMissionEnterPointKey;
+    static const char* _jsonEdgeIndexKey;
 
     static const char* _jsonV3GridObjectKey;
     static const char* _jsonV3GridAltitudeKey;

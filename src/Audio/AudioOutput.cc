@@ -46,6 +46,8 @@ AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
 
     _effect = new QSoundEffect(this);
     _effect->setLoopCount(0);
+    _effect->setMuted(false);
+    _effect->setVolume(100);
 
     connect(_effect, &QSoundEffect::playingChanged, this, &AudioOutput::_effectPlayingChanged);
     connect(_effect, &QSoundEffect::statusChanged, this, &AudioOutput::_effectStateChanged);

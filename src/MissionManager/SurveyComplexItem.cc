@@ -74,6 +74,8 @@ const char* SurveyComplexItem::_jsonFlyAlternateTransectsKey =          "flyaAlt
 const char* SurveyComplexItem::_jsonSplitConcavePolygonsKey =           "splitConcavePolygons";
 const char* SurveyComplexItem::_jsonApplicationRateKey =                "applicationRate";
 const char* SurveyComplexItem::_jsonVelocityKey =                       "velocity";
+const char* SurveyComplexItem::_jsonMissionEnterPointKey =                       "missionEnterPoint";
+const char* SurveyComplexItem::_jsonEdgeIndexKey =                       "edgeIndex";
 
 SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlOrShpFile, QObject* parent)
     : TransectStyleComplexItem  (masterController, flyView, settingsGroup, parent)
@@ -142,8 +144,11 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     _timer_optimize_Angle_EntryPoint.setSingleShot(true);
     _timer_optimize_Angle_EntryPoint.setInterval(0);
     connect(&_timer_optimize_Angle_EntryPoint,       &QTimer::timeout,                           this, &SurveyComplexItem::_optimize_Angle_EntryPoint);
+
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                &_timer_optimize_Angle_EntryPoint, QOverload<>::of(&QTimer::start));
     connect(_masterController->missionController()->takeoffMissionItem(), &TakeoffMissionItem::launchCoordinateChanged, this, &SurveyComplexItem::_optimize_EntryPoint);
+
+    QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
 
     connect(this, &TransectStyleComplexItem::coveredAreaChanged, _masterController, &PlanMasterController::areaChanged);
 
@@ -183,6 +188,7 @@ void SurveyComplexItem::_saveWorker(QJsonObject& saveObject)
     saveObject[_jsonEntryPointKey] =                            _entryPoint;
     saveObject[_jsonApplicationRateKey] =                 _applicationRateFact.rawValue().toDouble();
     saveObject[_jsonVelocityKey] =                 _velocityFact.rawValue().toDouble();
+    saveObject[_jsonEdgeIndexKey] = _edgeIndex;
 
     // Polygon shape
     _surveyAreaPolygon.saveToJson(saveObject);
@@ -256,6 +262,7 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         { _jsonFlyAlternateTransectsKey,                QJsonValue::Bool,   false },
         { _jsonApplicationRateKey,                            QJsonValue::Double, true },
         { _jsonVelocityKey,                            QJsonValue::Double, true },
+        { _jsonEdgeIndexKey,                            QJsonValue::Double, false },
 
     };
 
@@ -296,13 +303,18 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
     _applicationRateFact.setRawValue              (complexObject[_jsonApplicationRateKey].toDouble());
     _velocityFact.setRawValue              (complexObject[_jsonVelocityKey].toDouble());
 
+    _edgeIndex = (int)complexObject[_jsonEdgeIndexKey].toDouble();
+    _isEdgeIndexFromFile = true;
     qDebug() << " _jsonVelocityKey: " << complexObject[_jsonVelocityKey].toDouble() ;
+    qDebug() << " _jsonEdgeIndexKey: " << _edgeIndex ;
+    qDebug() << " _isEdgeIndexFromFile: " << _isEdgeIndexFromFile ;
 
     if (version == 5) {
         _splitConcavePolygonsFact.setRawValue   (complexObject[_jsonSplitConcavePolygonsKey].toBool(true));
     }
 
     _entryPoint = complexObject[_jsonEntryPointKey].toInt();
+    qDebug() << " _jsonEntryPointKey: " << _entryPoint ;
 
     _ignoreRecalc = false;
 
@@ -747,6 +759,7 @@ void SurveyComplexItem::_rebuildTransectsPhase1(void)
     		_rebuildTransectsPhase1WorkerSinglePolygon(true /* refly */);
     	}
     }
+
 }
 
 void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
@@ -1052,6 +1065,7 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSplitPolygons(bool refly)
 //        qCDebug(SurveyComplexItemLog) << "Transects from polynom p " << p;
         _rebuildTransectsFromPolygon(refly, *p, tangentOrigin, vMatch);
     }
+
 }
 
 void SurveyComplexItem::_PolygonDecomposeConvex(const QPolygonF& polygon, QList<QPolygonF>& decomposedPolygons)
@@ -1301,6 +1315,7 @@ void SurveyComplexItem::_rebuildTransectsFromPolygon(bool refly, const QPolygonF
 
     _adjustTransectsToEntryPointLocation(transects);
 
+
     if (refly) {
         _optimizeTransectsForShortestDistance(_transects.last().last().coord, transects);
     }
@@ -1459,11 +1474,15 @@ SurveyComplexItem::ReadyForSaveState SurveyComplexItem::readyForSaveState(void) 
 
 void SurveyComplexItem::rotateEntryPoint(void)
 {
-    if (_entryPoint == EntryLocationLast) {
-        _entryPoint = EntryLocationFirst;
-    } else {
-        _entryPoint++;
+    if (!_isEdgeIndexFromFile) {
+        if (_entryPoint == EntryLocationLast) {
+            _entryPoint = EntryLocationFirst;
+        } else {
+            _entryPoint++;
+        }
     }
+
+    qDebug() << "rotateEntryPoint _jsonEntryPointKey: " << _entryPoint ;
 
     _rebuildTransects();
 
