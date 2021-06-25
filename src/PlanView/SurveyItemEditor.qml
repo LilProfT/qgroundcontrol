@@ -231,7 +231,8 @@ Rectangle {
                     columns:        2
                     visible:        transectsHeader.checked
 
-                    QGCLabel { text: qsTr("Angle") }
+                    QGCLabel { text: qsTr("Angle")
+                    visible:                false}
                     FactTextField {
                         fact:                   _missionItem.gridAngle
                         Layout.fillWidth:       true
@@ -242,6 +243,7 @@ Rectangle {
                         text:               _missionItem.gridAngle.value.toFixed(1) + " " + _missionItem.gridAngle.units
 //                      font.pointSize:     ScreenTools.mediumFontPointSize
                         Layout.alignment:   Qt.AlignRight
+                        visible:                false
                     }
 
                     QGCSlider {
@@ -257,6 +259,7 @@ Rectangle {
                         onValueChanged:         _missionItem.gridAngle.value = value
                         Component.onCompleted:  value = _missionItem.gridAngle.value
                         updateValueWhileDragging: true
+                        visible:                false
                     }
 
                     QGCButton {
@@ -267,7 +270,7 @@ Rectangle {
                     QGCLabel {
                         text:       qsTr("Turnaround dist")
                         Layout.fillWidth:       true
-			visible:            false
+                        visible:            false
                     }
                     FactTextField {
                         fact:               _missionItem.turnAroundDistance
@@ -279,7 +282,7 @@ Rectangle {
                         text:               _missionItem.turnAroundDistance.value.toFixed(2) + " " + _missionItem.turnAroundDistance.units
 //                        font.pointSize:     ScreenTools.mediumFontPointSize
                         Layout.alignment:   Qt.AlignRight
-			visible:            false
+                        visible:            false
                     }
 
 
@@ -296,7 +299,7 @@ Rectangle {
                         onValueChanged:         _missionItem.turnAroundDistance.value = value
                         Component.onCompleted:  value = _missionItem.turnAroundDistance.value
                         updateValueWhileDragging: true
-			visible:            false
+                        visible:            false
                     }
                 }
 

@@ -428,7 +428,7 @@ public:
     Q_INVOKABLE void clearAllParamMapRC(void);
 
     /// Removes the vehicle from the system
-    Q_INVOKABLE void closeVehicle(void) { _vehicleLinkManager->closeVehicle(); }
+    Q_INVOKABLE void closeVehicle(void) { _vehicleLinkManager->closeVehicle(); emit vehicleClosed(); }
 
     /// Trigger camera using MAV_CMD_DO_DIGICAM_CONTROL command
     Q_INVOKABLE void triggerSimpleCamera(void);
@@ -926,6 +926,7 @@ signals:
     void gimbalDataChanged              ();
     void isROIEnabledChanged            ();
     void initialConnectComplete         ();
+    void vehicleClosed                  ();
 
 private slots:
     void _mavlinkMessageReceived            (LinkInterface* link, mavlink_message_t message);

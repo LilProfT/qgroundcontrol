@@ -62,6 +62,7 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     , _managerVehicle       (masterController->managerVehicle())
     , _missionManager       (masterController->managerVehicle()->missionManager())
     , _visualItems          (new QmlObjectListModel(this))
+    , _bufferedVisualItems  (new QmlObjectListModel(this))
     , _planViewSettings     (qgcApp()->toolbox()->settingsManager()->planViewSettings())
     , _appSettings          (qgcApp()->toolbox()->settingsManager()->appSettings())
 {
@@ -72,6 +73,8 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     connect(&_updateTimer,                                  &QTimer::timeout,                           this, &MissionController::_updateTimeout);
     connect(_planViewSettings->takeoffItemNotRequired(),    &Fact::rawValueChanged,                     this, &MissionController::_takeoffItemNotRequiredChanged);
     connect(this,                                           &MissionController::missionDistanceChanged, this, &MissionController::recalcTerrainProfile);
+
+    connect(_managerVehicle,                                &Vehicle::vehicleClosed,                    this, &MissionController::_bufferMission);
 
     // The follow is used to compress multiple recalc calls in a row to into a single call.
     connect(this, &MissionController::_recalcMissionFlightStatusSignal, this, &MissionController::_recalcMissionFlightStatus,   Qt::QueuedConnection);
@@ -2032,7 +2035,7 @@ void MissionController::_managerVehicleChanged(Vehicle* managerVehicle)
     }
 
     _missionManager = _managerVehicle->missionManager();
-    connect(_missionManager, &MissionManager::newMissionItemsAvailable, this, &MissionController::_newMissionItemsAvailableFromVehicle);
+    // connect(_missionManager, &MissionManager::newMissionItemsAvailable, this, &MissionController::_newMissionItemsAvailableFromVehicle);
     connect(_missionManager, &MissionManager::sendComplete,             this, &MissionController::_managerSendComplete);
     connect(_missionManager, &MissionManager::removeAllComplete,        this, &MissionController::_managerRemoveAllComplete);
     connect(_missionManager, &MissionManager::inProgressChanged,        this, &MissionController::_inProgressChanged);
@@ -2044,6 +2047,15 @@ void MissionController::_managerVehicleChanged(Vehicle* managerVehicle)
     connect(_managerVehicle, &Vehicle::defaultCruiseSpeedChanged,       this, &MissionController::_recalcMissionFlightStatusSignal, Qt::QueuedConnection);
     connect(_managerVehicle, &Vehicle::defaultHoverSpeedChanged,        this, &MissionController::_recalcMissionFlightStatusSignal, Qt::QueuedConnection);
     connect(_managerVehicle, &Vehicle::vehicleTypeChanged,              this, &MissionController::complexMissionItemNamesChanged);
+    connect(_managerVehicle, &Vehicle::vehicleClosed,                   this, &MissionController::_bufferMission);
+
+    // release buffered mission
+    if (_bufferedVisualItems->count() > 0) {
+        _visualItems->clear();
+        for (int i=0; i<_bufferedVisualItems->count(); i++)
+            _visualItems->append(_bufferedVisualItems->get(i));
+        _masterController->sendToVehicle();
+    }
 
     emit complexMissionItemNamesChanged();
     emit resumeMissionIndexChanged();
@@ -2718,4 +2730,11 @@ void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeM
         _globalAltMode = altMode;
         emit globalAltitudeModeChanged();
     }
+}
+
+void MissionController::_bufferMission()
+{
+    _bufferedVisualItems->clear();
+    for (int i=0; i<_visualItems->count(); i++)
+        _bufferedVisualItems->append(_visualItems->get(i));
 }
