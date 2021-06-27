@@ -166,6 +166,7 @@ public:
     Q_INVOKABLE VisualMissionItem*  insertComplexMissionItemFromKMLOrSHP(QString itemName, QString file, int visualItemIndex, bool makeCurrentItem = false);
 
     Q_INVOKABLE void resumeMission(int resumeIndex);
+    Q_INVOKABLE void autoSaveMission(void);
 
     /// Updates the altitudes of the items in the current mission to the new default altitude
     Q_INVOKABLE void applyDefaultMissionAltitude(void);
@@ -418,6 +419,7 @@ private:
     static const char*  _jsonGlobalPlanAltitudeModeKey;
     static const char*  _jsonResumePositionKey;
     static const char*  _jsonResumeIndexKey;
+    static const char*  _jsonSprayAreaKey;
 
     // Deprecated V1 format keys
     static const char*  _jsonMavAutopilotKey;

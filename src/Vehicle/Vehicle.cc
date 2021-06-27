@@ -3934,6 +3934,11 @@ void Vehicle::updateAreaSprayed(double distance)
     _areaSprayedFact.setRawValue(_areaSprayedFact.rawValue().toDouble() + distance * _spacingFact.rawValue().toDouble());
 }
 
+void Vehicle::updateAreaSprayedFromFile(double area)
+{
+    _areaSprayedFact.setRawValue(area);
+}
+
 void Vehicle::sendParamMapRC(const QString& paramName, double scale, double centerValue, int tuningID, double minValue, double maxValue)
 {
     SharedLinkInterfacePtr  sharedLink = vehicleLinkManager()->primaryLink().lock();

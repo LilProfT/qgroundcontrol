@@ -372,22 +372,22 @@ int main(int argc, char *argv[])
 
 #ifdef UNITTEST_BUILD
     if (runUnitTests) {
-        for (int i=0; i < (stressUnitTests ? 20 : 1); i++) {
-            if (!app->_initForUnitTests()) {
-                return -1;
-            }
+//        for (int i=0; i < (stressUnitTests ? 20 : 1); i++) {
+//            if (!app->_initForUnitTests()) {
+//                return -1;
+//            }
 
-            // Run the test
-            int failures = UnitTest::run(unitTestOptions);
-            if (failures == 0) {
-                qDebug() << "ALL TESTS PASSED";
-                exitCode = 0;
-            } else {
-                qDebug() << failures << " TESTS FAILED!";
-                exitCode = -failures;
-                break;
-            }
-        }
+//            // Run the test
+//            int failures = UnitTest::run(unitTestOptions);
+//            if (failures == 0) {
+//                qDebug() << "ALL TESTS PASSED";
+//                exitCode = 0;
+//            } else {
+//                qDebug() << failures << " TESTS FAILED!";
+//                exitCode = -failures;
+//                break;
+//            }
+//        }
     } else
 #endif
     {

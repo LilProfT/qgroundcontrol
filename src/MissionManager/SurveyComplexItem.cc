@@ -293,6 +293,16 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         }
     }
 
+    _controllerVehicle->updateMapPolyPoints(_surveyAreaPolygon.path());
+    qWarning() << " updateMapPolyPoints: " << _controllerVehicle->mapPolyPoints().size() ;
+
+//    for (int i=0; i<_surveyAreaPolygon.count(); i++) {
+//        double y, x, down;
+//        QGeoCoordinate vertex = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i)->coordinate();
+//        _controllerVehicle->polyPoints().append(_surveyAreaPolygon->);
+
+//    }
+
     if (!TransectStyleComplexItem::_load(complexObject, forPresets, errorString)) {
         _ignoreRecalc = false;
         return false;

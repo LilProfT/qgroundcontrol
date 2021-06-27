@@ -1546,7 +1546,7 @@ void MockLink::_handleLogRequestData(const mavlink_message_t& msg)
 
     if (_logDownloadFilename.isEmpty()) {
 #ifdef UNITTEST_BUILD
-        _logDownloadFilename = UnitTest::createRandomFile(_logDownloadFileSize);
+        //_logDownloadFilename = UnitTest::createRandomFile(_logDownloadFileSize);
 #endif
     }
 

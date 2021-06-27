@@ -38,6 +38,7 @@ public:
     int cacheResumeIndex() {return _cachedResumeIndex; };
     void loadResumeFromFile(bool load) {_loadResumeFromFile = load; };
     void updateCacheResumeIndex(int resumeIndex) {_cachedResumeIndex = resumeIndex; };
+    void autoSaveMission(void);
 
 private slots:
     void _mavlinkMessageReceived(const mavlink_message_t& message);
@@ -48,6 +49,7 @@ private:
     void _handleMissionCurrent(const mavlink_message_t& message);
     void _updateMissionIndex(int index);
     void _handleHeartbeat(const mavlink_message_t& message);
+    void _resetCachedResumeIndex(void);
 
     int _cachedLastCurrentIndex;
     int _cachedResumeIndex;

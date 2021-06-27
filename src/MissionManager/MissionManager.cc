@@ -88,6 +88,9 @@ void MissionManager::generateResumeMission(int resumeIndex)
         return;
     }
 
+    if (resumeIndex <= 0)
+        return;
+
     for (int i=0; i<_missionItems.count(); i++) {
         MissionItem* item = _missionItems[i];
         if (item->command() == MAV_CMD_DO_JUMP) {
@@ -254,11 +257,24 @@ void MissionManager::generateResumeMission(int resumeIndex)
     _writeMissionItemsWorker();
     qCWarning(MissionManagerLog) << "_loadResumeFromFile: " << _loadResumeFromFile;
 
-    if (!_loadResumeFromFile) {
+    // autosaved the first time
+//    if (!_loadResumeFromFile) {
+//        emit autoSaved();
+//    } else {
+//        _loadResumeFromFile = false;
+//        _cachedResumeIndex = -1;
+//    }
+}
+
+void MissionManager::autoSaveMission(void) {
+    if (_cachedResumeIndex > 0)
         emit autoSaved();
-    } else {
-        _loadResumeFromFile = false;
-    }
+    //QTimer::singleShot(2000, this, &MissionManager::_resetCachedResumeIndex);
+}
+
+void MissionManager::_resetCachedResumeIndex(void)
+{
+    //_cachedResumeIndex = -1;
 }
 
 /// Called when a new mavlink message for out vehicle is received

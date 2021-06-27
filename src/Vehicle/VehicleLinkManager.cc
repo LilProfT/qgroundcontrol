@@ -146,9 +146,9 @@ void VehicleLinkManager::_commLostCheck(void)
             _vehicle->_say(tr("%1Communication lost").arg(_vehicle->_vehicleIdSpeech()));
 
             _communicationLost = true;
-            if (_vehicle->armed() == false) {
-                closeVehicle();
-            }
+//            if (_vehicle->armed() == false) {
+//                closeVehicle();
+//            }
             emit communicationLostChanged(true);
         }
     }

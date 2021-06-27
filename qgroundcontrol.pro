@@ -460,9 +460,10 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 #
 # Unit Test specific configuration goes here (requires full debug build with all plugins)
 #
-
-DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { APMFirmwarePluginFactory { !MobileBuild {
-    DEFINES += UNITTEST_BUILD
+DEFINES -= UNITTEST_BUILD
+contains (DEFINES, UNITTEST_BUILD) {
+#DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { APMFirmwarePluginFactory { !MobileBuild {
+    #DEFINES -= UNITTEST_BUILD
 
     INCLUDEPATH += \
         src/qgcunittest
@@ -564,7 +565,8 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         #src/qgcunittest/MainWindowTest.cc \
         #src/qgcunittest/MessageBoxTest.cc \
 
-} } } } } }
+}
+#} } } } }
 
 # Main QGC Headers and Source files
 
@@ -1328,7 +1330,7 @@ contains (DEFINES, QGC_GST_MICROHARD_DISABLED) {
 }
 #-------------------------------------------------------------------------------------
 # AirMap
-
+DEFINES -= QGC_AIRMAP_ENABLED
 contains (DEFINES, QGC_AIRMAP_ENABLED) {
 
     #-- These should be always enabled but not yet

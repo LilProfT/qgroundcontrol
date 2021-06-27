@@ -228,6 +228,7 @@ contains (DEFINES, DISABLE_ZEROCONF) {
 #
 # [OPTIONAL] AirMap Support
 #
+DEFINES+=DISABLE_AIRMAP
 contains (DEFINES, DISABLE_AIRMAP) {
     message("Skipping support for AirMap (manual override from command line)")
 # Otherwise the user can still disable this feature in the user_config.pri file.

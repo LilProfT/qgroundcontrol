@@ -19,11 +19,11 @@ Item {
     property var    missionItems:               _controllerValid ? _planMasterController.missionController.visualItems : undefined
     property real   missionDistance:            _controllerValid ? _planMasterController.missionController.missionDistance : NaN
     property real   missionTime:                _controllerValid ? _planMasterController.missionController.missionTime : NaN
-    property real   area:                       _controllerValid ? _planMasterController.area : NaN
-    property real   applicationRate:            (_controllerValid && _planMasterController.applicationRate) ? _planMasterController.applicationRate.value : NaN
-    property real   flowRate:                   (_controllerValid && _planMasterController.flowRate) ? _planMasterController.flowRate.value : NaN
-    property real   spacing:                    (_controllerValid && _planMasterController.spacing) ? _planMasterController.spacing.value : NaN
-    property real   velocity:                   (_controllerValid && _planMasterController.velocity) ? _planMasterController.velocity.value : NaN
+    property real   area:                       (_controllerValid && _missionTime > 0) ? _planMasterController.area : NaN
+    property real   applicationRate:            (_controllerValid && _planMasterController.applicationRate && _missionTime > 0) ? _planMasterController.applicationRate.value : NaN
+    property real   flowRate:                   (_controllerValid && _planMasterController.flowRate && _missionTime > 0) ? _planMasterController.flowRate.value : NaN
+    property real   spacing:                    (_controllerValid && _planMasterController.spacing && _missionTime > 0) ? _planMasterController.spacing.value : NaN
+    property real   velocity:                   (_controllerValid && _planMasterController.velocity && _missionTime > 0) ? _planMasterController.velocity.value : NaN
     property real   missionMaxTelemetry:        _controllerValid ? _planMasterController.missionController.missionMaxTelemetry : NaN
     property bool   missionDirty:               _controllerValid ? _planMasterController.missionController.dirty : false
 

@@ -455,6 +455,7 @@ public:
 
     //Mismart: Area sprayed update function
     void updateAreaSprayed(double distance);
+    void updateAreaSprayedFromFile(double area);
 
     //Mismart: Custom Area Sprayed Start and Stop function
     bool _areaSprayedStart              ();
@@ -778,6 +779,8 @@ public:
     const QVariantList&         toolIndicators      ();
     const QVariantList&         modeIndicators      ();
     const QVariantList&         staticCameraList    () const;
+    const QVariantList mapPolyPoints(void) const { return _polyPoints; }
+    void updateMapPolyPoints(QVariantList path) { _polyPoints = path; }
 
     bool capabilitiesKnown      () const { return _capabilityBitsKnown; }
     uint64_t capabilityBits     () const { return _capabilityBits; }    // Change signalled by capabilityBitsChanged
@@ -1128,6 +1131,9 @@ private:
     QElapsedTimer                   _flightTimer;
     QTimer                          _flightTimeUpdater;
     TrajectoryPoints*               _trajectoryPoints = nullptr;
+    QVariantList    _polyPoints;
+
+
     QmlObjectListModel              _cameraTriggerPoints;
     //QMap<QString, ADSBVehicle*>     _trafficVehicleMap;
 

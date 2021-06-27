@@ -82,14 +82,15 @@ public:
     Q_INVOKABLE void loadFromVehicle(void);
     Q_INVOKABLE void sendToVehicle(void);
     Q_INVOKABLE void loadFromFile(const QString& filename);
+    Q_INVOKABLE void loadFromRecentFile(void);
     Q_INVOKABLE void saveToCurrent();
     Q_INVOKABLE void saveToFile(const QString& filename);
     Q_INVOKABLE void saveToKml(const QString& filename);
     Q_INVOKABLE void removeAll(void);                       ///< Removes all from controller only, synce required to remove from vehicle
     Q_INVOKABLE void removeAllFromVehicle(void);            ///< Removes all from vehicle and controller
-
+    Q_INVOKABLE void loadResumeFile(void);
     Q_INVOKABLE void setParam(void);
-
+    Q_INVOKABLE void clearResumeFile(void);
     MissionController*      missionController(void)     { return &_missionController; }
     GeoFenceController*     geoFenceController(void)    { return &_geoFenceController; }
     RallyPointController*   rallyPointController(void)  { return &_rallyPointController; }
@@ -118,6 +119,7 @@ public:
     void        setFlyView(bool flyView) { _flyView = flyView; }
 
     QJsonDocument saveToJson    ();
+    QJsonDocument saveRecentFileToJson    ();
 
     Vehicle* controllerVehicle(void) { return _controllerVehicle; }
     Vehicle* managerVehicle(void) { return _managerVehicle; }
@@ -127,7 +129,8 @@ public:
     static const char*  kJsonMissionObjectKey;
     static const char*  kJsonGeoFenceObjectKey;
     static const char*  kJsonRallyPointsObjectKey;
-
+    static const char*  kJsonRecentFileObjectKey;
+    static const char*  kRecentFile;
 signals:
     void containsItemsChanged               (bool containsItems);
     void syncInProgressChanged              (void);
@@ -150,9 +153,7 @@ private slots:
     void _sendGeoFenceComplete      (void);
     void _sendRallyPointsComplete   (void);
     void _updatePlanCreatorsList    (void);
-    void _saveToCurrentAutosaved    (void);
-    void _saveToFileAutoSaved(const QString& filename);
-
+    void _saveRecentFile(void);
 #if defined(QGC_AIRMAP_ENABLED)
     void _startFlightPlanning       (void);
 #endif
@@ -160,6 +161,7 @@ private slots:
 private:
     void _commonInit                (void);
     void _showPlanFromManagerVehicle(void);
+    void _uploadToVehicle(void);
 
     MultiVehicleManager*    _multiVehicleMgr =          nullptr;
     Vehicle*                _controllerVehicle =        nullptr;    ///< Offline controller vehicle
@@ -174,6 +176,8 @@ private:
     bool                    _sendGeoFence =             false;
     bool                    _sendRallyPoints =          false;
     QString                 _currentPlanFile;
+    QString                 _resumePlanFile;
+
     bool                    _deleteWhenSendCompleted =  false;
     QmlObjectListModel*     _planCreators =             nullptr;
     bool                    _isSourcePlan;

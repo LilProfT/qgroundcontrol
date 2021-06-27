@@ -227,8 +227,8 @@ Item {
 
         onPromptForPlanUsageOnVehicleChange: {
             if (!_promptForPlanUsageShowing) {
-                _promptForPlanUsageShowing = true
-                mainWindow.showPopupDialogFromComponent(promptForPlanUsageOnVehicleChangePopupComponent)
+                //_promptForPlanUsageShowing = true
+                //mainWindow.showPopupDialogFromComponent(promptForPlanUsageOnVehicleChangePopupComponent)
             }
         }
 
@@ -1226,6 +1226,7 @@ Item {
                 QGCButton {
                     Layout.columnSpan:  3
                     Layout.fillWidth:   true
+                    visible: false
                     text:               qsTr("Save Mission Waypoints As KML...")
                     enabled:            !_planMasterController.syncInProgress && _visualItems.count > 1
                     onClicked: {
@@ -1243,22 +1244,24 @@ Item {
             SectionHeader {
                 id:                 vehicleSection
                 Layout.fillWidth:   true
-                text:               qsTr("Vehicle")
+                text:               qsTr("Resume")
+                visible: false
             }
 
             RowLayout {
                 Layout.fillWidth:   true
                 spacing:            _margin
-                visible:            vehicleSection.visible
+                visible:            true
 
                 QGCButton {
-                    text:               qsTr("Upload")
+                    text:               qsTr("Download Resume")
                     Layout.fillWidth:   true
-                    enabled:            !_planMasterController.offline && !_planMasterController.syncInProgress && _planMasterController.containsItems
-                    visible:            !QGroundControl.corePlugin.options.disableVehicleConnection
+                    //enabled:            !_planMasterController.offline && !_planMasterController.syncInProgress && _planMasterController.containsItems
+                    visible:            true
                     onClicked: {
                         dropPanel.hide()
-                        _planMasterController.upload()
+                        _planMasterController.loadFromRecentFile()
+
                     }
                 }
 
@@ -1266,7 +1269,8 @@ Item {
                     text:               qsTr("Download")
                     Layout.fillWidth:   true
                     enabled:            !_planMasterController.offline && !_planMasterController.syncInProgress
-                    visible:            !QGroundControl.corePlugin.options.disableVehicleConnection
+                    //visible:            !QGroundControl.corePlugin.options.disableVehicleConnection
+                    visible: false
                     onClicked: {
                         dropPanel.hide()
                         if (_planMasterController.dirty) {
@@ -1278,14 +1282,16 @@ Item {
                 }
 
                 QGCButton {
-                    text:               qsTr("Clear")
+                    text:               qsTr("Clear Resume")
                     Layout.fillWidth:   true
                     Layout.columnSpan:  2
-                    enabled:            !_planMasterController.offline && !_planMasterController.syncInProgress
-                    visible:            !QGroundControl.corePlugin.options.disableVehicleConnection
+                    enabled:            true
+                    //visible:            !QGroundControl.corePlugin.options.disableVehicleConnection
+                    visible: false
                     onClicked: {
                         dropPanel.hide()
-                        mainWindow.showComponentDialog(clearVehicleMissionDialog, text, mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
+                        _planMasterController.clearResumeFile();
+                        //mainWindow.showComponentDialog(clearVehicleMissionDialog, text, mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
                     }
                 }
             }

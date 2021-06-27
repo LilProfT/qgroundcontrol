@@ -474,6 +474,9 @@ Item {
             _activeVehicle.guidedModeTakeoff(actionAltitudeChange)
             break
         case actionResumeMission:
+            missionController.resumeMission(missionController.resumeMissionIndex)
+            missionController.autoSaveMission()
+            break
         case actionResumeMissionUploadFail:
             missionController.resumeMission(missionController.resumeMissionIndex)
             break

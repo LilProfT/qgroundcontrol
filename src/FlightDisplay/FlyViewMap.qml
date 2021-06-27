@@ -57,6 +57,12 @@ FlightMap {
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
+    property var  path: [
+        { latitude: -35.3627585729104, longitude: 149.16561385359756 },
+        { latitude: -35.36323317011994, longitude: 149.166278961657554},
+        { latitude: -35.36338926624347, longitude: 149.1655693841518 },
+        { latitude: -35.36317483107069, longitude: 149.16540697403713 }
+    ]
 
     function updateAirspace(reset) {
         if(_airspaceEnabled) {
@@ -243,6 +249,46 @@ FlightMap {
             onPointsCleared:        trajectoryPolyline.path = []
         }
     }
+
+
+
+    // Area polygon
+//    QGCMapPolygonVisuals {
+//        id:                 mapPolygonVisuals
+//        z:          QGroundControl.zOrderTrajectoryLines
+
+//        mapPolygon:         _mapPolygon
+//        interactive:        false
+//        borderWidth:        4
+//        borderColor:        "white"
+//        interiorColor:      QGroundControl.globalPalette.surveyPolygonInterior
+//        altColor:           QGroundControl.globalPalette.surveyPolygonTerrainCollision
+//        interiorOpacity:    0.3 * _root.opacity
+
+            MapPolygon {
+                id:                 mapPolygon
+                    border.width: 4
+                    border.color: "white"
+                    z:          QGroundControl.zOrderTrajectoryLines
+                    color: "#4D000000"
+                    visible:    !pipMode
+
+                    Connections {
+                        target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
+                        onPointAdded: mapPolygon.path = _activeVehicle ? _activeVehicle.mapPolyPoints : []
+                    }
+
+//                    Connections {
+//                        target:                 _activeVehicle ? _activeVehicle.mapPolygon : null
+//                        onPointAdded:           mapPolygon.addCoordinate(coordinate)
+//                        onUpdateLastPoint:      mapPolygon.replaceCoordinate(trajectoryPolyline.pathLength() - 1, coordinate)
+//                        onPointsCleared:        mapPolygon.path = []
+//                    }
+
+
+                }
+//    }
+
 
     // Add the vehicles to the map
     MapItemView {

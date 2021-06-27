@@ -146,6 +146,7 @@ LinuxBuild {
     QMAKE_POST_LINK += && $$QMAKE_COPY --dereference --recursive $$[QT_INSTALL_QML] $$DESTDIR/Qt/
 
     # Airmap
+    DEFINES-=QGC_AIRMAP_ENABLED
     contains (DEFINES, QGC_AIRMAP_ENABLED) {
         QMAKE_POST_LINK += && $$QMAKE_COPY $$OUT_PWD/libs/airmap-platform-sdk/linux/$$AIRMAP_QT_PATH/libairmap-qt.so.1.1.0 $$DESTDIR/Qt/libs/
     }

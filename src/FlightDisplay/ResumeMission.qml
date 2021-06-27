@@ -7,8 +7,8 @@ ToolStripAction {
     iconSource: "/qmlimages/MapSync.svg"
     //Should only be visble and enable after landing, before completing the designated mission
     visible:    _activeVehicle && !_activeVehicle.armed
-    //enabled:    _activeVehicle && !_activeVehicle.armed && globals.guidedControllerFlyView.showResumeMission
-    enabled: true
+    enabled:    _activeVehicle && !_activeVehicle.armed
+    //enabled: true
 
     onTriggered: {
         globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMission, null, null)

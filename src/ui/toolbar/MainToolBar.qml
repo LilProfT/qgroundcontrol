@@ -82,9 +82,8 @@ Rectangle {
         QGCButton {
                     id:                 disconnectButton
                     text:               qsTr("Disconnect")
-                    onClicked:          {
-                        _vehicleDisconnected = true;
-                        _activeVehicle.closeVehicle();
+                    onClicked:          {                        
+                        QGroundControl.linkManager.reloadApp();
                     }
                     visible:            _activeVehicle && _communicationLost && currentToolbar === flyViewToolbar
                 }
@@ -94,9 +93,9 @@ Rectangle {
                     id:                 reconnectButton
                     text:               qsTr("Reconnect")
                     onClicked:          {
-                        QGroundControl.linkManager.startAutomaticallyConnectLinks();
+                        QGroundControl.linkManager.reloadApp();
                     }
-                    visible:            !_activeVehicle && currentToolbar === flyViewToolbar
+                    visible:            false
         }
 
     }

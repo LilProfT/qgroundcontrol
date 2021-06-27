@@ -24,7 +24,7 @@
 
 const char* JsonHelper::jsonVersionKey                      = "version";
 const char* JsonHelper::jsonGroundStationKey                = "groundStation";
-const char* JsonHelper::jsonGroundStationValue              = "QGroundControl";
+const char* JsonHelper::jsonGroundStationValue              = "MiSmartGCS";
 const char* JsonHelper::jsonFileTypeKey                     = "fileType";
 const char* JsonHelper::_translateKeysKey                   = "translateKeys";
 const char* JsonHelper::_arrayIDKeysKey                     = "_arrayIDKeys";
