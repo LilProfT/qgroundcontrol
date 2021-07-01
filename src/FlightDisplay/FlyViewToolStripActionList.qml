@@ -33,7 +33,8 @@ ToolStripActionList {
         ToolStripAction {
             text:        qsTr("Clear")
             iconSource:  "/qmlimages/Eraser.svg"
-            visible:     _activeVehicle && _activeVehicle.trajectoryPoints
+            //visible:     _activeVehicle && _activeVehicle.trajectoryPoints
+            visible: false
             onTriggered: _activeVehicle.trajectoryPoints.clear()
         }
     ]

@@ -146,11 +146,24 @@ void MissionManager::generateResumeMission(int resumeIndex)
 
     MissionItem* changeYawItem;
     int prefixCommandCount = 0;
+    int firstAddedPoints = 0;
     for (int i=0; i<_missionItems.count(); i++) {
         MissionItem* oldItem = _missionItems[i];
         if (oldItem->command() == MAV_CMD_CONDITION_YAW) {
             changeYawItem = oldItem;
         }
+        if ( i <= resumeIndex && oldItem->coordinate().longitude() != 0 && oldItem->coordinate().latitude() != 0) {
+            qCWarning(MissionManagerLog) << "oldItem->command()  " << oldItem->command() << " , i: " << i;
+
+            if (oldItem->command() == MAV_CMD_NAV_WAYPOINT) {
+                firstAddedPoints++;
+                qCWarning(MissionManagerLog) << "_cachedResumeIndex i: " << i;
+
+            }
+            if (firstAddedPoints > 1)
+                emit _vehicle->pointAddedFromfile(oldItem->coordinate());
+        }
+
         if (i == resumeIndex) {
             
             QGeoCoordinate coordinate = _vehicle->resumeCoordinate();
@@ -159,6 +172,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
             // And now I'm reluctant to write that method.
             // Are there reasons upstream not do it ??
             qCWarning(MissionManagerLog) << "coordinate: " << coordinate << "at resumeIndex: " << resumeIndex;
+            emit _vehicle->pointAddedFromfile(coordinate);
 
             //qDebug() << coordinate;
             if (oldItem->param5() != coordinate.latitude() || oldItem->param6() != coordinate.longitude()) {

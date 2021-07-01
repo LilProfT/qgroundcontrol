@@ -11,7 +11,7 @@ ToolStripAction {
     //enabled: true
 
     onTriggered: {
-        globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMission, null, null)
+        globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMissionFromDialog, null, null)
         hideDialog()
     }
 }

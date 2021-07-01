@@ -166,7 +166,10 @@ public:
     Q_INVOKABLE VisualMissionItem*  insertComplexMissionItemFromKMLOrSHP(QString itemName, QString file, int visualItemIndex, bool makeCurrentItem = false);
 
     Q_INVOKABLE void resumeMission(int resumeIndex);
+    Q_INVOKABLE void resumeMissionFromDialog();
     Q_INVOKABLE void autoSaveMission(void);
+    Q_INVOKABLE void clearTrajectoryPoints(void);
+    Q_INVOKABLE void updateAreaSprayed(void);
 
     /// Updates the altitudes of the items in the current mission to the new default altitude
     Q_INVOKABLE void applyDefaultMissionAltitude(void);
@@ -184,6 +187,8 @@ public:
     Q_ENUM(SendToVehiclePreCheckState)
 
     Q_INVOKABLE SendToVehiclePreCheckState sendToVehiclePreCheck(void);
+    Q_INVOKABLE QVariantList boundingCube(void)  ;
+    Q_INVOKABLE void pointAdded(void);
 
     /// Determines if the mission has all data needed to be saved or sent to the vehicle.
     /// IMPORTANT NOTE: The return value is a VisualMissionItem::ReadForSaveState value. It is an int here to work around
@@ -242,6 +247,7 @@ public:
     int currentPlanViewSeqNum       (void) const { return _currentPlanViewSeqNum; }
     int currentPlanViewVIIndex      (void) const { return _currentPlanViewVIIndex; }
     int resumeMissionIndexFromFile          (void) const;
+    int resumeMissionIndex2          (void) const;
 
     double  missionDistance         (void) const { return _missionFlightStatus.totalDistance; }
     double  missionTime             (void) const { return _missionFlightStatus.totalTime; }
@@ -300,6 +306,7 @@ signals:
     void _recalcMissionFlightStatusSignal   (void);
     void _recalcFlightPathSegmentsSignal    (void);
     void globalAltitudeModeChanged          (void);
+    void updateSurveyAreaPolygon(void);
 
 private slots:
     void _newMissionItemsAvailableFromVehicle   (bool removeAllRequested);
@@ -318,7 +325,7 @@ private slots:
     void _recalcAll                             (void);
     void _managerVehicleChanged                 (Vehicle* managerVehicle);
     void _takeoffItemNotRequiredChanged         (void);
-    void _bufferMission                         (void);
+//    void _bufferMission                         (void);
 
 private:
     void                    _init                               (void);
@@ -369,7 +376,7 @@ private:
     MissionManager*             _missionManager =               nullptr;
     int                         _missionItemCount =             0;
     QmlObjectListModel*         _visualItems =                  nullptr;
-    QmlObjectListModel*         _bufferedVisualItems =          nullptr;
+//    QmlObjectListModel*         _bufferedVisualItems =          nullptr;
     MissionSettingsItem*        _settingsItem =                 nullptr;
     PlanViewSettings*           _planViewSettings =             nullptr;
     QmlObjectListModel          _simpleFlightPathSegments;

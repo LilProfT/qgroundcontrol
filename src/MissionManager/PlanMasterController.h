@@ -96,6 +96,9 @@ public:
     RallyPointController*   rallyPointController(void)  { return &_rallyPointController; }
 
     SurveyComplexItem* _surveyComplexItem = nullptr;
+    void loadPolygonFromRecentFile(void);
+
+
     double      area            (void) const;
     Fact*       applicationRate (void) { return _surveyComplexItem ? _surveyComplexItem->applicationRate() : nullptr; }
     Fact*       flowRate        (void) { return _surveyComplexItem ? _surveyComplexItem->sprayFlowRate() : nullptr; }
@@ -115,9 +118,12 @@ public:
     QStringList loadNameFilters (void) const;
     QStringList saveNameFilters (void) const;
     bool        isEmpty         (void) const;
+    void        savePolygon (QVariantList path);
+    void        saveSprayedArea(double area) { _sprayedArea = area; };
+    double      sprayedArea(void) { return _sprayedArea; };
 
-    void        setFlyView(bool flyView) { _flyView = flyView; }
-
+    void        setFlyView(bool flyView) { _flyView = flyView; };
+    QGCMapPolygon loadSurveyPolygon(void) { return _surveyAreaPolygon;};
     QJsonDocument saveToJson    ();
     QJsonDocument saveRecentFileToJson    ();
 
@@ -131,6 +137,8 @@ public:
     static const char*  kJsonRallyPointsObjectKey;
     static const char*  kJsonRecentFileObjectKey;
     static const char*  kRecentFile;
+    static const char*  kJsonSprayedAreaObjectKey;
+
 signals:
     void containsItemsChanged               (bool containsItems);
     void syncInProgressChanged              (void);
@@ -181,4 +189,7 @@ private:
     bool                    _deleteWhenSendCompleted =  false;
     QmlObjectListModel*     _planCreators =             nullptr;
     bool                    _isSourcePlan;
+    QGCMapPolygon           _surveyAreaPolygon;
+    double           _sprayedArea;
+
 };

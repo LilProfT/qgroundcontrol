@@ -1519,9 +1519,10 @@ void Vehicle::_updateArmed(bool armed)
         emit armedChanged(_armed);
         // We are transitioning to the armed state, begin tracking trajectory points for the map
         if (_armed) {
+//            _trajectoryPoints->updateEnterPoint(missionManager()-)
             _trajectoryPoints->start();
             _flightTimerStart();
-            _clearCameraTriggerPoints();
+//            _clearCameraTriggerPoints();
             // Reset battery warning
             _lowestBatteryChargeStateAnnouncedMap.clear();
         } else {
@@ -1536,6 +1537,16 @@ void Vehicle::_updateArmed(bool armed)
             }
         }
     }
+}
+
+void Vehicle::updateTrajectoryEnterPoint(QGeoCoordinate coordinate)
+{
+    _trajectoryPoints->updateEnterPoint(coordinate);
+}
+
+void Vehicle::updateTrajectoryExitPoint(QGeoCoordinate coordinate)
+{
+    _trajectoryPoints->updateExitPoint(coordinate);
 }
 
 void Vehicle::_handlePing(LinkInterface* link, mavlink_message_t& message)

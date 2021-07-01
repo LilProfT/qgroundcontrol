@@ -507,6 +507,8 @@ public:
     bool vtol() const;
     bool rover() const;
     bool sub() const;
+    void updateTrajectoryEnterPoint(QGeoCoordinate coordinate);
+    void updateTrajectoryExitPoint(QGeoCoordinate coordinate);
 
     bool supportsThrottleModeCenterZero () const;
     bool supportsNegativeThrust         ();
@@ -828,6 +830,9 @@ public slots:
 
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
+    void pointAddedFromfile              (QGeoCoordinate coordinate);
+    void clearTrajectoryPoint              (void);
+
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
     void homePositionChanged            (const QGeoCoordinate& homePosition);

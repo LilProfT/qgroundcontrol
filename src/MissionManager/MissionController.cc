@@ -63,7 +63,6 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     , _managerVehicle       (masterController->managerVehicle())
     , _missionManager       (masterController->managerVehicle()->missionManager())
     , _visualItems          (new QmlObjectListModel(this))
-    , _bufferedVisualItems  (new QmlObjectListModel(this))
     , _planViewSettings     (qgcApp()->toolbox()->settingsManager()->planViewSettings())
     , _appSettings          (qgcApp()->toolbox()->settingsManager()->appSettings())
 {
@@ -75,7 +74,6 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     connect(_planViewSettings->takeoffItemNotRequired(),    &Fact::rawValueChanged,                     this, &MissionController::_takeoffItemNotRequiredChanged);
     connect(this,                                           &MissionController::missionDistanceChanged, this, &MissionController::recalcTerrainProfile);
 
-    connect(_managerVehicle,                                &Vehicle::vehicleClosed,                    this, &MissionController::_bufferMission);
 
     // The follow is used to compress multiple recalc calls in a row to into a single call.
     connect(this, &MissionController::_recalcMissionFlightStatusSignal, this, &MissionController::_recalcMissionFlightStatus,   Qt::QueuedConnection);
@@ -209,10 +207,8 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
             newControllerMissionItems->append(simpleItem);
 
             qDebug() << "[parse mission] " << simpleItem->missionItem().commandInt();
-            if (
-                   (simpleItem->missionItem().commandInt() == 216 /* MAV_CMD_DO_SPRAYER */)
-                && (lastWaypoint)
-            ) {
+            if ((simpleItem->missionItem().commandInt() == 216 /* MAV_CMD_DO_SPRAYER */)
+                 && (lastWaypoint)) {
                 if (enterMarked == false) {
                     lastWaypoint->setVisualType(MissionItem::VisualType::ENTER);
                     enterMarked = true;
@@ -225,6 +221,14 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
         if (exitWaypoint) {
             exitWaypoint->setVisualType(MissionItem::VisualType::EXIT);
             qDebug() << "[parse mission] exit waypoint found";
+            _masterController->loadPolygonFromRecentFile();
+            emit updateSurveyAreaPolygon();
+
+            if (!_missionManager->resumeFromFile()) {
+                emit _managerVehicle->clearTrajectoryPoint();
+                _managerVehicle->updateAreaSprayedFromFile(0);
+
+            }
         }
 
         _visualItems = newControllerMissionItems;
@@ -635,6 +639,7 @@ void MissionController::removeAll(void)
         _managerVehicle->updateResumeCoordinate(coordinate);
         _missionManager->loadResumeFromFile(false);
         _missionManager->updateCacheResumeIndex(-1);
+        _masterController->saveSprayedArea(0);
     }
 }
 
@@ -800,6 +805,7 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
     if (!JsonHelper::loadGeoCoordinate(json[_jsonPlannedHomePositionKey], true /* altitudeRequired */, homeCoordinate, errorString)) {
         return false;
     }
+    _missionManager->loadResumeFromFile(false);
 
     QGeoCoordinate resumeCoordinate;
     if (JsonHelper::loadGeoCoordinate(json[_jsonResumePositionKey], true /* altitudeRequired */, resumeCoordinate, errorString)) {
@@ -814,15 +820,18 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         if (resumeCoordinate.isValid() && resumeIndex > 0) {
             _managerVehicle->updateResumeCoordinate(resumeCoordinate);
             _missionManager->updateCacheResumeIndex(resumeIndex);
-            _missionManager->loadResumeFromFile(true);
             qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
         }
     }
     if (json.contains(_jsonSprayAreaKey)) {
+        double area = json[_jsonSprayAreaKey].toDouble();
         qCWarning(MissionControllerLog) << "_jsonSprayAreaKey: " << json[_jsonSprayAreaKey].toDouble();
+        if (area <= 100)
+            _masterController->saveSprayedArea(json[_jsonSprayAreaKey].toDouble() * 10000);
+        else
+            _masterController->saveSprayedArea(json[_jsonSprayAreaKey].toDouble() );
     }
 
-    //_managerVehicle->updateAreaSprayedFromFile(json[_jsonSprayAreaKey].toDouble());
 
     MissionSettingsItem* settingsItem = new MissionSettingsItem(_masterController, _flyView, visualItems);
     settingsItem->setCoordinate(homeCoordinate);
@@ -1163,7 +1172,10 @@ void MissionController::save(QJsonObject& json)
         JsonHelper::saveGeoCoordinate(_managerVehicle->resumeCoordinate(), true /* writeAltitude */, resumeCoordinateValue);
         json[_jsonResumePositionKey]            = resumeCoordinateValue;
         json[_jsonResumeIndexKey]               = _missionManager->cacheResumeIndex();
-        json[_jsonSprayAreaKey]                 = _managerVehicle->areaSprayed()->rawValue().toDouble();
+        if (_managerVehicle->areaSprayed()->rawValue().toDouble() > 0)
+            json[_jsonSprayAreaKey]                 = _managerVehicle->areaSprayed()->rawValue().toDouble();
+        else
+            json[_jsonSprayAreaKey]                 = _masterController->sprayedArea();
         _missionManager->updateCacheResumeIndex(-1);
     } else {
         QGeoCoordinate saveCoordinate;
@@ -1348,7 +1360,7 @@ void MissionController::_recalcFlightPathSegments(void)
     lastFlyThroughVI->setSimpleFlighPathSegment(nullptr);
 
     // Grovel through the list of items keeping track of things needed to correctly draw waypoints lines
-
+    QList<QGeoCoordinate> geoList;
     for (int i=1; i<_visualItems->count(); i++) {
         VisualMissionItem*  visualItem =    qobject_cast<VisualMissionItem*>(_visualItems->get(i));
         SimpleMissionItem*  simpleItem =    qobject_cast<SimpleMissionItem*>(visualItem);
@@ -1433,7 +1445,10 @@ void MissionController::_recalcFlightPathSegments(void)
                     }
                 }
                 firstCoordinateNotFound = false;
+                qWarning(MissionManagerLog) << "_waypointPath coordinate :" << visualItem->coordinate();
+
                 _waypointPath.append(QVariant::fromValue(visualItem->coordinate()));
+                geoList.append(visualItem->coordinate());
                 lastFlyThroughVI = visualItem;
             }
         }
@@ -1441,6 +1456,8 @@ void MissionController::_recalcFlightPathSegments(void)
 
     if (linkStartToHome && homePositionValid) {
         _waypointPath.prepend(QVariant::fromValue(_settingsItem->coordinate()));
+
+
     }
 
     if (linkEndToHome && lastFlyThroughVI != _settingsItem && homePositionValid) {
@@ -1488,6 +1505,23 @@ void MissionController::_recalcFlightPathSegments(void)
     qDeleteAll(oldSegmentTable);
 
     emit _recalcMissionFlightStatusSignal();
+    if (geoList.count() > 0) {
+        QGeoCoordinate _enterPoint, _exitPoint;
+//        _enterPoint.setLatitude(-35.3635283621613);
+//        _enterPoint.setLongitude(149.1642707053213);
+//        _exitPoint.setLatitude(-35.363367756072925);
+//        _exitPoint.setLongitude(149.16492230227956);
+
+        _enterPoint = geoList.at(0);
+        qWarning(MissionManagerLog) << "_enterPoint coordinate :" << _enterPoint;
+        _managerVehicle->updateTrajectoryEnterPoint(_enterPoint);
+
+
+        _exitPoint = geoList.at(geoList.count() - 1);
+        qWarning(MissionManagerLog) << "_exitPoint coordinate :" << _exitPoint;
+        _managerVehicle->updateTrajectoryExitPoint(_exitPoint);
+    }
+    geoList.clear();
 
     if (_waypointPath.count() == 0) {
         // MapPolyLine has a bug where if you change from a path which has elements to an empty path the line drawn
@@ -1496,6 +1530,7 @@ void MissionController::_recalcFlightPathSegments(void)
         _waypointPath.append(QVariant::fromValue(QGeoCoordinate(0, 0)));
         _waypointPath.append(QVariant::fromValue(QGeoCoordinate(0, 0)));
     }
+
 
     emit waypointPathChanged();
     emit recalcTerrainProfile();
@@ -2062,15 +2097,15 @@ void MissionController::_managerVehicleChanged(Vehicle* managerVehicle)
     connect(_managerVehicle, &Vehicle::defaultCruiseSpeedChanged,       this, &MissionController::_recalcMissionFlightStatusSignal, Qt::QueuedConnection);
     connect(_managerVehicle, &Vehicle::defaultHoverSpeedChanged,        this, &MissionController::_recalcMissionFlightStatusSignal, Qt::QueuedConnection);
     connect(_managerVehicle, &Vehicle::vehicleTypeChanged,              this, &MissionController::complexMissionItemNamesChanged);
-    connect(_managerVehicle, &Vehicle::vehicleClosed,                   this, &MissionController::_bufferMission);
+//    connect(_managerVehicle, &Vehicle::vehicleClosed,                   this, &MissionController::_bufferMission);
 
     // release buffered mission
-    if (_bufferedVisualItems->count() > 0) {
-        _visualItems->clear();
-        for (int i=0; i<_bufferedVisualItems->count(); i++)
-            _visualItems->append(_bufferedVisualItems->get(i));
-        _masterController->sendToVehicle();
-    }
+//    if (_bufferedVisualItems->count() > 0) {
+//        _visualItems->clear();
+//        for (int i=0; i<_bufferedVisualItems->count(); i++)
+//            _visualItems->append(_bufferedVisualItems->get(i));
+//        _masterController->sendToVehicle();
+//    }
 
     emit complexMissionItemNamesChanged();
     emit resumeMissionIndexChanged();
@@ -2180,21 +2215,64 @@ void MissionController::_centerHomePositionOnMissionItems(QmlObjectListModel *vi
     }
 }
 
-void MissionController::autoSaveMission(void) {
+void MissionController::autoSaveMission(void)
+{
     _missionManager->autoSaveMission();
+}
+
+void MissionController::clearTrajectoryPoints(void)
+{
+    emit _managerVehicle->clearTrajectoryPoint();
+}
+
+void MissionController::updateAreaSprayed(void)
+{
+    _managerVehicle->updateAreaSprayedFromFile(_masterController->sprayedArea());
 }
 
 int MissionController::resumeMissionIndex(void) const
 {
 
+
     int resumeIndex = 0;
-    qCWarning(MissionControllerLog) << "_resumeMissionIndex(void)";
+    qCWarning(MissionControllerLog) << "resumeMissionIndexFromDialog(void)";
+    qCWarning(MissionControllerLog) << "resumeMissionIndexFromDialog: " << _resumeMissionIndexFromFile;
+
+    if (_flyView) {
+        //emit _managerVehicle->clearTrajectoryPoint();
+        //_missionManager->loadResumeFromFile(true);
+            resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
+            if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
+                // Resume at the item previous to the item we were heading towards
+                resumeIndex--;
+            } else {
+                resumeIndex = 0;
+            }
+            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
+
+
+    }
+
+    return resumeIndex;
+}
+
+int MissionController::resumeMissionIndex2(void) const
+{
+    int resumeIndex = 0;
+    qCWarning(MissionControllerLog) << "_resumeMissiosnIndex(void)";
     qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
 
     if (_flyView) {
         if (_missionManager->cacheResumeIndex() > 0) {
-            qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _missionManager->cacheResumeIndex();
+            //resumeActive();
+            _managerVehicle->updateAreaSprayedFromFile(0);
+
+            emit _managerVehicle->clearTrajectoryPoint();
+            _missionManager->loadResumeFromFile(true);
+
             resumeIndex = _missionManager->cacheResumeIndex();
+            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
+
         } else {
             resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
             if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
@@ -2251,7 +2329,6 @@ bool MissionController::dirty(void) const
 {
     return _visualItems ? _visualItems->dirty() : false;
 }
-
 
 void MissionController::setDirty(bool dirty)
 {
@@ -2332,6 +2409,17 @@ QStringList MissionController::complexMissionItemNames(void) const
 
 void MissionController::resumeMission(int resumeIndex)
 {
+    if (!_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle()) {
+        resumeIndex--;
+    }
+    qCWarning(MissionManagerLog) << "resumeMission resumeIndex: " << resumeIndex;
+
+    _missionManager->generateResumeMission(resumeIndex);
+}
+
+void MissionController::resumeMissionFromDialog()
+{
+    int resumeIndex = resumeMissionIndex2();
     if (!_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle()) {
         resumeIndex--;
     }
@@ -2751,9 +2839,19 @@ void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeM
     }
 }
 
-void MissionController::_bufferMission()
+//void MissionController::_bufferMission()
+//{
+//    _bufferedVisualItems->clear();
+//    for (int i=0; i<_visualItems->count(); i++)
+//        _bufferedVisualItems->append(_visualItems->get(i));
+//}
+
+QVariantList  MissionController::boundingCube(void)
 {
-    _bufferedVisualItems->clear();
-    for (int i=0; i<_visualItems->count(); i++)
-        _bufferedVisualItems->append(_visualItems->get(i));
+    return _masterController->loadSurveyPolygon().path();
+}
+
+void MissionController::pointAdded(void)
+{
+    emit updateSurveyAreaPolygon();
 }

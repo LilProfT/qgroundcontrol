@@ -37,6 +37,8 @@ public:
     void generateResumeMission(int resumeIndex);
     int cacheResumeIndex() {return _cachedResumeIndex; };
     void loadResumeFromFile(bool load) {_loadResumeFromFile = load; };
+    bool resumeFromFile(void) {return _loadResumeFromFile; };
+
     void updateCacheResumeIndex(int resumeIndex) {_cachedResumeIndex = resumeIndex; };
     void autoSaveMission(void);
 

@@ -42,6 +42,7 @@ const char* PlanMasterController::kJsonMissionObjectKey =       "mission";
 const char* PlanMasterController::kJsonGeoFenceObjectKey =      "geoFence";
 const char* PlanMasterController::kJsonRallyPointsObjectKey =   "rallyPoints";
 const char* PlanMasterController::kJsonRecentFileObjectKey =  "recentFile";
+const char* PlanMasterController::kJsonSprayedAreaObjectKey =  "sprayedArea";
 
 PlanMasterController::PlanMasterController(QObject* parent)
     : QObject               (parent)
@@ -497,6 +498,7 @@ void PlanMasterController::loadFromRecentFile(void)
             recentlyFile = json[kJsonRecentFileObjectKey].toString();
             qCWarning(PlanMasterControllerLog()) << "recentlyFile: " << recentlyFile;
         }
+
         qgcApp()->toolbox()->corePlugin()->postLoadFromJson(this, json);
         success = true;
     }
@@ -513,6 +515,72 @@ void PlanMasterController::loadFromRecentFile(void)
 
     if (!offline()) {
         setDirty(true);
+    }
+}
+
+void PlanMasterController::loadPolygonFromRecentFile(void)
+{
+    QString filename = qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + kRecentFile;
+    QString recentlyFile;
+    QString errorString;
+    QString errorMessage = tr("Error loading Plan file (%1). %2").arg(filename).arg("%1");
+
+    QFileInfo fileInfo(filename);
+    QFile file(filename);
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        errorString = file.errorString() + QStringLiteral(" ") + filename;
+        qgcApp()->showAppMessage(errorMessage.arg(errorString));
+        return;
+    }
+
+    bool success = false;
+    if (fileInfo.suffix() == AppSettings::missionFileExtension) {
+        if (!_missionController.loadJsonFile(file, errorString)) {
+            qgcApp()->showAppMessage(errorMessage.arg(errorString));
+        } else {
+            success = true;
+        }
+    } else if (fileInfo.suffix() == AppSettings::waypointsFileExtension || fileInfo.suffix() == QStringLiteral("txt")) {
+        if (!_missionController.loadTextFile(file, errorString)) {
+            qgcApp()->showAppMessage(errorMessage.arg(errorString));
+        } else {
+            success = true;
+        }
+    } else {
+        QJsonDocument   jsonDoc;
+        QByteArray      bytes = file.readAll();
+
+        if (!JsonHelper::isJsonFile(bytes, jsonDoc, errorString)) {
+            qgcApp()->showAppMessage(errorMessage.arg(errorString));
+            return;
+        }
+
+        QJsonObject json = jsonDoc.object();
+//        //-- Allow plugins to pre process the load
+        qgcApp()->toolbox()->corePlugin()->preLoadFromJson(this, json);
+        if (!_surveyAreaPolygon.loadFromJson(json, true /* required */, errorString)) {
+            _surveyAreaPolygon.clear();
+        }
+        qWarning(PlanMasterControllerLog()) << " _surveyAreaPolygon: " << _surveyAreaPolygon.path() ;
+
+        if (json.contains(kJsonSprayedAreaObjectKey)) {
+            _sprayedArea = json[kJsonSprayedAreaObjectKey].toDouble();
+            qCWarning(PlanMasterControllerLog()) << "_sprayedArea: " << _sprayedArea;
+        }
+
+        qgcApp()->toolbox()->corePlugin()->postLoadFromJson(this, json);
+
+        success = true;
+    }
+
+    if(success){
+        //_currentPlanFile = recentlyFile;
+        //setIsSourcePlan(true);
+        //_resumePlanFile = QString(_currentPlanFile);
+        //loadResumeFile();
+    } else {
+        //_currentPlanFile.clear();
     }
 }
 
@@ -538,23 +606,20 @@ QJsonDocument PlanMasterController::saveToJson()
     return QJsonDocument(planJson);
 }
 
+void  PlanMasterController::savePolygon(QVariantList path)
+{
+    _surveyAreaPolygon.setPath(path);
+    _saveRecentFile();
+}
+
 QJsonDocument PlanMasterController::saveRecentFileToJson()
 {
     QJsonObject planJson;
     qgcApp()->toolbox()->corePlugin()->preSaveToJson(this, planJson);
     planJson[kJsonRecentFileObjectKey] = _currentPlanFile;
+    _surveyAreaPolygon.saveToJson(planJson);
+    planJson[kJsonSprayedAreaObjectKey] = _sprayedArea;
 
-
-    //-- Allow plugin to preemptly add its own keys to mission
-//    qgcApp()->toolbox()->corePlugin()->preSaveToMissionJson(this, missionJson);
-//    _missionController.save(missionJson);
-//    //-- Allow plugin to add its own keys to mission
-//    qgcApp()->toolbox()->corePlugin()->postSaveToMissionJson(this, missionJson);
-//    _geoFenceController.save(fenceJson);
-//    _rallyPointController.save(rallyJson);
-//    planJson[kJsonMissionObjectKey] = missionJson;
-//    planJson[kJsonGeoFenceObjectKey] = fenceJson;
-//    planJson[kJsonRallyPointsObjectKey] = rallyJson;
     qgcApp()->toolbox()->corePlugin()->postSaveToJson(this, planJson);
     return QJsonDocument(planJson);
 }
@@ -665,21 +730,26 @@ void PlanMasterController::removeAll(void)
     }
 }
 
-void PlanMasterController::clearResumeFile(void) {
+void PlanMasterController::clearResumeFile(void)
+{
     _resumePlanFile.clear();
 }
 
-void PlanMasterController::_uploadToVehicle() {
+
+
+void PlanMasterController::_uploadToVehicle()
+{
     if (!offline()) {
         setParam();
         sendToVehicle();
     }
 }
 
-void PlanMasterController::loadResumeFile(void) {
+void PlanMasterController::loadResumeFile(void)
+{
     if (!_resumePlanFile.isEmpty()) {
         loadFromFile(_resumePlanFile);
-        QTimer::singleShot(4000, this, &PlanMasterController::_uploadToVehicle);
+        QTimer::singleShot(3000, this, &PlanMasterController::_uploadToVehicle);
     }
 }
 
