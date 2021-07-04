@@ -99,6 +99,11 @@ public:
     /// Add position from vehicle
     Q_INVOKABLE void setPositionFromVehicle(void);
 
+
+    /// Add position from gcs
+    Q_INVOKABLE void setPositionFromGCS(void);
+
+
     /// Saves the polygon to the json object.
     ///     @param json Json object to save to
     void saveToJson(QJsonObject& json);

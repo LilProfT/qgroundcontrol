@@ -1463,7 +1463,7 @@ void MissionController::_recalcFlightPathSegments(void)
     if (linkEndToHome && lastFlyThroughVI != _settingsItem && homePositionValid) {
         lastSegmentVisualItemPair = VisualItemPair(lastFlyThroughVI, _settingsItem);
         if (_flyView) {
-            _waypointPath.append(QVariant::fromValue(_settingsItem->coordinate()));
+            //_waypointPath.append(QVariant::fromValue(_settingsItem->coordinate()));
         }
         FlightPathSegment* segment = _addFlightPathSegment(oldSegmentTable, lastSegmentVisualItemPair);
         segment->setSpecialVisual(roiActive);

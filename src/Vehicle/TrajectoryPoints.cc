@@ -70,7 +70,7 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
                 //if (coordinate != _vehicle->homePosition())
                 qWarning(MissionManagerLog) << "pointFreeAdded coordinate :" << coordinate;
                 if (_reachEnterPoint) {
-                    if (!_reachExitPoint)
+                    if (!_reachExitPoint   )
                         emit pointAdded(coordinate);
                     else
                         emit pointExitAdded(coordinate);
@@ -86,7 +86,7 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
                 qWarning(MissionManagerLog) << "updateLastPoint coordinate :" << coordinate;
 
                 if (_reachEnterPoint) {
-                    if (!_reachExitPoint)
+                    if (!_reachExitPoint   )
                         emit updateLastPoint(coordinate);
                     else
                         emit updateExitLastPoint(coordinate);
@@ -108,7 +108,7 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
         qWarning(MissionManagerLog) << "first pointFreeAdded coordinate :" << coordinate;
 
         if (_reachEnterPoint) {
-            if (!_reachExitPoint)
+            if (!_reachExitPoint  )
                 emit pointAdded(coordinate);
             else
                 emit pointExitAdded(coordinate);
@@ -173,6 +173,19 @@ void TrajectoryPoints::pointAddedFromfile(QGeoCoordinate coordinate)
     }
 }
 
+void TrajectoryPoints::updatePausePoint(QGeoCoordinate coordinate)
+{
+    _reachExitPoint = true;
+    _vehicleCoordinateChanged(coordinate);
+
+}
+
+void TrajectoryPoints::updateResumePoint(QGeoCoordinate coordinate)
+{
+    _reachExitPoint = false;
+    _vehicleCoordinateChanged(coordinate);
+    //emit exitPointsCleared();
+}
 void TrajectoryPoints::clear(void)
 {
     _points.clear();

@@ -220,7 +220,6 @@ Vehicle::Vehicle(LinkInterface*             link,
     if (_flightHubManager == nullptr) {
         _flightHubManager               = new FlightHubManager(this);
     }
-
     _autopilotPlugin = _firmwarePlugin->autopilotPlugin(this);
     _autopilotPlugin->setParent(this);
 
@@ -3487,6 +3486,11 @@ QString Vehicle::missionFlightMode() const
     return _firmwarePlugin->missionFlightMode();
 }
 
+QString Vehicle::loiterFlightMode() const
+{
+    return _firmwarePlugin->loiterFlightMode();
+}
+
 QString Vehicle::pauseFlightMode() const
 {
     return _firmwarePlugin->pauseFlightMode();
@@ -4055,8 +4059,13 @@ void Vehicle::triggerSimpleCamera()
 }
 
 void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
-    if (flightMode == this->rtlFlightMode()) {
-        qDebug() << "save RTL coord";
+    if (flightMode == this->rtlFlightMode() || (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode())) {
+        qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
         _resumeCoordinate = this->coordinate();
-    };
+        _trajectoryPoints->updatePausePoint(this->coordinate());
+    } else if (flightMode == this->missionFlightMode() && (_prevflightMode == this->loiterFlightMode() || _prevflightMode == this->rtlFlightMode())) {
+        //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
+        _trajectoryPoints->updateResumePoint(this->coordinate());
+    }
+    _prevflightMode = flightMode;
 }

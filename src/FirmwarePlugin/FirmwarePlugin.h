@@ -107,6 +107,9 @@ public:
     /// Returns the flight mode for running missions
     virtual QString missionFlightMode(void) const { return QString(); }
 
+    /// Returns the flight mode for running missions
+    virtual QString loiterFlightMode(void) const { return QString(); }
+
     /// Returns the flight mode for RTL
     virtual QString rtlFlightMode(void) const { return QString(); }
 

@@ -14,6 +14,7 @@
 #include "QGCApplication.h"
 #include "ShapeFileHelper.h"
 #include "QGCLoggingCategory.h"
+#include "PositionManager.h"
 
 #include <QGeoRectangle>
 #include <QDebug>
@@ -971,6 +972,14 @@ QList<QGCMapPolygon::CoordInfo_t> QGCMapPolygon::followEdges(const QList<QGCMapP
 void QGCMapPolygon::setPositionFromVehicle(void) 
 {
     QGeoCoordinate coordinate = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle()->coordinate();
+    _polygonPath.append(QVariant::fromValue(coordinate));
+    _polygonModel.append(new QGCQGeoCoordinate(coordinate, this));
+    emit pathChanged();
+}
+
+void QGCMapPolygon::setPositionFromGCS(void)
+{
+    QGeoCoordinate coordinate = qgcApp()->toolbox()->qgcPositionManager()->gcsPosition();
     _polygonPath.append(QVariant::fromValue(coordinate));
     _polygonModel.append(new QGCQGeoCoordinate(coordinate, this));
     emit pathChanged();

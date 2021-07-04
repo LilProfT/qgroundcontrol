@@ -559,6 +559,13 @@ Item {
 
             QGCButton {
                 _horizontalPadding: 0
+                text:               qsTr("Set from GCS")
+                visible:            mapPolygon.traceMode
+                onClicked:          mapPolygon.setPositionFromGCS()
+            }
+
+            QGCButton {
+                _horizontalPadding: 0
                 text:               mapPolygon.traceMode ? qsTr("Done Tracing") : qsTr("Trace")
                 onClicked: {
                     if (mapPolygon.traceMode) {

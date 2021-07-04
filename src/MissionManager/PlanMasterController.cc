@@ -665,6 +665,10 @@ void PlanMasterController::saveToFile(const QString& filename)
     }
 
     QString planFilename = filename;
+    if (!QFileInfo(filename).fileName().contains("(") && !QFileInfo(filename).fileName().contains("ha)")) {
+        planFilename += QString("(%1ha)").arg(QString::number(area() / 10000, 'f', 2));
+    }
+
     if (!QFileInfo(filename).fileName().contains(".")) {
         planFilename += QString(".%1").arg(fileExtension());
     }

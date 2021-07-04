@@ -29,6 +29,8 @@ public:
     void pointAddedFromfile(QGeoCoordinate coordinate);
     void updateEnterPoint(QGeoCoordinate coordinate) { _enterPoint = coordinate; };
     void updateExitPoint(QGeoCoordinate coordinate) { _exitPoint = coordinate; };
+    void updateResumePoint(QGeoCoordinate coordinate) ;
+    void updatePausePoint(QGeoCoordinate coordinate) ;
 
 public slots:
     void clear  (void);
@@ -41,6 +43,7 @@ signals:
     void updateEnterLastPoint(QGeoCoordinate coordinate);
     void pointExitAdded     (QGeoCoordinate coordinate);
     void updateExitLastPoint(QGeoCoordinate coordinate);
+    void exitPointsCleared  (void);
 
 private slots:
     void _vehicleCoordinateChanged(QGeoCoordinate coordinate);

@@ -579,6 +579,7 @@ public:
     int             sensorsHealthBits           () const { return static_cast<int>(_onboardControlSensorsHealth); }
     int             sensorsUnhealthyBits        () const { return static_cast<int>(_onboardControlSensorsUnhealthy); }
     QString         missionFlightMode           () const;
+    QString         loiterFlightMode           () const;
     QString         pauseFlightMode             () const;
     QString         rtlFlightMode               () const;
     QString         smartRTLFlightMode          () const;
@@ -1052,7 +1053,7 @@ private:
     QGeoCoordinate  _homePosition;
     QGeoCoordinate  _armedPosition;
     QGeoCoordinate  _resumeCoordinate;
-
+    QString         _prevflightMode;
     UASInterface*   _mav = nullptr;
     int             _currentMessageCount = 0;
     int             _messageCount = 0;

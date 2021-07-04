@@ -192,6 +192,8 @@ void SurveyComplexItem::_saveWorker(QJsonObject& saveObject)
 
     // Polygon shape
     _surveyAreaPolygon.saveToJson(saveObject);
+    _masterController->savePolygon(_surveyAreaPolygon.path());
+
 }
 
 void SurveyComplexItem::loadPreset(const QString& name)

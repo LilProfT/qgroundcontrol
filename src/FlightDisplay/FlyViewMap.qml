@@ -82,6 +82,7 @@ FlightMap {
         _saveZoomLevelSetting = true
     }
 
+
     onPipModeChanged: _adjustMapZoomForPipMode()
 
     onVisibleChanged: {
@@ -306,6 +307,8 @@ FlightMap {
             onPointExitAdded:           trajectoryExitPolyline.addCoordinate(coordinate)
             onUpdateExitLastPoint:      trajectoryExitPolyline.replaceCoordinate(trajectoryExitPolyline.pathLength() - 1, coordinate)
             onPointsCleared:        trajectoryExitPolyline.path = []
+            onExitPointsCleared:        trajectoryExitPolyline.path = []
+
         }
     }
 
