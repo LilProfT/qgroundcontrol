@@ -166,21 +166,10 @@ void SurveyComplexItem::rotateAngle(void)
 
 double SurveyComplexItem::getYaw(void)
 {
-    float gridAngle = _gridAngleFact.property("value").value<qreal>();
-    QGeoCoordinate center = _surveyAreaPolygon.center();
-    TakeoffMissionItem* takeoffItem = _masterController->missionController()->takeoffMissionItem();
-    if (!takeoffItem) return gridAngle;
-    QGeoCoordinate takeoffWaypoint = takeoffItem->launchCoordinate();
-    float azimuth = takeoffWaypoint.azimuthTo(center);
+    if (_transects.count() == 0) return 0;
 
-    float yaw;
+    QGeoCoordinate first  = _transects[0][0].coord;
+    QGeoCoordinate second = _transects[0][1].coord;
 
-    // 2 vector: unit direction vector and survey center positioning vector must constitute an angle < 90 deg
-    if (qAbs(gridAngle - azimuth) > 90) {
-        yaw = gridAngle + 180;
-    } else {
-        yaw = gridAngle;
-    }
-
-    return yaw;
+    return first.azimuthTo(second);
 }
