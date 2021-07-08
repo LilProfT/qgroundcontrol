@@ -100,6 +100,10 @@ Item {
         }
     }
 
+    function _switchReceiver() {
+        QGroundControl.videoManager.switchReceiver()
+    }
+
     Window {
         id:         window
         visible:    false
@@ -191,19 +195,25 @@ Item {
     // Pip to Window
     Image {
         id:             popupPIP
-        source:         "/qmlimages/PiP.svg"
+        source:         QGroundControl.videoManager.receiverId() ? "/qmlimages/pipHide.svg" : "/qmlimages/PiP.svg"
         mipmap:         true
         fillMode:       Image.PreserveAspectFit
         anchors.left:   parent.left
         anchors.top:    parent.top
-        visible:        _isExpanded && !ScreenTools.isMobile && pipMouseArea.containsMouse
+        visible:        _isExpanded
         height:         ScreenTools.defaultFontPixelHeight * 2.5
         width:          ScreenTools.defaultFontPixelHeight * 2.5
         sourceSize.height:  height
 
         MouseArea {
             anchors.fill:   parent
-            onClicked:      _pipOrWindowItem.pipState.state = _pipOrWindowItem.pipState.windowState
+            onClicked:  {
+                _switchReceiver()
+                if (QGroundControl.videoManager.receiverId())
+                    popupPIP.source = "/qmlimages/pipHide.svg"
+                else
+                    popupPIP.source = "/qmlimages/PiP.svg"
+            }
         }
     }
 

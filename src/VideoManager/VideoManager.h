@@ -110,6 +110,8 @@ public:
     Q_INVOKABLE void stopRecording  ();
 
     Q_INVOKABLE void grabImage(const QString& imageFile = QString());
+    Q_INVOKABLE void switchReceiver              ();
+    Q_INVOKABLE int receiverId             (void) { return _receiverId; };
 
 signals:
     void hasVideoChanged            ();
@@ -131,6 +133,8 @@ protected slots:
     void _videoSourceChanged        ();
     void _udpPortChanged            ();
     void _rtspUrlChanged            ();
+    void _rtspUrl02Changed            ();
+
     void _tcpUrlChanged             ();
     void _lowLatencyModeChanged     ();
     void _updateUVC                 ();
@@ -149,7 +153,8 @@ protected:
     void _restartVideo              (unsigned id);
     void _startReceiver             (unsigned id);
     void _stopReceiver              (unsigned id);
-
+    void _timerSlot              ();
+    void _startTimer(int interval);
 protected:
     QString                 _videoFile;
     QString                 _imageFile;
@@ -173,6 +178,9 @@ protected:
     QString                 _videoSourceID;
     bool                    _fullScreen             = false;
     Vehicle*                _activeVehicle          = nullptr;
+    int                     _receiverId             = 0;
+    QString                     _receiverUrl             = "";
+
 };
 
 #endif
