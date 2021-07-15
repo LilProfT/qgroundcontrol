@@ -420,13 +420,29 @@ void TransectStyleComplexItem::_rebuildTransects (void)
     _model.setAvoidDistance(gridSpacing / 2);
 
     _model.clearStep();
-    _model.appendHoldAltitude(requestedAltitude);
+//    _model.appendHoldAltitude(requestedAltitude);
     _model.appendHoldYaw(yaw);
 
+    const double updownlength = 4;
     for (const QList<CoordInfo_t>& transect: _transects) {
-        _model.appendWaypoint(transect[0].coord);
+        QGeoCoordinate first  = transect[0].coord;
+        QGeoCoordinate second = transect[1].coord;
+        first.setAltitude(requestedAltitude + 2);
+        second.setAltitude(requestedAltitude + 2);
+        double distance = first.distanceTo(second);
+        double azimuth = first.azimuthTo(second);
+        double rev_azimuth = second.azimuthTo(first);
+
+        QGeoCoordinate downAfterFirst = first.atDistanceAndAzimuth(updownlength, azimuth, -2);
+        qDebug() << downAfterFirst;
+        QGeoCoordinate upBeforeSecond = second.atDistanceAndAzimuth(updownlength, rev_azimuth, -2);
+        qDebug() << upBeforeSecond;
+
+        _model.appendWaypoint(first);
+        if (distance > updownlength*2) _model.appendWaypoint(downAfterFirst);
         _model.appendSpray();
-        _model.appendWaypoint(transect[1].coord);
+        if (distance > updownlength*2) _model.appendWaypoint(upBeforeSecond);
+        _model.appendWaypoint(second);
     }
 
     _model.pregenIntegrate();
