@@ -246,6 +246,7 @@ void MissionModel::_processHoldAltitudes()
 
         for (MissionItem* item: step->items) {
             if (item->command() == MAV_CMD_NAV_WAYPOINT) {
+                qDebug() << "modify altitude";
                 item->setParam7(altitude);
             }
         }
@@ -279,6 +280,7 @@ void MissionModel::_gen_PointF_From_Geo()
                     convertGeoToNed(waypoint->coord, _tangentOrigin, &y, &x, &down);
                     QPointF  pointf(x, -y);
                     waypoint->pointf = pointf;
+                    waypoint->nedDown = down;
                 }
             }
         }
@@ -291,7 +293,7 @@ void MissionModel::_gen_Geo_From_PointF()
         if (step->type() == Step::Type::WAYPOINT) {
             WaypointStep* waypoint = qobject_cast<WaypointStep*>(step);
             if (!waypoint->pointf.isNull()) {
-                convertNedToGeo(-waypoint->pointf.y(), waypoint->pointf.x(), 0, _tangentOrigin, &(waypoint->coord));
+                convertNedToGeo(-waypoint->pointf.y(), waypoint->pointf.x(), waypoint->nedDown, _tangentOrigin, &(waypoint->coord));
             }
         }
     }

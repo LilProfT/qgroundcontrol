@@ -46,6 +46,7 @@ public:
     WaypointStep(QPointF pointf_) { pointf = pointf_; };
     QGeoCoordinate coord;
     QPointF pointf;
+    double nedDown;
     Type type() const override final { return Step::Type::WAYPOINT; };
     QString repr() const override final;
 };

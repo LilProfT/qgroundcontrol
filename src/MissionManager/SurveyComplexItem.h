@@ -166,6 +166,7 @@ private:
     void _optimize_EntryPoint(void);
     void _toggleAutoOptimize(QVariant value);
     void _updateAngle(void);
+    void _calcFeaturedWidth(void);
 
     QMap<QString, FactMetaData*> _metaDataMap;
 
@@ -185,6 +186,8 @@ private:
     QVariantList    _angleEdge;
 
     QTimer _timer_optimize_Angle_EntryPoint;
+
+    QList<QGeoCoordinate> _featuredLine;
 
     static const char* _jsonGridAngleKey;
     static const char* _jsonEntryPointKey;

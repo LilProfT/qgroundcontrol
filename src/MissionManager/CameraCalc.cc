@@ -441,3 +441,11 @@ QString CameraCalc::_validCanonicalCameraName(const QString& cameraName)
 
     return canonicalCameraName;
 }
+
+double CameraCalc::adjustSpacing(double spacing)
+{
+    double num_lanes = _featuredWidth/spacing;
+    int whole_num_lanes = qRound(num_lanes);
+
+    return _featuredWidth/whole_num_lanes;
+}
