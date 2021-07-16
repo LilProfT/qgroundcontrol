@@ -173,3 +173,66 @@ double SurveyComplexItem::getYaw(void)
 
     return first.azimuthTo(second);
 }
+
+void SurveyComplexItem::_calcFeaturedWidth(void)
+{
+    double gridAngle = _gridAngleFact.rawValue().toDouble();
+    double azimuth = gridAngle + 90;
+
+    if (_surveyAreaPolygon.count() < 2) return;
+
+    QGeoCoordinate tangentOrigin = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(0)->coordinate();
+    QList<QLineF> crossvectors;
+    QList<QPointF> vertices;
+    for (int i=0; i<_surveyAreaPolygon.count(); i++) {
+        QGeoCoordinate vertex = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i)->coordinate();
+        QGeoCoordinate crosspoint = vertex.atDistanceAndAzimuth(1, azimuth);
+
+        double y, x, down;
+        convertGeoToNed(vertex, tangentOrigin, &y, &x, &down);
+        QPointF vertexf(x, -y);
+        convertGeoToNed(crosspoint, tangentOrigin, &y, &x, &down);
+        QPointF crosspointf(x, -y);
+        QLineF crossvector(vertexf, crosspointf);
+        crossvectors << crossvector;
+        vertices << vertexf;
+    }
+
+    QList<QLineF> edges;
+    for (int i=0; i<vertices.count()-1; i++) {
+        QLineF edge(vertices[i], vertices[i+1]);
+        edges << edge;
+    }
+    QLineF edge(vertices[vertices.count()-1], vertices[0]);
+    edges << edge;
+
+    double featuredWidth = 0;
+    QLineF featuredLine;
+    for (const QLineF& crossvector: crossvectors) {
+        for (const QLineF& edge: edges) {
+            QPointF intersectPoint;
+            crossvector.intersect(edge, &intersectPoint);
+
+            // check bound in edge
+            QLineF first(edge.p1(), intersectPoint);
+            QLineF second(edge.p2(), intersectPoint);
+            if (qMax(first.length(), second.length()) < edge.length()) {
+                QLineF crossline(crossvector.p1(), intersectPoint);
+                double l = crossline.length();
+                if (l > featuredWidth) {
+                    featuredWidth = l;
+                    featuredLine = crossline;
+                }
+            }
+        }
+    }
+
+    QGeoCoordinate first;
+    convertNedToGeo(-featuredLine.p1().y(), featuredLine.p1().x(), 0, tangentOrigin, &first);
+    QGeoCoordinate second;
+    convertNedToGeo(-featuredLine.p2().y(), featuredLine.p2().x(), 0, tangentOrigin, &second);
+    _featuredLine.clear();
+    _featuredLine << first << second;
+
+    _cameraCalc.setFeaturedWidth(featuredWidth);
+}

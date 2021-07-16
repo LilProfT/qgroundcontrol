@@ -49,6 +49,8 @@ public:
     Q_PROPERTY(double imageFootprintSide    READ imageFootprintSide     NOTIFY imageFootprintSideChanged)       ///< Size of image size side in meters
     Q_PROPERTY(double imageFootprintFrontal READ imageFootprintFrontal  NOTIFY imageFootprintFrontalChanged)    ///< Size of image size frontal in meters
 
+    Q_INVOKABLE double adjustSpacing(double spacing);
+
     static QString xlatCustomCameraName     (void);
     static QString xlatManualCameraName     (void);
     static QString canonicalCustomCameraName(void);
@@ -81,6 +83,7 @@ public:
     void setDistanceToSurfaceRelative   (bool distanceToSurfaceRelative);
     void setCameraBrand                 (const QString& cameraBrand);
     void setCameraModel                 (const QString& cameraModel);
+    void setFeaturedWidth               (double value) { _featuredWidth = value; emit featuredWidthChanged(); };
 
     void save(QJsonObject& json) const;
     bool load(const QJsonObject& json, QString& errorString);
@@ -108,6 +111,7 @@ signals:
     void cameraModelChanged                 (void);
     void cameraModelListChanged             (void);
     void updateCameraStats                  (void);
+    void featuredWidthChanged               (void);
 
 private slots:
     void _recalcTriggerDistance             (void);
@@ -130,6 +134,7 @@ private:
     double          _imageFootprintSide         = 0;
     double          _imageFootprintFrontal      = 0;
     QVariantList    _knownCameraList;
+    double          _featuredWidth;
 
     QMap<QString, FactMetaData*> _metaDataMap;
 
