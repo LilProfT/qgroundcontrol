@@ -65,16 +65,15 @@ void AudioOutput::say(const QString& inText)
     muted |= qgcApp()->runningUnitTests();
     if (!muted && !qgcApp()->runningUnitTests()) {
         QString text = fixTextMessageForAudio(inText);
-//        if(_tts->state() == QTextToSpeech::Speaking) {
-//            if(!_texts.contains(text)) {
-//                //-- Some arbitrary limit
-//                if(_texts.size() > 20) {
-//                    _texts.removeFirst();
-//                }
-//                _texts.append(text);
-//            }
-//        } else
-        if (_effect->isPlaying() || _effect->status() == QSoundEffect::Loading) {
+        if(_tts->state() == QTextToSpeech::Speaking) {
+            if(!_texts.contains(text)) {
+                //-- Some arbitrary limit
+                if(_texts.size() > 20) {
+                    _texts.removeFirst();
+                }
+                _texts.append(text);
+            }
+        } else if (_effect->isPlaying() || _effect->status() == QSoundEffect::Loading) {
             if(!_texts.contains(text)) {
                 //-- Some arbitrary limit
                 if(_texts.size() > 20) {
@@ -143,12 +142,11 @@ void AudioOutput::_play(QString& text) {
         if (text.contains(key) || QString::compare(text, key, Qt::CaseInsensitive) == 0) {
             qDebug() << "contains wav ::: " << text;
             QString wav = _audioMap.value(key).value<QString>();
-            QUrl url("qrc:/audio/" + wav);
-            qDebug() << "url wav ::: " << url.toString();
+            //QUrl url("qrc:/audio/" + wav);
+            qDebug() << "url wav ::: " << wav;
 
             //QSound::play(url.toString());
-
-            _effect->setSource(url);
+            _tts->say(wav);
             return;
         }
     }
