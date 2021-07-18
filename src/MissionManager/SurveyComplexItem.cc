@@ -848,21 +848,6 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
     double maxWidth = qMax(boundingRect.width(), boundingRect.height()) + 2000.0;
     double halfWidth = maxWidth / 2.0;
     double transectX = boundingCenter.x() - halfWidth;
-
-    _calcFeaturedWidth();
-    double y, x, down;
-    convertGeoToNed(_featuredLine[0], tangentOrigin, &y, &x, &down);
-    QPointF first(x, y);
-    QGeoCoordinate testLinePoint = _featuredLine[0].atDistanceAndAzimuth(maxWidth, gridAngle + 90);
-    convertGeoToNed(testLinePoint, tangentOrigin, &y, &x, &down);
-    QPointF second(x, y);
-    QLineF testLine(first, second);
-
-    QGeoCoordinate coordFirstTransectContain = _featuredLine[0].atDistanceAndAzimuth(gridSpacing/2, gridAngle + 90);
-    convertGeoToNed(coordFirstTransectContain, tangentOrigin, &y, &x, &down);
-    QPointF pointFirstTransectContain(x, y);
-
-
     double transectXMax = transectX + maxWidth;
     while (transectX < transectXMax) {
         double transectYTop = boundingCenter.y() - halfWidth;
@@ -872,18 +857,37 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
         transectX += gridSpacing;
     }
 
-    QPointF translateVector;
-    for (const QLineF& line: lineList) {
-        QPointF intersectPoint;
-        if (testLine.intersect(line, &intersectPoint) == QLineF::BoundedIntersection) {
-            translateVector.setX(pointFirstTransectContain.x() - intersectPoint.x());
-            translateVector.setY(pointFirstTransectContain.y() - intersectPoint.y());
-            break;
-        }
-    }
+    // [mismart] adjust the space phase of transects
+    if ((lineList.count() > 0) && (_angleEdge.count() > 0)) {
+        QGeoCoordinate edgePoint = _angleEdge[0].value<QGeoCoordinate>();
 
-    for (int i=0; i<lineList.count(); i++) {
-        lineList[i].translate(translateVector);
+        // sampling the line list, get 1 sample
+        QGeoCoordinate first  = edgePoint.atDistanceAndAzimuth(gridSpacing/2, gridAngle + 90);
+        QGeoCoordinate second = edgePoint.atDistanceAndAzimuth(gridSpacing/2, gridAngle - 90);
+        double y, x, down;
+        convertGeoToNed(first, tangentOrigin, &y, &x, &down);
+        QPointF firstf(x, y);
+        convertGeoToNed(second, tangentOrigin, &y, &x, &down);
+        QPointF secondf(x, y);
+        QLineF samplingLine(firstf, secondf);
+
+        // construct the translate vector that can move the sample to the right phase
+        QPointF translateVector;
+        for (const QLineF& line: lineList) {
+            QPointF intersectPoint;
+            if (samplingLine.intersect(line, &intersectPoint) == QLineF::BoundedIntersection) {
+                translateVector.setX(firstf.x() - intersectPoint.x());
+                translateVector.setY(firstf.y() - intersectPoint.y());
+                break;
+            }
+        }
+
+        // use that translation to move all transect lines to the right phase
+        if (!translateVector.isNull()) {
+            for (int i=0; i<lineList.count(); i++) {
+                lineList[i].translate(translateVector);
+            }
+        }
     }
 
     // Now intersect the lines with the polygon

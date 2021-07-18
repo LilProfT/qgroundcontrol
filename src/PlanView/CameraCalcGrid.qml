@@ -185,7 +185,7 @@ Column {
             Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
             value:                  cameraCalc.adjustedFootprintSide.value
             onValueChanged:         {
-                cameraCalc.adjustedFootprintSide.value = cameraCalc.adjustSpacing(value)
+                cameraCalc.adjustedFootprintSide.value = value
                 //Mismart: Carbon-copy of the cameraCalc spacing, should be improved in the future
                 _vehicle.spacing.value = cameraCalc.adjustedFootprintSide.value
             }

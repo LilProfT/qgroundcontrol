@@ -36,6 +36,11 @@ void SurveyComplexItem::_optimize_Angle_EntryPoint(void)
         A = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(0)->coordinate();
         B = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(1)->coordinate();
 
+        _angleEdge.clear();
+        _angleEdge.append(QVariant::fromValue(A));
+        _angleEdge.append(QVariant::fromValue(B));
+        emit angleEdgeChanged();
+
         double angle = A.azimuthTo(B);
         qDebug() << "trace mode angle: " << angle;
         _gridAngleFact.setProperty("value", angle);
@@ -59,6 +64,11 @@ void SurveyComplexItem::_optimize_Angle_EntryPoint(void)
 
         A = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i_A)->coordinate();
         B = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i_B)->coordinate();
+
+        _angleEdge.clear();
+        _angleEdge.append(QVariant::fromValue(A));
+        _angleEdge.append(QVariant::fromValue(B));
+        emit angleEdgeChanged();
 
         double angle = A.azimuthTo(B);
         qDebug() << "angle: " << angle;
@@ -155,13 +165,13 @@ void SurveyComplexItem::rotateAngle(void)
     A = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i_A)->coordinate();
     B = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i_B)->coordinate();
 
-    double angle = A.azimuthTo(B);
-    _gridAngleFact.setProperty("value", angle);
-
     _angleEdge.clear();
     _angleEdge.append(QVariant::fromValue(A));
     _angleEdge.append(QVariant::fromValue(B));
     emit angleEdgeChanged();
+
+    double angle = A.azimuthTo(B);
+    _gridAngleFact.setProperty("value", angle);
 }
 
 double SurveyComplexItem::getYaw(void)
