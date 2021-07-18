@@ -37,6 +37,8 @@ AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
 #ifdef Q_OS_LINUX
     _tts->setLocale(QLocale("en_US"));
 #endif
+    _tts->setVolume(1.0f);
+
     connect(_tts, &QTextToSpeech::stateChanged, this, &AudioOutput::_stateChanged);
 
     // QSoundEffect
