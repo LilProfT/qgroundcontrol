@@ -423,12 +423,15 @@ void TransectStyleComplexItem::_rebuildTransects (void)
 //    _model.appendHoldAltitude(requestedAltitude);
     _model.appendHoldYaw(yaw);
 
+    auto _surveyComplexItem = qobject_cast<SurveyComplexItem*>(this);
+    bool ascend = _surveyComplexItem->ascendTerminals()->cookedValue().value<bool>();
+
     const double updownlength = 4;
     for (const QList<CoordInfo_t>& transect: _transects) {
         QGeoCoordinate first  = transect[0].coord;
         QGeoCoordinate second = transect[1].coord;
-        first.setAltitude(requestedAltitude + 2);
-        second.setAltitude(requestedAltitude + 2);
+        first.setAltitude(ascend ? requestedAltitude + 2 : requestedAltitude);
+        second.setAltitude(ascend ? requestedAltitude + 2 : requestedAltitude);
         double distance = first.distanceTo(second);
         double azimuth = first.azimuthTo(second);
         double rev_azimuth = second.azimuthTo(first);
@@ -439,9 +442,9 @@ void TransectStyleComplexItem::_rebuildTransects (void)
         qDebug() << upBeforeSecond;
 
         _model.appendWaypoint(first);
-        if (distance > updownlength*2) _model.appendWaypoint(downAfterFirst);
+        if (ascend && (distance > updownlength*2)) _model.appendWaypoint(downAfterFirst);
         _model.appendSpray();
-        if (distance > updownlength*2) _model.appendWaypoint(upBeforeSecond);
+        if (ascend && (distance > updownlength*2)) _model.appendWaypoint(upBeforeSecond);
         _model.appendWaypoint(second);
     }
 

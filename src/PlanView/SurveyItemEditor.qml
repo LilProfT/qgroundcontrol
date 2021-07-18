@@ -212,6 +212,12 @@ Rectangle {
                 }
 
                 QGCCheckBox {
+                    text:               qsTr("Ascend transect terminals")
+                    checked:            true
+                    onClicked:          _missionItem.ascendTerminals.value = checked
+                }
+
+                QGCCheckBox {
                     text:               qsTr("Auto Optimize")
                     checked:            false
                     onClicked:          _missionItem.autoOptimize.value = checked

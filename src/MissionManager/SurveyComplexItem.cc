@@ -41,6 +41,7 @@ const char* SurveyComplexItem::autoOptimizeName =           "AutoOptimize";
 const char* SurveyComplexItem::gridEntryLocationName =      "GridEntryLocation";
 const char* SurveyComplexItem::flyAlternateTransectsName =  "FlyAlternateTransects";
 const char* SurveyComplexItem::splitConcavePolygonsName =   "SplitConcavePolygons";
+const char* SurveyComplexItem::ascendTerminalsName =        "AscendTerminals";
 
 const char* SurveyComplexItem::_jsonGridAngleKey =          "angle";
 const char* SurveyComplexItem::_jsonEntryPointKey =         "entryLocation";
@@ -72,6 +73,7 @@ const char* SurveyComplexItem::_jsonV3FixedValueIsAltitudeKey =         "fixedVa
 const char* SurveyComplexItem::_jsonV3Refly90DegreesKey =               "refly90Degrees";
 const char* SurveyComplexItem::_jsonFlyAlternateTransectsKey =          "flyaAlternateTransects";
 const char* SurveyComplexItem::_jsonSplitConcavePolygonsKey =           "splitConcavePolygons";
+const char* SurveyComplexItem::_jsonAscendTerminalsKey =           "ascendTerminals";
 const char* SurveyComplexItem::_jsonApplicationRateKey =                "applicationRate";
 const char* SurveyComplexItem::_jsonVelocityKey =                       "velocity";
 const char* SurveyComplexItem::_jsonMissionEnterPointKey =                       "missionEnterPoint";
@@ -89,6 +91,7 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     , _autoOptimizeFact         (settingsGroup, _metaDataMap[autoOptimizeName])
     , _flyAlternateTransectsFact(settingsGroup, _metaDataMap[flyAlternateTransectsName])
     , _splitConcavePolygonsFact (settingsGroup, _metaDataMap[splitConcavePolygonsName])
+    , _ascendTerminalsFact      (settingsGroup, _metaDataMap[ascendTerminalsName])
     , _entryPoint               (EntryLocationTopLeft)
     , _timer_optimize_Angle_EntryPoint       (this)
 {
@@ -123,11 +126,13 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     connect(&_nozzleOffsetFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_flyAlternateTransectsFact,&Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_splitConcavePolygonsFact, &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_ascendTerminalsFact,      &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_setDirty);
 
     connect(&_gridAngleFact,            &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_flyAlternateTransectsFact,&Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_splitConcavePolygonsFact, &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
+    connect(&_ascendTerminalsFact,      &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_rebuildTransects);
 
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::isValidChanged,             this, &SurveyComplexItem::_updateWizardMode);
@@ -185,6 +190,7 @@ void SurveyComplexItem::_saveWorker(QJsonObject& saveObject)
     saveObject[_jsonGridAngleKey] =                             _gridAngleFact.rawValue().toDouble();
     saveObject[_jsonFlyAlternateTransectsKey] =                 _flyAlternateTransectsFact.rawValue().toBool();
     saveObject[_jsonSplitConcavePolygonsKey] =                  _splitConcavePolygonsFact.rawValue().toBool();
+    saveObject[_jsonAscendTerminalsKey] =                       _ascendTerminalsFact.rawValue().toBool();
     saveObject[_jsonEntryPointKey] =                            _entryPoint;
     saveObject[_jsonApplicationRateKey] =                 _applicationRateFact.rawValue().toDouble();
     saveObject[_jsonVelocityKey] =                 _velocityFact.rawValue().toDouble();
@@ -262,10 +268,10 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         { _jsonEntryPointKey,                           QJsonValue::Double, true },
         { _jsonGridAngleKey,                            QJsonValue::Double, true },
         { _jsonFlyAlternateTransectsKey,                QJsonValue::Bool,   false },
-        { _jsonApplicationRateKey,                            QJsonValue::Double, true },
-        { _jsonVelocityKey,                            QJsonValue::Double, true },
+        { _jsonApplicationRateKey,                      QJsonValue::Double, true },
+        { _jsonVelocityKey,                             QJsonValue::Double, true },
         { _jsonEdgeIndexKey,                            QJsonValue::Double, false },
-
+        { _jsonAscendTerminalsKey,                      QJsonValue::Bool,   false }
     };
 
     if(version == 5) {
@@ -303,8 +309,9 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
 
     _gridAngleFact.setRawValue              (complexObject[_jsonGridAngleKey].toDouble());
     _flyAlternateTransectsFact.setRawValue  (complexObject[_jsonFlyAlternateTransectsKey].toBool(false));
-    _applicationRateFact.setRawValue              (complexObject[_jsonApplicationRateKey].toDouble());
-    _velocityFact.setRawValue              (complexObject[_jsonVelocityKey].toDouble());
+    _applicationRateFact.setRawValue        (complexObject[_jsonApplicationRateKey].toDouble());
+    _velocityFact.setRawValue               (complexObject[_jsonVelocityKey].toDouble());
+    _ascendTerminalsFact.setRawValue        (complexObject[_jsonAscendTerminalsKey].toBool());
 
     _edgeIndex = (int)complexObject[_jsonEdgeIndexKey].toDouble();
     _isEdgeIndexFromFile = true;

@@ -76,6 +76,12 @@
     "shortDesc": "Split mission concave polygons into separate regular, convex polygons.",
     "type":             "bool",
     "default":     false
+},
+{
+    "name":             "AscendTerminals",
+    "shortDesc": "Ascend both terminals of each transect to avoid flying at low altitude when velocity is low.",
+    "type":             "bool",
+    "default":     false
 }
 ]
 }

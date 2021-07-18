@@ -38,6 +38,7 @@ public:
     Q_PROPERTY(Fact* autoOptimize           READ autoOptimize           CONSTANT)
     Q_PROPERTY(Fact* flyAlternateTransects  READ flyAlternateTransects  CONSTANT)
     Q_PROPERTY(Fact* splitConcavePolygons   READ splitConcavePolygons   CONSTANT)
+    Q_PROPERTY(Fact* ascendTerminals        READ ascendTerminals        CONSTANT)
     Q_PROPERTY(QVariantList  angleEdge      READ angleEdge              NOTIFY angleEdgeChanged)
 
     Fact* gridAngle             (void) { return &_gridAngleFact; }
@@ -49,6 +50,7 @@ public:
     Fact* autoOptimize          (void) { return &_autoOptimizeFact; }
     Fact* flyAlternateTransects (void) { return &_flyAlternateTransectsFact; }
     Fact* splitConcavePolygons  (void) { return &_splitConcavePolygonsFact; }
+    Fact* ascendTerminals       (void) { return &_ascendTerminalsFact; }
     Fact* gridSpacing           (void) { return _cameraCalc.adjustedFootprintSide(); }
 
     QVariantList angleEdge() { return _angleEdge; }
@@ -102,6 +104,7 @@ public:
     static const char* gridEntryLocationName;
     static const char* flyAlternateTransectsName;
     static const char* splitConcavePolygonsName;
+    static const char* ascendTerminalsName;
 
     static const char* jsonV3ComplexItemTypeValue;
 
@@ -179,6 +182,7 @@ private:
     SettingsFact    _autoOptimizeFact;
     SettingsFact    _flyAlternateTransectsFact;
     SettingsFact    _splitConcavePolygonsFact;
+    SettingsFact    _ascendTerminalsFact;
     int             _entryPoint;
     int             _edgeIndex = 0;
     bool            _isEdgeIndexFromFile = false;
@@ -193,6 +197,7 @@ private:
     static const char* _jsonEntryPointKey;
     static const char* _jsonFlyAlternateTransectsKey;
     static const char* _jsonSplitConcavePolygonsKey;
+    static const char* _jsonAscendTerminalsKey;
     static const char* _jsonApplicationRateKey;
     static const char* _jsonVelocityKey;
     static const char* _jsonMissionEnterPointKey;
