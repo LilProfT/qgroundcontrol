@@ -39,6 +39,8 @@ public:
     Q_PROPERTY(Fact* flyAlternateTransects  READ flyAlternateTransects  CONSTANT)
     Q_PROPERTY(Fact* splitConcavePolygons   READ splitConcavePolygons   CONSTANT)
     Q_PROPERTY(Fact* ascendTerminals        READ ascendTerminals        CONSTANT)
+    Q_PROPERTY(Fact* ascendAltitude         READ ascendAltitude         CONSTANT)
+    Q_PROPERTY(Fact* ascendLength           READ ascendLength           CONSTANT)
     Q_PROPERTY(QVariantList  angleEdge      READ angleEdge              NOTIFY angleEdgeChanged)
 
     Fact* gridAngle             (void) { return &_gridAngleFact; }
@@ -51,6 +53,8 @@ public:
     Fact* flyAlternateTransects (void) { return &_flyAlternateTransectsFact; }
     Fact* splitConcavePolygons  (void) { return &_splitConcavePolygonsFact; }
     Fact* ascendTerminals       (void) { return &_ascendTerminalsFact; }
+    Fact* ascendAltitude        (void) { return &_ascendAltitudeFact; }
+    Fact* ascendLength          (void) { return &_ascendLengthFact; }
     Fact* gridSpacing           (void) { return _cameraCalc.adjustedFootprintSide(); }
 
     QVariantList angleEdge() { return _angleEdge; }
@@ -105,6 +109,8 @@ public:
     static const char* flyAlternateTransectsName;
     static const char* splitConcavePolygonsName;
     static const char* ascendTerminalsName;
+    static const char* ascendAltitudeName;
+    static const char* ascendLengthName;
 
     static const char* jsonV3ComplexItemTypeValue;
 
@@ -183,6 +189,8 @@ private:
     SettingsFact    _flyAlternateTransectsFact;
     SettingsFact    _splitConcavePolygonsFact;
     SettingsFact    _ascendTerminalsFact;
+    SettingsFact    _ascendAltitudeFact;
+    SettingsFact    _ascendLengthFact;
     int             _entryPoint;
     int             _edgeIndex = 0;
     bool            _isEdgeIndexFromFile = false;
@@ -198,6 +206,8 @@ private:
     static const char* _jsonFlyAlternateTransectsKey;
     static const char* _jsonSplitConcavePolygonsKey;
     static const char* _jsonAscendTerminalsKey;
+    static const char* _jsonAscendAltitudeKey;
+    static const char* _jsonAscendLengthKey;
     static const char* _jsonApplicationRateKey;
     static const char* _jsonVelocityKey;
     static const char* _jsonMissionEnterPointKey;

@@ -141,6 +141,7 @@ Rectangle {
                     rowSpacing:     _margin
                     columns:        2
                     visible:        sprayConfigHeader.checked
+                    width:          _root.width - _margin*2
 
                     QGCLabel { text: qsTr("Application Rate") }
                     FactTextField {
@@ -211,24 +212,6 @@ Rectangle {
                     text:           qsTr("Transects")
                 }
 
-                QGCCheckBox {
-                    text:               qsTr("Ascend transect terminals")
-                    checked:            true
-                    onClicked:          _missionItem.ascendTerminals.value = checked
-                }
-
-                QGCCheckBox {
-                    text:               qsTr("Auto Optimize")
-                    checked:            false
-                    onClicked:          _missionItem.autoOptimize.value = checked
-                    visible: false
-                }
-
-                QGCButton {
-                    text:               qsTr("Optimize")
-                    onClicked:          _missionItem.optimize();
-                }
-
                 GridLayout {
                     anchors.left:   parent.left
                     anchors.right:  parent.right
@@ -236,9 +219,83 @@ Rectangle {
                     rowSpacing:     _margin
                     columns:        2
                     visible:        transectsHeader.checked
+                    width:          _root.width - _margin*2
+
+                    QGCCheckBox {
+                        text:               qsTr("Ascend transect terminals")
+                        checked:            true
+                        onClicked:          _missionItem.ascendTerminals.value = checked
+                        Layout.columnSpan: 2
+                    }
+
+                    FactTextField {
+                        fact:                   _missionItem.ascendAltitude
+                        Layout.fillWidth:       true
+                        onUpdated:              ascendAltitude.value = _missionItem.ascendAltitude.value
+                        visible:                false
+                    }
+                    QGCLabel { text: qsTr("Ascent Alt"); }
+                    QGCLabel {
+                        text:                   _missionItem.ascendAltitude.value.toFixed(1) + " " + _missionItem.ascendAltitude.units
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     ascendAltitudeSlider
+                        minimumValue:           0
+                        maximumValue:           5
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.ascendAltitude.value
+                        onValueChanged:         _missionItem.ascendAltitude.value = value
+                        Component.onCompleted:  value = _missionItem.ascendAltitude.value
+                        updateValueWhileDragging: true
+                    }
+
+                    FactTextField {
+                        fact:                   _missionItem.ascendLength
+                        Layout.fillWidth:       true
+                        onUpdated:              ascendLength.value = _missionItem.ascendLength.value
+                        visible:                false
+                    }
+                    QGCLabel { text: qsTr("Ascent Len"); }
+                    QGCLabel {
+                        text:                   _missionItem.ascendLength.value.toFixed(1) + " " + _missionItem.ascendLength.units
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     ascendLengthSlider
+                        minimumValue:           0
+                        maximumValue:           5
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.ascendLength.value
+                        onValueChanged:         _missionItem.ascendLength.value = value
+                        Component.onCompleted:  value = _missionItem.ascendLength.value
+                        updateValueWhileDragging: true
+                    }
+
+                    QGCCheckBox {
+                        text:               qsTr("Auto Optimize")
+                        checked:            false
+                        onClicked:          _missionItem.autoOptimize.value = checked
+                        Layout.columnSpan:  2
+                        visible:            false
+                    }
+
+                    QGCButton {
+                        text:               qsTr("Optimize")
+                        onClicked:          _missionItem.optimize();
+                        Layout.fillWidth: true
+                    }
 
                     QGCLabel { text: qsTr("Angle")
-                    visible:                false}
+                        visible:                false}
                     FactTextField {
                         fact:                   _missionItem.gridAngle
                         Layout.fillWidth:       true
@@ -247,7 +304,7 @@ Rectangle {
                     }
                     QGCLabel {
                         text:               _missionItem.gridAngle.value.toFixed(1) + " " + _missionItem.gridAngle.units
-//                      font.pointSize:     ScreenTools.mediumFontPointSize
+                        //                      font.pointSize:     ScreenTools.mediumFontPointSize
                         Layout.alignment:   Qt.AlignRight
                         visible:                false
                     }
@@ -286,7 +343,7 @@ Rectangle {
                     }
                     QGCLabel {
                         text:               _missionItem.turnAroundDistance.value.toFixed(2) + " " + _missionItem.turnAroundDistance.units
-//                        font.pointSize:     ScreenTools.mediumFontPointSize
+                        //                        font.pointSize:     ScreenTools.mediumFontPointSize
                         Layout.alignment:   Qt.AlignRight
                         visible:            false
                     }

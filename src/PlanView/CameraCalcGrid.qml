@@ -152,14 +152,6 @@ Column {
             updateValueWhileDragging: true
         }
 
-        // haven't been able to set spacing at fixed 6m, so enable again
-        // FIXME set fixed 6m
-//        QGCLabel { text: frontalDistanceLabel }
-//        FactTextField {
-//            Layout.fillWidth:   true
-//            fact:               cameraCalc.adjustedFootprintFrontal
-//        }
-
         QGCLabel { text: sideDistanceLabel }
         FactTextField {
             Layout.fillWidth:   true
