@@ -395,7 +395,9 @@ Item {
             enabled:     !_controllerSyncInProgress
             visible:     _controllerIsSourcePlan && !_controllerOffline && !_controllerSyncInProgress && !uploadCompleteText.visible
             primary:     _controllerDirty
-            onClicked:   _planMasterController.upload()
+            onClicked:   {
+                _planMasterController.upload()
+            }
 
             PropertyAnimation on opacity {
                 easing.type:    Easing.OutQuart

@@ -133,7 +133,7 @@ protected slots:
     void _videoSourceChanged        ();
     void _udpPortChanged            ();
     void _rtspUrlChanged            ();
-    void _rtspUrl02Changed            ();
+    void _rtspUrl02Changed          ();
 
     void _tcpUrlChanged             ();
     void _lowLatencyModeChanged     ();
@@ -153,8 +153,7 @@ protected:
     void _restartVideo              (unsigned id);
     void _startReceiver             (unsigned id);
     void _stopReceiver              (unsigned id);
-    void _timerSlot              ();
-    void _startTimer(int interval);
+
 protected:
     QString                 _videoFile;
     QString                 _imageFile;
@@ -179,7 +178,7 @@ protected:
     bool                    _fullScreen             = false;
     Vehicle*                _activeVehicle          = nullptr;
     int                     _receiverId             = 0;
-    QString                     _receiverUrl             = "";
+    QString                 _receiverUrl            = "";
 
 };
 

@@ -254,9 +254,23 @@ Item {
         }
 
         function upload() {
+            if (!(!_planMasterController.syncInProgress && _planMasterController.currentPlanFile !== "")) {
+                //dropPanel.show()
+                _planMasterController.saveToSelectedFile()
+                return
+            }
+
+            if (!_planMasterController.syncInProgress && _planMasterController.currentPlanFile !== "") {
+                //mainWindow.showComponentDialog(createSaveCurrentPromptDialog, qsTr("Save"), mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
+                //return
+                _planMasterController.saveToCurrent()
+           }
+
             if (!checkReadyForSaveUpload(false /* save */)) {
                 return
             }
+
+
             switch (_missionController.sendToVehiclePreCheck()) {
                 case MissionController.SendToVehiclePreCheckStateOk:
                     _planMasterController.setParam()
@@ -1014,12 +1028,25 @@ Item {
 
     property var createPlanRemoveAllPromptDialogMapCenter
     property var createPlanRemoveAllPromptDialogPlanCreator
+    property var createSaveCurrentPromptDialogPlanCreator
+
     Component {
         id: createPlanRemoveAllPromptDialog
         QGCViewMessage {
             message: qsTr("Are you sure you want to remove current plan and create a new plan? ")
             function accept() {
                 createPlanRemoveAllPromptDialogPlanCreator.createPlan(createPlanRemoveAllPromptDialogMapCenter)
+                hideDialog()
+            }
+        }
+    }
+
+    Component {
+        id: createSaveCurrentPromptDialog
+        QGCViewMessage {
+            message: qsTr("Are you sure you want to save a plan? ")
+            function accept() {
+                _planMasterController.saveToCurrent()
                 hideDialog()
             }
         }

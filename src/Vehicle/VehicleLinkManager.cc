@@ -146,9 +146,6 @@ void VehicleLinkManager::_commLostCheck(void)
             _vehicle->_say(tr("%1Communication lost").arg(_vehicle->_vehicleIdSpeech()));
 
             _communicationLost = true;
-//            if (_vehicle->armed() == false) {
-//                closeVehicle();
-//            }
             emit communicationLostChanged(true);
         }
     }
@@ -337,8 +334,6 @@ void VehicleLinkManager::closeVehicle(void)
 
     QList<LinkInfo_t> rgLinkInfoCopy = _rgLinkInfo;
     for (const LinkInfo_t& linkInfo: rgLinkInfoCopy) {
-        qCDebug(VehicleLog) << "_linkDisconnected linkInfo" << linkInfo.link.get();
-
         _removeLink(linkInfo.link.get());
     }
 

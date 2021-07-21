@@ -227,7 +227,6 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
             if (!_missionManager->resumeFromFile()) {
                 emit _managerVehicle->clearTrajectoryPoint();
                 _managerVehicle->updateAreaSprayedFromFile(0);
-
             }
         }
 
@@ -2839,19 +2838,7 @@ void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeM
     }
 }
 
-//void MissionController::_bufferMission()
-//{
-//    _bufferedVisualItems->clear();
-//    for (int i=0; i<_visualItems->count(); i++)
-//        _bufferedVisualItems->append(_visualItems->get(i));
-//}
-
 QVariantList  MissionController::boundingCube(void)
 {
     return _masterController->loadSurveyPolygon().path();
-}
-
-void MissionController::pointAdded(void)
-{
-    emit updateSurveyAreaPolygon();
 }

@@ -211,7 +211,6 @@ void SurveyComplexItem::_saveWorker(QJsonObject& saveObject)
     // Polygon shape
     _surveyAreaPolygon.saveToJson(saveObject);
     _masterController->savePolygon(_surveyAreaPolygon.path());
-
 }
 
 void SurveyComplexItem::loadPreset(const QString& name)
@@ -284,8 +283,8 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         { _jsonVelocityKey,                             QJsonValue::Double, true },
         { _jsonEdgeIndexKey,                            QJsonValue::Double, false },
         { _jsonAscendTerminalsKey,                      QJsonValue::Bool,   false },
-        { _jsonAscendAltitudeKey,                       QJsonValue::Double, true },
-        { _jsonAscendLengthKey,                         QJsonValue::Double, true }
+        { _jsonAscendAltitudeKey,                       QJsonValue::Double, false },
+        { _jsonAscendLengthKey,                         QJsonValue::Double, false }
     };
 
     if(version == 5) {

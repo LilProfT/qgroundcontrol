@@ -126,7 +126,8 @@ void AudioOutput::_playAfter(int interval)
     QTimer::singleShot(interval, this, &AudioOutput::_timerSlot);
 }
 
-void AudioOutput::_next() {
+void AudioOutput::_next()
+{
     if (_texts.size()) {
         QString text = _texts.first();
         _texts.removeFirst();
@@ -135,7 +136,8 @@ void AudioOutput::_next() {
     }
 }
 
-void AudioOutput::_play(QString& text) {
+void AudioOutput::_play(QString& text)
+{
     qDebug() << "_play ::: " << text;
 
     for (const QString& key: _audioMap.keys()) {
@@ -154,7 +156,8 @@ void AudioOutput::_play(QString& text) {
     }
 };
 
-bool AudioOutput::getMillisecondString(const QString& string, QString& match, int& number) {
+bool AudioOutput::getMillisecondString(const QString& string, QString& match, int& number)
+{
     static QRegularExpression re("([0-9]+ms)");
     QRegularExpressionMatchIterator i = re.globalMatch(string);
     while (i.hasNext()) {
@@ -168,7 +171,8 @@ bool AudioOutput::getMillisecondString(const QString& string, QString& match, in
     return false;
 }
 
-QString AudioOutput::fixTextMessageForAudio(const QString& string) {
+QString AudioOutput::fixTextMessageForAudio(const QString& string)
+{
     QString match;
     QString newNumber;
     QString result = string;

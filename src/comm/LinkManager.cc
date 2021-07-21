@@ -794,8 +794,6 @@ void LinkManager::reloadApp(void)
 {
     qApp->quit();
     QProcess::startDetached(qApp->arguments()[0], qApp->arguments());
-
-
 }
 
 uint8_t LinkManager::allocateMavlinkChannel(void)

@@ -206,7 +206,7 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
     } else {
         stopVideo();
     }
-    //_startTimer(20000);
+
 #endif
 }
 
@@ -249,18 +249,6 @@ void VideoManager::_cleanupOldVideos()
         }
     }
 #endif
-}
-
-void VideoManager::_startTimer(int interval)
-{
-    QTimer::singleShot(interval, this, &VideoManager::_timerSlot);
-}
-
-void VideoManager::_timerSlot()
-{
-    qCWarning(VideoManagerLog()) << "timerSlot";
-    switchReceiver();
-    _startTimer(20000);
 }
 
 //-----------------------------------------------------------------------------

@@ -59,7 +59,6 @@ void NTRIP::connectGPSNTRIP()
             connect(_rtkProvider, &RTKProvider::satelliteInfoUpdate,    this, &NTRIP::GPSSatelliteUpdate);
             connect(_rtkProvider, &RTKProvider::finished,               this, &NTRIP::onDisconnect);
             connect(_rtkProvider, &RTKProvider::surveyInStatus,         this, &NTRIP::surveyInStatus);
-            //emit onConnect();
         }
     }
 }

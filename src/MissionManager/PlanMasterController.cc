@@ -725,12 +725,14 @@ void PlanMasterController::removeAll(void)
     _missionController.removeAll();
     _geoFenceController.removeAll();
     _rallyPointController.removeAll();
+    _currentPlanFile.clear();
+    emit currentPlanFileChanged();
+
     if (_offline) {
         _missionController.setDirty(false);
         _geoFenceController.setDirty(false);
         _rallyPointController.setDirty(false);
-        _currentPlanFile.clear();
-        emit currentPlanFileChanged();
+
     }
 }
 
