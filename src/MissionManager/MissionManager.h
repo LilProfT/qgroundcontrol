@@ -51,7 +51,6 @@ private:
     void _handleMissionCurrent(const mavlink_message_t& message);
     void _updateMissionIndex(int index);
     void _handleHeartbeat(const mavlink_message_t& message);
-    void _resetCachedResumeIndex(void);
 
     int _cachedLastCurrentIndex;
     int _cachedResumeIndex;

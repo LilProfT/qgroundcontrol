@@ -270,25 +270,11 @@ void MissionManager::generateResumeMission(int resumeIndex)
     _resumeMission = true;
     _writeMissionItemsWorker();
     qCWarning(MissionManagerLog) << "_loadResumeFromFile: " << _loadResumeFromFile;
-
-    // autosaved the first time
-//    if (!_loadResumeFromFile) {
-//        emit autoSaved();
-//    } else {
-//        _loadResumeFromFile = false;
-//        _cachedResumeIndex = -1;
-//    }
 }
 
 void MissionManager::autoSaveMission(void) {
     if (_cachedResumeIndex > 0)
         emit autoSaved();
-    //QTimer::singleShot(2000, this, &MissionManager::_resetCachedResumeIndex);
-}
-
-void MissionManager::_resetCachedResumeIndex(void)
-{
-    //_cachedResumeIndex = -1;
 }
 
 /// Called when a new mavlink message for out vehicle is received

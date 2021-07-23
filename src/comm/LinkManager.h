@@ -131,7 +131,6 @@ public:
 
     void startAutoConnectedLinks(void);
 
-    Q_INVOKABLE void startAutomaticallyConnectLinks(void);
     Q_INVOKABLE void reloadApp(void);
 
 

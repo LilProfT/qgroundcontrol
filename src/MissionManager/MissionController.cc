@@ -2096,15 +2096,6 @@ void MissionController::_managerVehicleChanged(Vehicle* managerVehicle)
     connect(_managerVehicle, &Vehicle::defaultCruiseSpeedChanged,       this, &MissionController::_recalcMissionFlightStatusSignal, Qt::QueuedConnection);
     connect(_managerVehicle, &Vehicle::defaultHoverSpeedChanged,        this, &MissionController::_recalcMissionFlightStatusSignal, Qt::QueuedConnection);
     connect(_managerVehicle, &Vehicle::vehicleTypeChanged,              this, &MissionController::complexMissionItemNamesChanged);
-//    connect(_managerVehicle, &Vehicle::vehicleClosed,                   this, &MissionController::_bufferMission);
-
-    // release buffered mission
-//    if (_bufferedVisualItems->count() > 0) {
-//        _visualItems->clear();
-//        for (int i=0; i<_bufferedVisualItems->count(); i++)
-//            _visualItems->append(_bufferedVisualItems->get(i));
-//        _masterController->sendToVehicle();
-//    }
 
     emit complexMissionItemNamesChanged();
     emit resumeMissionIndexChanged();
@@ -2288,7 +2279,12 @@ int MissionController::resumeMissionIndex2(void) const
 
 int MissionController::resumeMissionIndexFromFile(void) const
 {
-    return _resumeMissionIndexFromFile;
+    return _missionManager->cacheResumeIndex();
+}
+
+void MissionController::updateResumeMissionIndexFromFile(int resumeIndex) const
+{
+    _missionManager->updateCacheResumeIndex(resumeIndex);
 }
 
 int MissionController::currentMissionIndex(void) const

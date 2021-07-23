@@ -69,7 +69,8 @@ public:
     /// Determines if the plan has all information needed to be saved or sent to the vehicle.
     /// IMPORTANT NOTE: The return value is a VisualMissionItem::ReadForSaveState value. It is an int here to work around
     /// a nightmare of circular header dependency problems.
-    Q_INVOKABLE int readyForSaveState(void) const { return _missionController.readyForSaveState(); }
+    Q_INVOKABLE int readyForSaveState(void) const { return _missionController.readyForSaveState(); };
+    Q_INVOKABLE bool        isMissionChange         (void) const { return _isMissionChange; };
 
     /// Replaces any current plan with the plan from the manager vehicle even if offline.
     Q_INVOKABLE void showPlanFromManagerVehicle(void);
@@ -84,6 +85,7 @@ public:
     Q_INVOKABLE void loadFromFile(const QString& filename);
     Q_INVOKABLE void loadFromRecentFile(void);
     Q_INVOKABLE void saveToCurrent();
+    Q_INVOKABLE void saveToCurrentInBackground();
     Q_INVOKABLE void saveToFile(const QString& filename);
     Q_INVOKABLE void saveToKml(const QString& filename);
     Q_INVOKABLE void removeAll(void);                       ///< Removes all from controller only, synce required to remove from vehicle
@@ -91,6 +93,7 @@ public:
     Q_INVOKABLE void loadResumeFile(void);
     Q_INVOKABLE void setParam(void);
     Q_INVOKABLE void clearResumeFile(void);
+
     MissionController*      missionController(void)     { return &_missionController; }
     GeoFenceController*     geoFenceController(void)    { return &_geoFenceController; }
     RallyPointController*   rallyPointController(void)  { return &_rallyPointController; }
@@ -121,6 +124,7 @@ public:
     void        savePolygon (QVariantList path);
     void        saveSprayedArea(double area) { _sprayedArea = area; };
     double      sprayedArea(void) { return _sprayedArea; };
+    void        missionChange         (bool change)  { _isMissionChange = change; };
 
     void        setFlyView(bool flyView) { _flyView = flyView; };
     QGCMapPolygon loadSurveyPolygon(void) { return _surveyAreaPolygon;};
@@ -170,6 +174,7 @@ private:
     void _commonInit                (void);
     void _showPlanFromManagerVehicle(void);
     void _uploadToVehicle(void);
+    void _missionChanged(void);
 
     MultiVehicleManager*    _multiVehicleMgr =          nullptr;
     Vehicle*                _controllerVehicle =        nullptr;    ///< Offline controller vehicle
@@ -191,5 +196,6 @@ private:
     bool                    _isSourcePlan;
     QGCMapPolygon           _surveyAreaPolygon;
     double           _sprayedArea;
+    bool                    _isMissionChange = false;
 
 };

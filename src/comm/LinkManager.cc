@@ -780,16 +780,6 @@ void LinkManager::startAutoConnectedLinks(void)
     }
 }
 
-void LinkManager::startAutomaticallyConnectLinks(void)
-{
-    SharedLinkConfigurationPtr conf;
-    for(int i = 0; i < _rgLinkConfigs.count(); i++) {
-        conf = _rgLinkConfigs[i];
-        if (conf->isAutoConnect())
-            createConnectedLink(conf);
-    }
-}
-
 void LinkManager::reloadApp(void)
 {
     qApp->quit();

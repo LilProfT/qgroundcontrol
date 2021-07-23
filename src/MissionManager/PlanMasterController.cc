@@ -443,6 +443,8 @@ void PlanMasterController::loadFromFile(const QString& filename)
         setIsSourcePlan(true);
         _resumePlanFile = QString(_currentPlanFile);
         _saveRecentFile();
+        QTimer::singleShot(3000, this, &PlanMasterController::_missionChanged);
+
     } else {
         _currentPlanFile.clear();
     }
@@ -451,6 +453,12 @@ void PlanMasterController::loadFromFile(const QString& filename)
     if (!offline()) {
         setDirty(true);
     }
+}
+
+void PlanMasterController::_missionChanged()
+{
+    _isMissionChange = false;
+
 }
 
 void PlanMasterController::loadFromRecentFile(void)
@@ -633,6 +641,16 @@ PlanMasterController::saveToCurrent()
 }
 
 void
+PlanMasterController::saveToCurrentInBackground()
+{
+    if(!_currentPlanFile.isEmpty()) {
+        int resumeIndex =  _missionController.resumeMissionIndexFromFile();
+        saveToFile(_currentPlanFile);
+        _missionController.updateResumeMissionIndexFromFile(resumeIndex);
+    }
+}
+
+void
 PlanMasterController::_saveRecentFile()
 {
     if(!_currentPlanFile.isEmpty()) {
@@ -682,12 +700,25 @@ void PlanMasterController::saveToFile(const QString& filename)
     } else {
         QJsonDocument saveDoc = saveToJson();
         file.write(saveDoc.toJson());
+
+        QFileInfo fileInfo = QFileInfo(planFilename);
+        planFilename = QString("%1/%2(%3ha).%4")
+               .arg(fileInfo.absoluteDir().absolutePath())
+               .arg(fileInfo.baseName().split("(").at(0))
+               .arg(QString::number(area() / 10000, 'f', 2))
+                .arg(fileExtension());
+        qCWarning(PlanMasterControllerLog) << "fileInfo.absoluteDir(): " << fileInfo.absoluteDir().absolutePath();
+        qCWarning(PlanMasterControllerLog) << "planFilename: " << planFilename;
+        fileInfo.absoluteDir().rename(fileInfo.absoluteFilePath(), planFilename);
+
         if(_currentPlanFile != planFilename) {
             _currentPlanFile = planFilename;            
             emit currentPlanFileChanged();
         }
         _saveRecentFile();
         _resumePlanFile = QString(_currentPlanFile);
+        QTimer::singleShot(3000, this, &PlanMasterController::_missionChanged);
+
     }
 
     // Only clear dirty bit if we are offline

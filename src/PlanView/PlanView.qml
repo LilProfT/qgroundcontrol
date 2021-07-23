@@ -260,10 +260,10 @@ Item {
                 return
             }
 
-            if (!_planMasterController.syncInProgress && _planMasterController.currentPlanFile !== "") {
-                //mainWindow.showComponentDialog(createSaveCurrentPromptDialog, qsTr("Save"), mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
-                //return
-                _planMasterController.saveToCurrent()
+            if (isMissionChange()) {
+                mainWindow.showComponentDialog(createSaveCurrentPromptDialog, qsTr("Save"), mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
+                return
+//                _planMasterController.saveToCurrentInBackground()
            }
 
             if (!checkReadyForSaveUpload(false /* save */)) {

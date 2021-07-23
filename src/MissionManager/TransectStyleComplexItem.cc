@@ -402,6 +402,7 @@ void TransectStyleComplexItem::_rebuildTransects (void)
     _rgFlightPathCoordInfo.clear();
 
     _rebuildTransectsPhase1();
+    _masterController->missionChange(true);
 
     _minAMSLAltitude = _maxAMSLAltitude = qQNaN();
 
