@@ -16,6 +16,8 @@
 void SurveyComplexItem::_updateSprayFlowRate(void)
 {
     qDebug() << "update spray flow rate";
+    _masterController->missionChange(true);
+
     double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
     double applicationRate = _applicationRateFact.property("value").toFloat();
     double velocity = _velocityFact.property("value").toFloat();
@@ -103,6 +105,8 @@ void SurveyComplexItem::_optimize_EntryPoint(void) {
         qDebug() << "takeoff invalid";
         return;
     };
+    _masterController->missionChange(true);
+
     qDebug() << "takeoff: " << takeoffWaypoint;
     double min_distance = INFINITY;
     int start_entryPoint = _entryPoint;
@@ -153,7 +157,7 @@ void SurveyComplexItem::_buildAndAppendMissionItems (QList<MissionItem*>& items,
 void SurveyComplexItem::rotateAngle(void)
 {
     qDebug() << " rotateAngle _isEdgeIndexFromFile: " << _isEdgeIndexFromFile ;
-
+    _masterController->missionChange(true);
     if (!_isEdgeIndexFromFile) {
         _edgeIndex += 1;
         if (_edgeIndex == _surveyAreaPolygon.count()) _edgeIndex = 0;

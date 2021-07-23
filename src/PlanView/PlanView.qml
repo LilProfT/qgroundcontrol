@@ -1046,7 +1046,7 @@ Item {
         QGCViewMessage {
             message: qsTr("Are you sure you want to save a plan? ")
             function accept() {
-                _planMasterController.saveToCurrent()
+                _planMasterController.saveToCurrentInBackground()
                 hideDialog()
             }
         }

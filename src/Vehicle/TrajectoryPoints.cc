@@ -18,10 +18,10 @@ TrajectoryPoints::TrajectoryPoints(Vehicle* vehicle, QObject* parent)
     connect(_vehicle, &Vehicle::pointAddedFromfile, this, &TrajectoryPoints::pointAddedFromfile);
     connect(_vehicle, &Vehicle::clearTrajectoryPoint, this, &TrajectoryPoints::clear);
 
-//    _enterPoint.setLatitude(-35.3635283621613);
-//    _enterPoint.setLongitude(149.1642707053213);
-//    _exitPoint.setLatitude(-35.363367756072925);
-//    _exitPoint.setLongitude(149.16492230227956);
+    _enterPoint.setLatitude(-35.3635283621613);
+    _enterPoint.setLongitude(149.1642707053213);
+    _exitPoint.setLatitude(-35.363367756072925);
+    _exitPoint.setLongitude(149.16492230227956);
 
     _reachEnterPoint = false;
 }
