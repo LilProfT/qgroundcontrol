@@ -403,7 +403,6 @@ void TransectStyleComplexItem::_rebuildTransects (void)
 
     _rebuildTransectsPhase1();
     _masterController->missionChange(true);
-
     _minAMSLAltitude = _maxAMSLAltitude = qQNaN();
 
     if (_followTerrain) {

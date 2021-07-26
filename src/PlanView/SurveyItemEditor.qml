@@ -223,7 +223,7 @@ Rectangle {
 
                     QGCCheckBox {
                         text:               qsTr("Ascend transect terminals")
-                        checked:            true
+                        checked:            _missionItem.ascendTerminals.value
                         onClicked:          _missionItem.ascendTerminals.value = checked
                         Layout.columnSpan: 2
                     }

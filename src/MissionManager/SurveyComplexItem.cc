@@ -118,6 +118,7 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
         // Only fixed wing flight paths support alternate transects
         _flyAlternateTransectsFact.setRawValue(false);
     }
+    _ascendTerminalsFact.setRawValue(false);
 
     // We override the altitude to the mission default
     if (_cameraCalc.isManualCamera() || !_cameraCalc.valueSetIsDistance()->rawValue().toBool()) {
