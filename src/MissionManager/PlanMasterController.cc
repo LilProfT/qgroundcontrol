@@ -163,7 +163,8 @@ void PlanMasterController::_activeVehicleChanged(Vehicle* activeVehicle)
         connect(_managerVehicle->missionManager(),      &MissionManager::sendComplete,              this, &PlanMasterController::_sendMissionComplete);
         connect(_managerVehicle->geoFenceManager(),     &GeoFenceManager::sendComplete,             this, &PlanMasterController::_sendGeoFenceComplete);
         connect(_managerVehicle->rallyPointManager(),   &RallyPointManager::sendComplete,           this, &PlanMasterController::_sendRallyPointsComplete);
-        connect(_managerVehicle->missionManager(),      &MissionManager::autoSaved,              this, &PlanMasterController::saveToCurrent);
+        connect(_managerVehicle->missionManager(),      &MissionManager::autoSaved,              this, &PlanMasterController::_saveToCurrentOnResumeFolder);
+        connect(_managerVehicle->missionManager(),      &MissionManager::deleteResumed,              this, &PlanMasterController::deleteFileInResume);
 
     }
 
@@ -455,6 +456,72 @@ void PlanMasterController::loadFromFile(const QString& filename)
     }
 }
 
+void PlanMasterController::loadFromFileInResume(const QString& filename)
+{
+
+    QString recentlyFile;
+    QString errorString;
+    QString errorMessage = tr("Error loading Plan file (%1). %2").arg(filename).arg("%1");
+
+    QFileInfo fileInfo(filename);
+    QFile file(filename);
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        errorString = file.errorString() + QStringLiteral(" ") + filename;
+        qgcApp()->showAppMessage(errorMessage.arg(errorString));
+        return;
+    }
+
+    bool success = false;
+    if (fileInfo.suffix() == AppSettings::missionFileExtension) {
+        if (!_missionController.loadJsonFile(file, errorString)) {
+            qgcApp()->showAppMessage(errorMessage.arg(errorString));
+        } else {
+            success = true;
+        }
+    } else if (fileInfo.suffix() == AppSettings::waypointsFileExtension || fileInfo.suffix() == QStringLiteral("txt")) {
+        if (!_missionController.loadTextFile(file, errorString)) {
+            qgcApp()->showAppMessage(errorMessage.arg(errorString));
+        } else {
+            success = true;
+        }
+    } else {
+        QJsonDocument   jsonDoc;
+        QByteArray      bytes = file.readAll();
+
+        if (!JsonHelper::isJsonFile(bytes, jsonDoc, errorString)) {
+            qgcApp()->showAppMessage(errorMessage.arg(errorString));
+            return;
+        }
+
+        QJsonObject json = jsonDoc.object();
+        //-- Allow plugins to pre process the load
+        qgcApp()->toolbox()->corePlugin()->preLoadFromJson(this, json);
+        if (json.contains(kJsonRecentFileObjectKey)) {
+            recentlyFile = json[kJsonRecentFileObjectKey].toString();
+            qCWarning(PlanMasterControllerLog()) << "recentlyFile: " << recentlyFile;
+        }
+
+        qgcApp()->toolbox()->corePlugin()->postLoadFromJson(this, json);
+        success = true;
+    }
+
+    if(success){
+        _currentPlanFile = recentlyFile;
+        setIsSourcePlan(true);
+        _resumePlanFile = QString(_currentPlanFile);
+        loadResumeFile();
+    } else {
+        _currentPlanFile.clear();
+    }
+    emit currentPlanFileChanged();
+
+    if (!offline()) {
+        setDirty(true);
+    }
+}
+
+
 void PlanMasterController::_missionChanged()
 {
     _isMissionChange = false;
@@ -523,6 +590,18 @@ void PlanMasterController::loadFromRecentFile(void)
 
     if (!offline()) {
         setDirty(true);
+    }
+}
+
+void PlanMasterController::deleteFileInResume(void)
+{
+    qCWarning(PlanMasterControllerLog()) << "deleteFileInResume: " << _currentPlanFile;
+
+    if (!_currentPlanFile.isEmpty()) {
+        QFileInfo fileInfo(_currentPlanFile);
+
+        QString curentAutosavedPlanFile =  qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath() + "/" + fileInfo.fileName();
+        QFile::remove(curentAutosavedPlanFile);
     }
 }
 
@@ -620,11 +699,11 @@ void  PlanMasterController::savePolygon(QVariantList path)
     _saveRecentFile();
 }
 
-QJsonDocument PlanMasterController::saveRecentFileToJson()
+QJsonDocument PlanMasterController::saveRecentFileToJson(const QString& filename)
 {
     QJsonObject planJson;
     qgcApp()->toolbox()->corePlugin()->preSaveToJson(this, planJson);
-    planJson[kJsonRecentFileObjectKey] = _currentPlanFile;
+    planJson[kJsonRecentFileObjectKey] = filename;
     _surveyAreaPolygon.saveToJson(planJson);
     planJson[kJsonSprayedAreaObjectKey] = _sprayedArea;
 
@@ -636,7 +715,75 @@ void
 PlanMasterController::saveToCurrent()
 {
     if(!_currentPlanFile.isEmpty()) {
+        _saveToCurrentOnResumeFolder2();
         saveToFile(_currentPlanFile);
+    }
+}
+
+void
+PlanMasterController::_saveToCurrentOnResumeFolder()
+{
+    if(!_currentPlanFile.isEmpty()) {
+        saveToFile(_currentPlanFile);
+
+        QFileInfo fileInfo(_currentPlanFile);
+        QString curentAutosavedPlanFile =  qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath() + "/" + fileInfo.fileName();
+
+        qCWarning(MissionControllerLog) << "after: " << curentAutosavedPlanFile;
+        QFile file(curentAutosavedPlanFile);
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            qgcApp()->showAppMessage(tr("Plan save error %1 : %2").arg(curentAutosavedPlanFile).arg(file.errorString()));
+            curentAutosavedPlanFile.clear();
+            emit currentPlanFileChanged();
+        } else {
+            QJsonDocument saveDoc = saveRecentFileToJson(_currentPlanFile);
+            file.write(saveDoc.toJson());
+        }
+
+        // Only clear dirty bit if we are offline
+        if (offline()) {
+            setDirty(false);
+        }
+    }
+}
+
+void
+PlanMasterController::_saveToCurrentOnResumeFolder2()
+{
+    if(!_currentPlanFile.isEmpty()) {
+        QFileInfo fileInfo(_currentPlanFile);
+        QString curentAutosavedPlanFile =  qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath() + "/" + fileInfo.fileName();
+
+        qCWarning(MissionControllerLog) << "after: " << curentAutosavedPlanFile;
+        QFile file(curentAutosavedPlanFile);
+        if (!file.exists())
+            return;
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            qgcApp()->showAppMessage(tr("Plan save error %1 : %2").arg(curentAutosavedPlanFile).arg(file.errorString()));
+            curentAutosavedPlanFile.clear();
+            emit currentPlanFileChanged();
+        } else {
+            QFileInfo fileInfo = QFileInfo(curentAutosavedPlanFile);
+            QString planFilename = QString("%1/%2(%3ha).%4")
+                   .arg(fileInfo.absoluteDir().absolutePath())
+                   .arg(fileInfo.baseName().split("(").at(0))
+                   .arg(QString::number(area() / 10000, 'f', 2))
+                    .arg(fileExtension());
+            qCWarning(PlanMasterControllerLog) << "fileInfo.absoluteDir(): " << fileInfo.absoluteDir().absolutePath();
+            qCWarning(PlanMasterControllerLog) << "planFilename: " << planFilename;
+            fileInfo.absoluteDir().rename(fileInfo.absoluteFilePath(), planFilename);
+
+
+            QJsonDocument saveDoc = saveRecentFileToJson(planFilename);
+            file.write(saveDoc.toJson());
+        }
+
+        // Only clear dirty bit if we are offline
+        if (offline()) {
+            setDirty(false);
+        }
     }
 }
 
@@ -644,6 +791,8 @@ void
 PlanMasterController::saveToCurrentInBackground()
 {
     if(!_currentPlanFile.isEmpty()) {
+        _saveToCurrentOnResumeFolder2();
+
         int resumeIndex =  _missionController.resumeMissionIndexFromFile();
         saveToFile(_currentPlanFile);
         _missionController.updateResumeMissionIndexFromFile(resumeIndex);
@@ -664,7 +813,7 @@ PlanMasterController::_saveRecentFile()
             curentAutosavedPlanFile.clear();
             emit currentPlanFileChanged();
         } else {
-            QJsonDocument saveDoc = saveRecentFileToJson();
+            QJsonDocument saveDoc = saveRecentFileToJson(_currentPlanFile);
             file.write(saveDoc.toJson());
             emit currentPlanFileChanged();
         }

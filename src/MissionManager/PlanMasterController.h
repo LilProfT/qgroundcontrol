@@ -83,6 +83,9 @@ public:
     Q_INVOKABLE void loadFromVehicle(void);
     Q_INVOKABLE void sendToVehicle(void);
     Q_INVOKABLE void loadFromFile(const QString& filename);
+    Q_INVOKABLE void loadFromFileInResume(const QString& filename);
+
+
     Q_INVOKABLE void loadFromRecentFile(void);
     Q_INVOKABLE void saveToCurrent();
     Q_INVOKABLE void saveToCurrentInBackground();
@@ -93,6 +96,9 @@ public:
     Q_INVOKABLE void loadResumeFile(void);
     Q_INVOKABLE void setParam(void);
     Q_INVOKABLE void clearResumeFile(void);
+    Q_INVOKABLE void deleteFileInResume(void);
+
+
 
     MissionController*      missionController(void)     { return &_missionController; }
     GeoFenceController*     geoFenceController(void)    { return &_geoFenceController; }
@@ -129,7 +135,7 @@ public:
     void        setFlyView(bool flyView) { _flyView = flyView; };
     QGCMapPolygon loadSurveyPolygon(void) { return _surveyAreaPolygon;};
     QJsonDocument saveToJson    ();
-    QJsonDocument saveRecentFileToJson    ();
+    QJsonDocument saveRecentFileToJson    (const QString& filename);
 
     Vehicle* controllerVehicle(void) { return _controllerVehicle; }
     Vehicle* managerVehicle(void) { return _managerVehicle; }
@@ -175,6 +181,8 @@ private:
     void _showPlanFromManagerVehicle(void);
     void _uploadToVehicle(void);
     void _missionChanged(void);
+    void _saveToCurrentOnResumeFolder(void);
+    void _saveToCurrentOnResumeFolder2(void);
 
     MultiVehicleManager*    _multiVehicleMgr =          nullptr;
     Vehicle*                _controllerVehicle =        nullptr;    ///< Offline controller vehicle

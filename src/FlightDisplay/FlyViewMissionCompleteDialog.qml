@@ -35,6 +35,9 @@ Item {
                                                         (missionController.containsItems || geoFenceController.containsItems || rallyPointController.containsItems ||
                                                         (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false)) &&
                                                         globals.guidedControllerFlyView.showResumeMission
+    property bool _showMissionResumeDialog:       _vehicleWasArmed && _vehicleWasInMissionFlightMode &&
+                                                        (missionController.containsItems || geoFenceController.containsItems || rallyPointController.containsItems ||
+                                                        (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false))
     //Mismart: Hide the Dialog
     //property bool _showMissionCompleteDialog:       false
 
@@ -61,6 +64,12 @@ Item {
                 globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMission, null, null)
 
                 //mainWindow.showComponentDialog(missionCompleteDialogComponent, qsTr("Flight Plan complete"), mainWindow.showDialogDefaultWidth, StandardButton.Close)
+            } else {
+                //_planController.deleteFileInResume()
+                if (_showMissionResumeDialog) {
+                    globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionDeleteMission, null, null)
+                }
+
             }
 
             //Mismart: Checking if the mission is really completed

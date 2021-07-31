@@ -88,6 +88,7 @@ signals:
     void resumeMissionReady         (void);
     void resumeMissionUploadFail    (void);
     void autoSaved                  (void);
+    void deleteResumed                  (void);
 
 private slots:
     void _mavlinkMessageReceived(const mavlink_message_t& message);

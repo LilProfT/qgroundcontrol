@@ -225,7 +225,7 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
             emit updateSurveyAreaPolygon();
 
             if (!_missionManager->resumeFromFile()) {
-                emit _managerVehicle->clearTrajectoryPoint();
+                //emit _managerVehicle->clearTrajectoryPoint();
                 _managerVehicle->updateAreaSprayedFromFile(0);
             }
         }
@@ -2210,6 +2210,11 @@ void MissionController::autoSaveMission(void)
     _missionManager->autoSaveMission();
 }
 
+void MissionController::deleteResumeMission(void)
+{
+    _missionManager->deleteResumeMission();
+}
+
 void MissionController::clearTrajectoryPoints(void)
 {
     emit _managerVehicle->clearTrajectoryPoint();
@@ -2257,7 +2262,7 @@ int MissionController::resumeMissionIndex2(void) const
             //resumeActive();
             _managerVehicle->updateAreaSprayedFromFile(0);
 
-            emit _managerVehicle->clearTrajectoryPoint();
+            //emit _managerVehicle->clearTrajectoryPoint();
             _missionManager->loadResumeFromFile(true);
 
             resumeIndex = _missionManager->cacheResumeIndex();
@@ -2412,7 +2417,7 @@ void MissionController::resumeMission(int resumeIndex)
     _missionManager->generateResumeMission(resumeIndex);
 }
 
-void MissionController::resumeMissionFromDialog()
+void MissionController::resumeMissionFromFile()
 {
     int resumeIndex = resumeMissionIndex2();
     if (!_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle()) {
@@ -2420,7 +2425,7 @@ void MissionController::resumeMissionFromDialog()
     }
     qCWarning(MissionManagerLog) << "resumeMission resumeIndex: " << resumeIndex;
 
-    _missionManager->generateResumeMission(resumeIndex);
+    _missionManager->generateResumeMissionFromFile(resumeIndex);
 }
 
 QGeoCoordinate MissionController::plannedHomePosition(void) const

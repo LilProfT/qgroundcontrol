@@ -270,6 +270,7 @@ Item {
                 return
             }
 
+            _missionController.clearTrajectoryPoints()
 
             switch (_missionController.sendToVehiclePreCheck()) {
                 case MissionController.SendToVehiclePreCheckStateOk:
@@ -291,6 +292,14 @@ Item {
             fileDialog.selectExisting = true
             fileDialog.nameFilters =    _planMasterController.loadNameFilters
             fileDialog.openForLoad()
+        }
+
+        function loadFromSelectedFileInResume() {
+            fileDialogInResume.title =          qsTr("Select Plan File")
+            fileDialogInResume.planFiles =      true
+            fileDialogInResume.selectExisting = true
+            fileDialogInResume.nameFilters =    _planMasterController.loadNameFilters
+            fileDialogInResume.openForLoad()
         }
 
         function saveToSelectedFile() {
@@ -377,7 +386,7 @@ Item {
 
     QGCFileDialog {
         id:             fileDialog
-        folder:         _appSettings ? _appSettings.missionSavePath : ""
+        folder:         _appSettings ?  _appSettings.missionSavePath : ""
 
         property bool planFiles: true    ///< true: working with plan files, false: working with kml file
 
@@ -392,6 +401,29 @@ Item {
 
         onAcceptedForLoad: {
             _planMasterController.loadFromFile(file)
+            _planMasterController.fitViewportToItems()
+            _missionController.setCurrentPlanViewSeqNum(0, true)
+            close()
+        }
+    }
+
+    QGCFileDialog {
+        id:             fileDialogInResume
+        folder:         _appSettings ? _appSettings.resumeSavePath : ""
+
+        property bool planFiles: true    ///< true: working with plan files, false: working with kml file
+
+        onAcceptedForSave: {
+            if (planFiles) {
+                _planMasterController.saveToFile(file)
+            } else {
+                _planMasterController.saveToKml(file)
+            }
+            close()
+        }
+
+        onAcceptedForLoad: {
+            _planMasterController.loadFromFileInResume(file)
             _planMasterController.fitViewportToItems()
             _missionController.setCurrentPlanViewSeqNum(0, true)
             close()
@@ -737,6 +769,30 @@ Item {
                         enabled:            true
                         visible:            true
                         dropPanelComponent: centerMapDropPanel
+                    },
+                    ToolStripAction {
+                        text:       qsTr("Open...")
+                        iconSource: "/res/takeoff.svg"
+                        //visible:    toolStrip._isMissionLayer && !_planMasterController.controllerVehicle.rover
+                        enabled:                !_planMasterController.syncInProgress
+
+                        visible:    true
+                        onTriggered: {
+                            toolStrip.allAddClickBoolsOff()
+                            _planMasterController.loadFromSelectedFile()
+                        }
+                    },
+                    ToolStripAction {
+                        text:       qsTr("Continue...")
+                        iconSource: "/res/rtl.svg"
+                        //visible:    toolStrip._isMissionLayer && !_planMasterController.controllerVehicle.rover
+                        visible:    true
+                        enabled:                !_planMasterController.syncInProgress
+
+                        onTriggered: {
+                            toolStrip.allAddClickBoolsOff()
+                            _planMasterController.loadFromSelectedFileInResume()
+                        }
                     }
                 ]
             }
@@ -1115,7 +1171,7 @@ Item {
                 text:               globals.activeVehicle ?
                                         qsTr("You have unsaved changes. You should upload to your vehicle, or save to a file.") :
                                         qsTr("You have unsaved changes.")
-                visible:            _planMasterController.dirty
+                visible:            false
             }
 
             SectionHeader {
@@ -1218,11 +1274,11 @@ Item {
                     enabled:            !_planMasterController.syncInProgress
                     onClicked: {
                         dropPanel.hide()
-                        if (_planMasterController.dirty) {
-                            mainWindow.showComponentDialog(syncLoadFromFileOverwrite, columnHolder._overwriteText, mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
-                        } else {
-                            _planMasterController.loadFromSelectedFile()
-                        }
+//                        if (_planMasterController.dirty) {
+//                            mainWindow.showComponentDialog(syncLoadFromFileOverwrite, columnHolder._overwriteText, mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
+//                        } else {
+                        _planMasterController.loadFromSelectedFile()
+//                        }
                     }
                 }
 
@@ -1253,17 +1309,17 @@ Item {
                 QGCButton {
                     Layout.columnSpan:  3
                     Layout.fillWidth:   true
-                    visible: false
-                    text:               qsTr("Save Mission Waypoints As KML...")
-                    enabled:            !_planMasterController.syncInProgress && _visualItems.count > 1
+                    visible: true
+                    text:               qsTr("Continue Mission...")
+                    enabled:            !_planMasterController.syncInProgress
                     onClicked: {
                         // First point does not count
-                        if (_visualItems.count < 2) {
-                            mainWindow.showComponentDialog(noItemForKML, qsTr("KML"), mainWindow.showDialogDefaultWidth, StandardButton.Cancel)
-                            return
-                        }
+//                        if (_visualItems.count < 2) {
+//                            mainWindow.showComponentDialog(noItemForKML, qsTr("KML"), mainWindow.showDialogDefaultWidth, StandardButton.Cancel)
+//                            return
+//                        }
                         dropPanel.hide()
-                        _planMasterController.saveKmlToSelectedFile()
+                        _planMasterController.loadFromSelectedFileInResume()
                     }
                 }
             }
@@ -1288,7 +1344,8 @@ Item {
                     onClicked: {
                         dropPanel.hide()
                         _planMasterController.loadFromRecentFile()
-
+                        _planMasterController.fitViewportToItems()
+                        _missionController.setCurrentPlanViewSeqNum(0, true)
                     }
                 }
 

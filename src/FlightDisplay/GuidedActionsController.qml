@@ -100,7 +100,8 @@ Item {
     readonly property int actionROI:                        22
     readonly property int actionActionList:                 23
     readonly property int actionForceArm:                   24
-    readonly property int actionResumeMissionFromDialog:              25
+    readonly property int actionResumeMissionFromFile:              25
+    readonly property int actionDeleteMission:              26
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
@@ -479,10 +480,13 @@ Item {
             missionController.autoSaveMission()
             missionController.updateAreaSprayed()
             break
-        case actionResumeMissionFromDialog:
-            missionController.resumeMissionFromDialog()
+        case actionResumeMissionFromFile:
+            missionController.resumeMissionFromFile()
             missionController.autoSaveMission()
             missionController.updateAreaSprayed()
+            break
+        case actionDeleteMission:
+            missionController.deleteResumeMission()
             break
         case actionResumeMissionUploadFail:
             missionController.resumeMission(missionController.resumeMissionIndex)
