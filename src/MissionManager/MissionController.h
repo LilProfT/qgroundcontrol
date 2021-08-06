@@ -71,6 +71,7 @@ public:
     } MissionFlightStatus_t;
 
     Q_PROPERTY(QmlObjectListModel*  visualItems                     READ visualItems                    NOTIFY visualItemsChanged)
+    Q_PROPERTY(QmlObjectListModel*  drainedPoints                   READ drainedPoints                  NOTIFY drainedPointsChanged)
     Q_PROPERTY(QmlObjectListModel*  simpleFlightPathSegments        READ simpleFlightPathSegments       CONSTANT)                               ///< Used by Plan view only for interactive editing
     Q_PROPERTY(QVariantList         waypointPath                    READ waypointPath                   NOTIFY waypointPathChanged)             ///< Used by Fly view only for static display
     Q_PROPERTY(QmlObjectListModel*  directionArrows                 READ directionArrows                CONSTANT)
@@ -225,6 +226,7 @@ public:
     // Property accessors
 
     QmlObjectListModel* visualItems                 (void) { return _visualItems; }
+    QmlObjectListModel* drainedPoints               (void) { return _drainedPoints; }
     QmlObjectListModel* simpleFlightPathSegments    (void) { return &_simpleFlightPathSegments; }
     QmlObjectListModel* directionArrows             (void) { return &_directionArrows; }
     QmlObjectListModel* incompleteComplexItemLines  (void) { return &_incompleteComplexItemLines; }
@@ -269,6 +271,7 @@ public:
 
 signals:
     void visualItemsChanged                 (void);
+    void drainedPointsChanged               (void);
     void waypointPathChanged                (void);
     void splitSegmentChanged                (void);
     void newItemsFromVehicle                (void);
@@ -365,6 +368,7 @@ private:
     FlightPathSegment*      _createFlightPathSegmentWorker      (VisualItemPair& pair);
     void                    _allItemsRemoved                    (void);
     void                    _firstItemAdded                     (void);
+    void                    _injectDrainedWaterPoint            (void);
 
     static double           _calcDistanceToHome                 (VisualMissionItem* currentItem, VisualMissionItem* homeItem);
     static double           _normalizeLat                       (double lat);
@@ -377,6 +381,7 @@ private:
     MissionManager*             _missionManager =               nullptr;
     int                         _missionItemCount =             0;
     QmlObjectListModel*         _visualItems =                  nullptr;
+    QmlObjectListModel*         _drainedPoints =                nullptr;
 //    QmlObjectListModel*         _bufferedVisualItems =          nullptr;
     MissionSettingsItem*        _settingsItem =                 nullptr;
     PlanViewSettings*           _planViewSettings =             nullptr;

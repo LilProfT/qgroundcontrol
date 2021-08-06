@@ -32,6 +32,7 @@
 #include "QGCApplication.h"
 #include "ADSBVehicleManager.h"
 #include "NTRIP.h"
+#include "PlanMasterController.h"
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"
 #endif
@@ -94,6 +95,22 @@ QGCToolbox::QGCToolbox(QGCApplication* app)
 #if defined(QGC_GST_MICROHARD_ENABLED)
     _microhardManager       = new MicrohardManager          (app, this);
 #endif
+}
+
+PlanMasterController* QGCToolbox::planMasterControllerPlanView()
+{
+    QQuickItem* root = qgcApp()->mainRootWindow();
+    _qmlGlobals = root->findChild<QObject*>("globals");
+    if (_qmlGlobals == nullptr) return nullptr;
+    return qobject_cast<PlanMasterController*>(_qmlGlobals->property("planMasterControllerPlanView").value<QObject*>());
+}
+
+PlanMasterController* QGCToolbox::planMasterControllerFlyView()
+{
+    QQuickItem* root = qgcApp()->mainRootWindow();
+    _qmlGlobals = root->findChild<QObject*>("globals");
+    if (_qmlGlobals == nullptr) return nullptr;
+    return qobject_cast<PlanMasterController*>(_qmlGlobals->property("planMasterControllerFlyView").value<QObject*>());
 }
 
 void QGCToolbox::setChildToolboxes(void)
