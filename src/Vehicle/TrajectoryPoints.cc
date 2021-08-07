@@ -27,27 +27,14 @@ TrajectoryPoints::TrajectoryPoints(Vehicle* vehicle, QObject* parent)
 }
 
 void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
-{
-    // The goal of this algorithm is to limit the number of trajectory points whic represent the vehicle path.
-    // Fewer points means higher performance of map display.
+{   
+    if (isSprayTrigger() != _isSprayTrigger) {
+        _isSprayTrigger = isSprayTrigger();
+        qCWarning(VehicleLog()) << "_isSprayTrigger: " << _isSprayTrigger << "_lastPoint:" << _lastPoint;
 
-    if (!_reachEnterPoint) {
-        double dist = coordinate.distanceTo(_enterPoint);
-        qWarning(MissionManagerLog) << "dist :" << dist;
-        if (dist < 1) {
-            _reachEnterPoint = true;
-            qWarning(MissionManagerLog) << "_reachEnterPoint :" << _reachEnterPoint;
-
-        }
-    } else {
-        double dist = coordinate.distanceTo(_exitPoint);
-        qWarning(MissionManagerLog) << "dist :" << dist;
-        if (dist < 1) {
-            _reachExitPoint = true;
-            qWarning(MissionManagerLog) << "_reachExitPoint :" << _reachExitPoint;
-        }
+        emit pointSprayTrigger(_isSprayTrigger, _lastPoint);
+        _lastPoint = QGeoCoordinate();
     }
-
 
     if (_lastPoint.isValid()) {
         double distance = _lastPoint.distanceTo(coordinate);
@@ -56,96 +43,7 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
             _vehicle->updateFlightDistance(distance);
 
             //Mismart: Throw in a sprayed area update function
-            if (_vehicle->_areaSprayedStart()) {
-                _vehicle->updateAreaSprayed(distance);
-            }
-
-            // Vehicle has moved far enough from previous point for an update
-            double newAzimuth = _lastPoint.azimuthTo(coordinate);
-            if (qIsNaN(_lastAzimuth) || qAbs(newAzimuth - _lastAzimuth) > _azimuthTolerance) {
-                // The new position IS NOT colinear with the last segment. Append the new position to the list.
-                _lastAzimuth = _lastPoint.azimuthTo(coordinate);
-                _lastPoint = coordinate;
-                _points.append(QVariant::fromValue(coordinate));
-                //if (coordinate != _vehicle->homePosition())
-                qWarning(MissionManagerLog) << "pointFreeAdded coordinate :" << coordinate;
-                if (_reachEnterPoint) {
-                    if (!_reachExitPoint   )
-                        emit pointAdded(coordinate);
-                    else
-                        emit pointExitAdded(coordinate);
-                } else {
-                    emit pointEnterAdded(coordinate);
-                }
-
-            } else {
-                // The new position IS colinear with the last segment. Don't add a new point, just update
-                // the last point to be the new position.
-                _lastPoint = coordinate;
-                _points[_points.count() - 1] = QVariant::fromValue(coordinate);
-                qWarning(MissionManagerLog) << "updateLastPoint coordinate :" << coordinate;
-
-                if (_reachEnterPoint) {
-                    if (!_reachExitPoint   )
-                        emit updateLastPoint(coordinate);
-                    else
-                        emit updateExitLastPoint(coordinate);
-                } else {
-                    emit updateEnterLastPoint(coordinate);
-                }
-
-//                if (_reachEnterPoint)
-//                    emit updateLastPoint(coordinate);
-//                else
-//                    emit updateFreeLastPoint(coordinate);
-            }
-        }
-    } else {
-        // Add the very first trajectory point to the list
-        _lastPoint = coordinate;
-        _points.append(QVariant::fromValue(coordinate));
-
-        qWarning(MissionManagerLog) << "first pointFreeAdded coordinate :" << coordinate;
-
-        if (_reachEnterPoint) {
-            if (!_reachExitPoint  )
-                emit pointAdded(coordinate);
-            else
-                emit pointExitAdded(coordinate);
-        } else {
-            emit pointEnterAdded(coordinate);
-        }
-
-    }
-}
-
-void TrajectoryPoints::start(void)
-{
-    //clear();
-    _reachEnterPoint = false;
-    _reachExitPoint = false;
-
-    connect(_vehicle, &Vehicle::coordinateChanged, this, &TrajectoryPoints::_vehicleCoordinateChanged);
-
-}
-
-void TrajectoryPoints::stop(void)
-{
-    disconnect(_vehicle, &Vehicle::coordinateChanged, this, &TrajectoryPoints::_vehicleCoordinateChanged);
-}
-
-void TrajectoryPoints::pointAddedFromfile(QGeoCoordinate coordinate)
-{
-    qWarning(MissionManagerLog) << "pointAddedFromfile coordinate :" << coordinate;
-
-    if (_lastPoint.isValid()) {
-        double distance = _lastPoint.distanceTo(coordinate);
-        if (distance > _distanceTolerance) {
-            //-- Update flight distance
-            _vehicle->updateFlightDistance(distance);
-
-            //Mismart: Throw in a sprayed area update function
-            if (_vehicle->_areaSprayedStart()) {
+            if (_isSprayTrigger) {
                 _vehicle->updateAreaSprayed(distance);
             }
 
@@ -173,11 +71,88 @@ void TrajectoryPoints::pointAddedFromfile(QGeoCoordinate coordinate)
     }
 }
 
+void TrajectoryPoints::sprayTrigger()
+{
+    if (_isTrigger)
+        _isTrigger = false;
+    else
+        _isTrigger = true;
+    qCWarning(VehicleLog()) << "_isTrigger: " << _isTrigger;
+}
+
+bool TrajectoryPoints::isSprayTrigger()
+{
+    //return _isTrigger;
+    return _vehicle->_areaSprayedStart();
+}
+
+void TrajectoryPoints::start(void)
+{
+    //clear();
+    _reachEnterPoint = false;
+    _reachExitPoint = false;
+
+    connect(_vehicle, &Vehicle::coordinateChanged, this, &TrajectoryPoints::_vehicleCoordinateChanged);
+
+}
+
+void TrajectoryPoints::stop(void)
+{
+    disconnect(_vehicle, &Vehicle::coordinateChanged, this, &TrajectoryPoints::_vehicleCoordinateChanged);
+}
+
+void TrajectoryPoints::pointAddedFromfile(QGeoCoordinate coordinate)
+{
+    qWarning(MissionManagerLog) << "pointAddedFromfile coordinate :" << coordinate;
+
+    if (_lastPoint.isValid()) {
+        double distance = _lastPoint.distanceTo(coordinate);
+        if (distance > _distanceTolerance) {
+            //-- Update flight distance
+//            _vehicle->updateFlightDistance(distance);
+
+//            //Mismart: Throw in a sprayed area update function
+//            if (_vehicle->_areaSprayedStart()) {
+//                _vehicle->updateAreaSprayed(distance);
+//            }
+
+            // Vehicle has moved far enough from previous point for an update
+            double newAzimuth = _lastPoint.azimuthTo(coordinate);
+            if (qIsNaN(_lastAzimuth) || qAbs(newAzimuth - _lastAzimuth) > _azimuthTolerance) {
+                // The new position IS NOT colinear with the last segment. Append the new position to the list.
+                _lastAzimuth = _lastPoint.azimuthTo(coordinate);
+                _lastPoint = coordinate;
+                _points.append(QVariant::fromValue(coordinate));
+                emit pointAdded(coordinate);
+            } else {
+                // The new position IS colinear with the last segment. Don't add a new point, just update
+                // the last point to be the new position.
+                _lastPoint = coordinate;
+                _points[_points.count() - 1] = QVariant::fromValue(coordinate);
+                emit updateLastPoint(coordinate);
+            }
+        }
+    } else {
+        // Add the very first trajectory point to the list
+        _lastPoint = coordinate;
+        pointSprayTrigger(true, _lastPoint);
+        QTimer::singleShot(5000, this, &TrajectoryPoints::_timerSlot);
+
+        _points.append(QVariant::fromValue(coordinate));
+        emit pointAdded(coordinate);
+    }
+}
+
+void TrajectoryPoints::_timerSlot()
+{
+    _lastPoint = QGeoCoordinate();
+    pointSprayTrigger(false, _lastPoint);
+}
+
 void TrajectoryPoints::updatePausePoint(QGeoCoordinate coordinate)
 {
     _reachExitPoint = true;
     _vehicleCoordinateChanged(coordinate);
-
 }
 
 void TrajectoryPoints::updateResumePoint(QGeoCoordinate coordinate)

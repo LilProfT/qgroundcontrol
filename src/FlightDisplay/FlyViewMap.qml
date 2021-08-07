@@ -82,6 +82,11 @@ FlightMap {
         _saveZoomLevelSetting = true
     }
 
+    function addPolyline() {
+
+    }
+
+
 
     onPipModeChanged: _adjustMapZoomForPipMode()
 
@@ -145,6 +150,7 @@ FlightMap {
         animateLat.start()
         animateLong.start()
     }
+
 
     function _insetRect() {
         return Qt.rect(toolInsets.leftEdgeCenterInset,
@@ -247,71 +253,167 @@ FlightMap {
     }
 
 
-    // Add trajectory lines to the map
-    MapPolyline {
-        id:         trajectoryPolyline
-        line.width: 4.5
-        line.color: "limegreen"
+//    // Add trajectory lines to the map
+//    MapPolyline {
+//        id:         trajectoryPolyline
+//        line.width: 4.5
+//        line.color: "limegreen"
+//        z:          QGroundControl.zOrderTrajectoryLines
+//        visible:    !pipMode
+
+//        Connections {
+//            target:                 QGroundControl.multiVehicleManager
+//            onActiveVehicleChanged: trajectoryPolyline.path = _activeVehicle ? _activeVehicle.trajectoryPoints.list() : []
+//        }
+
+//        Connections {
+//            target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
+//            onPointAdded:           trajectoryPolyline.addCoordinate(coordinate)
+//            onUpdateLastPoint:      trajectoryPolyline.replaceCoordinate(trajectoryPolyline.pathLength() - 1, coordinate)
+//            onPointsCleared:        trajectoryPolyline.path = []
+//        }
+//    }
+
+
+//    MapPolyline {
+//        id:         trajectoryEnterPolyline
+//        line.width: 4.5
+//        line.color: "white"
+//        z:          QGroundControl.zOrderTrajectoryLines
+//        visible:    !pipMode
+
+//        Connections {
+//            target:                 QGroundControl.multiVehicleManager
+//            onActiveVehicleChanged: trajectoryEnterPolyline.path = _activeVehicle ? [] : []
+//        }
+
+//        Connections {
+//            target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
+//            onPointEnterAdded:           trajectoryEnterPolyline.addCoordinate(coordinate)
+//            onUpdateEnterLastPoint:      trajectoryEnterPolyline.replaceCoordinate(trajectoryEnterPolyline.pathLength() - 1, coordinate)
+//            onPointsCleared:        trajectoryEnterPolyline.path = []
+//        }
+//    }
+
+
+//    MapPolyline {
+//        id:         trajectoryExitPolyline
+//        line.width: 4.5
+//        line.color: "white"
+//        z:          QGroundControl.zOrderTrajectoryLines
+//        visible:    !pipMode
+
+//        Connections {
+//            target:                 QGroundControl.multiVehicleManager
+//            onActiveVehicleChanged: trajectoryExitPolyline.path = _activeVehicle ? [] : []
+//        }
+
+//        Connections {
+//            target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
+//            onPointExitAdded:           trajectoryExitPolyline.addCoordinate(coordinate)
+//            onUpdateExitLastPoint:      trajectoryExitPolyline.replaceCoordinate(trajectoryExitPolyline.pathLength() - 1, coordinate)
+//            onPointsCleared:        trajectoryExitPolyline.path = []
+//            onExitPointsCleared:        trajectoryExitPolyline.path = []
+
+//        }
+//    }
+
+//    var arrayLines=[]
+//    var lineComplete=false
+
+//    function createElements(point) {
+
+//        var componentMarker = missionLineViewComponent.createObject(map)
+
+//        if (componentMarker.status === Component.Ready) {
+//            var markerFirstCorner = componentMarker.createObject(themap);
+//            markerFirstCorner.coordinate = themap.toCoordinate(point)
+
+//            addMapItem(markerFirstCorner)
+//        }else{
+//            console.log("Marker not created")
+//        }
+
+//        var theLine
+
+//        if(changeMode===0){
+
+//            //Polyline mode
+//            if(arrayLines.length===0){
+//                createLine(point)
+//            }else{
+//                theLine = arrayLines[arrayLines.length-1]
+
+//                theLine.mainPolyline.addCoordinate(themap.toCoordinate(point))
+//            }
+
+//        }else{
+//            //Array of lines
+
+//            if(arrayLines.length===0 || !lineComplete){
+//                createLine(point)
+//                lineComplete=true
+//            }else{
+//                theLine = arrayLines[arrayLines.length-1]
+
+//                theLine.mainPolyline.addCoordinate(themap.toCoordinate(point))
+
+//                lineComplete=false
+//            }
+//        }
+//    }
+
+//    Component {
+//        id: missionLineViewComponent
+
+//        // Add trajectory lines to the map
+//        MapPolyline {
+//            id:         trajectoryTrialPolyline
+//            line.width: 4.5
+//            line.color: "limegreen"
+//            z:          QGroundControl.zOrderTrajectoryLines
+//            visible:    !pipMode
+
+//            Connections {
+//                target:                 QGroundControl.multiVehicleManager
+//                onActiveVehicleChanged: trajectoryTrialPolyline.path = _activeVehicle ? _activeVehicle.trajectoryPoints.list() : []
+//            }
+
+//            Connections {
+//                target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
+//                onPointAdded:           trajectoryTrialPolyline.addCoordinate(coordinate)
+//                onUpdateLastPoint:      trajectoryTrialPolyline.replaceCoordinate(trajectoryTrialPolyline.pathLength() - 1, coordinate)
+//                onPointsCleared:        trajectoryTrialPolyline.path = []
+//            }
+//        }
+
+//    }
+
+    TrajectionFlightPaths {
+        id:             trajectoryPolylines
         z:          QGroundControl.zOrderTrajectoryLines
         visible:    !pipMode
+        mapControl:     parent
 
         Connections {
             target:                 QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: trajectoryPolyline.path = _activeVehicle ? _activeVehicle.trajectoryPoints.list() : []
+            onActiveVehicleChanged: {
+                trajectoryPolylines.activeVehicleChanged(_activeVehicle ? _activeVehicle.trajectoryPoints.list() : [])
+
+               // trajectoryPolyline.path = _activeVehicle ? _activeVehicle.trajectoryPoints.list() : []
+               // trajectoryPolyline.line.color = "yellow"
+            }
         }
 
         Connections {
             target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
-            onPointAdded:           trajectoryPolyline.addCoordinate(coordinate)
-            onUpdateLastPoint:      trajectoryPolyline.replaceCoordinate(trajectoryPolyline.pathLength() - 1, coordinate)
-            onPointsCleared:        trajectoryPolyline.path = []
+            onPointAdded:           trajectoryPolylines.pointAdded(coordinate)
+            onUpdateLastPoint:      trajectoryPolylines.updateLastPoint( coordinate)
+            onPointSprayTrigger:      trajectoryPolylines.pointSprayTrigger(trigger, coordinate)
+
+            onPointsCleared:        trajectoryPolylines.pointsCleared()
         }
     }
-
-
-    MapPolyline {
-        id:         trajectoryEnterPolyline
-        line.width: 4.5
-        line.color: "white"
-        z:          QGroundControl.zOrderTrajectoryLines
-        visible:    !pipMode
-
-        Connections {
-            target:                 QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: trajectoryEnterPolyline.path = _activeVehicle ? [] : []
-        }
-
-        Connections {
-            target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
-            onPointEnterAdded:           trajectoryEnterPolyline.addCoordinate(coordinate)
-            onUpdateEnterLastPoint:      trajectoryEnterPolyline.replaceCoordinate(trajectoryEnterPolyline.pathLength() - 1, coordinate)
-            onPointsCleared:        trajectoryEnterPolyline.path = []
-        }
-    }
-
-
-    MapPolyline {
-        id:         trajectoryExitPolyline
-        line.width: 4.5
-        line.color: "white"
-        z:          QGroundControl.zOrderTrajectoryLines
-        visible:    !pipMode
-
-        Connections {
-            target:                 QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: trajectoryExitPolyline.path = _activeVehicle ? [] : []
-        }
-
-        Connections {
-            target:                 _activeVehicle ? _activeVehicle.trajectoryPoints : null
-            onPointExitAdded:           trajectoryExitPolyline.addCoordinate(coordinate)
-            onUpdateExitLastPoint:      trajectoryExitPolyline.replaceCoordinate(trajectoryExitPolyline.pathLength() - 1, coordinate)
-            onPointsCleared:        trajectoryExitPolyline.path = []
-            onExitPointsCleared:        trajectoryExitPolyline.path = []
-
-        }
-    }
-
 
 
     // Add the vehicles to the map
@@ -611,6 +713,8 @@ FlightMap {
         }
 
         onClicked: {
+            //_activeVehicle.trajectoryPoints.sprayTrigger()
+
             if (!globals.guidedControllerFlyView.guidedUIVisible && (globals.guidedControllerFlyView.showGotoLocation || globals.guidedControllerFlyView.showOrbit || globals.guidedControllerFlyView.showROI)) {
                 orbitMapCircle.hide()
                 gotoLocationItem.hide()

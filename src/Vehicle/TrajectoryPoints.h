@@ -23,6 +23,7 @@ public:
     TrajectoryPoints(Vehicle* vehicle, QObject* parent = nullptr);
 
     Q_INVOKABLE QVariantList list(void) const { return _points; }
+    Q_INVOKABLE void sprayTrigger();
 
     void start  (void);
     void stop   (void);
@@ -31,7 +32,7 @@ public:
     void updateExitPoint(QGeoCoordinate coordinate) { _exitPoint = coordinate; };
     void updateResumePoint(QGeoCoordinate coordinate) ;
     void updatePausePoint(QGeoCoordinate coordinate) ;
-
+    bool isSprayTrigger();
 public slots:
     void clear  (void);
 
@@ -44,16 +45,19 @@ signals:
     void pointExitAdded     (QGeoCoordinate coordinate);
     void updateExitLastPoint(QGeoCoordinate coordinate);
     void exitPointsCleared  (void);
-
+    void pointSprayTrigger     (bool trigger, QGeoCoordinate coordinate);
 private slots:
     void _vehicleCoordinateChanged(QGeoCoordinate coordinate);
 
 private:
+    void _timerSlot();
     Vehicle*        _vehicle;
     QVariantList    _points;
     QGeoCoordinate  _lastPoint;
     QGeoCoordinate  _enterPoint;
     QGeoCoordinate  _exitPoint;
+    bool            _isSprayTrigger = false;
+    bool            _isTrigger = false;
 
     double          _lastAzimuth;
     double          _reachEnterPoint;
