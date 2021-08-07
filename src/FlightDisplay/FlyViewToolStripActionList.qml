@@ -16,6 +16,7 @@ ToolStripActionList {
     id: _root
 
     signal displayPreFlightChecklist
+    signal displayResumePoint
 
     model: [
         /*ToolStripAction {
@@ -31,11 +32,12 @@ ToolStripActionList {
         GuidedActionActionList { },
         ResumeMission { },
         ToolStripAction {
-            text:        qsTr("Clear")
+            text:        qsTr("Estimate")
             iconSource:  "/qmlimages/Eraser.svg"
-            //visible:     _activeVehicle && _activeVehicle.trajectoryPoints
-            visible: false
-            onTriggered: _activeVehicle.trajectoryPoints.clear()
+//            //visible:     _activeVehicle && _activeVehicle.trajectoryPoints
+//            visible: false
+//            onTriggered: _activeVehicle.trajectoryPoints.clear()
+            onTriggered: displayResumePoint()
         }
     ]
 }

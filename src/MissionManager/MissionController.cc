@@ -83,7 +83,7 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&MissionController::_recalcFlightPathSegmentsSignal));
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&MissionController::recalcTerrainProfile));
 
-    connect(this, &MissionController::visualItemsChanged, this, &MissionController::_injectDrainedWaterPoint);
+    //connect(this, &MissionController::visualItemsChanged, this, &MissionController::_injectDrainedWaterPoint);
 }
 
 MissionController::~MissionController()
@@ -2847,7 +2847,7 @@ QVariantList  MissionController::boundingCube(void)
     return _masterController->loadSurveyPolygon().path();
 }
 
-void MissionController::_injectDrainedWaterPoint(void)
+void MissionController::injectDrainedWaterPoint(double remaining)
 {
     auto mc = qgcApp()->toolbox()->planMasterControllerPlanView();
     if (mc == nullptr) return;           // abort if unavailable
@@ -2864,7 +2864,7 @@ void MissionController::_injectDrainedWaterPoint(void)
     double spacing     = rawSpacing.toDouble();         // m
 
     double lenAppRate = areaAppRate * spacing;          // l/m
-    double volume = 20;                                 // l
+    double volume = remaining;                                 // l
     double len = volume / lenAppRate;
 
     double accu = 0;
@@ -2898,6 +2898,8 @@ void MissionController::_injectDrainedWaterPoint(void)
             }
             lastWaypoint = currentWaypoint;
         };
+        if (_drainedPoints->count() ==1)
+            break;
     }
     qDebug() << _drainedPoints->count();
     emit drainedPointsChanged();

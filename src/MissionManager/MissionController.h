@@ -175,6 +175,7 @@ public:
 
     /// Updates the altitudes of the items in the current mission to the new default altitude
     Q_INVOKABLE void applyDefaultMissionAltitude(void);
+    Q_INVOKABLE void                    injectDrainedWaterPoint            (double remaining);
 
     /// Sets a new current mission item (PlanView).
     ///     @param sequenceNumber - index for new item, -1 to clear current item
@@ -368,7 +369,7 @@ private:
     FlightPathSegment*      _createFlightPathSegmentWorker      (VisualItemPair& pair);
     void                    _allItemsRemoved                    (void);
     void                    _firstItemAdded                     (void);
-    void                    _injectDrainedWaterPoint            (void);
+//    void                    _injectDrainedWaterPoint            (double remaining);
 
     static double           _calcDistanceToHome                 (VisualMissionItem* currentItem, VisualMissionItem* homeItem);
     static double           _normalizeLat                       (double lat);

@@ -18,11 +18,14 @@ ToolStrip {
     title:  qsTr("Fly")
 
     signal displayPreFlightChecklist
+    signal displayResumePoint
 
     FlyViewToolStripActionList {
         id: flyViewToolStripActionList
 
         onDisplayPreFlightChecklist: _root.displayPreFlightChecklist()
+        onDisplayResumePoint: _root.displayResumePoint()
+
     }
 
     model: flyViewToolStripActionList.model

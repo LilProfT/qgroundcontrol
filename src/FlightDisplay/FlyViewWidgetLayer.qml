@@ -192,6 +192,7 @@ Item {
         visible:                !QGroundControl.videoManager.fullScreen
 
         onDisplayPreFlightChecklist: mainWindow.showPopupDialogFromComponent(preFlightChecklistPopup)
+        onDisplayResumePoint: mainWindow.showPopupDialogFromComponent(resumePointPopup)
 
         property real leftInset: x + width
     }
@@ -225,5 +226,49 @@ Item {
         id: preFlightChecklistPopup
         FlyViewPreFlightChecklistPopup {
         }
+    }
+
+    Component {
+        id: resumePointPopup
+
+        QGCPopupDialog {
+
+            title:      qsTr("Estimate")
+            buttons:    StandardButton.Cancel | StandardButton.Ok
+
+            function accept() {
+                //QGroundControl.multiVehicleManager.activeVehicle.sendParamMapRC(tuningFact.name, scale.text, centerValue.text, tuningID.currentIndex, minValue.text, maxValue.text);
+                _missionController.injectDrainedWaterPoint(remain.text)
+                hideDialog()
+            }
+
+            ColumnLayout {
+                spacing: ScreenTools.defaultDialogControlSpacing
+
+                QGCLabel {
+                    Layout.preferredWidth:  mainGrid.width
+                    Layout.fillWidth:       true
+                    wrapMode:               Text.WordWrap
+                    text:                   qsTr("Nhập số nước có trong bình")
+                }
+
+                GridLayout {
+                    id:             mainGrid
+                    columns:        2
+                    rowSpacing:     ScreenTools.defaultDialogControlSpacing
+                    columnSpacing:  ScreenTools.defaultDialogControlSpacing
+                    enabled:        controller.ready
+
+
+                    QGCLabel { text: qsTr("Số lít") }
+                    QGCTextField {
+                        id:     remain
+                        text:   ""
+                    }
+                }
+
+            }
+        }
+
     }
 }

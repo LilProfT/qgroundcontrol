@@ -134,21 +134,21 @@ Rectangle {
 
                             RowLayout {
                                 spacing: ScreenTools.defaultFontPixelWidth
-                                visible: false
+                                //visible: false
 
                                 FactCheckBox {
                                     text:       qsTr("Virtual Joystick")
-                                    //visible:    _virtualJoystick.visible
+                                    visible:    _virtualJoystick.visible
                                     //Virtual joystick is not really needed
-                                    visible:    false
+                                    //visible:    false
                                     fact:       _virtualJoystick
                                 }
 
                                 FactCheckBox {
                                     text:       qsTr("Auto-Center Throttle")
-                                    //visible:    _virtualJoystickAutoCenterThrottle.visible
+                                    visible:    _virtualJoystickAutoCenterThrottle.visible
                                     //Same as above
-                                    visible:    false
+                                    //visible:    false
                                     enabled:    _virtualJoystick.rawValue
                                     fact:       _virtualJoystickAutoCenterThrottle
                                 }
