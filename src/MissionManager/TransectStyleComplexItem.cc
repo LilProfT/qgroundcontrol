@@ -428,10 +428,11 @@ void TransectStyleComplexItem::_rebuildTransects (void)
     double ascendAltitude = _surveyComplexItem->ascendAltitude()->cookedValue().value<double>();
     double ascendLength = _surveyComplexItem->ascendLength()->cookedValue().value<double>();
 
+    bool isFirst = true;
     for (const QList<CoordInfo_t>& transect: _transects) {
         QGeoCoordinate first  = transect[0].coord;
         QGeoCoordinate second = transect[1].coord;
-        first.setAltitude(ascend ? requestedAltitude + ascendAltitude : requestedAltitude);
+        first.setAltitude((isFirst || ascend) ? requestedAltitude + ascendAltitude : requestedAltitude);
         second.setAltitude(ascend ? requestedAltitude + ascendAltitude : requestedAltitude);
         double distance = first.distanceTo(second);
         double azimuth = first.azimuthTo(second);
@@ -443,10 +444,12 @@ void TransectStyleComplexItem::_rebuildTransects (void)
         qDebug() << upBeforeSecond;
 
         _model.appendWaypoint(first);
-        if (ascend && (distance > ascendLength*2)) _model.appendWaypoint(downAfterFirst);
+        if ((isFirst || ascend) && (distance > ascendLength*2)) _model.appendWaypoint(downAfterFirst);
         _model.appendSpray();
         if (ascend && (distance > ascendLength*2)) _model.appendWaypoint(upBeforeSecond);
         _model.appendWaypoint(second);
+
+        isFirst = false;
     }
 
     _model.pregenIntegrate();

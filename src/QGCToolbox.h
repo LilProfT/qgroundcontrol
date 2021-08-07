@@ -44,6 +44,7 @@ class TaisyncManager;
 #if defined(QGC_GST_MICROHARD_ENABLED)
 class MicrohardManager;
 #endif
+class PlanMasterController;
 
 /// This is used to manage all of our top level services/tools
 class QGCToolbox : public QObject {
@@ -84,6 +85,9 @@ public:
     MicrohardManager*           microhardManager        () { return _microhardManager; }
 #endif
 
+    PlanMasterController*       planMasterControllerPlanView ();
+    PlanMasterController*       planMasterControllerFlyView  ();
+
 private:
     void setChildToolboxes(void);
     void _scanAndLoadPlugins(QGCApplication *app);
@@ -121,6 +125,7 @@ private:
 #if defined(QGC_GST_MICROHARD_ENABLED)
     MicrohardManager*           _microhardManager       = nullptr;
 #endif
+    QObject*                    _qmlGlobals             = nullptr;
     friend class QGCApplication;
 };
 

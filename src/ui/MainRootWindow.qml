@@ -77,6 +77,7 @@ ApplicationWindow {
 
     QtObject {
         id: globals
+        objectName: "globals"
 
         readonly property var       activeVehicle:                  QGroundControl.multiVehicleManager.activeVehicle
         readonly property real      defaultTextHeight:              ScreenTools.defaultFontPixelHeight

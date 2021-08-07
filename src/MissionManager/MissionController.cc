@@ -63,6 +63,7 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     , _managerVehicle       (masterController->managerVehicle())
     , _missionManager       (masterController->managerVehicle()->missionManager())
     , _visualItems          (new QmlObjectListModel(this))
+    , _drainedPoints        (new QmlObjectListModel(this))
     , _planViewSettings     (qgcApp()->toolbox()->settingsManager()->planViewSettings())
     , _appSettings          (qgcApp()->toolbox()->settingsManager()->appSettings())
 {
@@ -81,6 +82,8 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&MissionController::_recalcMissionFlightStatusSignal));
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&MissionController::_recalcFlightPathSegmentsSignal));
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&MissionController::recalcTerrainProfile));
+
+    connect(this, &MissionController::visualItemsChanged, this, &MissionController::_injectDrainedWaterPoint);
 }
 
 MissionController::~MissionController()
@@ -2842,4 +2845,60 @@ void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeM
 QVariantList  MissionController::boundingCube(void)
 {
     return _masterController->loadSurveyPolygon().path();
+}
+
+void MissionController::_injectDrainedWaterPoint(void)
+{
+    auto mc = qgcApp()->toolbox()->planMasterControllerPlanView();
+    if (mc == nullptr) return;           // abort if unavailable
+    if (_masterController == mc) return; // abort if is plan view
+    if (mc->applicationRate() == nullptr) return;
+    if (mc->spacing() == nullptr) return;
+
+    QVariant rawAppRate = mc->applicationRate()->rawValue();
+    QVariant rawSpacing = mc->spacing()->rawValue();
+
+    if (rawAppRate.isNull() || rawSpacing.isNull()) return;
+
+    double areaAppRate = rawAppRate.toDouble() / 10000; // l/m^2
+    double spacing     = rawSpacing.toDouble();         // m
+
+    double lenAppRate = areaAppRate * spacing;          // l/m
+    double volume = 20;                                 // l
+    double len = volume / lenAppRate;
+
+    double accu = 0;
+    bool spraying = false;
+    const QGeoCoordinate invalid(qQNaN(), qQNaN());
+    assert(invalid.isValid() == false);
+    QGeoCoordinate lastWaypoint = invalid;
+    _drainedPoints->clear();
+    for (int i = 1; i < _visualItems->count(); i++) {
+        SimpleMissionItem* item = qobject_cast<SimpleMissionItem*>(_visualItems->get(i));
+        int cmd = item->command();
+        if (cmd == 216) { // spray
+            int spray = item->missionItem().param1();
+            spraying = qFuzzyCompare(spray, 1.0);
+        };
+        if (cmd == 16)  { // waypoint
+            double lat = item->missionItem().param5();
+            double lon = item->missionItem().param6();
+            QGeoCoordinate currentWaypoint(lat, lon);
+            assert(currentWaypoint.isValid());
+            if (spraying && lastWaypoint.isValid()) {
+                double distance = lastWaypoint.distanceTo(currentWaypoint);
+                accu += distance;
+                double delta = accu - len;
+                if (delta > 0) {
+                    QGeoCoordinate point = currentWaypoint.atDistanceAndAzimuth(delta, currentWaypoint.azimuthTo(lastWaypoint));
+                    QGCQGeoCoordinate* qgcPoint = new QGCQGeoCoordinate(point, this);
+                    _drainedPoints->append(qgcPoint);
+                    accu -= len;
+                }
+            }
+            lastWaypoint = currentWaypoint;
+        };
+    }
+    qDebug() << _drainedPoints->count();
+    emit drainedPointsChanged();
 }
