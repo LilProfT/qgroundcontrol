@@ -229,7 +229,7 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
 
             if (!_missionManager->resumeFromFile()) {
                 //emit _managerVehicle->clearTrajectoryPoint();
-                _managerVehicle->updateAreaSprayedFromFile(0);
+                //_managerVehicle->updateAreaSprayedFromFile(0);
             }
         }
 
@@ -2220,6 +2220,7 @@ void MissionController::deleteResumeMission(void)
 
 void MissionController::clearTrajectoryPoints(void)
 {
+    _managerVehicle->updateAreaSprayedFromFile(0);
     emit _managerVehicle->clearTrajectoryPoint();
 }
 

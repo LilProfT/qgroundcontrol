@@ -45,7 +45,7 @@ FlightMap {
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:      planMasterController
-    property var    _missionController:      planMasterController.missionController
+    property var    _missionController:         planMasterController.missionController
 
     property var    _geoFenceController:        planMasterController.geoFenceController
     property var    _rallyPointController:      planMasterController.rallyPointController
