@@ -42,8 +42,8 @@ const char* TransectStyleComplexItem::_jsonTerrainFollowKey =               "Fol
 const char* TransectStyleComplexItem::_jsonTerrainFlightSpeed =             "TerrainFlightSpeed";
 const char* TransectStyleComplexItem::_jsonCameraShotsKey =                 "CameraShots";
 
-TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterController, bool flyView, QString settingsGroup, QObject* parent)
-    : ComplexMissionItem                (masterController, flyView, parent)
+TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterController, bool flyView, QString settingsGroup)
+    : ComplexMissionItem                (masterController, flyView)
     , _cameraCalc                       (masterController, settingsGroup)
     , _model                            (_sequenceNumber, followTerrain() || !_cameraCalc.distanceToSurfaceRelative() ? MAV_FRAME_GLOBAL : MAV_FRAME_GLOBAL_RELATIVE_ALT, this /* temporary missionItemParent */, this)
     , _metaDataMap                      (FactMetaData::createMapFromJsonFile(QStringLiteral(":/json/TransectStyle.SettingsGroup.json"), this))

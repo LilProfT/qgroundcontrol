@@ -478,7 +478,7 @@ Item {
         case actionResumeMission:
             missionController.resumeMission(missionController.resumeMissionIndex)
             missionController.autoSaveMission()
-            missionController.updateAreaSprayed()
+            //missionController.updateAreaSprayed()
             break
         case actionResumeMissionFromFile:
             missionController.resumeMissionFromFile()

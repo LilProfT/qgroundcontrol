@@ -61,10 +61,4 @@ android {
     lintOptions {
         abortOnError false
     }
-
-    buildTypes {
-            customDebugType {
-                debuggable true
-            }
-        }
 }

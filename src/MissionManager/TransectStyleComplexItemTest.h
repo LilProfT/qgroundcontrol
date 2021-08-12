@@ -30,20 +30,13 @@ protected:
     void cleanup(void) final;
 
 private slots:
-    //void _testDirty             (void);
-    //void _testRebuildTransects  (void);
-    //void _testDistanceSignalling(void);
-    //void _testAltMode           (void);
-    void _testAltitudes         (void);
-    //void _testFollowTerrain     (void);
-
-private:
     void _testDirty             (void);
     void _testRebuildTransects  (void);
     void _testDistanceSignalling(void);
-    void _testAltMode           (void);
-    //void _testAltitudes         (void);
+    void _testAltitudes         (void);
     void _testFollowTerrain     (void);
+
+private:
     MultiSignalSpyV2*       _multiSpy =             nullptr;
     TestTransectStyleItem*  _transectStyleItem =    nullptr;
 };
@@ -53,10 +46,9 @@ class TestTransectStyleItem : public TransectStyleComplexItem
     Q_OBJECT
 
 public:
-    TestTransectStyleItem(PlanMasterController* masterController, QObject* parent = nullptr);
+    TestTransectStyleItem(PlanMasterController* masterController);
 
-    // [mismart] placeholder
-    double getYaw(void) override final { return 0.0; };
+    void adjustSurveAreaPolygon(void);
 
     // Overrides from ComplexMissionItem
     QString patternName         (void) const final { return QString(); }

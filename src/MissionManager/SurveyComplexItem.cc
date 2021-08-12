@@ -83,8 +83,8 @@ const char* SurveyComplexItem::_jsonVelocityKey =                       "velocit
 const char* SurveyComplexItem::_jsonMissionEnterPointKey =                       "missionEnterPoint";
 const char* SurveyComplexItem::_jsonEdgeIndexKey =                       "edgeIndex";
 
-SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlOrShpFile, QObject* parent)
-    : TransectStyleComplexItem  (masterController, flyView, settingsGroup, parent)
+SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlOrShpFile)
+    : TransectStyleComplexItem  (masterController, flyView, settingsGroup)
     , _metaDataMap              (FactMetaData::createMapFromJsonFile(QStringLiteral(":/json/Survey.SettingsGroup.json"), this))
     , _gridAngleFact            (settingsGroup, _metaDataMap[gridAngleName])
     , _velocityFact             (settingsGroup, _metaDataMap[velocityName])

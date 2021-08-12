@@ -81,25 +81,25 @@ Item {
         }
 
         VehicleSummaryRow {
-            labelText:  qsTr("Batt low failsafe:")
+            labelText:  qsTr("Batt1 low failsafe:")
             valueText:  _batt1MonitorEnabled ? _batt1FSLowAct.enumStringValue : ""
             visible:    _batt1MonitorEnabled
         }
 
         VehicleSummaryRow {
-            labelText:  qsTr("Batt critical failsafe:")
+            labelText:  qsTr("Batt1 critical failsafe:")
             valueText:  _batt1FSCritActAvailable ? _batt1FSCritAct.enumStringValue : ""
             visible:    _batt1FSCritActAvailable
         }
 
         VehicleSummaryRow {
-            labelText:  qsTr("Tank low failsafe:")
+            labelText:  qsTr("Batt2 low failsafe:")
             valueText:  _batt2MonitorEnabled ? _batt2FSLowAct.enumStringValue : ""
             visible:    _batt2MonitorEnabled
         }
 
         VehicleSummaryRow {
-            labelText:  qsTr("Tank critical failsafe:")
+            labelText:  qsTr("Batt2 critical failsafe:")
             valueText:  _batt2MonitorEnabled ? _batt2FSCritAct.enumStringValue : ""
             visible:    _batt2MonitorEnabled
         }

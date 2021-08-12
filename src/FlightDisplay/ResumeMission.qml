@@ -12,6 +12,6 @@ ToolStripAction {
 
     onTriggered: {
         globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMissionFromFile, null, null)
-        hideDialog()
+        //hideDialog()
     }
 }

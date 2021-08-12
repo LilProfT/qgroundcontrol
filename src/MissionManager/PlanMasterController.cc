@@ -926,6 +926,7 @@ void PlanMasterController::clearResumeFile(void)
 void PlanMasterController::_uploadToVehicle()
 {
     if (!offline()) {
+        _missionController.clearTrajectoryPoints();
         setParam();
         sendToVehicle();
     }

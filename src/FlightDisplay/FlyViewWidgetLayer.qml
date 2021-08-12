@@ -120,6 +120,7 @@ Item {
     }
 
     PhotoVideoControl {
+        id:                     photoVideoControl
         anchors.margins:        _toolsMargin
         anchors.verticalCenter: parent.verticalCenter
         anchors.right:          parent.right

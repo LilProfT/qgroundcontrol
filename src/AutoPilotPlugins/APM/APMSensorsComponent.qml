@@ -667,7 +667,7 @@ SetupPage {
                     QGCButton {
                         width:      _buttonWidth
                         text:       qsTr("Gyro")
-                        visible:    globals.activeVehicle && (globals.activeVehicle.multiRotor | globals.activeVehicle.rover)
+                        visible:    globals.activeVehicle && (globals.activeVehicle.multiRotor | globals.activeVehicle.rover | globals.activeVehicle.sub)
                         onClicked:  mainWindow.showComponentDialog(calibrateGyroDialogComponent, qsTr("Calibrate Gyro"), mainWindow.showDialogDefaultWidth, StandardButton.Cancel | StandardButton.Ok)
                     }
 
@@ -682,15 +682,14 @@ SetupPage {
                     QGCButton {
                         width:      _buttonWidth
                         text:       qsTr("CompassMot")
-                        //visible:    globals.activeVehicle ? globals.activeVehicle.supportsMotorInterference : false
-                        visible:    false
+                        visible:    globals.activeVehicle ? globals.activeVehicle.supportsMotorInterference : false
+
                         onClicked:  mainWindow.showComponentDialog(compassMotDialogComponent, qsTr("CompassMot - Compass Motor Interference Calibration"), mainWindow.showDialogFullWidth, StandardButton.Cancel | StandardButton.Ok)
                     }
 
                     QGCButton {
                         width:      _buttonWidth
                         text:       qsTr("Sensor Settings")
-                        visible:    false
                         onClicked:  showOrientationsDialog(_calTypeSet)
                     }
                 } // Column - Cal Buttons

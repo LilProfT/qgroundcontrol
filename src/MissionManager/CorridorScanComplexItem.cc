@@ -30,8 +30,8 @@ const char* CorridorScanComplexItem::_jsonEntryPointKey =       "EntryPoint";
 
 const char* CorridorScanComplexItem::jsonComplexItemTypeValue = "CorridorScan";
 
-CorridorScanComplexItem::CorridorScanComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlFile, QObject* parent)
-    : TransectStyleComplexItem  (masterController, flyView, settingsGroup, parent)
+CorridorScanComplexItem::CorridorScanComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlFile)
+    : TransectStyleComplexItem  (masterController, flyView, settingsGroup)
     , _entryPoint               (0)
     , _metaDataMap              (FactMetaData::createMapFromJsonFile(QStringLiteral(":/json/CorridorScan.SettingsGroup.json"), this))
     , _corridorWidthFact        (settingsGroup, _metaDataMap[corridorWidthName])
@@ -237,20 +237,20 @@ void CorridorScanComplexItem::_rebuildTransectsPhase1(void)
 
             // Extend the transect ends for turnaround
             if (_hasTurnaround()) {
-                 QGeoCoordinate turnaroundCoord;
-                 double turnAroundDistance = _turnAroundDistanceFact.rawValue().toDouble();
+                QGeoCoordinate turnaroundCoord;
+                double turnAroundDistance = _turnAroundDistanceFact.rawValue().toDouble();
 
-                 double azimuth = transectCoords[0].azimuthTo(transectCoords[1]);
-                 turnaroundCoord = transectCoords[0].atDistanceAndAzimuth(-turnAroundDistance, azimuth);
-                 turnaroundCoord.setAltitude(qQNaN());
-                 TransectStyleComplexItem::CoordInfo_t coordInfo = { turnaroundCoord, CoordTypeTurnaround };
-                 transect.prepend(coordInfo);
+                double azimuth = transectCoords[0].azimuthTo(transectCoords[1]);
+                turnaroundCoord = transectCoords[0].atDistanceAndAzimuth(-turnAroundDistance, azimuth);
+                turnaroundCoord.setAltitude(qQNaN());
+                TransectStyleComplexItem::CoordInfo_t coordInfo = { turnaroundCoord, CoordTypeTurnaround };
+                transect.prepend(coordInfo);
 
-                 azimuth = transectCoords.last().azimuthTo(transectCoords[transectCoords.count() - 2]);
-                 turnaroundCoord = transectCoords.last().atDistanceAndAzimuth(-turnAroundDistance, azimuth);
-                 turnaroundCoord.setAltitude(qQNaN());
-                 coordInfo = { turnaroundCoord, CoordTypeTurnaround };
-                 transect.append(coordInfo);
+                azimuth = transectCoords.last().azimuthTo(transectCoords[transectCoords.count() - 2]);
+                turnaroundCoord = transectCoords.last().atDistanceAndAzimuth(-turnAroundDistance, azimuth);
+                turnaroundCoord.setAltitude(qQNaN());
+                coordInfo = { turnaroundCoord, CoordTypeTurnaround };
+                transect.append(coordInfo);
             }
 
 #if 0

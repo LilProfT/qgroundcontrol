@@ -82,8 +82,8 @@ void TrajectoryPoints::sprayTrigger()
 
 bool TrajectoryPoints::isSprayTrigger()
 {
-    //return _isTrigger;
-    return _vehicle->_areaSprayedStart();
+    return _isTrigger;
+    //return _vehicle->_areaSprayedStart();
 }
 
 void TrajectoryPoints::start(void)

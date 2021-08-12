@@ -373,23 +373,6 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
         value -> setCustomUnits("");
     }
 
-//    rowIndex    = 0;
-//    column      = factValueGrid.columns()->value<QmlObjectListModel*>(includeFWValues ? 3 : 2);
-
-//    value = column->value<InstrumentValueData*>(rowIndex++);
-//    value->setFact("Vehicle", "FlightTime");
-//    value->setIcon("timer.svg");
-//    value->setText(value->fact()->shortDescription());
-//    value->setShowUnits(false);
-
-//    value = column->value<InstrumentValueData*>(rowIndex++);
-//    value->setFact("Vehicle", "FlightDistance");
-//    value->setIcon("travel-walk.svg");
-//    value->setText(value->fact()->shortDescription());
-//    value->setShowUnits(true);
-//    value -> setCustomUnits("");
-
-    //Adding tank and flow rate instruments
     rowIndex    = 0;
     column      = factValueGrid.columns()->value<QmlObjectListModel*>(includeFWValues ? 3 : 2);
 

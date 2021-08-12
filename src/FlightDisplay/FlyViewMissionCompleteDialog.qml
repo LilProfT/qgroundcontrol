@@ -54,10 +54,10 @@ Item {
             _vehicleWasInMissionFlightMode = _vehicleInMissionFlightMode
 
             //Mismart: Reset areaSprayed fact
-            if (_readyToResetAreaSprayed) {
-                _activeVehicle.areaSprayed.value = 0
-                _readyToResetAreaSprayed = false
-            }
+//            if (_readyToResetAreaSprayed) {
+//                _activeVehicle.areaSprayed.value = 0
+//                _readyToResetAreaSprayed = false
+//            }
 
         } else {
             if (_showMissionCompleteDialog) {

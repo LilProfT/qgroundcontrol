@@ -72,14 +72,10 @@ const QVariantList& APMAutoPilotPlugin::vehicleComponents(void)
 {
     if (_components.count() == 0 && !_incorrectParameterVersion) {
         if (_vehicle->parameterManager()->parametersReady()) {
-
-//Hiding unneeded features on Mismart release builds
-#if defined(QT_DEBUG)
-
             _airframeComponent = new APMAirframeComponent(_vehicle, this);
             _airframeComponent->setupTriggerSignals();
             _components.append(QVariant::fromValue((VehicleComponent*)_airframeComponent));
-#endif
+
             if ( _vehicle->supportsRadio() ) {
                 _radioComponent = new APMRadioComponent(_vehicle, this);
                 _radioComponent->setupTriggerSignals();
@@ -97,12 +93,10 @@ const QVariantList& APMAutoPilotPlugin::vehicleComponents(void)
             _sensorsComponent->setupTriggerSignals();
             _components.append(QVariant::fromValue((VehicleComponent*)_sensorsComponent));
 
-//Hiding unneeded features on Mismart release builds
-#if defined(QT_DEBUG)
             _powerComponent = new APMPowerComponent(_vehicle, this);
             _powerComponent->setupTriggerSignals();
             _components.append(QVariant::fromValue((VehicleComponent*)_powerComponent));
-#endif
+
             if (!_vehicle->sub() || (_vehicle->sub() && _vehicle->versionCompare(3, 5, 3) >= 0)) {
                 _motorComponent = new APMMotorComponent(_vehicle, this);
                 _motorComponent->setupTriggerSignals();
@@ -130,16 +124,16 @@ const QVariantList& APMAutoPilotPlugin::vehicleComponents(void)
                 _components.append(QVariant::fromValue((VehicleComponent*)_heliComponent));
             }
 
-//Hiding unneeded features on Mismart release builds
-#if defined(QT_DEBUG)
             _tuningComponent = new APMTuningComponent(_vehicle, this);
             _tuningComponent->setupTriggerSignals();
             _components.append(QVariant::fromValue((VehicleComponent*)_tuningComponent));
 
-            _cameraComponent = new APMCameraComponent(_vehicle, this);
-            _cameraComponent->setupTriggerSignals();
-            _components.append(QVariant::fromValue((VehicleComponent*)_cameraComponent));
-#endif
+            if(_vehicle->parameterManager()->parameterExists(-1, "MNT_RC_IN_PAN")) {
+                _cameraComponent = new APMCameraComponent(_vehicle, this);
+                _cameraComponent->setupTriggerSignals();
+                _components.append(QVariant::fromValue((VehicleComponent*)_cameraComponent));
+            }
+
             if (_vehicle->sub()) {
                 _lightsComponent = new APMLightsComponent(_vehicle, this);
                 _lightsComponent->setupTriggerSignals();

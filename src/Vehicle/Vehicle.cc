@@ -11,6 +11,7 @@
 #include <QDateTime>
 #include <QLocale>
 #include <QQuaternion>
+
 #include <Eigen/Eigen>
 
 #include "Vehicle.h"
@@ -77,6 +78,7 @@ const char* Vehicle::_pitchRateFactName =           "pitchRate";
 const char* Vehicle::_yawRateFactName =             "yawRate";
 const char* Vehicle::_airSpeedFactName =            "airSpeed";
 const char* Vehicle::_airSpeedSetpointFactName =    "airSpeedSetpoint";
+const char* Vehicle::_xTrackErrorFactName =         "xTrackError";
 const char* Vehicle::_groundSpeedFactName =         "groundSpeed";
 const char* Vehicle::_climbRateFactName =           "climbRate";
 const char* Vehicle::_altitudeRelativeFactName =    "altitudeRelative";
@@ -147,6 +149,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _altitudeAMSLFact             (0, _altitudeAMSLFactName,      FactMetaData::valueTypeDouble)
     , _altitudeTuningFact           (0, _altitudeTuningFactName,    FactMetaData::valueTypeDouble)
     , _altitudeTuningSetpointFact   (0, _altitudeTuningSetpointFactName, FactMetaData::valueTypeDouble)
+    , _xTrackErrorFact              (0, _xTrackErrorFactName,       FactMetaData::valueTypeDouble)
     , _flightDistanceFact           (0, _flightDistanceFactName,    FactMetaData::valueTypeDouble)
 
     //Mismart: Custom areaSprayed and spacing fact
@@ -308,6 +311,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _altitudeAMSLFact                 (0, _altitudeAMSLFactName,      FactMetaData::valueTypeDouble)
     , _altitudeTuningFact               (0, _altitudeTuningFactName,    FactMetaData::valueTypeDouble)
     , _altitudeTuningSetpointFact       (0, _altitudeTuningSetpointFactName, FactMetaData::valueTypeDouble)
+    , _xTrackErrorFact                  (0, _xTrackErrorFactName,       FactMetaData::valueTypeDouble)
     , _flightDistanceFact               (0, _flightDistanceFactName,    FactMetaData::valueTypeDouble)
 
     //Mismart: Custom areaSprayed and spacing fact
@@ -433,6 +437,7 @@ void Vehicle::_commonInit()
     _addFact(&_altitudeAMSLFact,        _altitudeAMSLFactName);
     _addFact(&_altitudeTuningFact,       _altitudeTuningFactName);
     _addFact(&_altitudeTuningSetpointFact, _altitudeTuningSetpointFactName);
+    _addFact(&_xTrackErrorFact,         _xTrackErrorFactName);
     _addFact(&_flightDistanceFact,      _flightDistanceFactName);
 
     //Mismart: Custom areaSprayed and spacing fact group
@@ -477,7 +482,7 @@ void Vehicle::_commonInit()
     _flightDistanceFact.setRawValue(0);
 
     // Mismart: Custom areaSprayed init fact
-    _areaSprayedFact.setRawValue(0);
+    //_areaSprayedFact.setRawValue(0);
 
     _flightTimeFact.setRawValue(0);
     _flightTimeUpdater.setInterval(1000);
@@ -935,10 +940,6 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
         }
     }
 
-    //readAloud = true;
-    //messageText = "Battery 2 is low ";
-
-
     if (readAloud) {
         if (!skipSpoken) {
             qgcApp()->toolbox()->audioOutput()->say(messageText);
@@ -1025,6 +1026,7 @@ void Vehicle::_handleNavControllerOutput(mavlink_message_t& message)
     mavlink_msg_nav_controller_output_decode(&message, &navControllerOutput);
 
     _altitudeTuningSetpointFact.setRawValue(_altitudeTuningFact.rawValue().toDouble() - navControllerOutput.alt_error);
+    _xTrackErrorFact.setRawValue(_altitudeTuningFact.rawValue().toDouble() - navControllerOutput.xtrack_error);
     _airSpeedSetpointFact.setRawValue(_airSpeedFact.rawValue().toDouble() - navControllerOutput.aspd_error);
 }
 
@@ -1384,8 +1386,6 @@ void Vehicle::_handleSysStatus(mavlink_message_t& message)
     if (sysStatus.onboard_control_sensors_enabled & MAV_SYS_STATUS_PREARM_CHECK) {
         if (!_readyToFlyAvailable) {
             _readyToFlyAvailable = true;
-            //if (!skipSpoken) {
-            //}
             emit readyToFlyAvailableChanged(true);
         }
 
@@ -1518,10 +1518,9 @@ void Vehicle::_updateArmed(bool armed)
         emit armedChanged(_armed);
         // We are transitioning to the armed state, begin tracking trajectory points for the map
         if (_armed) {
-//            _trajectoryPoints->updateEnterPoint(missionManager()-)
             _trajectoryPoints->start();
             _flightTimerStart();
-//            _clearCameraTriggerPoints();
+            _clearCameraTriggerPoints();
             // Reset battery warning
             _lowestBatteryChargeStateAnnouncedMap.clear();
         } else {
@@ -3947,12 +3946,19 @@ void Vehicle::updateFlightDistance(double distance)
 // A better method should be considered
 void Vehicle::updateAreaSprayed(double distance)
 {
+    qCWarning(VehicleLog) << "updateAreaSprayed- _areaSprayedFact before: " << _areaSprayedFact.rawValue().toDouble() << ", distance: " << distance;
+
     _areaSprayedFact.setRawValue(_areaSprayedFact.rawValue().toDouble() + distance * _spacingFact.rawValue().toDouble());
+
+    qCWarning(VehicleLog) << "updateAreaSprayed- _areaSprayedFact after: " << _areaSprayedFact.rawValue().toDouble();
+
 }
 
 void Vehicle::updateAreaSprayedFromFile(double area)
 {
     _areaSprayedFact.setRawValue(area);
+
+    qCWarning(VehicleLog) << "updateAreaSprayedFromFile- _areaSprayedFact after: " << _areaSprayedFact.rawValue().toDouble();
 }
 
 void Vehicle::sendParamMapRC(const QString& paramName, double scale, double centerValue, int tuningID, double minValue, double maxValue)
@@ -3982,8 +3988,8 @@ void Vehicle::sendParamMapRC(const QString& paramName, double scale, double cent
                                        param_id_cstr,
                                        -1,                                                  // parameter name specified as string in previous argument
                                        static_cast<uint8_t>(tuningID),
-                                       static_cast<float>(scale),
                                        static_cast<float>(centerValue),
+                                       static_cast<float>(scale),
                                        static_cast<float>(minValue),
                                        static_cast<float>(maxValue));
     sendMessageOnLinkThreadSafe(sharedLink.get(), message);

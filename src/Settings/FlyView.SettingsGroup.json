@@ -51,6 +51,12 @@
     "name":         "showSimpleCameraControl",
     "shortDesc":    "Show controls for camera triggering using MAV_CMD_DO_DIGICAM_CONTROL.",
     "type":         "bool",
+    "default":      true
+},
+{
+    "name":         "showObstacleDistanceOverlay",
+    "shortDesc":    "Show obstacle distance overlay on map and video.",
+    "type":         "bool",
     "default":      false
 },
 {

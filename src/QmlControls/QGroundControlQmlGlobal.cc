@@ -29,6 +29,7 @@ QGroundControlQmlGlobal::QGroundControlQmlGlobal(QGCApplication* app, QGCToolbox
 {
     // We clear the parent on this object since we run into shutdown problems caused by hybrid qml app. Instead we let it leak on shutdown.
     setParent(nullptr);
+
     // Load last coordinates and zoom from config file
     QSettings settings;
     settings.beginGroup(_flightMapPositionSettingsGroup);
