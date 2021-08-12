@@ -196,16 +196,19 @@ void MissionManager::generateResumeMission(int resumeIndex)
             newItem->setIsCurrentItem(false);
             resumeMission.append(newItem);
         }
-        if (i == resumeIndex) {
-            if (changeYawItem) {
-                MissionItem* newChangeYawItem = new MissionItem(*changeYawItem, this);
-                newChangeYawItem->setIsCurrentItem(false);
-                resumeMission.append(newChangeYawItem);
-            }
+        if ((i == resumeIndex) && changeYawItem) {
+            MissionItem* newChangeYawItem = new MissionItem(*changeYawItem, this);
+            newChangeYawItem->setIsCurrentItem(false);
+            resumeMission.append(newChangeYawItem);
 
-            MissionItem* newItem = new MissionItem(*oldItem, this);
-            newItem->setIsCurrentItem(false);
-            resumeMission.append(newItem);
+            MissionItem* newHoldingWaypointItem = new MissionItem(*oldItem, this);
+            newHoldingWaypointItem->setIsCurrentItem(false);
+            newHoldingWaypointItem->setParam1(2.0);
+            resumeMission.append(newHoldingWaypointItem);
+
+            newChangeYawItem = new MissionItem(*changeYawItem, this);
+            newChangeYawItem->setIsCurrentItem(false);
+            resumeMission.append(newChangeYawItem);
         }
     }
     prefixCommandCount = qMax(0, qMin(prefixCommandCount, resumeMission.count()));  // Anal prevention against crashes

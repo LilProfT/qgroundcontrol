@@ -921,8 +921,6 @@ void PlanMasterController::clearResumeFile(void)
     _resumePlanFile.clear();
 }
 
-
-
 void PlanMasterController::_uploadToVehicle()
 {
     if (!offline()) {
