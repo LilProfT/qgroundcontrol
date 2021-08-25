@@ -492,7 +492,8 @@ Item {
             coordinate:             mapPolygon.vertexCoordinate(menu._editingVertexIndex)
             onCoordinateChanged: {
                 mapPolygon.adjustVertex(menu._editingVertexIndex, coordinate)
-                mapPolygon.verifyClockwiseWinding()
+                // mapPolygon.verifyClockwiseWinding()
+                // KNOWN ISSUE: verifyClockwiseWinding here will make coordinate be assigned to wrong vertex
             }
         }
     }

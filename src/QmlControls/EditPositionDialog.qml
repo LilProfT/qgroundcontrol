@@ -150,6 +150,48 @@ QGCViewDialog {
                         reject()
                     }
                 }
+                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
+
+                QGCButton {
+                    text:              qsTr("Up")
+                    Layout.alignment:  Qt.AlignRight
+                    Layout.columnSpan: 2
+                    onClicked: {
+                        controller.moveVertexUp()
+                    }
+                }
+                QGCButton {
+                    text:              qsTr("Left")
+                    Layout.alignment:  Qt.AlignRight
+                    Layout.columnSpan: 2
+                    onClicked: {
+                        controller.moveVertexLeft()
+                    }
+                }
+                QGCButton {
+                    text:              qsTr("Right")
+                    Layout.alignment:  Qt.AlignRight
+                    Layout.columnSpan: 2
+                    onClicked: {
+                        controller.moveVertexRight()
+                    }
+                }
+                QGCButton {
+                    text:              qsTr("Down")
+                    Layout.alignment:  Qt.AlignRight
+                    Layout.columnSpan: 2
+                    onClicked: {
+                        controller.moveVertexDown()
+                    }
+                }
+                QGCButton {
+                    text:              qsTr("Undo")
+                    Layout.alignment:  Qt.AlignRight
+                    Layout.columnSpan: 2
+                    onClicked: {
+                        controller.undoMoveVertex()
+                    }
+                }
             }
         } // Column
     } // QGCFlickable

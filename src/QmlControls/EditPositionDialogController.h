@@ -47,6 +47,12 @@ public:
     Q_INVOKABLE void setFromMGRS(void);
     Q_INVOKABLE void setFromVehicle(void);
 
+    Q_INVOKABLE void moveVertexUp    (bool record = true);
+    Q_INVOKABLE void moveVertexLeft  (bool record = true);
+    Q_INVOKABLE void moveVertexRight (bool record = true);
+    Q_INVOKABLE void moveVertexDown  (bool record = true);
+    Q_INVOKABLE void undoMoveVertex  (void);
+
 signals:
     void coordinateChanged(QGeoCoordinate coordinate);
 
@@ -54,6 +60,12 @@ private:
     static QMap<QString, FactMetaData*> _metaDataMap;
 
     QGeoCoordinate _coordinate;
+
+    enum Move {
+        LEFT, RIGHT, UP, DOWN
+    };
+
+    QList<Move> _stackUndo;
 
     Fact _latitudeFact;
     Fact _longitudeFact;

@@ -103,3 +103,42 @@ void EditPositionDialogController::setFromVehicle(void)
     emit coordinateChanged(_coordinate);
 }
 
+void EditPositionDialogController::moveVertexUp(bool record)
+{
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, 0);
+    emit coordinateChanged(_coordinate);
+    if (record) _stackUndo.append(Move::UP);
+}
+
+void EditPositionDialogController::moveVertexLeft(bool record)
+{
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, -90);
+    emit coordinateChanged(_coordinate);
+    if (record) _stackUndo.append(Move::LEFT);
+}
+
+void EditPositionDialogController::moveVertexRight(bool record)
+{
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, 90);
+    emit coordinateChanged(_coordinate);
+    if (record) _stackUndo.append(Move::RIGHT);
+}
+
+void EditPositionDialogController::moveVertexDown(bool record)
+{
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, 180);
+    emit coordinateChanged(_coordinate);
+    if (record) _stackUndo.append(Move::DOWN);
+}
+
+void EditPositionDialogController::undoMoveVertex(void)
+{
+    if (!_stackUndo.isEmpty())
+    {
+        int moveSignal = _stackUndo.takeLast();
+        if      (moveSignal == Move::UP)    moveVertexDown(false);
+        else if (moveSignal == Move::DOWN)  moveVertexUp(false);
+        else if (moveSignal == Move::LEFT)  moveVertexRight(false);
+        else if (moveSignal == Move::RIGHT) moveVertexLeft(false);
+    }
+}
