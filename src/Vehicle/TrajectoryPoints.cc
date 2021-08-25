@@ -73,17 +73,25 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
 
 void TrajectoryPoints::sprayTrigger()
 {
+#ifdef __android__
+    qCWarning(VehicleLog()) << "android _isTrigger: " << _isTrigger;
+#else
     if (_isTrigger)
         _isTrigger = false;
     else
         _isTrigger = true;
     qCWarning(VehicleLog()) << "_isTrigger: " << _isTrigger;
+#endif
 }
 
 bool TrajectoryPoints::isSprayTrigger()
 {
+#ifdef __android__
+    return _vehicle->_areaSprayedStart();
+#else
     return _isTrigger;
-    //return _vehicle->_areaSprayedStart();
+#endif
+
 }
 
 void TrajectoryPoints::start(void)
