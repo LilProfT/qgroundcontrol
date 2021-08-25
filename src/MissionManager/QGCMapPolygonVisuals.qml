@@ -312,7 +312,12 @@ Item {
 
             sourceItem: SplitIndicator {
                 z:          _zorderSplitHandle
-                onClicked:  if(_root.interactive) mapPolygon.splitPolygonSegment(mapQuickItem.vertexIndex)
+                onClicked:  {
+                    if(_root.interactive) {
+                        menu._editingVertexIndex = mapQuickItem.vertexIndex
+                        mainWindow.showComponentDialog(editEdgeOffsetDialog, qsTr("Edit Edge Offset"), mainWindow.showDialogDefaultWidth, StandardButton.Close)
+                    }
+                }
             }
         }
     }
@@ -490,6 +495,60 @@ Item {
                 mapPolygon.verifyClockwiseWinding()
             }
         }
+    }
+
+    Component {
+        id: editEdgeOffsetDialog
+
+        QGCViewDialog {
+            property real   _margin:        ScreenTools.defaultFontPixelWidth / 2
+            property real   _fieldWidth:    ScreenTools.defaultFontPixelWidth * 10.5
+
+            Component.onCompleted: {
+                console.log(menu._editingVertexIndex)
+                offsetField.text = (mapPolygon.offsets[menu._editingVertexIndex.toString()] || 0).toString()
+            }
+
+            QGCFlickable {
+                anchors.fill:   parent
+                contentHeight:  column.height
+
+                Column {
+                    id:             column
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    spacing:        ScreenTools.defaultFontPixelHeight
+
+                    GridLayout {
+                        anchors.left:   parent.left
+                        anchors.right:  parent.right
+                        columnSpacing:  _margin
+                        rowSpacing:     _margin
+                        columns:        2
+
+                        QGCLabel {
+                            text: qsTr("Offset")
+                        }
+                        QGCTextField {
+                            id:                 offsetField
+                            unitsLabel:         "m"
+                            showUnits:          true
+                            Layout.fillWidth:   true
+                        }
+
+                        QGCButton {
+                            text:               qsTr("Set Value")
+                            Layout.alignment:   Qt.AlignRight
+                            Layout.columnSpan:  2
+                            onClicked: {
+                                mapPolygon.setOffset(menu._editingVertexIndex, parseFloat(offsetField.text))
+                                reject()
+                            }
+                        }
+                    }
+                } // Column
+            } // QGCFlickable
+        } // QGCViewDialog
     }
 
     Component {

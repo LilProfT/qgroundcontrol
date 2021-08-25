@@ -63,6 +63,9 @@ TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterC
     connect(this, &TransectStyleComplexItem::_updateFlightPathSegmentsSignal, this, &TransectStyleComplexItem::_updateFlightPathSegmentsDontCallDirectly,   Qt::QueuedConnection);
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&TransectStyleComplexItem::_updateFlightPathSegmentsSignal));
 
+    connect(&_surveyAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::_rebuildOffsetPolygon);
+    connect(&_surveyAreaPolygon,                        &QGCMapPolygon::offsetsChanged, this, &TransectStyleComplexItem::_rebuildOffsetPolygon);
+
     connect(&_turnAroundDistanceFact,                   &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_hoverAndCaptureFact,                      &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_refly90DegreesFact,                       &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
@@ -70,7 +73,7 @@ TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterC
     connect(&_terrainAdjustMaxClimbRateFact,            &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_terrainAdjustMaxDescentRateFact,          &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_terrainAdjustToleranceFact,               &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
-    connect(&_surveyAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::_rebuildTransects);
+    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_cameraTriggerInTurnAroundFact,            &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(_cameraCalc.adjustedFootprintSide(),        &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(_cameraCalc.adjustedFootprintFrontal(),     &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
@@ -80,11 +83,13 @@ TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterC
     connect(&_hoverAndCaptureFact,                      &Fact::valueChanged,            this, &TransectStyleComplexItem::complexDistanceChanged);
     connect(&_refly90DegreesFact,                       &Fact::valueChanged,            this, &TransectStyleComplexItem::complexDistanceChanged);
     connect(&_surveyAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::complexDistanceChanged);
+    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::complexDistanceChanged);
 
     connect(&_turnAroundDistanceFact,                   &Fact::valueChanged,            this, &TransectStyleComplexItem::greatestDistanceToChanged);
     connect(&_hoverAndCaptureFact,                      &Fact::valueChanged,            this, &TransectStyleComplexItem::greatestDistanceToChanged);
     connect(&_refly90DegreesFact,                       &Fact::valueChanged,            this, &TransectStyleComplexItem::greatestDistanceToChanged);
     connect(&_surveyAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::greatestDistanceToChanged);
+    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::greatestDistanceToChanged);
 
     connect(&_turnAroundDistanceFact,                   &Fact::valueChanged,            this, &TransectStyleComplexItem::_setDirty);
     connect(&_cameraTriggerInTurnAroundFact,            &Fact::valueChanged,            this, &TransectStyleComplexItem::_setDirty);
@@ -95,11 +100,13 @@ TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterC
     connect(&_terrainAdjustMaxDescentRateFact,          &Fact::valueChanged,            this, &TransectStyleComplexItem::_setDirty);
     connect(&_terrainAdjustToleranceFact,               &Fact::valueChanged,            this, &TransectStyleComplexItem::_setDirty);
     connect(&_surveyAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::_setDirty);
+    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::_setDirty);
 
     connect(&_surveyAreaPolygon,                        &QGCMapPolygon::dirtyChanged,   this, &TransectStyleComplexItem::_setIfDirty);
+    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::dirtyChanged,   this, &TransectStyleComplexItem::_setIfDirty);
     connect(&_cameraCalc,                               &CameraCalc::dirtyChanged,      this, &TransectStyleComplexItem::_setIfDirty);
 
-    connect(&_surveyAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::coveredAreaChanged);
+    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::coveredAreaChanged);
 
     connect(_cameraCalc.distanceToSurface(),            &Fact::rawValueChanged,                         this, &TransectStyleComplexItem::_amslEntryAltChanged);
     connect(_cameraCalc.distanceToSurface(),            &Fact::rawValueChanged,                         this, &TransectStyleComplexItem::_amslExitAltChanged);
@@ -142,6 +149,7 @@ void TransectStyleComplexItem::setDirty(bool dirty)
 {
     if (!dirty) {
         _surveyAreaPolygon.setDirty(false);
+        _offsetAreaPolygon.setDirty(false);
         _cameraCalc.setDirty(false);
     }
     if (_dirty != dirty) {
@@ -373,7 +381,7 @@ void TransectStyleComplexItem::_updateCoordinateAltitudes(void)
 
 double TransectStyleComplexItem::coveredArea(void) const
 {
-    return _surveyAreaPolygon.area();
+    return _offsetAreaPolygon.area();
 }
 
 bool TransectStyleComplexItem::_hasTurnaround(void) const
@@ -1282,4 +1290,56 @@ void TransectStyleComplexItem::_listenFences (void)
         connect(fence, &QGCMapPolygon::pathChanged, this, &TransectStyleComplexItem::_rebuildTransects, Qt::UniqueConnection);
         connect(fence, &QGCFencePolygon::inclusionChanged, this, &TransectStyleComplexItem::_rebuildTransects, Qt::UniqueConnection);
     }
+}
+
+void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
+{
+    _offsetAreaPolygon.blockSignals(true);
+    _offsetAreaPolygon.clear();
+
+    if (_surveyAreaPolygon.count() < 3) return;
+
+    qDebug() << _surveyAreaPolygon.offsets();
+
+    QGeoCoordinate tangentOrigin = _surveyAreaPolygon.path()[0].value<QGeoCoordinate>();
+    QPolygonF basePolygon = _surveyAreaPolygon.toPolygonF(tangentOrigin);
+
+    double y, x, down;
+    convertGeoToNed(_surveyAreaPolygon.center(), tangentOrigin, &y, &x, &down);
+    QPointF center(x, -y);
+
+    QList<QLineF> offsetLines;
+    for (int i=0; i<basePolygon.count(); i++) {
+        int     lastIndex = i == basePolygon.count() - 1 ? 0 : i + 1;
+        QLineF  originalEdge(basePolygon[i], basePolygon[lastIndex]);
+        float   offset = _surveyAreaPolygon.offsets().value(QString::number(i), 0.001f).value<float>();
+
+        QPointF transVec = center - originalEdge.p1();
+        QLineF  workerLine = originalEdge;
+        workerLine.translate(transVec);                       // translate the edge to center
+        workerLine.setAngle(workerLine.angle() + 90.0);       // rotate 90 degress to create a crossline
+        QPointF intersectPoint;
+        workerLine.intersect(originalEdge, &intersectPoint);
+        workerLine.setPoints(intersectPoint, center);         // crossline with intersect point
+        workerLine.setLength(offset);                         // offset the intersect point to create base point
+        workerLine.setPoints(workerLine.p2(), intersectPoint);// swap terminals
+        workerLine.setAngle(originalEdge.angle());            // rotate the crossline to create offset line on the base point
+
+        offsetLines.append(workerLine);
+    }
+
+    // Intersect the offset edges to generate new vertices
+    QPointF         newVertex;
+    for (int i=0; i<offsetLines.count(); i++) {
+        int prevIndex = i == 0 ? offsetLines.count() - 1 : i - 1;
+        auto intersect = offsetLines[prevIndex].intersect(offsetLines[i], &newVertex);
+        assert(intersect != QLineF::NoIntersection);
+
+        QGeoCoordinate coord;
+        convertNedToGeo(-newVertex.y(), newVertex.x(), 0, tangentOrigin, &coord);
+        _offsetAreaPolygon.appendVertex(coord);
+    };
+
+    _offsetAreaPolygon.blockSignals(false);
+    emit _offsetAreaPolygon.pathChanged();
 }

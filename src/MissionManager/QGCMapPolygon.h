@@ -32,6 +32,7 @@ public:
 
     Q_PROPERTY(int                  count           READ count                                  NOTIFY countChanged)
     Q_PROPERTY(QVariantList         path            READ path                                   NOTIFY pathChanged)
+    Q_PROPERTY(QVariantMap          offsets         READ offsets                                NOTIFY offsetsChanged)
     Q_PROPERTY(double               area            READ area                                   NOTIFY pathChanged)
     Q_PROPERTY(QmlObjectListModel*  pathModel       READ qmlPathModel                           CONSTANT)
     Q_PROPERTY(bool                 dirty           READ dirty          WRITE setDirty          NOTIFY dirtyChanged)
@@ -48,6 +49,7 @@ public:
     Q_INVOKABLE void appendVertex(const QGeoCoordinate& coordinate);
     Q_INVOKABLE void removeVertex(int vertexIndex);
     Q_INVOKABLE void appendVertices(const QVariantList& varCoords);
+    Q_INVOKABLE void setOffset(int i, float offset) { _offsets[QString::number(i)] = QVariant::fromValue(offset); emit offsetsChanged(); };
 
     void appendVertices(const QList<QGeoCoordinate>& coordinates);
 
@@ -138,6 +140,7 @@ public:
     int             selectedVertex()   const { return _selectedVertexIndex; }
 
     QVariantList        path        (void) const { return _polygonPath; }
+    QVariantMap         offsets     (void) const { return _offsets; }
     QmlObjectListModel* qmlPathModel(void) { return &_polygonModel; }
     QmlObjectListModel& pathModel   (void) { return _polygonModel; }
 
@@ -157,6 +160,7 @@ public:
 signals:
     void countChanged       (int count);
     void pathChanged        (void);
+    void offsetsChanged     (void);
     void dirtyChanged       (bool dirty);
     void cleared            (void);
     void centerChanged      (QGeoCoordinate center);
@@ -184,6 +188,7 @@ private:
 
     QVariantList        _polygonPath;
     QmlObjectListModel  _polygonModel;
+    QVariantMap         _offsets;
     bool                _dirty =                false;
     QGeoCoordinate      _center;
     bool                _centerDrag =           false;
