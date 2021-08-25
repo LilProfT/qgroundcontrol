@@ -1340,7 +1340,7 @@ Item {
                     text:               qsTr("Download Resume")
                     Layout.fillWidth:   true
                     //enabled:            !_planMasterController.offline && !_planMasterController.syncInProgress && _planMasterController.containsItems
-                    visible:            true
+                    visible:            false
                     onClicked: {
                         dropPanel.hide()
                         _planMasterController.loadFromRecentFile()

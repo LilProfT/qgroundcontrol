@@ -371,6 +371,7 @@ public class QGCActivity extends QtActivity
                 deviceInfo = deviceInfo + "Cdc Acm:";
             } else if (driver instanceof Cp2102SerialDriver) {
                 deviceInfo = deviceInfo + "Cp2102:";
+
             } else if (driver instanceof ProlificSerialDriver) {
                 deviceInfo = deviceInfo + "Prolific:";
             } else {

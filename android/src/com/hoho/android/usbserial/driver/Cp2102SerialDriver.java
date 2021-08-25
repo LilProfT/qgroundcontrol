@@ -281,10 +281,10 @@ public class Cp2102SerialDriver extends CommonUsbSerialDriver {
     
     public static Map<Integer, int[]> getSupportedDevices() {
         final Map<Integer, int[]> supportedDevices = new LinkedHashMap<Integer, int[]>();
-        supportedDevices.put(Integer.valueOf(UsbId.VENDOR_SILAB),
-                new int[] {
-                        UsbId.SILAB_CP2102
-                });
+//        supportedDevices.put(Integer.valueOf(UsbId.VENDOR_SILAB),
+//                new int[] {
+//                        UsbId.SILAB_CP2102
+//                });
         return supportedDevices;
     }
 
