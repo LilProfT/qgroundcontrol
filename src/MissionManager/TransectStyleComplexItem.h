@@ -31,6 +31,7 @@ public:
     TransectStyleComplexItem(PlanMasterController* masterController, bool flyView, QString settignsGroup);
 
     Q_PROPERTY(QGCMapPolygon*   surveyAreaPolygon           READ surveyAreaPolygon                                  CONSTANT)
+    Q_PROPERTY(QGCMapPolygon*   offsetAreaPolygon           READ offsetAreaPolygon                                  CONSTANT)
     Q_PROPERTY(CameraCalc*      cameraCalc                  READ cameraCalc                                         CONSTANT)
     Q_PROPERTY(Fact*            turnAroundDistance          READ turnAroundDistance                                 CONSTANT)
     Q_PROPERTY(Fact*            cameraTriggerInTurnAround   READ cameraTriggerInTurnAround                          CONSTANT)
@@ -49,6 +50,7 @@ public:
     Q_PROPERTY(Fact*            terrainAdjustMaxClimbRate   READ terrainAdjustMaxClimbRate                          CONSTANT)
 
     QGCMapPolygon*  surveyAreaPolygon   (void) { return &_surveyAreaPolygon; }
+    QGCMapPolygon*  offsetAreaPolygon   (void) { return &_offsetAreaPolygon; }
     CameraCalc*     cameraCalc          (void) { return &_cameraCalc; }
     QVariantList    visualTransectPoints(void) { return _visualTransectPoints; }
 
@@ -139,6 +141,7 @@ protected slots:
     void _updateCoordinateAltitudes         (void);
     void _polyPathTerrainData               (bool success, const QList<TerrainPathQuery::PathHeightInfo_t>& rgPathHeightInfo);
     void _rebuildTransects                  (void);
+    void _rebuildOffsetPolygon              (void);
     void _listenFences      (void);
 
 protected:
@@ -165,6 +168,7 @@ protected:
     QGeoCoordinate      _coordinate;
     QGeoCoordinate      _exitCoordinate;
     QGCMapPolygon       _surveyAreaPolygon;
+    QGCMapPolygon       _offsetAreaPolygon;
 
     enum CoordType {
         CoordTypeInterior,              ///< Interior waypoint for flight path only

@@ -808,18 +808,18 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
         _rgFlightPathCoordInfo.clear();
     }
 
-    if (_surveyAreaPolygon.count() < 3) {
+    if (_offsetAreaPolygon.count() < 3) {
         return;
     }
 
     // Convert polygon to NED
 
     QList<QPointF> polygonPoints;
-    QGeoCoordinate tangentOrigin = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(0)->coordinate();
-    qCDebug(SurveyComplexItemLog) << "_rebuildTransectsPhase1 Convert polygon to NED - _surveyAreaPolygon.count():tangentOrigin" << _surveyAreaPolygon.count() << tangentOrigin;
-    for (int i=0; i<_surveyAreaPolygon.count(); i++) {
+    QGeoCoordinate tangentOrigin = _offsetAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(0)->coordinate();
+    qCDebug(SurveyComplexItemLog) << "_rebuildTransectsPhase1 Convert polygon to NED - _offsetAreaPolygon.count():tangentOrigin" << _surveyAreaPolygon.count() << tangentOrigin;
+    for (int i=0; i<_offsetAreaPolygon.count(); i++) {
         double y, x, down;
-        QGeoCoordinate vertex = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i)->coordinate();
+        QGeoCoordinate vertex = _offsetAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(i)->coordinate();
         if (i == 0) {
             // This avoids a nan calculation that comes out of convertGeoToNed
             x = y = 0;
@@ -926,7 +926,7 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
     //      Create a single transect which goes through the center of the polygon
     //      Intersect it with the polygon
     if (intersectLines.count() < 2) {
-        _surveyAreaPolygon.center();
+        _offsetAreaPolygon.center();
         QLineF firstLine = lineList.first();
         QPointF lineCenter = firstLine.pointAt(0.5);
         QPointF centerOffset = boundingCenter - lineCenter;
