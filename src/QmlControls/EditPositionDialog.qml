@@ -48,22 +48,27 @@ QGCViewDialog {
                 columns:        2
 
                 QGCLabel {
+                    visible: false
                     text: qsTr("Latitude")
                 }
                 FactTextField {
+                    visible: false
                     fact:               controller.latitude
                     Layout.fillWidth:   true
                 }
 
                 QGCLabel {
+                    visible: false
                     text: qsTr("Longitude")
                 }
                 FactTextField {
+                    visible: false
                     fact:               controller.longitude
                     Layout.fillWidth:   true
                 }
 
                 QGCButton {
+                    visible: false
                     text:               qsTr("Set Geographic")
                     Layout.alignment:   Qt.AlignRight
                     Layout.columnSpan:  2
@@ -73,37 +78,45 @@ QGCViewDialog {
                     }
                 }
 
-                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
+                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2; visible: false}
 
                 QGCLabel {
+                    visible: false
                     text: qsTr("Zone")
                 }
                 FactTextField {
+                    visible: false
                     fact:               controller.zone
                     Layout.fillWidth:   true
                 }
 
                 QGCLabel {
+                    visible: false
                     text: qsTr("Hemisphere")
                 }
                 FactComboBox {
+                    visible: false
                     fact:               controller.hemisphere
                     indexModel:         false
                     Layout.fillWidth:   true
                 }
 
                 QGCLabel {
+                    visible: false
                     text: qsTr("Easting")
                 }
                 FactTextField {
+                    visible: false
                     fact:               controller.easting
                     Layout.fillWidth:   true
                 }
 
                 QGCLabel {
+                    visible: false
                     text: qsTr("Northing")
                 }
                 FactTextField {
+                    visible: false
                     fact:               controller.northing
                     Layout.fillWidth:   true
                 }
@@ -112,37 +125,42 @@ QGCViewDialog {
                     text:               qsTr("Set UTM")
                     Layout.alignment:   Qt.AlignRight
                     Layout.columnSpan:  2
+                    visible: false
                     onClicked: {
                         controller.setFromUTM()
                         reject()
                     }
                 }
 
-                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
+                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2; visible: false}
 
                 QGCLabel {
                     text:              qsTr("MGRS")
+                    visible: false
                 }
                 FactTextField {
                     fact:              controller.mgrs
                     Layout.fillWidth:  true
+                    visible: false
                 }
 
                 QGCButton {
                     text:              qsTr("Set MGRS")
                     Layout.alignment:  Qt.AlignRight
                     Layout.columnSpan: 2
+                    visible: false
                     onClicked: {
                         controller.setFromMGRS()
                         reject()
                     }
                 }
 
-                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
+                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2; visible: false}
 
                 QGCButton {
                     text:              qsTr("Set From Vehicle Position")
-                    visible:           QGroundControl.multiVehicleManager.activeVehicle && QGroundControl.multiVehicleManager.activeVehicle.coordinate.isValid
+                    //visible:           QGroundControl.multiVehicleManager.activeVehicle && QGroundControl.multiVehicleManager.activeVehicle.coordinate.isValid
+                    visible: false
                     Layout.alignment:  Qt.AlignRight
                     Layout.columnSpan: 2
                     onClicked: {
@@ -152,46 +170,166 @@ QGCViewDialog {
                 }
                 Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
 
-                QGCButton {
-                    text:              qsTr("Up")
-                    Layout.alignment:  Qt.AlignRight
+//                QGCButton {
+//                    text:              qsTr("Up")
+//                    Layout.alignment:  Qt.AlignCenter
+//                    Layout.columnSpan: 2
+//                    Layout.fillWidth: true
+//                    onClicked: {
+//                        controller.moveVertexUp()
+//                    }
+//                }
+
+                GridLayout {
+                    Layout.alignment:  Qt.AlignCenter
                     Layout.columnSpan: 2
-                    onClicked: {
-                        controller.moveVertexUp()
+                    Layout.fillWidth:  true
+
+                    rowSpacing:     _margin
+                    rows: 1
+
+//                    QGCLabel {
+//                        text:              qsTr(".")
+//                        Layout.fillWidth: true
+
+//                    }
+
+//                    QGCButton {
+//                        text:              qsTr("Left")
+//                        Layout.fillWidth: true
+
+//                        onClicked: {
+//                            controller.moveVertexLeft()
+//                        }
+//                    }
+
+                    QGCButton {
+                        text:              qsTr("Up")
+                        Layout.fillWidth: true
+                        Layout.maximumWidth : 200
+
+                        onClicked: {
+                            controller.moveVertexUp()
+                        }
+                    }
+
+//                    QGCButton {
+//                        text:              qsTr("Right")
+//                        Layout.fillWidth: true
+
+//                        onClicked: {
+//                            controller.moveVertexRight()
+//                        }
+//                    }
+//                    QGCLabel {
+//                        text:              qsTr(".")
+//                        Layout.fillWidth: true
+
+//                    }
+                }
+
+
+
+                GridLayout {
+                    Layout.alignment:  Qt.AlignCenter
+                    Layout.columnSpan: 2
+                    Layout.fillWidth:  true
+
+                    rowSpacing:     _margin
+                    rows: 1
+
+                    QGCButton {
+                        text:              qsTr("Left")
+                        Layout.fillWidth: true
+
+                        onClicked: {
+                            controller.moveVertexLeft()
+                        }
+                    }
+
+                    QGCButton {
+                        text:              qsTr("Undo")
+                        Layout.fillWidth: true
+
+                        onClicked: {
+                            controller.undoMoveVertex()
+                        }
+                    }
+
+                    QGCButton {
+                        text:              qsTr("Right")
+                        Layout.fillWidth: true
+
+                        onClicked: {
+                            controller.moveVertexRight()
+                        }
                     }
                 }
+
+                GridLayout {
+                    Layout.alignment:  Qt.AlignCenter
+                    Layout.columnSpan: 2
+                    Layout.fillWidth:  true
+
+                    rowSpacing:     _margin
+                    rows: 1
+
+//                    QGCLabel {
+//                        text:              qsTr(".")
+//                        Layout.fillWidth: true
+
+//                    }
+
+//                    QGCButton {
+//                        text:              qsTr("Left")
+//                        Layout.fillWidth: true
+
+//                        onClicked: {
+//                            controller.moveVertexLeft()
+//                        }
+//                    }
+
+                    QGCButton {
+                        text:              qsTr("Down")
+                        Layout.alignment:  Qt.AlignCenter
+                        Layout.fillWidth: true
+                        Layout.maximumWidth : 200
+
+                        Layout.columnSpan: 2
+                        onClicked: {
+                            controller.moveVertexDown()
+                        }
+                    }
+
+//                    QGCButton {
+//                        text:              qsTr("Right")
+//                        Layout.fillWidth: true
+
+//                        onClicked: {
+//                            controller.moveVertexRight()
+//                        }
+//                    }
+//                    QGCLabel {
+//                        text:              qsTr(".")
+//                        Layout.fillWidth: true
+
+//                    }
+                }
+
+                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
+
+
                 QGCButton {
-                    text:              qsTr("Left")
+                    text:              qsTr("Reset")
                     Layout.alignment:  Qt.AlignRight
+                    Layout.minimumWidth: 30
+
                     Layout.columnSpan: 2
                     onClicked: {
-                        controller.moveVertexLeft()
+                        controller.resetMoveVertex()
                     }
                 }
-                QGCButton {
-                    text:              qsTr("Right")
-                    Layout.alignment:  Qt.AlignRight
-                    Layout.columnSpan: 2
-                    onClicked: {
-                        controller.moveVertexRight()
-                    }
-                }
-                QGCButton {
-                    text:              qsTr("Down")
-                    Layout.alignment:  Qt.AlignRight
-                    Layout.columnSpan: 2
-                    onClicked: {
-                        controller.moveVertexDown()
-                    }
-                }
-                QGCButton {
-                    text:              qsTr("Undo")
-                    Layout.alignment:  Qt.AlignRight
-                    Layout.columnSpan: 2
-                    onClicked: {
-                        controller.undoMoveVertex()
-                    }
-                }
+
             }
         } // Column
     } // QGCFlickable

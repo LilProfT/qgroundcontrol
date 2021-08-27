@@ -56,6 +56,10 @@ void EditPositionDialogController::initValues(void)
     _latitudeFact.setRawValue(_coordinate.latitude());
     _longitudeFact.setRawValue(_coordinate.longitude());
 
+    _beginCoordinate.setLatitude(_coordinate.latitude());
+    _beginCoordinate.setLongitude(_coordinate.longitude());
+    _beginCoordinate.setAltitude(_coordinate.altitude());
+
     double easting, northing;
     int zone = convertGeoToUTM(_coordinate, easting, northing);
     if (zone >= 1 && zone <= 60) {
@@ -105,30 +109,38 @@ void EditPositionDialogController::setFromVehicle(void)
 
 void EditPositionDialogController::moveVertexUp(bool record)
 {
-    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, 0);
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.5, 0);
     emit coordinateChanged(_coordinate);
     if (record) _stackUndo.append(Move::UP);
 }
 
 void EditPositionDialogController::moveVertexLeft(bool record)
 {
-    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, -90);
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.5, -90);
     emit coordinateChanged(_coordinate);
     if (record) _stackUndo.append(Move::LEFT);
 }
 
 void EditPositionDialogController::moveVertexRight(bool record)
 {
-    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, 90);
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.5, 90);
     emit coordinateChanged(_coordinate);
     if (record) _stackUndo.append(Move::RIGHT);
 }
 
 void EditPositionDialogController::moveVertexDown(bool record)
 {
-    _coordinate = _coordinate.atDistanceAndAzimuth(0.1, 180);
+    _coordinate = _coordinate.atDistanceAndAzimuth(0.5, 180);
     emit coordinateChanged(_coordinate);
     if (record) _stackUndo.append(Move::DOWN);
+}
+
+void EditPositionDialogController::resetMoveVertex()
+{
+    _coordinate = _beginCoordinate;
+    _stackUndo.clear();
+    emit coordinateChanged(_coordinate);
+
 }
 
 void EditPositionDialogController::undoMoveVertex(void)

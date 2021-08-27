@@ -312,11 +312,17 @@ Item {
 
             sourceItem: SplitIndicator {
                 z:          _zorderSplitHandle
+
                 onClicked:  {
                     if(_root.interactive) {
                         menu._editingVertexIndex = mapQuickItem.vertexIndex
                         mainWindow.showComponentDialog(editEdgeOffsetDialog, qsTr("Edit Edge Offset"), mainWindow.showDialogDefaultWidth, StandardButton.Close)
                     }
+                }
+
+                onPressAndHold:  {
+                    if(_root.interactive)
+                        mapPolygon.splitPolygonSegment(mapQuickItem.vertexIndex)
                 }
             }
         }

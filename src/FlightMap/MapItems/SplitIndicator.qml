@@ -25,6 +25,8 @@ Rectangle {
     property color indicatorColor: "white"
 
     signal clicked
+    signal pressAndHold
+    signal doubleClicked
 
     Rectangle {
         anchors.margins:            _root.height / 6
@@ -47,5 +49,8 @@ Rectangle {
     QGCMouseArea {
         fillItem:   parent
         onClicked:  _root.clicked()
+        onPressAndHold:  _root.pressAndHold()
+        onDoubleClicked:  _root.doubleClicked()
+
     }
 }

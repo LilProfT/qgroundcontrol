@@ -52,6 +52,7 @@ public:
     Q_INVOKABLE void moveVertexRight (bool record = true);
     Q_INVOKABLE void moveVertexDown  (bool record = true);
     Q_INVOKABLE void undoMoveVertex  (void);
+    Q_INVOKABLE void resetMoveVertex  (void);
 
 signals:
     void coordinateChanged(QGeoCoordinate coordinate);
@@ -60,6 +61,7 @@ private:
     static QMap<QString, FactMetaData*> _metaDataMap;
 
     QGeoCoordinate _coordinate;
+    QGeoCoordinate _beginCoordinate;
 
     enum Move {
         LEFT, RIGHT, UP, DOWN
