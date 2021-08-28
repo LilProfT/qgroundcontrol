@@ -222,6 +222,9 @@ void QGCMapPolygon::saveToJson(QJsonObject& json)
 
     JsonHelper::saveGeoCoordinateArray(_polygonPath, false /* writeAltitude*/, jsonValue);
     json.insert(jsonPolygonKey, jsonValue);
+
+    json.insert("polygonOffsets", QJsonObject::fromVariantMap(_offsets));
+
     setDirty(false);
 }
 
@@ -245,6 +248,9 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
     for (int i=0; i<_polygonPath.count(); i++) {
         _polygonModel.append(new QGCQGeoCoordinate(_polygonPath[i].value<QGeoCoordinate>(), this));
     }
+
+    QJsonValue offsetJson = json.value("polygonOffsets");
+    if (offsetJson != QJsonValue::Undefined) _offsets = offsetJson.toObject().toVariantMap();
 
     setDirty(false);
     emit pathChanged();
