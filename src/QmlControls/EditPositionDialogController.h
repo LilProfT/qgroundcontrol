@@ -52,7 +52,8 @@ public:
     Q_INVOKABLE void moveVertexRight (bool record = true);
     Q_INVOKABLE void moveVertexDown  (bool record = true);
     Q_INVOKABLE void undoMoveVertex  (void);
-    Q_INVOKABLE void resetMoveVertex  (void);
+    Q_INVOKABLE void resetMoveVertex (void);
+    Q_INVOKABLE void commitVertex    (void);
 
 signals:
     void coordinateChanged(QGeoCoordinate coordinate);

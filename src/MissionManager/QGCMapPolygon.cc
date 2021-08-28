@@ -222,6 +222,9 @@ void QGCMapPolygon::saveToJson(QJsonObject& json)
 
     JsonHelper::saveGeoCoordinateArray(_polygonPath, false /* writeAltitude*/, jsonValue);
     json.insert(jsonPolygonKey, jsonValue);
+
+    json.insert("polygonOffsets", QJsonObject::fromVariantMap(_offsets));
+
     setDirty(false);
 }
 
@@ -231,7 +234,10 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
     clear();
 
     if (required) {
-        if (!JsonHelper::validateRequiredKeys(json, QStringList(jsonPolygonKey), errorString)) {
+        QStringList requiredKeys;
+        requiredKeys.append(jsonPolygonKey);
+        requiredKeys.append("polygonOffsets");
+        if (!JsonHelper::validateRequiredKeys(json, requiredKeys, errorString)) {
             return false;
         }
     } else if (!json.contains(jsonPolygonKey)) {
@@ -245,6 +251,8 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
     for (int i=0; i<_polygonPath.count(); i++) {
         _polygonModel.append(new QGCQGeoCoordinate(_polygonPath[i].value<QGeoCoordinate>(), this));
     }
+
+    _offsets = json["polygonOffsets"].toObject().toVariantMap();
 
     setDirty(false);
     emit pathChanged();

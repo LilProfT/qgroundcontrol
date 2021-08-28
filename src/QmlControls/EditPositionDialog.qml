@@ -163,22 +163,8 @@ QGCViewDialog {
                     visible: false
                     Layout.alignment:  Qt.AlignRight
                     Layout.columnSpan: 2
-                    onClicked: {
-                        controller.setFromVehicle()
-                        reject()
-                    }
+                    onClicked: controller.moveVertexLeft()
                 }
-                Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
-
-//                QGCButton {
-//                    text:              qsTr("Up")
-//                    Layout.alignment:  Qt.AlignCenter
-//                    Layout.columnSpan: 2
-//                    Layout.fillWidth: true
-//                    onClicked: {
-//                        controller.moveVertexUp()
-//                    }
-//                }
 
                 GridLayout {
                     Layout.alignment:  Qt.AlignCenter
@@ -188,44 +174,13 @@ QGCViewDialog {
                     rowSpacing:     _margin
                     rows: 1
 
-//                    QGCLabel {
-//                        text:              qsTr(".")
-//                        Layout.fillWidth: true
-
-//                    }
-
-//                    QGCButton {
-//                        text:              qsTr("Left")
-//                        Layout.fillWidth: true
-
-//                        onClicked: {
-//                            controller.moveVertexLeft()
-//                        }
-//                    }
-
                     QGCButton {
                         text:              qsTr("Up")
+                        horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
                         Layout.maximumWidth : 200
-
-                        onClicked: {
-                            controller.moveVertexUp()
-                        }
+                        onClicked: controller.moveVertexUp()
                     }
-
-//                    QGCButton {
-//                        text:              qsTr("Right")
-//                        Layout.fillWidth: true
-
-//                        onClicked: {
-//                            controller.moveVertexRight()
-//                        }
-//                    }
-//                    QGCLabel {
-//                        text:              qsTr(".")
-//                        Layout.fillWidth: true
-
-//                    }
                 }
 
 
@@ -240,29 +195,26 @@ QGCViewDialog {
 
                     QGCButton {
                         text:              qsTr("Left")
+                        horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
 
-                        onClicked: {
-                            controller.moveVertexLeft()
-                        }
+                        onClicked: controller.moveVertexLeft()
                     }
 
                     QGCButton {
                         text:              qsTr("Undo")
+                        horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
 
-                        onClicked: {
-                            controller.undoMoveVertex()
-                        }
+                        onClicked: controller.undoMoveVertex()
                     }
 
                     QGCButton {
                         text:              qsTr("Right")
+                        horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
 
-                        onClicked: {
-                            controller.moveVertexRight()
-                        }
+                        onClicked: controller.moveVertexRight()
                     }
                 }
 
@@ -274,62 +226,44 @@ QGCViewDialog {
                     rowSpacing:     _margin
                     rows: 1
 
-//                    QGCLabel {
-//                        text:              qsTr(".")
-//                        Layout.fillWidth: true
-
-//                    }
-
-//                    QGCButton {
-//                        text:              qsTr("Left")
-//                        Layout.fillWidth: true
-
-//                        onClicked: {
-//                            controller.moveVertexLeft()
-//                        }
-//                    }
-
                     QGCButton {
                         text:              qsTr("Down")
+                        horizontalAlignment: Text.AlignHCenter
                         Layout.alignment:  Qt.AlignCenter
                         Layout.fillWidth: true
                         Layout.maximumWidth : 200
 
                         Layout.columnSpan: 2
-                        onClicked: {
-                            controller.moveVertexDown()
-                        }
+                        onClicked: controller.moveVertexDown()
                     }
-
-//                    QGCButton {
-//                        text:              qsTr("Right")
-//                        Layout.fillWidth: true
-
-//                        onClicked: {
-//                            controller.moveVertexRight()
-//                        }
-//                    }
-//                    QGCLabel {
-//                        text:              qsTr(".")
-//                        Layout.fillWidth: true
-
-//                    }
                 }
 
                 Item { width: 1; height: ScreenTools.defaultFontPixelHeight; Layout.columnSpan: 2}
 
-
-                QGCButton {
-                    text:              qsTr("Reset")
-                    Layout.alignment:  Qt.AlignRight
-                    Layout.minimumWidth: 30
-
+                GridLayout {
                     Layout.columnSpan: 2
-                    onClicked: {
-                        controller.resetMoveVertex()
+                    Layout.fillWidth:  true
+                    rowSpacing:     _margin
+                    rows: 1
+
+                    QGCButton {
+                        text:              qsTr("Commit")
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.alignment:  Qt.AlignLeft
+                        Layout.minimumWidth: 30
+
+                        onClicked: controller.commitVertex()
+                    }
+
+                    QGCButton {
+                        text:              qsTr("Reset")
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.alignment:  Qt.AlignRight
+                        Layout.minimumWidth: 30
+
+                        onClicked: controller.resetMoveVertex()
                     }
                 }
-
             }
         } // Column
     } // QGCFlickable
