@@ -1313,6 +1313,7 @@ void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
         int     lastIndex = i == basePolygon.count() - 1 ? 0 : i + 1;
         QLineF  originalEdge(basePolygon[i], basePolygon[lastIndex]);
         float   offset = _surveyAreaPolygon.offsets().value(QString::number(i), 0.001f).value<float>();
+        if (qFuzzyCompare(offset, 0.0f)) offset = 0.001f;
 
         QPointF transVec = center - originalEdge.p1();
         QLineF  workerLine = originalEdge;
