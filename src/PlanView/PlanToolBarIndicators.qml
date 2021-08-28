@@ -222,6 +222,7 @@ Item {
             QGCLabel {
                 text:               qsTr("Total Mission")
                 Layout.columnSpan:  11
+                visible: false
                 font.pointSize:     ScreenTools.smallFontPointSize
             }
 
