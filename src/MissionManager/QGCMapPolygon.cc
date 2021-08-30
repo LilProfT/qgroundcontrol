@@ -252,12 +252,8 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
         _polygonModel.append(new QGCQGeoCoordinate(_polygonPath[i].value<QGeoCoordinate>(), this));
     }
 
-<<<<<<< HEAD
-    _offsets = json["polygonOffsets"].toObject().toVariantMap();
-=======
     QJsonValue offsetJson = json.value("polygonOffsets");
     if (offsetJson != QJsonValue::Undefined) _offsets = offsetJson.toObject().toVariantMap();
->>>>>>> ff293c6eb41722ca6819ea58d8e26a487e0c7f77
 
     setDirty(false);
     emit pathChanged();
