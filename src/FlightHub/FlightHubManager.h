@@ -18,6 +18,7 @@
 #include "QGCLoggingCategory.h"
 #include "QGCMAVLink.h"
 #include "FlightHubMqtt.h"
+#include "QJsonObject"
 
 Q_DECLARE_LOGGING_CATEGORY(FlightHubManagerLog)
 
@@ -40,13 +41,15 @@ public:
     /// @return true: download has started, false: error, no download
     /// Signals downloadComplete, commandError, commandProgress
     //bool download(const QString& fromURI, const QString& toDir);
+    void startTimer(int interval);
+
 signals:
     void publishMsg(QByteArray message);
-
+public slots:
+    void timerSlot();
 private:
     void    _mavlinkMessageReceived     (const mavlink_message_t& message);
     void    _vehicleReady(bool ready);
-
     QString _handleAltitude     (const mavlink_message_t& message);
     QString _handleGpsRawInt    (const mavlink_message_t& message);
     QString _handleBatteryStatus(const mavlink_message_t& message);
@@ -56,5 +59,7 @@ private:
     Vehicle*                _vehicle;
     FlightHubMqtt   *_flightHubMQtt     = nullptr;
     QThread mqttclientThread;
+    QJsonObject jsonObj = QJsonObject();
+
 };
 
