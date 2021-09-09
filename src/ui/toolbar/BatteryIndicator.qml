@@ -47,12 +47,12 @@ Item {
             }
         }
     }
-//    MouseArea {
-//        anchors.fill:   parent
-//        onClicked: {
-//            mainWindow.showIndicatorPopup(_root, batteryPopup)
-//        }
-//    }
+    MouseArea {
+        anchors.fill:   parent
+        onClicked: {
+            mainWindow.showIndicatorPopup(_root, batteryPopup)
+        }
+    }
 
     Component {
         id: batteryVisual
@@ -121,6 +121,8 @@ Item {
             property bool mahConsumedAvailable:     !isNaN(battery.mahConsumed.rawValue)
             property bool timeRemainingAvailable:   !isNaN(battery.timeRemaining.rawValue)
             property bool chargeStateAvailable:     battery.chargeState.rawValue !== MAVLink.MAV_BATTERY_CHARGE_STATE_UNDEFINED
+            property bool cellVoltageMinAvailable:  !isNaN(battery.cellVoltageMin.rawValue)
+            property bool cellVoltageMaxAvailable:  !isNaN(battery.cellVoltageMax.rawValue)
         }
     }
 
@@ -152,10 +154,11 @@ Item {
 
                     ColumnLayout {
                         Repeater {
-                            model: _activeVehicle ? _activeVehicle.batteries : 0
+                            model: _activeVehicle ? _activeVehicle.batteries : 0 
 
                             ColumnLayout {
                                 spacing: 0
+                                visible: model.index === 0
 
                                 property var batteryValuesAvailable: nameAvailableLoader.item
 
@@ -166,14 +169,17 @@ Item {
                                     property var battery: object
                                 }
 
-                                QGCLabel { text: qsTr("Battery %1").arg(object.id.rawValue) }
-                                QGCLabel { text: qsTr("Charge State");                          visible: batteryValuesAvailable.chargeStateAvailable }
+                                //QGCLabel { text: qsTr("Battery %1").arg(object.id.rawValue) }
+                                //QGCLabel { text: qsTr("Charge State");                          visible: batteryValuesAvailable.chargeStateAvailable }
                                 QGCLabel { text: qsTr("Remaining");                             visible: batteryValuesAvailable.timeRemainingAvailable }
                                 QGCLabel { text: qsTr("Remaining") }
                                 QGCLabel { text: qsTr("Voltage") }
-                                QGCLabel { text: qsTr("Consumed");                              visible: batteryValuesAvailable.mahConsumedAvailable }
+                                //QGCLabel { text: qsTr("Consumed");                              visible: batteryValuesAvailable.mahConsumedAvailable }
+                                QGCLabel { text: qsTr("Current");                               visible: batteryValuesAvailable.currentAvailable }
                                 QGCLabel { text: qsTr("Temperature");                           visible: batteryValuesAvailable.temperatureAvailable }
                                 QGCLabel { text: qsTr("Function");                              visible: batteryValuesAvailable.functionAvailable }
+                                QGCLabel { text: qsTr("Min Cell Volt");                         visible: batteryValuesAvailable.cellVoltageMinAvailable}
+                                QGCLabel { text: qsTr("Max Cell Volt");                         visible: batteryValuesAvailable.cellVoltageMaxAvailable}
                             }
                         }
                     }
@@ -184,6 +190,7 @@ Item {
 
                             ColumnLayout {
                                 spacing: 0
+                                visible: model.index === 0
 
                                 property var batteryValuesAvailable: valueAvailableLoader.item
 
@@ -194,14 +201,17 @@ Item {
                                     property var battery: object
                                 }
 
-                                QGCLabel { text: "" }
-                                QGCLabel { text: object.chargeState.enumStringValue;                                        visible: batteryValuesAvailable.chargeStateAvailable }
+                                //QGCLabel { text: "" }
+                                //QGCLabel { text: object.chargeState.enumStringValue;                                        visible: batteryValuesAvailable.chargeStateAvailable }
                                 QGCLabel { text: object.timeRemainingStr.value;                                             visible: batteryValuesAvailable.timeRemainingAvailable }
                                 QGCLabel { text: object.percentRemaining.valueString + " " + object.percentRemaining.units }
                                 QGCLabel { text: object.voltage.valueString + " " + object.voltage.units }
-                                QGCLabel { text: object.mahConsumed.valueString + " " + object.mahConsumed.units;           visible: batteryValuesAvailable.mahConsumedAvailable }
+                                //QGCLabel { text: object.mahConsumed.valueString + " " + object.mahConsumed.units;           visible: batteryValuesAvailable.mahConsumedAvailable }
+                                QGCLabel { text: object.current.valueString + " " + object.current.units;                   visible: batteryValuesAvailable.currentAvailable }
                                 QGCLabel { text: object.temperature.valueString + " " + object.temperature.units;           visible: batteryValuesAvailable.temperatureAvailable }
                                 QGCLabel { text: object.function.enumStringValue;                                           visible: batteryValuesAvailable.functionAvailable }
+                                QGCLabel { text: object.cellVoltageMin.valueString + " " + object.cellVoltageMin.units;           visible: batteryValuesAvailable.cellVoltageMinAvailable }
+                                QGCLabel { text: object.cellVoltageMax.valueString + " " + object.cellVoltageMax.units;           visible: batteryValuesAvailable.cellVoltageMaxAvailable }
                             }
                         }
                     }

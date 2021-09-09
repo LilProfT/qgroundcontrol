@@ -4163,9 +4163,14 @@ Please place your vehicle in water, click the button, and wait. Note that the th
         <translation>Đã dùng</translation>
     </message>
     <message>
-        <location filename="../src/ui/toolbar/BatteryIndicator.qml" line="174"/>
+        <location filename="../src/ui/toolbar/BatteryIndicator.qml" line="178"/>
+        <source>Current</source>
+        <translation>Dòng</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/toolbar/BatteryIndicator.qml" line="179"/>
         <source>Temperature</source>
-        <translation type="unfinished"></translation>
+        <translation>Nhiệt độ</translation>
     </message>
     <message>
         <location filename="../src/ui/toolbar/BatteryIndicator.qml" line="175"/>

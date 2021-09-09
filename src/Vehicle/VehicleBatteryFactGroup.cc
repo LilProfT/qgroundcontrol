@@ -26,6 +26,9 @@ const char* VehicleBatteryFactGroup::_timeRemainingFactName         = "timeRemai
 const char* VehicleBatteryFactGroup::_timeRemainingStrFactName      = "timeRemainingStr";
 const char* VehicleBatteryFactGroup::_chargeStateFactName           = "chargeState";
 
+const char* VehicleBatteryFactGroup::_cellVoltageMinFactName        = "cellVoltageMin";
+const char* VehicleBatteryFactGroup::_cellVoltageMaxFactName        = "cellVoltageMax";
+
 const char* VehicleBatteryFactGroup::_settingsGroup =                       "Vehicle.battery";
 
 VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* parent)
@@ -42,6 +45,9 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     , _timeRemainingStrFact (0, _timeRemainingStrFactName,          FactMetaData::valueTypeString)
     , _chargeStateFact      (0, _chargeStateFactName,               FactMetaData::valueTypeUint8)
     , _instantPowerFact     (0, _instantPowerFactName,              FactMetaData::valueTypeDouble)
+
+    , _cellVoltageMinFact   (0, _cellVoltageMinFactName,            FactMetaData::valueTypeDouble)
+    , _cellVoltageMaxFact   (0, _cellVoltageMaxFactName,            FactMetaData::valueTypeDouble)
 {
     _addFact(&_batteryIdFact,               _batteryIdFactName);
     _addFact(&_batteryFunctionFact,         _batteryFunctionFactName);
@@ -56,6 +62,9 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     _addFact(&_chargeStateFact,             _chargeStateFactName);
     _addFact(&_instantPowerFact,            _instantPowerFactName);
 
+    _addFact(&_cellVoltageMinFact,          _cellVoltageMinFactName);
+    _addFact(&_cellVoltageMaxFact,          _cellVoltageMaxFactName);
+
     _batteryIdFact.setRawValue          (batteryId);
     _batteryFunctionFact.setRawValue    (MAV_BATTERY_FUNCTION_UNKNOWN);
     _batteryTypeFact.setRawValue        (MAV_BATTERY_TYPE_UNKNOWN);
@@ -67,6 +76,9 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     _timeRemainingFact.setRawValue      (qQNaN());
     _chargeStateFact.setRawValue        (MAV_BATTERY_CHARGE_STATE_UNDEFINED);
     _instantPowerFact.setRawValue       (qQNaN());
+
+    _cellVoltageMinFact.setRawValue     (qQNaN());
+    _cellVoltageMaxFact.setRawValue     (qQNaN());
 
     connect(&_timeRemainingFact, &Fact::rawValueChanged, this, &VehicleBatteryFactGroup::_timeRemainingChanged);
 }
@@ -130,16 +142,48 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_mes
 
     VehicleBatteryFactGroup* group = _findOrAddBatteryGroupById(vehicle, batteryStatus.id);
 
+    double cellVoltMin = qQNaN();
+    double cellVoltMax = qQNaN();
+
     double totalVoltage = qQNaN();
     for (int i=0; i<10; i++) {
         double cellVoltage = batteryStatus.voltages[i] == UINT16_MAX ? qQNaN() : static_cast<double>(batteryStatus.voltages[i]) / 1000.0;
         if (qIsNaN(cellVoltage)) {
             break;
         }
+
         if (i == 0) {
             totalVoltage = cellVoltage;
+
+            cellVoltMax = cellVoltage;
+            cellVoltMin = cellVoltage;
         } else {
             totalVoltage += cellVoltage;
+
+            if (cellVoltMax < cellVoltage) {
+                cellVoltMax = cellVoltage;
+            }
+
+            else if (cellVoltMin > cellVoltage) {
+                cellVoltMin = cellVoltage;
+            }
+        }
+    }
+
+    //Mismart: Extra 4 cells for our batteries
+    for (int i=0; i<4; i++) {
+        double extCellVoltage = (batteryStatus.voltages_ext[i] == UINT16_MAX || batteryStatus.voltages_ext[i] == 0)  ? qQNaN() : static_cast<double>(batteryStatus.voltages[i]) / 1000.0;
+        if (qIsNaN(extCellVoltage)) {
+            break;
+        }
+        totalVoltage += extCellVoltage;
+
+        if (cellVoltMax < extCellVoltage) {
+            cellVoltMax = extCellVoltage;
+        }
+
+        else if (cellVoltMin > extCellVoltage) {
+            cellVoltMin = extCellVoltage;
         }
     }
 
@@ -154,6 +198,9 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_mes
     group->chargeState()->setRawValue       (batteryStatus.charge_state);
     group->instantPower()->setRawValue      (totalVoltage * group->current()->rawValue().toDouble());
     group->_setTelemetryAvailable(true);
+
+    group->cellVoltageMin()->setRawValue    (cellVoltMin);
+    group->cellVoltageMax()->setRawValue    (cellVoltMax);
 }
 
 VehicleBatteryFactGroup* VehicleBatteryFactGroup::_findOrAddBatteryGroupById(Vehicle* vehicle, uint8_t batteryId)
