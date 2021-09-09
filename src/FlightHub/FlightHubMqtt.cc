@@ -77,14 +77,14 @@ void FlightHubMqtt::updateConnected()
             + QLatin1Char('\n');
 
     qCDebug(RTKGPSLog) << "updateConnected: " << content;
-    if(this->state() == QMqttClient::Connected) {
-        QByteArray messagePub;
-        QString topicPub;
-        topicPub = "v1/devices/me/telemetry";
-        QString telemetry ("{\"temperature\":42}");
-        messagePub = telemetry.toUtf8();
-        this->publish(topicPub, messagePub);
-    }
+//    if(this->state() == QMqttClient::Connected) {
+//        QByteArray messagePub;
+//        QString topicPub;
+//        topicPub = "v1/devices/me/telemetry";
+//        QString telemetry ("{\"temperature\":42}");
+//        messagePub = telemetry.toUtf8();
+//        this->publish(topicPub, messagePub);
+//    }
 }
 
 void FlightHubMqtt::updateDisConnected()

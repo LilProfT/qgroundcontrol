@@ -142,7 +142,7 @@ void SurveyComplexItem::_toggleAutoOptimize(QVariant value) {
     } else {
         disconnect(&_timer_optimize_Angle_EntryPoint,       &QTimer::timeout,                           this, &SurveyComplexItem::_optimize_Angle_EntryPoint);
         disconnect(_masterController->missionController()->takeoffMissionItem(), &TakeoffMissionItem::launchCoordinateChanged, this, &SurveyComplexItem::_optimize_EntryPoint);
-    };
+    }
 }
 
 void SurveyComplexItem::_buildAndAppendMissionItems (QList<MissionItem*>& items, QObject* missionItemParent)

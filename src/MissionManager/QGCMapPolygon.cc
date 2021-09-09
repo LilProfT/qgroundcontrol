@@ -234,10 +234,7 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
     clear();
 
     if (required) {
-        QStringList requiredKeys;
-        requiredKeys.append(jsonPolygonKey);
-        requiredKeys.append("polygonOffsets");
-        if (!JsonHelper::validateRequiredKeys(json, requiredKeys, errorString)) {
+        if (!JsonHelper::validateRequiredKeys(json, QStringList(jsonPolygonKey), errorString)) {
             return false;
         }
     } else if (!json.contains(jsonPolygonKey)) {
@@ -259,6 +256,7 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
     emit pathChanged();
 
     return true;
+
 }
 
 QList<QGeoCoordinate> QGCMapPolygon::coordinateList(void) const
