@@ -4177,6 +4177,11 @@ Please place your vehicle in water, click the button, and wait. Note that the th
         <source>Function</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../src/ui/toolbar/BatteryIndicator.qml" line="180"/>
+        <source>Cycle count</source>
+        <translation>Số lần sạc</translation>
+    </message>
 </context>
 <context>
     <name>BlankPlanCreator</name>
