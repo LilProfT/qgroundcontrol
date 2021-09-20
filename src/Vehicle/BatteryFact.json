@@ -29,7 +29,7 @@
     "shortDesc":        "Voltage",
     "type":             "double",
     "decimalPlaces":    2,
-    "units":            "v"
+    "units":            "V"
 },
 {
     "name":             "percentRemaining",
@@ -57,7 +57,7 @@
     "shortDesc":        "Temperature",
     "type":             "double",
     "decimalPlaces":    0,
-    "units":            "C"
+    "units":            "°C"
 },
 {
     "name":             "instantPower",
@@ -85,6 +85,20 @@
     "enumStrings":      "n/a,Ok,Low,Critical,Emergency,Failed,Unhealthy,Charging",
     "enumValues":       "0,1,2,3,4,5,6,7",
     "decimalPlaces":    0
+},
+{
+    "name":             "cellVoltageMin",
+    "shortDesc":        "Minium Cell Voltage",
+    "type":             "double",
+    "decimalPlaces":    2,
+    "units":            "V"
+},
+{
+    "name":             "cellVoltageMax",
+    "shortDesc":        "Minium Cell Voltage",
+    "type":             "double",
+    "decimalPlaces":    2,
+    "units":            "V"
 }
 ]
 }

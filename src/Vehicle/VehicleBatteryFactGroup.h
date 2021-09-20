@@ -34,6 +34,10 @@ public:
     Q_PROPERTY(Fact* chargeState        READ chargeState        CONSTANT)
     Q_PROPERTY(Fact* instantPower       READ instantPower       CONSTANT)
 
+    //Mismart: New stuff
+    Q_PROPERTY(Fact* cellVoltageMin     READ cellVoltageMin     CONSTANT)
+    Q_PROPERTY(Fact* cellVoltageMax     READ cellVoltageMax     CONSTANT)
+
     Fact* id                        () { return &_batteryIdFact; }
     Fact* function                  () { return &_batteryFunctionFact; }
     Fact* type                      () { return &_batteryTypeFact; }
@@ -47,6 +51,9 @@ public:
     Fact* timeRemainingStr          () { return &_timeRemainingStrFact; }
     Fact* chargeState               () { return &_chargeStateFact; }
 
+    Fact* cellVoltageMin            () { return &_cellVoltageMinFact; }
+    Fact* cellVoltageMax            () { return &_cellVoltageMaxFact; }
+
     static const char* _batteryIdFactName;
     static const char* _batteryFunctionFactName;
     static const char* _batteryTypeFactName;
@@ -59,6 +66,9 @@ public:
     static const char* _timeRemainingStrFactName;
     static const char* _chargeStateFactName;
     static const char* _instantPowerFactName;
+
+    static const char* _cellVoltageMinFactName;
+    static const char* _cellVoltageMaxFactName;
 
     static const char* _settingsGroup;
 
@@ -89,6 +99,9 @@ private:
     Fact            _timeRemainingStrFact;
     Fact            _chargeStateFact;
     Fact            _instantPowerFact;
+
+    Fact            _cellVoltageMinFact;
+    Fact            _cellVoltageMaxFact;
 
     static const char* _batteryFactGroupNamePrefix;
 };

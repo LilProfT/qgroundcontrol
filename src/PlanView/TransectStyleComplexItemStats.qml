@@ -16,8 +16,8 @@ Grid {
     QGCLabel { text: qsTr("Survey Area") }
     QGCLabel { text: QGroundControl.unitsConversion.squareMetersToAppSettingsAreaUnits(missionItem.coveredArea).toFixed(2) + " " + QGroundControl.unitsConversion.appSettingsAreaUnitsString }
 
-    QGCLabel { text: qsTr("Photo Count"); visible: false }
-    QGCLabel { text: missionItem.cameraShots; visible: false }
+    QGCLabel { text: qsTr("Photo Count") ; visible: false }
+    QGCLabel { text: missionItem.cameraShots ; visible: false }
 
     QGCLabel { text: qsTr("Photo Interval"); visible: false }
     QGCLabel { text: missionItem.timeBetweenShots.toFixed(1) + " " + qsTr("secs"); visible: false }

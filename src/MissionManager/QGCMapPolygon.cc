@@ -256,6 +256,7 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
     emit pathChanged();
 
     return true;
+
 }
 
 QList<QGeoCoordinate> QGCMapPolygon::coordinateList(void) const

@@ -92,10 +92,11 @@ Rectangle {
                 anchors.left:   parent.left
                 anchors.right:  parent.right
 
-                Component.onCompleted: currentIndex = QGroundControl.settingsManager.planViewSettings.displayPresetsTabFirst.rawValue ? 2 : 0
+                Component.onCompleted: currentIndex = QGroundControl.settingsManager.planViewSettings.displayPresetsTabFirst.rawValue ? 1 : 0
 
                 QGCTabButton { icon.source: "/qmlimages/PatternGrid.png"; icon.height: ScreenTools.defaultFontPixelHeight }
-                //QGCTabButton { icon.source: "/qmlimages/PatternTerrain.png"; icon.height: ScreenTools.defaultFontPixelHeight }
+//                QGCTabButton { icon.source: "/qmlimages/PatternTerrain.png"; icon.height: ScreenTools.defaultFontPixelHeight }
+                QGCTabButton { icon.source: "/qmlimages/PatternPresets.png"; icon.height: ScreenTools.defaultFontPixelHeight }
             }
 
 
@@ -460,26 +461,32 @@ Rectangle {
 //            }
 
             // Presets Tab
-/*            ColumnLayout {
+            Column {
                 anchors.left:       parent.left
                 anchors.right:      parent.right
                 spacing:            _margin
-                visible:            tabBar.currentIndex === 3
+                visible:            tabBar.currentIndex === 1
 
                 QGCLabel {
-                    Layout.fillWidth:   true
+                    //Layout.fillWidth:   true
+                    anchors.left:       parent.left
+                    anchors.right:      parent.right
                     text:               qsTr("Presets")
                     wrapMode:           Text.WordWrap
                 }
 
                 QGCComboBox {
                     id:                 presetCombo
-                    Layout.fillWidth:   true
+                    //Layout.fillWidth:   true
+                    anchors.left:       parent.left
+                    anchors.right:      parent.right
                     model:              _missionItem.presetNames
                 }
 
                 RowLayout {
-                    Layout.fillWidth:   true
+                    //Layout.fillWidth:   true
+                    anchors.left:       parent.left
+                    anchors.right:      parent.right
 
                     QGCButton {
                         Layout.fillWidth:   true
@@ -512,11 +519,13 @@ Rectangle {
 
                 QGCButton {
                     Layout.alignment:   Qt.AlignCenter
-                    Layout.fillWidth:   true
+                    //Layout.fillWidth:   true
+                    anchors.left:       parent.left
+                    anchors.right:      parent.right
                     text:               qsTr("Save Settings As New Preset")
                     onClicked:          mainWindow.showComponentDialog(savePresetDialog, qsTr("Save Preset"), mainWindow.showDialogDefaultWidth, StandardButton.Save | StandardButton.Cancel)
                 }
-
+                /*
                 SectionHeader {
                     id:                 presectsTransectsHeader
                     Layout.fillWidth:   true
@@ -568,8 +577,137 @@ Rectangle {
                 TransectStyleComplexItemStats {
                     Layout.fillWidth:   true
                     visible:            presetsStatsHeader.checked
+                }*/
+                //Mismart Implementation
+                Item { height: ScreenTools.defaultFontPixelHeight; width: 1 }
+
+                CameraCalcGrid {
+                    cameraCalc:                     _missionItem.cameraCalc
+                    vehicleFlightIsFrontal:         true
+                    distanceToSurfaceLabel:         qsTr("Altitude")
+                    distanceToSurfaceAltitudeMode:  _missionItem.followTerrain ?
+                                                        QGroundControl.AltitudeModeCalcAboveTerrain :
+                                                        (_missionItem.cameraCalc.distanceToSurfaceRelative ? QGroundControl.AltitudeModeRelative : QGroundControl.AltitudeModeAbsolute)
+                    //frontalDistanceLabel:           qsTr("Trigger Dist")
+                    sideDistanceLabel:              qsTr("Spacing")
                 }
-            }*/ // Main editing column
+
+                GridLayout {
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    columnSpacing:  _margin
+                    rowSpacing:     _margin
+                    columns:        2
+                    width:          _root.width - _margin*2
+
+
+                    QGCLabel { text: qsTr("Settle Velocity") }
+                    FactTextField {
+                        fact:                   _missionItem.velocity
+                        Layout.fillWidth:       true
+                        onUpdated:              velocitySlider.value = _missionItem.velocity.value
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.velocity.value.toFixed(1) + " " + _missionItem.velocity.units
+    //                        font.pointSize:     ScreenTools.mediumFontPointSize
+                        Layout.alignment:  Qt.AlignRight
+                    }
+
+                    QGCSlider {
+                        id:                     presetsVelocitySlider
+                        minimumValue:           4.0
+                        maximumValue:           7.0
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.velocity.value
+                        onValueChanged:         _missionItem.velocity.value = value
+                        Component.onCompleted:  value = _missionItem.velocity.value
+                        updateValueWhileDragging: true
+                    }
+                }
+
+                SectionHeader {
+                    id:                 presectsTransectsHeader
+                    anchors.left:       parent.left
+                    anchors.right:      parent.right
+                    text:               qsTr("Transects")
+                }
+
+                GridLayout {
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    columnSpacing:  _margin
+                    rowSpacing:     _margin
+                    columns:        2
+                    visible:        transectsHeader.checked
+                    width:          _root.width - _margin*2
+
+
+                    QGCCheckBox {
+                        text:               qsTr("Ascend transect terminals")
+                        checked:            _missionItem.ascendTerminals.value
+                        onClicked:          _missionItem.ascendTerminals.value = checked
+                        Layout.columnSpan: 2
+                    }
+
+                    FactTextField {
+                        fact:                   _missionItem.ascendAltitude
+                        Layout.fillWidth:       true
+                        onUpdated:              ascendAltitude.value = _missionItem.ascendAltitude.value
+                        visible:                false
+                    }
+                    QGCLabel { text: qsTr("Ascent Alt"); }
+                    QGCLabel {
+                        text:                   _missionItem.ascendAltitude.value.toFixed(1) + " " + _missionItem.ascendAltitude.units
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     presetsAscendAltitudeSlider
+                        minimumValue:           0
+                        maximumValue:           5
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.ascendAltitude.value
+                        onValueChanged:         _missionItem.ascendAltitude.value = value
+                        Component.onCompleted:  value = _missionItem.ascendAltitude.value
+                        updateValueWhileDragging: true
+                    }
+
+                    FactTextField {
+                        fact:                   _missionItem.ascendLength
+                        Layout.fillWidth:       true
+                        onUpdated:              ascendLength.value = _missionItem.ascendLength.value
+                        visible:                false
+                    }
+                    QGCLabel { text: qsTr("Ascent Len"); }
+                    QGCLabel {
+                        text:                   _missionItem.ascendLength.value.toFixed(1) + " " + _missionItem.ascendLength.units
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     presetsAscendLengthSlider
+                        minimumValue:           0
+                        maximumValue:           5
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.ascendLength.value
+                        onValueChanged:         _missionItem.ascendLength.value = value
+                        Component.onCompleted:  value = _missionItem.ascendLength.value
+                        updateValueWhileDragging: true
+                    }
+                }
+
+            } // Main editing column
         } // Top level  Column
 
         Component {

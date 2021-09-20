@@ -157,11 +157,11 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
                                         &Fact::valueChanged,                        this, &SurveyComplexItem::_updateSprayFlowRate);
     connect(&_autoOptimizeFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_toggleAutoOptimize);
 
-    _timer_optimize_Angle_EntryPoint.setSingleShot(true);
-    _timer_optimize_Angle_EntryPoint.setInterval(0);
-    connect(&_timer_optimize_Angle_EntryPoint,       &QTimer::timeout,                           this, &SurveyComplexItem::_optimize_Angle_EntryPoint);
+//    _timer_optimize_Angle_EntryPoint.setSingleShot(true);
+//    _timer_optimize_Angle_EntryPoint.setInterval(0);
+//    connect(&_timer_optimize_Angle_EntryPoint,       &QTimer::timeout,                           this, &SurveyComplexItem::_optimize_Angle_EntryPoint);
 
-    connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                &_timer_optimize_Angle_EntryPoint, QOverload<>::of(&QTimer::start));
+//    connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                &_timer_optimize_Angle_EntryPoint, QOverload<>::of(&QTimer::start));
     connect(_masterController->missionController()->takeoffMissionItem(), &TakeoffMissionItem::launchCoordinateChanged, this, &SurveyComplexItem::_optimize_EntryPoint);
 
     QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
