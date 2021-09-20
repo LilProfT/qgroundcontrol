@@ -149,10 +149,30 @@ void MissionManager::generateResumeMission(int resumeIndex)
     int firstAddedPoints = 0;
 
     QGeoCoordinate resumeCoordinate = _vehicle->resumeCoordinate();
-//    for (int i=0; i<_missionItems.count(); i++) {
-//        MissionItem* oldItem = _missionItems[i];
 
-//    }
+    // arquire mission params
+    int j=0;
+    QGeoCoordinate first, second, third, fourth;
+    for (int i=0; (i<_missionItems.count()) && (j<5); i++) {
+        MissionItem* oldItem = _missionItems[i];
+        if (oldItem->command() == MAV_CMD_NAV_WAYPOINT) {
+            if (j==2) first  = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
+            if (j==3) second = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
+            if (j==4) third  = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
+            if (j==5) fourth = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
+            j++;
+        };
+    }
+
+    //          ->
+    //   desc  spray  asc
+    // \-----_________---/
+    // 1     2        3  4
+//    bool isAscendingTerminal = qFuzzyCompare(first.azimuthTo(second), third.azimuthTo(fourth));
+    double missionAltitude = second.altitude();
+    double ascendingAltitude = first.altitude() - missionAltitude;
+//    double ascendingLength = third.distanceTo(fourth); // unused yet
+    double descendingLength = first.distanceTo(second);
 
     for (int i=0; i<_missionItems.count(); i++) {
         MissionItem* oldItem = _missionItems[i];
@@ -171,6 +191,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
 //                emit _vehicle->pointAddedFromfile(oldItem->coordinate());
         }
 
+        double oldParam7 = oldItem->param7();
         if (i == resumeIndex) {
             
             QGeoCoordinate coordinate = _vehicle->resumeCoordinate();
@@ -185,6 +206,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
             if (oldItem->param5() != coordinate.latitude() || oldItem->param6() != coordinate.longitude()) {
                 oldItem->setParam5(coordinate.latitude());
                 oldItem->setParam6(coordinate.longitude());
+                oldItem->setParam7(missionAltitude + ascendingAltitude); // ascending altitude
             }
             // [/UGLY]
         };
@@ -203,12 +225,43 @@ void MissionManager::generateResumeMission(int resumeIndex)
 
             MissionItem* newHoldingWaypointItem = new MissionItem(*oldItem, this);
             newHoldingWaypointItem->setIsCurrentItem(false);
-            newHoldingWaypointItem->setParam1(2.0);
+            newHoldingWaypointItem->setParam1(2.0); // delay 2 second
             resumeMission.append(newHoldingWaypointItem);
 
             newChangeYawItem = new MissionItem(*changeYawItem, this);
             newChangeYawItem->setIsCurrentItem(false);
             resumeMission.append(newChangeYawItem);
+
+            // NOTE if not ascendingTerminal, the (first, second, third, fourth) is wrong
+            // but below conditions still apply
+            bool isSecondOrThird = qFuzzyCompare(oldParam7, missionAltitude);
+            bool isSecond = false;
+            QGeoCoordinate thirdCoord;
+            if (isSecondOrThird) {
+                for (int j = resumeIndex+1; j<_missionItems.count(); j++) {
+                    MissionItem* item = _missionItems[j];
+                    if (item->command() == MAV_CMD_NAV_WAYPOINT) {
+                        isSecond = qFuzzyCompare(item->param7(), missionAltitude);
+                        thirdCoord = QGeoCoordinate(item->param5(), item->param6(), item->param7());
+                        break;
+                    }
+                }
+            }
+
+            if (isSecond) {
+                QGeoCoordinate resumeCoord(oldItem->param5(), oldItem->param6(), oldItem->param7());
+                double distance = resumeCoord.distanceTo(thirdCoord);
+                if (distance > descendingLength) {
+                    double azimuth = resumeCoord.azimuthTo(thirdCoord);
+                    QGeoCoordinate descCoord = resumeCoord.atDistanceAndAzimuth(descendingLength, azimuth);
+                    MissionItem* descWaypointItem = new MissionItem(*oldItem, this);
+                    descWaypointItem->setParam5(descCoord.latitude());
+                    descWaypointItem->setParam6(descCoord.longitude());
+                    descWaypointItem->setParam7(missionAltitude);
+                    descWaypointItem->setIsCurrentItem(false);
+                    resumeMission.append(descWaypointItem);
+                }
+            }
         }
     }
     prefixCommandCount = qMax(0, qMin(prefixCommandCount, resumeMission.count()));  // Anal prevention against crashes
