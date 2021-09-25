@@ -43,6 +43,7 @@ const char* SurveyComplexItem::flyAlternateTransectsName =  "FlyAlternateTransec
 const char* SurveyComplexItem::splitConcavePolygonsName =   "SplitConcavePolygons";
 const char* SurveyComplexItem::ascendTerminalsName =        "AscendTerminals";
 const char* SurveyComplexItem::ascendAltitudeName =         "AscendAltitude";
+const char* SurveyComplexItem::firstLaneOffsetName =        "FirstLaneOffset";
 const char* SurveyComplexItem::ascendLengthName =           "AscendLength";
 
 const char* SurveyComplexItem::_jsonGridAngleKey =          "angle";
@@ -77,6 +78,7 @@ const char* SurveyComplexItem::_jsonFlyAlternateTransectsKey =          "flyaAlt
 const char* SurveyComplexItem::_jsonSplitConcavePolygonsKey =           "splitConcavePolygons";
 const char* SurveyComplexItem::_jsonAscendTerminalsKey =                "ascendTerminals";
 const char* SurveyComplexItem::_jsonAscendAltitudeKey =                 "ascendAltitude";
+const char* SurveyComplexItem::_jsonFirstLaneOffsetKey =                 "firstLaneOffset";
 const char* SurveyComplexItem::_jsonAscendLengthKey =                   "ascendLength";
 const char* SurveyComplexItem::_jsonApplicationRateKey =                "applicationRate";
 const char* SurveyComplexItem::_jsonVelocityKey =                       "velocity";
@@ -97,6 +99,7 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     , _splitConcavePolygonsFact (settingsGroup, _metaDataMap[splitConcavePolygonsName])
     , _ascendTerminalsFact      (settingsGroup, _metaDataMap[ascendTerminalsName])
     , _ascendAltitudeFact       (settingsGroup, _metaDataMap[ascendAltitudeName])
+    , _firstLaneOffsetFact      (settingsGroup, _metaDataMap[firstLaneOffsetName])
     , _ascendLengthFact         (settingsGroup, _metaDataMap[ascendLengthName])
     , _entryPoint               (EntryLocationTopLeft)
     , _timer_optimize_Angle_EntryPoint       (this)
@@ -135,6 +138,7 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     connect(&_splitConcavePolygonsFact, &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_ascendTerminalsFact,      &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_ascendAltitudeFact,       &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_firstLaneOffsetFact,       &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_ascendLengthFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_setDirty);
 
@@ -143,6 +147,7 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     connect(&_splitConcavePolygonsFact, &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_ascendTerminalsFact,      &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_ascendAltitudeFact,       &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
+    connect(&_firstLaneOffsetFact,      &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_ascendLengthFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_rebuildTransects);
 
@@ -165,6 +170,8 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     connect(_masterController->missionController()->takeoffMissionItem(), &TakeoffMissionItem::launchCoordinateChanged, this, &SurveyComplexItem::_optimize_EntryPoint);
 
     QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
+
+    connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                this, &SurveyComplexItem::_catchFirstEdge);
 
     connect(this, &TransectStyleComplexItem::coveredAreaChanged, _masterController, &PlanMasterController::areaChanged);
 
@@ -203,6 +210,7 @@ void SurveyComplexItem::_saveWorker(QJsonObject& saveObject)
     saveObject[_jsonSplitConcavePolygonsKey] =                  _splitConcavePolygonsFact.rawValue().toBool();
     saveObject[_jsonAscendTerminalsKey] =                       _ascendTerminalsFact.rawValue().toBool();
     saveObject[_jsonAscendAltitudeKey] =                        _ascendAltitudeFact.rawValue().toDouble();
+    saveObject[_jsonFirstLaneOffsetKey] =                       _firstLaneOffsetFact.rawValue().toDouble();
     saveObject[_jsonAscendLengthKey] =                          _ascendLengthFact.rawValue().toDouble();
     saveObject[_jsonEntryPointKey] =                            _entryPoint;
     saveObject[_jsonApplicationRateKey] =                 _applicationRateFact.rawValue().toDouble();
@@ -285,6 +293,7 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         { _jsonEdgeIndexKey,                            QJsonValue::Double, false },
         { _jsonAscendTerminalsKey,                      QJsonValue::Bool,   false },
         { _jsonAscendAltitudeKey,                       QJsonValue::Double, false },
+        { _jsonFirstLaneOffsetKey,                       QJsonValue::Double, false },
         { _jsonAscendLengthKey,                         QJsonValue::Double, false }
     };
 
@@ -327,6 +336,7 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
     _velocityFact.setRawValue               (complexObject[_jsonVelocityKey].toDouble());
     _ascendTerminalsFact.setRawValue        (complexObject[_jsonAscendTerminalsKey].toBool(false));
     _ascendAltitudeFact.setRawValue         (complexObject[_jsonAscendAltitudeKey].toDouble());
+    _firstLaneOffsetFact.setRawValue        (complexObject[_jsonFirstLaneOffsetKey].toDouble());
     _ascendLengthFact.setRawValue           (complexObject[_jsonAscendLengthKey].toDouble());
 
     _edgeIndex = (int)complexObject[_jsonEdgeIndexKey].toDouble();
@@ -882,25 +892,34 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
 
     // [mismart] adjust the space phase of transects
     if ((lineList.count() > 0) && (_angleEdge.count() > 0)) {
+        QGeoCoordinate center = _offsetAreaPolygon.center();
         QGeoCoordinate edgePoint = _angleEdge[0].value<QGeoCoordinate>();
 
         // sampling the line list, get 1 sample
-        QGeoCoordinate first  = edgePoint.atDistanceAndAzimuth(gridSpacing/2, gridAngle + 90);
-        QGeoCoordinate second = edgePoint.atDistanceAndAzimuth(gridSpacing/2, gridAngle - 90);
+        double firstAzimuth = gridAngle + 90;
+        double secondAzimuth = gridAngle - 90;
+        QGeoCoordinate first  = edgePoint.atDistanceAndAzimuth(gridSpacing/2, firstAzimuth);
+        QGeoCoordinate second = edgePoint.atDistanceAndAzimuth(gridSpacing/2, secondAzimuth);
         double y, x, down;
         convertGeoToNed(first, tangentOrigin, &y, &x, &down);
         QPointF firstf(x, y);
         convertGeoToNed(second, tangentOrigin, &y, &x, &down);
         QPointF secondf(x, y);
         QLineF samplingLine(firstf, secondf);
+        double toInsideAzimuth = (first.distanceTo(center) > second.distanceTo(center)) ? secondAzimuth : firstAzimuth;
+        double phase = _firstLaneOffsetFact.rawValue().toDouble();
+        double meter = phase * gridSpacing;
+        QGeoCoordinate target = edgePoint.atDistanceAndAzimuth(meter, toInsideAzimuth);
+        convertGeoToNed(target, tangentOrigin, &y, &x, &down);
+        QPointF targetf(x, y);
 
         // construct the translate vector that can move the sample to the right phase
         QPointF translateVector;
         for (const QLineF& line: lineList) {
             QPointF intersectPoint;
             if (samplingLine.intersect(line, &intersectPoint) == QLineF::BoundedIntersection) {
-                translateVector.setX(firstf.x() - intersectPoint.x());
-                translateVector.setY(firstf.y() - intersectPoint.y());
+                translateVector.setX(targetf.x() - intersectPoint.x());
+                translateVector.setY(targetf.y() - intersectPoint.y());
                 break;
             }
         }
