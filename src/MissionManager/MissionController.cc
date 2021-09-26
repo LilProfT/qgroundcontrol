@@ -50,6 +50,7 @@ const char* MissionController::_jsonGlobalPlanAltitudeModeKey = "globalPlanAltit
 const char* MissionController::_jsonResumePositionKey =             "resumePosition";
 const char* MissionController::_jsonResumeIndexKey =             "resumeIndex";
 const char* MissionController::_jsonSprayAreaKey =             "resumeSprayedArea";
+const char* MissionController::_jsonPresetTemplateKey =             "presetTemplate";
 
 // Deprecated V1 format keys
 const char* MissionController::_jsonComplexItemsKey =           "complexItems";
@@ -761,6 +762,8 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         { _jsonResumePositionKey,      QJsonValue::Array,  false },
         { _jsonResumeIndexKey,             QJsonValue::Double, false },
         { _jsonSprayAreaKey,             QJsonValue::Double, false },
+        { _jsonPresetTemplateKey,      QJsonValue::Array,  false },
+
 
     };
     if (!JsonHelper::validateKeys(json, rootKeyInfoList, errorString)) {
@@ -825,6 +828,8 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
             qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
         }
     }
+
+
     if (json.contains(_jsonSprayAreaKey)) {
         double area = json[_jsonSprayAreaKey].toDouble();
         qCWarning(MissionControllerLog) << "_jsonSprayAreaKey: " << json[_jsonSprayAreaKey].toDouble();

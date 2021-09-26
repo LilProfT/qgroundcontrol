@@ -70,6 +70,7 @@ Rectangle {
             icon.source:            "/res/QGCLogoFull"
             logo:                   true
             onClicked:              toolSelectDrawer.visible = true
+
         }
 
         MainStatusIndicator {
@@ -105,6 +106,21 @@ Rectangle {
             source:             currentToolbar === flyViewToolbar ?
                                     "qrc:/toolbar/MainToolBarIndicators.qml" :
                                     (currentToolbar == planViewToolbar ? "qrc:/qml/PlanToolBarIndicators.qml" : "")
+        }
+    }
+
+    QGCButton {
+        anchors.right:          parent.right
+        anchors.top:            parent.top
+        anchors.bottom:         parent.bottom
+        anchors.margins:        ScreenTools.defaultFontPixelHeight * 0.66
+        id:                 showVideo
+        text:               qsTr("Show Video")
+        onPressAndHold: {
+            mainWindow.showFlyViewTransparency()
+        }
+        onReleased:   {
+            mainWindow.showPlanViewTransparency()
         }
     }
 

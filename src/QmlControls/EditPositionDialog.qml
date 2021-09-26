@@ -251,7 +251,7 @@ QGCViewDialog {
                         horizontalAlignment: Text.AlignHCenter
                         Layout.alignment:  Qt.AlignLeft
                         Layout.minimumWidth: 30
-
+                        visible: false
                         onClicked: controller.commitVertex()
                     }
 

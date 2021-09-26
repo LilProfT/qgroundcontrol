@@ -222,6 +222,7 @@ Rectangle {
 
                 Loader {
                     Layout.fillWidth:   true
+                    visible: false
                     visible:            presectsTransectValuesHeader.checked && !!presetsTransectValuesComponent
                     sourceComponent:    presetsTransectValuesComponent
 

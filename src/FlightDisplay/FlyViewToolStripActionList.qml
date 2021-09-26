@@ -19,11 +19,11 @@ ToolStripActionList {
     signal displayResumePoint
 
     model: [
-        /*ToolStripAction {
+        ToolStripAction {
             text:           qsTr("Plan")
             iconSource:     "/qmlimages/Plan.svg"
             onTriggered:    mainWindow.showPlanView()
-        },*/
+        },
         PreFlightCheckListShowAction { onTriggered: displayPreFlightChecklist() },
         GuidedActionTakeoff { },
         GuidedActionLand { },

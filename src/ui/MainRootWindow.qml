@@ -27,6 +27,7 @@ ApplicationWindow {
     minimumWidth:   ScreenTools.isMobile ? Screen.width  : Math.min(ScreenTools.defaultFontPixelWidth * 100, Screen.width)
     minimumHeight:  ScreenTools.isMobile ? Screen.height : Math.min(ScreenTools.defaultFontPixelWidth * 50, Screen.height)
     visible:        true
+    property bool   change:false
 
     Component.onCompleted: {
         //-- Full screen on mobile or tiny screens
@@ -140,10 +141,28 @@ ApplicationWindow {
         flightView.visible = true
     }
 
+    function showFlyViewTransparency() {
+        if (!flightView.visible) {
+            change = true
+            mainWindow.showFlyView()
+        }
+
+    }
+
+    function showPlanViewTransparency() {
+        if (change == true) {
+            mainWindow.showPlanView()
+            change = false
+        }
+
+    }
+
     function showPlanView() {
         viewSwitch(toolbar.planViewToolbar)
         planView.visible = true
     }
+
+
 
     function showTool(toolTitle, toolSource, toolIcon) {
         toolDrawer.backIcon     = flightView.visible ? "/qmlimages/PaperPlane.svg" : "/qmlimages/Plan.svg"
@@ -509,6 +528,7 @@ ApplicationWindow {
     FlyView {
         id:             flightView
         anchors.fill:   parent
+
     }
 
     PlanView {
@@ -516,6 +536,8 @@ ApplicationWindow {
         anchors.fill:   parent
         visible:        false
     }
+
+
 
     Drawer {
         id:             toolDrawer
