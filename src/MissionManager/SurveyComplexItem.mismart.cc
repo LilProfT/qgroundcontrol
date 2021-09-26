@@ -32,26 +32,6 @@ void SurveyComplexItem::_optimize_Angle_EntryPoint(void)
     double min_distance = INFINITY;
     double best_angle = 0;
 
-    if (_surveyAreaPolygon.count() < 3) return;
-
-    if (_surveyAreaPolygon.traceMode()) {
-        A = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(0)->coordinate();
-        B = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(1)->coordinate();
-
-        _angleEdge.clear();
-        _angleEdge.append(QVariant::fromValue(A));
-        _angleEdge.append(QVariant::fromValue(B));
-        emit angleEdgeChanged();
-
-        double angle = A.azimuthTo(B);
-        qDebug() << "trace mode angle: " << angle;
-        _gridAngleFact.setProperty("value", angle);
-        _rebuildTransects();
-        _optimize_EntryPoint();
-
-        return;
-    }
-
     for (int i=0; i < _surveyAreaPolygon.count(); i++) {
         int i_A = i;
         int i_B;
@@ -249,4 +229,26 @@ void SurveyComplexItem::_calcFeaturedWidth(void)
     _featuredLine << first << second;
 
     _cameraCalc.setFeaturedWidth(featuredWidth);
+}
+
+void SurveyComplexItem::_catchFirstEdge()
+{
+    if (!_surveyAreaPolygon.traceMode()) return;
+    if (_surveyAreaPolygon.count() < 3) return;
+
+    const QSignalBlocker blocker(_gridAngleFact); // don't fire _rebuildTransects automatically
+
+    QGeoCoordinate A = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(0)->coordinate();
+    QGeoCoordinate B = _surveyAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(1)->coordinate();
+
+    _angleEdge.clear();
+    _angleEdge.append(QVariant::fromValue(A));
+    _angleEdge.append(QVariant::fromValue(B));
+    emit angleEdgeChanged();
+
+    double angle = A.azimuthTo(B);
+    qDebug() << "trace mode angle: " << angle;
+    _gridAngleFact.setProperty("value", angle);
+    _rebuildTransects();
+    _optimize_EntryPoint();
 }

@@ -98,6 +98,14 @@
     "units":            "m",
     "decimalPlaces":    1,
     "default":     3
+},
+{
+    "name":             "FirstLaneOffset",
+    "shortDesc": "Offset of first lane from the edge of boundary polygon.",
+    "type":             "double",
+    "units":            "spc",
+    "decimalPlaces":    2,
+    "default":     0.5
 }
 ]
 }

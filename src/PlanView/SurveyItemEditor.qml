@@ -222,6 +222,32 @@ Rectangle {
                     visible:        transectsHeader.checked
                     width:          _root.width - _margin*2
 
+                    FactTextField {
+                        fact:                   _missionItem.firstLaneOffset
+                        Layout.fillWidth:       true
+                        onUpdated:              firstLaneOffset.value = _missionItem.firstLaneOffset.value
+                        visible:                false
+                    }
+                    QGCLabel { text: qsTr("1st lane offset"); }
+                    QGCLabel {
+                        text:                   (_missionItem.firstLaneOffset.value * 100).toFixed() + " %" + _missionItem.firstLaneOffset.units
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     firstLaneOffsetSlider
+                        minimumValue:           0.05
+                        maximumValue:           1
+                        stepSize:               0.05
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.firstLaneOffset.value
+                        onValueChanged:         _missionItem.firstLaneOffset.value = value
+                        Component.onCompleted:  value = _missionItem.firstLaneOffset.value
+                        updateValueWhileDragging: true
+                    }
+
                     QGCCheckBox {
                         text:               qsTr("Ascend transect terminals")
                         checked:            _missionItem.ascendTerminals.value
@@ -646,6 +672,31 @@ Rectangle {
                     visible:        transectsHeader.checked
                     width:          _root.width - _margin*2
 
+                    FactTextField {
+                        fact:                   _missionItem.firstLaneOffset
+                        Layout.fillWidth:       true
+                        onUpdated:              firstLaneOffset.value = _missionItem.firstLaneOffset.value
+                        visible:                false
+                    }
+                    QGCLabel { text: qsTr("1st lane offset"); }
+                    QGCLabel {
+                        text:                   (_missionItem.firstLaneOffset.value * 100).toFixed() + " %" + _missionItem.firstLaneOffset.units
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     presetsFirstLaneOffsetSlider
+                        minimumValue:           0.05
+                        maximumValue:           1
+                        stepSize:               0.05
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.firstLaneOffset.value
+                        onValueChanged:         _missionItem.firstLaneOffset.value = value
+                        Component.onCompleted:  value = _missionItem.firstLaneOffset.value
+                        updateValueWhileDragging: true
+                    }
 
                     QGCCheckBox {
                         text:               qsTr("Ascend transect terminals")

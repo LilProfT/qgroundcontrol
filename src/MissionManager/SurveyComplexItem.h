@@ -40,6 +40,7 @@ public:
     Q_PROPERTY(Fact* splitConcavePolygons   READ splitConcavePolygons   CONSTANT)
     Q_PROPERTY(Fact* ascendTerminals        READ ascendTerminals        CONSTANT)
     Q_PROPERTY(Fact* ascendAltitude         READ ascendAltitude         CONSTANT)
+    Q_PROPERTY(Fact* firstLaneOffset        READ firstLaneOffset        CONSTANT)
     Q_PROPERTY(Fact* ascendLength           READ ascendLength           CONSTANT)
     Q_PROPERTY(QVariantList  angleEdge      READ angleEdge              NOTIFY angleEdgeChanged)
 
@@ -54,6 +55,7 @@ public:
     Fact* splitConcavePolygons  (void) { return &_splitConcavePolygonsFact; }
     Fact* ascendTerminals       (void) { return &_ascendTerminalsFact; }
     Fact* ascendAltitude        (void) { return &_ascendAltitudeFact; }
+    Fact* firstLaneOffset       (void) { return &_firstLaneOffsetFact; }
     Fact* ascendLength          (void) { return &_ascendLengthFact; }
     Fact* gridSpacing           (void) { return _cameraCalc.adjustedFootprintSide(); }
 
@@ -110,6 +112,7 @@ public:
     static const char* splitConcavePolygonsName;
     static const char* ascendTerminalsName;
     static const char* ascendAltitudeName;
+    static const char* firstLaneOffsetName;
     static const char* ascendLengthName;
 
     static const char* jsonV3ComplexItemTypeValue;
@@ -176,6 +179,7 @@ private:
     void _toggleAutoOptimize(QVariant value);
     void _updateAngle(void);
     void _calcFeaturedWidth(void);
+    void _catchFirstEdge(void);
 
     QMap<QString, FactMetaData*> _metaDataMap;
 
@@ -190,6 +194,7 @@ private:
     SettingsFact    _splitConcavePolygonsFact;
     SettingsFact    _ascendTerminalsFact;
     SettingsFact    _ascendAltitudeFact;
+    SettingsFact    _firstLaneOffsetFact;
     SettingsFact    _ascendLengthFact;
     int             _entryPoint;
     int             _edgeIndex = 0;
@@ -207,6 +212,7 @@ private:
     static const char* _jsonSplitConcavePolygonsKey;
     static const char* _jsonAscendTerminalsKey;
     static const char* _jsonAscendAltitudeKey;
+    static const char* _jsonFirstLaneOffsetKey;
     static const char* _jsonAscendLengthKey;
     static const char* _jsonApplicationRateKey;
     static const char* _jsonVelocityKey;
