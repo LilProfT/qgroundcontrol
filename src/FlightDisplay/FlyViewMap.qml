@@ -60,6 +60,7 @@ FlightMap {
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
 
+
     function updateAirspace(reset) {
         if(_airspaceEnabled) {
             var coordinateNW = _root.toCoordinate(Qt.point(0,0), false /* clipToViewPort */)

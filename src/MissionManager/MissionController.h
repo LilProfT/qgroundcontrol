@@ -191,6 +191,7 @@ public:
 
     Q_INVOKABLE SendToVehiclePreCheckState sendToVehiclePreCheck(void);
     Q_INVOKABLE QVariantList boundingCube(void)  ;
+    Q_INVOKABLE QVariantList tracingPath(void)  ;
 
     /// Determines if the mission has all data needed to be saved or sent to the vehicle.
     /// IMPORTANT NOTE: The return value is a VisualMissionItem::ReadForSaveState value. It is an int here to work around

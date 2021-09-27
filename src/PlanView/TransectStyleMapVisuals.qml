@@ -44,6 +44,8 @@ Item {
     property var    _entryCoordinate
     property var    _exitCoordinate
 
+
+
     signal clicked(int sequenceNumber)
 
     function _addVisualElements() {
@@ -85,6 +87,33 @@ Item {
         id: objMgr
     }
 
+    MapPolygon {
+
+        border.width: 4
+        border.color: "yellow"
+        color: "yellow"
+        visible:    _currentItem
+        opacity:    _root.opacity
+        z: 100
+        path:  [
+            { latitude: -35.3627585729104, longitude: 149.16561385359756 },
+            { latitude: -35.36323317011994, longitude: 149.166278961657554},
+            { latitude: -35.36338926624347, longitude: 149.1655693841518 },
+            { latitude: -35.36317483107069, longitude: 149.16540697403713 }
+        ]
+
+//        Connections {
+//            target:                 QGroundControl.multiVehicleManager
+//            onActiveVehicleChanged: tracingAreaPolygon.path = _mapPolygon.boundingCube()
+//        }
+
+//        Connections {
+//            target:                 _activeVehicle ? _missionController  : null
+//            onUpdateSurveyAreaPolygon:      tracingAreaPolygon.path = _mapPolygon.boundingCube()
+////            onPointsCleared:        surveyAreaPolygon.path = []
+//        }
+    }
+
     // Area polygon
     QGCMapPolygonVisuals {
         id:                 mapPolygonVisuals
@@ -98,6 +127,7 @@ Item {
         interiorOpacity:    0.3 * _root.opacity
     }
 
+
     MapPolyline {
         line.color: "red"
         line.width: 4
@@ -106,6 +136,8 @@ Item {
         opacity:    _root.opacity
         z: 100
     }
+
+
 
     // Full set of transects lines. Shown when item is selected.
     Component {

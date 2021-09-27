@@ -136,6 +136,9 @@ public:
     QGCMapPolygon loadSurveyPolygon(void) { return _surveyAreaPolygon;};
     QJsonDocument saveToJson    ();
     QJsonDocument saveRecentFileToJson    (const QString& filename);
+    QGCMapPolygon loadTracingPolygon(void) { return _tracingAreaPolygon;};
+    void setTracingPolygon(QGCMapPolygon tracingPolygon);
+    void clearTracingPolygon();
 
     Vehicle* controllerVehicle(void) { return _controllerVehicle; }
     Vehicle* managerVehicle(void) { return _managerVehicle; }
@@ -203,6 +206,8 @@ private:
     QmlObjectListModel*     _planCreators =             nullptr;
     bool                    _isSourcePlan;
     QGCMapPolygon           _surveyAreaPolygon;
+    QGCMapPolygon           _tracingAreaPolygon;
+
     double           _sprayedArea;
     bool                    _isMissionChange = false;
 

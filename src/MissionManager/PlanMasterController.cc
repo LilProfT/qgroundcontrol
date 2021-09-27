@@ -671,6 +671,16 @@ void PlanMasterController::loadPolygonFromRecentFile(void)
     }
 }
 
+void PlanMasterController::setTracingPolygon(QGCMapPolygon tracingPolygon) {
+    _tracingAreaPolygon.setTracingPath(tracingPolygon.path());
+    emit _missionController.splitSegmentChanged();
+}
+
+void PlanMasterController::clearTracingPolygon() {
+    _tracingAreaPolygon.clear();
+    emit _missionController.splitSegmentChanged();
+}
+
 QJsonDocument PlanMasterController::saveToJson()
 {
     QJsonObject planJson;

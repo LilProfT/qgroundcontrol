@@ -2245,7 +2245,7 @@ bool Vehicle::_areaSprayedStart()
     {
         if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() >= 50) //Arbitrary number
         {
-           // return (flightMode() == missionFlightMode()); //Only records when AUTO mode is used
+            // return (flightMode() == missionFlightMode()); //Only records when AUTO mode is used
             return true;
         } else {
             return false;

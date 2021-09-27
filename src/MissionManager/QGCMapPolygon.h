@@ -109,6 +109,7 @@ public:
     /// Saves the polygon to the json object.
     ///     @param json Json object to save to
     void saveToJson(QJsonObject& json);
+    void saveTracingToJson(QJsonObject& json);
 
     /// Load a polygon from json
     ///     @param json Json object to load from
@@ -116,6 +117,7 @@ public:
     ///     @param errorString Error string if return is false
     /// @return true: success, false: failure (errorString set)
     bool loadFromJson(const QJsonObject& json, bool required, QString& errorString);
+    bool loadTracingFromJson(const QJsonObject& json, bool required, QString& errorString);
 
     /// Convert polygon to NED and return (D is ignored)
     QList<QPointF> nedPolygon(void) const;
@@ -152,10 +154,12 @@ public:
     void setTraceMode   (bool traceMode);
     void setShowAltColor(bool showAltColor);
     void selectVertex   (int index);
+    void setTracingPath        (const QVariantList& path);
 
     QPolygonF       toPolygonF             (QGeoCoordinate& tangentOrigin) const;
 
     static const char* jsonPolygonKey;
+    static const char* jsonTracingPolygonKey;
 
 signals:
     void countChanged       (int count);

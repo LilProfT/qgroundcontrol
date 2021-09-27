@@ -169,6 +169,7 @@ protected:
     QGeoCoordinate      _exitCoordinate;
     QGCMapPolygon       _surveyAreaPolygon;
     QGCMapPolygon       _offsetAreaPolygon;
+    QGCMapPolygon       _tracingAreaPolygon;
 
     enum CoordType {
         CoordTypeInterior,              ///< Interior waypoint for flight path only

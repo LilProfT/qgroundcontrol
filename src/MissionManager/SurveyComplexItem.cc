@@ -218,7 +218,7 @@ void SurveyComplexItem::_saveWorker(QJsonObject& saveObject)
     saveObject[_jsonEdgeIndexKey] = _edgeIndex;
 
     // Polygon shape
-    _surveyAreaPolygon.saveToJson(saveObject);
+    _surveyAreaPolygon.saveToJson(saveObject);    
     _masterController->savePolygon(_surveyAreaPolygon.path());
 }
 
@@ -1588,6 +1588,7 @@ double SurveyComplexItem::additionalTimeDelay (void) const
 void SurveyComplexItem::_updateWizardMode(void)
 {
     if (_surveyAreaPolygon.isValid() && !_surveyAreaPolygon.traceMode()) {
+        _masterController->setTracingPolygon(_surveyAreaPolygon);
         setWizardMode(false);
     }
 }

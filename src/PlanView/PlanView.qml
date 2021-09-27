@@ -65,6 +65,12 @@ Item {
     readonly property int       _layerGeoFence:             2
     readonly property int       _layerRallyPoints:          3
     readonly property string    _armedVehicleUploadPrompt:  qsTr("Vehicle is currently armed. Do you want to upload the mission to the vehicle?")
+    property var  _path: [
+        { latitude: -35.3627585729104, longitude: 149.16561385359756 },
+        { latitude: -35.36323317011994, longitude: 149.166278961657554},
+        { latitude: -35.36338926624347, longitude: 149.1655693841518 },
+        { latitude: -35.36317483107069, longitude: 149.16540697403713 }
+    ]
 
     function mapCenter() {
         var coordinate = editorMap.center
@@ -558,6 +564,21 @@ Item {
                 }
             }
 
+            MapPolygon {
+                id:             tracingAreaPolygon
+
+                border.width: 2
+                border.color: "white"
+                color: "transparent"
+                visible: true
+                opacity:    _root.opacity
+
+                Connections {
+                    target:                  _missionController
+                    onSplitSegmentChanged:   tracingAreaPolygon.path = _missionController.tracingPath()
+                }
+            }
+
             // Incomplete segment lines
             MapItemView {
                 model: _missionController.incompleteComplexItemLines
@@ -570,6 +591,8 @@ Item {
                     opacity:    _editingLayer == _layerMission ? 1 : editorMap._nonInteractiveOpacity
                 }
             }
+
+
 
             // UI for splitting the current segment
             MapQuickItem {

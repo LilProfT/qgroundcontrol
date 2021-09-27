@@ -642,6 +642,7 @@ void MissionController::removeAll(void)
         _managerVehicle->updateResumeCoordinate(coordinate);
         _missionManager->loadResumeFromFile(false);
         _missionManager->updateCacheResumeIndex(-1);
+        _masterController->clearTracingPolygon();
         _masterController->saveSprayedArea(0);
     }
 }
@@ -830,6 +831,7 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
     }
 
 
+
     if (json.contains(_jsonSprayAreaKey)) {
         double area = json[_jsonSprayAreaKey].toDouble();
         qCWarning(MissionControllerLog) << "_jsonSprayAreaKey: " << json[_jsonSprayAreaKey].toDouble();
@@ -970,6 +972,13 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
                 }
             }
         }
+    }
+
+    QGCMapPolygon tracingPolygon;
+    if (!tracingPolygon.loadTracingFromJson(json, true /* required */, errorString)) {
+        tracingPolygon.clear();
+    } else {
+        _masterController->setTracingPolygon(tracingPolygon);
     }
 
     return true;
@@ -1199,6 +1208,8 @@ void MissionController::save(QJsonObject& json)
     json[_jsonCruiseSpeedKey]               = _controllerVehicle->defaultCruiseSpeed();
     json[_jsonHoverSpeedKey]                = _controllerVehicle->defaultHoverSpeed();
     json[_jsonGlobalPlanAltitudeModeKey]    = _globalAltMode;
+
+    _masterController->loadTracingPolygon().saveTracingToJson(json);
 
     // Save the visual items
 
@@ -2852,6 +2863,12 @@ QVariantList  MissionController::boundingCube(void)
 {
     return _masterController->loadSurveyPolygon().path();
 }
+
+QVariantList  MissionController::tracingPath(void)
+{
+    return _masterController->loadTracingPolygon().path();
+}
+
 
 void MissionController::injectDrainedWaterPoint(double remaining)
 {

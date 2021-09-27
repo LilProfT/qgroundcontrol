@@ -24,6 +24,7 @@
 #include <QDomDocument>
 
 const char* QGCMapPolygon::jsonPolygonKey = "polygon";
+const char* QGCMapPolygon::jsonTracingPolygonKey = "tracingPolygon";
 
 QGCMapPolygon::QGCMapPolygon(QObject* parent)
     : QObject               (parent)
@@ -203,6 +204,17 @@ void QGCMapPolygon::setPath(const QList<QGeoCoordinate>& path)
     emit pathChanged();
 }
 
+void QGCMapPolygon::setTracingPath(const QVariantList& path)
+{
+    _polygonPath = path;
+
+    _polygonModel.clearAndDeleteContents();
+    for (int i=0; i<_polygonPath.count(); i++) {
+        _polygonModel.append(new QGCQGeoCoordinate(_polygonPath[i].value<QGeoCoordinate>(), this));
+    }
+
+}
+
 void QGCMapPolygon::setPath(const QVariantList& path)
 {
     _polygonPath = path;
@@ -224,6 +236,16 @@ void QGCMapPolygon::saveToJson(QJsonObject& json)
     json.insert(jsonPolygonKey, jsonValue);
 
     json.insert("polygonOffsets", QJsonObject::fromVariantMap(_offsets));
+
+    setDirty(false);
+}
+
+void QGCMapPolygon::saveTracingToJson(QJsonObject& json)
+{
+    QJsonValue jsonValue;
+
+    JsonHelper::saveGeoCoordinateArray(_polygonPath, false /* writeAltitude*/, jsonValue);
+    json.insert(jsonTracingPolygonKey, jsonValue);
 
     setDirty(false);
 }
@@ -254,6 +276,37 @@ bool QGCMapPolygon::loadFromJson(const QJsonObject& json, bool required, QString
 
     setDirty(false);
     emit pathChanged();
+
+    return true;
+
+}
+
+bool QGCMapPolygon::loadTracingFromJson(const QJsonObject& json, bool required, QString& errorString)
+{
+    errorString.clear();
+    clear();
+
+    if (required) {
+        if (!JsonHelper::validateRequiredKeys(json, QStringList(jsonTracingPolygonKey), errorString)) {
+            return false;
+        }
+    } else if (!json.contains(jsonTracingPolygonKey)) {
+        return true;
+    }
+
+    if (!JsonHelper::loadGeoCoordinateArray(json[jsonTracingPolygonKey], false /* altitudeRequired */, _polygonPath, errorString)) {
+        return false;
+    }
+
+    for (int i=0; i<_polygonPath.count(); i++) {
+        _polygonModel.append(new QGCQGeoCoordinate(_polygonPath[i].value<QGeoCoordinate>(), this));
+    }
+
+    QJsonValue offsetJson = json.value("polygonOffsets");
+    if (offsetJson != QJsonValue::Undefined) _offsets = offsetJson.toObject().toVariantMap();
+
+//    setDirty(false);
+//    emit pathChanged();
 
     return true;
 
