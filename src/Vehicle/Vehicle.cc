@@ -220,9 +220,9 @@ Vehicle::Vehicle(LinkInterface*             link,
         }
     }
 #endif
-    if (_flightHubManager == nullptr) {
-        _flightHubManager               = new FlightHubManager(this);
-    }
+//    if (_flightHubManager == nullptr) {
+//        _flightHubManager               = new FlightHubManager(this);
+//    }
     _autopilotPlugin = _firmwarePlugin->autopilotPlugin(this);
     _autopilotPlugin->setParent(this);
 

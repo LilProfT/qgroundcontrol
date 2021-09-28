@@ -1097,6 +1097,102 @@ Rectangle {
                         }
                     }
 
+                    Item { width: 1; height: _margins; visible: flightHubSectionLabel.visible }
+                    QGCLabel {
+                        id:         flightHubSectionLabel
+                        text:       qsTr("Flight Hub")
+                        visible:    QGroundControl.settingsManager.ntripSettings.visible
+                    }
+                    Rectangle {
+                        Layout.preferredHeight: flightHubGrid.height + (_margins * 2)
+                        Layout.preferredWidth:  flightHubGrid.width + (_margins * 2)
+                        color:                  qgcPal.windowShade
+                        visible:                flightHubSectionLabel.visible
+                        Layout.fillWidth:       true
+
+                        GridLayout {
+                            id:                         flightHubGrid
+                            anchors.topMargin:          _margins
+                            anchors.top:                parent.top
+                            Layout.fillWidth:           true
+                            anchors.horizontalCenter:   parent.horizontalCenter
+                            columns:                    2
+
+                            property var  flightHubSettings:    QGroundControl.settingsManager.flightHubSettings
+
+
+                            FactCheckBox {
+                                fact:                   flightHubGrid.flightHubSettings.flightHubServerConnectEnable
+                                text:                   flightHubGrid.flightHubSettings.flightHubServerConnectEnable.shortDescription
+                                visible:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.visible
+                                Layout.columnSpan:      2
+                            }
+
+                            QGCLabel {
+                                text:               flightHubGrid.flightHubSettings.flightHubServerHostAddress.shortDescription
+                                visible:            flightHubGrid.flightHubSettings.flightHubServerHostAddress.visible
+                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+
+                            }
+                            FactTextField {
+                                fact:                   flightHubGrid.flightHubSettings.flightHubServerHostAddress
+                                visible:                flightHubGrid.flightHubSettings.flightHubServerHostAddress.visible
+                                Layout.fillWidth:       true
+                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            }
+
+                            QGCLabel {
+                                text:               flightHubGrid.flightHubSettings.flightHubServerPort.shortDescription
+                                visible:            flightHubGrid.flightHubSettings.flightHubServerPort.visible
+                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            }
+                            FactTextField {
+                                fact:                   flightHubGrid.flightHubSettings.flightHubServerPort
+                                visible:                flightHubGrid.flightHubSettings.flightHubServerPort.visible
+                                Layout.fillWidth:       true
+                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            }
+                            QGCLabel {
+                                text:               flightHubGrid.flightHubSettings.flightHubUserName.shortDescription
+                                visible:            flightHubGrid.flightHubSettings.flightHubUserName.visible
+                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            }
+                            FactTextField {
+                                fact:                   flightHubGrid.flightHubSettings.flightHubUserName
+                                visible:                flightHubGrid.flightHubSettings.flightHubUserName.visible
+                                Layout.fillWidth:       true
+                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                                showHelp:               false
+                            }
+                            QGCLabel {
+                                text:               flightHubGrid.flightHubSettings.flightHubPasswd.shortDescription
+                                visible:            flightHubGrid.flightHubSettings.flightHubPasswd.visible
+                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+
+                            }
+                            FactTextField {
+                                fact:                   flightHubGrid.flightHubSettings.flightHubPasswd
+                                echoMode:               TextInput.Password
+                                visible:                flightHubGrid.flightHubSettings.flightHubPasswd.visible
+                                Layout.fillWidth:       true
+                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                                showHelp:               false
+                            }
+                            QGCLabel {
+                                text:               flightHubGrid.flightHubSettings.flightHubDeviceToken.shortDescription
+                                visible:            flightHubGrid.flightHubSettings.flightHubDeviceToken.visible
+                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            }
+                            FactTextField {
+                                fact:                   flightHubGrid.flightHubSettings.flightHubDeviceToken
+                                visible:                flightHubGrid.flightHubSettings.flightHubDeviceToken.visible
+                                Layout.fillWidth:       true
+                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                                showHelp:               false
+                            }
+                        }
+                    }
+
                     Item { width: 1; height: _margins; visible: adsbSectionLabel.visible }
                     QGCLabel {
                         id:         adsbSectionLabel
@@ -1109,8 +1205,8 @@ Rectangle {
                         Layout.preferredHeight: adsbGrid.y + adsbGrid.height + _margins
                         Layout.preferredWidth:  adsbGrid.width + (_margins * 2)
                         color:                  qgcPal.windowShade
-                        //visible:                adsbSectionLabel.visible
-                        visible:                false
+                        visible:                adsbSectionLabel.visible
+                        //visible:                false
                         Layout.fillWidth:       true
 
                         QGCLabel {
@@ -1167,7 +1263,8 @@ Rectangle {
                     QGCLabel {
                         id:         brandImageSectionLabel
                         text:       qsTr("Brand Image")
-                        visible:    QGroundControl.settingsManager.brandImageSettings.visible && !ScreenTools.isMobile
+                        //visible:    QGroundControl.settingsManager.brandImageSettings.visible && !ScreenTools.isMobile
+                        visible: false
                     }
                     Rectangle {
                         Layout.preferredWidth:  brandImageGrid.width + (_margins * 2)

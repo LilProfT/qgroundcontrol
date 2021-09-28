@@ -605,7 +605,7 @@ Item {
             QGCButton {
                 _horizontalPadding: 0
                 text:               qsTr("Basic")
-                visible:            !mapPolygon.traceMode
+                visible:            false
                 onClicked:          _resetPolygon()
             }
 

@@ -11,16 +11,22 @@
 #include "QJsonObject"
 #include "QJsonDocument"
 //#include "QGCLoggingCategory.h"
+#include "FlightHubSettings.h"
+#include "SettingsManager.h"
 
 QGC_LOGGING_CATEGORY(FlightHubManagerLog, "FlightHubManagerLog")
 
-FlightHubManager::FlightHubManager(Vehicle* vehicle)
-    :_vehicle(vehicle)
+FlightHubManager::FlightHubManager(QGCApplication* app, QGCToolbox* toolbox)
+    : QGCTool(app, toolbox)
 {
+}
+
+void FlightHubManager::setToolbox(QGCToolbox* toolbox)
+{
+    QGCTool::setToolbox(toolbox);
     qCDebug(FlightHubManagerLog) << "Instatiating FlightHubManager";
 
-    //connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &FlightHubManager::_mavlinkMessageReceived);
-    //connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_vehicleReady);
+    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_vehicleReady);
 }
 
 FlightHubManager::~FlightHubManager()
@@ -42,9 +48,21 @@ FlightHubManager::_vehicleReady(bool ready)
 {
     qCDebug(FlightHubManagerLog) << "_vehicleReady(" << ready << ")";
     if(ready) {
+        _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
         if(qgcApp()->toolbox()->multiVehicleManager()->activeVehicle() == _vehicle) {
+            connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &FlightHubManager::_mavlinkMessageReceived);
+
+            FlightHubSettings* flightHubSettings = qgcApp()->toolbox()->settingsManager()->flightHubSettings();
+            qCWarning(FlightHubManagerLog) << "flightHubServerHostAddress(" << flightHubSettings->flightHubServerHostAddress()->rawValue().toString() << ")";
+            qCWarning(FlightHubManagerLog) << "flightHubServerPort(" << flightHubSettings->flightHubServerPort()->rawValue().toInt() << ")";
+            qCWarning(FlightHubManagerLog) << "flightHubDeviceToken(" << flightHubSettings->flightHubDeviceToken()->rawValue().toString() << ")";
+
             _flightHubMQtt = new FlightHubMqtt(this);
-            _flightHubMQtt->initParams("13.250.118.139", 1883, "QQYYJ4Qa47uz5XtnlFav", "QQYYJ4Qa47uz5XtnlFav");
+            _flightHubMQtt->initParams(flightHubSettings->flightHubServerHostAddress()->rawValue().toString(),
+                                       flightHubSettings->flightHubServerPort()->rawValue().toInt(),
+                                       flightHubSettings->flightHubDeviceToken()->rawValue().toString(),
+                                       flightHubSettings->flightHubDeviceToken()->rawValue().toString());
+
             connect(this, &FlightHubManager::publishMsg, _flightHubMQtt, &FlightHubMqtt::publishMsg);
 
             _flightHubMQtt->moveToThread(&mqttclientThread);

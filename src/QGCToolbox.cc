@@ -78,6 +78,8 @@ QGCToolbox::QGCToolbox(QGCApplication* app)
     _mavlinkLogManager      = new MAVLinkLogManager         (app, this);
     _adsbVehicleManager     = new ADSBVehicleManager        (app, this);
     _ntrip                  = new NTRIP                     (app, this);
+    _flightHubManager       = new FlightHubManager          (app, this);
+
 #if defined(QGC_ENABLE_PAIRING)
     _pairingManager         = new PairingManager            (app, this);
 #endif
@@ -140,6 +142,8 @@ void QGCToolbox::setChildToolboxes(void)
     _airspaceManager->setToolbox(this);
     _adsbVehicleManager->setToolbox(this);
     _ntrip->setToolbox(this);
+    _flightHubManager->setToolbox(this);
+
 #if defined(QGC_GST_TAISYNC_ENABLED)
     _taisyncManager->setToolbox(this);
 #endif

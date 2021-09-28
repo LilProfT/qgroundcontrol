@@ -28,6 +28,8 @@
 #include "APMMavlinkStreamRateSettings.h"
 #include "FirmwareUpgradeSettings.h"
 #include "ADSBVehicleManagerSettings.h"
+#include "FlightHubSettings.h"
+
 #if defined(QGC_AIRMAP_ENABLED)
 #include "AirMapSettings.h"
 #endif
@@ -51,6 +53,8 @@ public:
     Q_PROPERTY(QObject* flightMapSettings               READ flightMapSettings              CONSTANT)
     Q_PROPERTY(QObject* rtkSettings                     READ rtkSettings                    CONSTANT)
     Q_PROPERTY(QObject* ntripSettings                   READ ntripSettings                  CONSTANT)
+    Q_PROPERTY(QObject* flightHubSettings                   READ flightHubSettings                  CONSTANT)
+
     Q_PROPERTY(QObject* flyViewSettings                 READ flyViewSettings                CONSTANT)
     Q_PROPERTY(QObject* planViewSettings                READ planViewSettings               CONSTANT)
     Q_PROPERTY(QObject* brandImageSettings              READ brandImageSettings             CONSTANT)
@@ -73,6 +77,7 @@ public:
     FlightMapSettings*              flightMapSettings           (void) { return _flightMapSettings; }
     RTKSettings*                    rtkSettings                 (void) { return _rtkSettings; }
     NTRIPSettings*                  ntripSettings               (void) { return _ntripSettings; }
+    FlightHubSettings*              flightHubSettings               (void) { return _flightHubSettings; }
     FlyViewSettings*                flyViewSettings             (void) { return _flyViewSettings; }
     PlanViewSettings*               planViewSettings            (void) { return _planViewSettings; }
     BrandImageSettings*             brandImageSettings          (void) { return _brandImageSettings; }
@@ -93,6 +98,8 @@ private:
     FlightMapSettings*              _flightMapSettings;
     RTKSettings*                    _rtkSettings;
     NTRIPSettings*                  _ntripSettings;
+    FlightHubSettings*              _flightHubSettings;
+
     FlyViewSettings*                _flyViewSettings;
     PlanViewSettings*               _planViewSettings;
     BrandImageSettings*             _brandImageSettings;

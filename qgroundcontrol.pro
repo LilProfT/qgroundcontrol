@@ -429,6 +429,7 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 HEADERS += \
     src/MissionManager/MissionModel.h \
     src/QmlControls/QmlUnitsConversion.h \
+    src/Settings/FlightHubSettings.h \
     src/Vehicle/VehicleEscStatusFactGroup.h \
     src/api/QGCCorePlugin.h \
     src/api/QGCOptions.h \
@@ -445,6 +446,7 @@ SOURCES += \
     src/MissionManager/MissionModel.cc \
     src/MissionManager/MissionModel.fence.cc \
     src/MissionManager/SurveyComplexItem.mismart.cc \
+    src/Settings/FlightHubSettings.cc \
     src/Vehicle/VehicleEscStatusFactGroup.cc \
     src/api/QGCCorePlugin.cc \
     src/api/QGCOptions.cc \

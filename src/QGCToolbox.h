@@ -35,6 +35,8 @@ class SettingsManager;
 class AirspaceManager;
 class ADSBVehicleManager;
 class NTRIP;
+class FlightHubManager;
+
 #if defined(QGC_ENABLE_PAIRING)
 class PairingManager;
 #endif
@@ -72,6 +74,8 @@ public:
     AirspaceManager*            airspaceManager         () { return _airspaceManager; }
     ADSBVehicleManager*         adsbVehicleManager      () { return _adsbVehicleManager; }
     NTRIP*                      ntrip                   () { return _ntrip; }
+    FlightHubManager*           flightHubManager        () { return _flightHubManager; }
+
 #if defined(QGC_ENABLE_PAIRING)
     PairingManager*             pairingManager          () { return _pairingManager; }
 #endif
@@ -116,6 +120,8 @@ private:
     AirspaceManager*            _airspaceManager        = nullptr;
     ADSBVehicleManager*         _adsbVehicleManager     = nullptr;
     NTRIP*                      _ntrip                  = nullptr;
+    FlightHubManager*           _flightHubManager       = nullptr;
+
 #if defined(QGC_ENABLE_PAIRING)
     PairingManager*             _pairingManager         = nullptr;
 #endif

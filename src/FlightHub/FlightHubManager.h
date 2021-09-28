@@ -8,6 +8,7 @@
  ****************************************************************************/
 
 #pragma once
+#include "QGCToolbox.h"
 
 #include <QObject>
 #include <QDir>
@@ -24,15 +25,17 @@ Q_DECLARE_LOGGING_CATEGORY(FlightHubManagerLog)
 
 class Vehicle;
 
-class FlightHubManager : public QObject
+class FlightHubManager : public QGCTool
 {
     Q_OBJECT
 
     friend class Vehicle;
 
 public:
-    FlightHubManager(Vehicle* vehicle);
+    FlightHubManager(QGCApplication* app, QGCToolbox* toolbox);
+   // FlightHubManager(Vehicle* vehicle);
     ~FlightHubManager();
+    void setToolbox(QGCToolbox* toolbox) final;
 
     /// Downloads the specified file.
     ///     @param fromURI  File to download from vehicle, fully qualified path. May be in the format "mftp://[;comp=<id>]..." where the component id is specified.

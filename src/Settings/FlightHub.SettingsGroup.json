@@ -1,0 +1,45 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name" :                "flightHubServerConnectEnable",
+    "shortDesc":            "Connect to FlightHub server",
+    "longDesc":             "Connect to FlightHub server using information provided",
+    "type":                 "bool",
+    "default":              "false",
+    "qgcRebootRequired":    true
+},
+{
+    "name" :                "flightHubServerHostAddress",
+    "shortDesc":            "Host Address",
+    "type":                 "string",
+    "default":              "flighthub.mismart.ai"
+},
+{
+    "name" :                "flightHubServerPort",
+    "shortDesc":            "Port",
+    "type":                 "string",
+    "default":              "1883"
+},
+{
+    "name" :                "flightHubUserName",
+    "shortDesc":            "User Name",
+    "type":                 "string",
+    "default":              ""
+},
+{
+    "name" :                "flightHubPasswd",
+    "shortDesc":            "Password",
+    "type":                 "string",
+    "default":              ""
+},
+{
+    "name" :                "flightHubDeviceToken",
+    "shortDesc":            "Device Token",
+    "type":                 "string",
+    "default":              ""
+}
+]
+}
