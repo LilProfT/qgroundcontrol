@@ -28,6 +28,7 @@ Item {
 
     property var    _missionItem:               object
     property var    _mapPolygon:                object.surveyAreaPolygon
+    property var    _offsetPolygon:             object.offsetAreaPolygon
     property bool   _currentItem:               object.isCurrentItem
     property var    _transectPoints:            _missionItem.visualTransectPoints
     property var    _angleEdge:                 _missionItem.angleEdge ? _missionItem.angleEdge : []
@@ -50,7 +51,7 @@ Item {
 
     function _addVisualElements() {
         var toAdd = [ fullTransectsComponent, entryTransectComponent, exitTransectComponent, entryPointComponent, exitPointComponent,
-                     entryArrow1Component, entryArrow2Component, exitArrow1Component, exitArrow2Component ]
+                     entryArrow1Component, entryArrow2Component, exitArrow1Component, exitArrow2Component, offsetPolygonComponent ]
         objMgr.createObjects(toAdd, map, true /* parentObjectIsMap */)
 
         console.log(_missionItem.angleEdge);
@@ -112,6 +113,18 @@ Item {
 //            onUpdateSurveyAreaPolygon:      tracingAreaPolygon.path = _mapPolygon.boundingCube()
 ////            onPointsCleared:        surveyAreaPolygon.path = []
 //        }
+    }
+
+    Component {
+        id: offsetPolygonComponent
+
+        MapPolygon {
+            border.width: 2
+            border.color: 'green'
+            path: _offsetPolygon.path
+            visible: true
+            opacity: _root.opacity
+        }
     }
 
     // Area polygon

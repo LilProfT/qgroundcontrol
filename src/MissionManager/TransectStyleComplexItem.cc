@@ -1308,7 +1308,8 @@ void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
     convertGeoToNed(_surveyAreaPolygon.center(), tangentOrigin, &y, &x, &down);
     QPointF center(x, -y);
 
-    QList<QLineF> offsetLines;
+    QPolygonF currentPolygon;
+    currentPolygon << basePolygon;
     for (int i=0; i<basePolygon.count(); i++) {
         int     lastIndex = i == basePolygon.count() - 1 ? 0 : i + 1;
         QLineF  originalEdge(basePolygon[i], basePolygon[lastIndex]);
@@ -1326,18 +1327,50 @@ void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
         workerLine.setPoints(workerLine.p2(), intersectPoint);// swap terminals
         workerLine.setAngle(originalEdge.angle());            // rotate the crossline to create offset line on the base point
 
-        offsetLines.append(workerLine);
+        QList<QPointF> intersectPoints;
+        for (int j=0; j<currentPolygon.count(); j++) {
+            int lastj = j == currentPolygon.count() - 1 ? 0 : j+1;
+            QLineF AB(currentPolygon[j], currentPolygon[lastj]);
+            QPointF intersectPoint;
+            auto result = workerLine.intersect(AB, &intersectPoint);
+            if (result != QLineF::NoIntersection) {
+                QLineF MC(AB.center(), intersectPoint);
+                bool inboundAB = MC.length() <= AB.length()/2;
+                if (inboundAB) intersectPoints.append(intersectPoint);
+            }
+        }
+
+//        assert((intersectPoints.count() == 2) || (intersectPoints.count() == 0));
+
+        QPolygonF nextPolygon;
+        if (intersectPoints.count() == 2) {
+            float cos = workerLine.dx() / workerLine.length();
+            float sin = workerLine.dy() / workerLine.length();
+            QPointF V0 = originalEdge.p2() - workerLine.p1();
+            float originRegion = -sin*V0.x() + cos*V0.y();
+            for (const QPointF& vertex: currentPolygon) {
+                QPointF V = vertex - workerLine.p1();
+                float vertexRegion = -sin*V.x() + cos*V.y();
+                if (vertexRegion * originRegion < 0) nextPolygon << vertex;
+            }
+
+            QLineF testEdgeFirst(nextPolygon.first(), intersectPoints[0]);
+            QLineF testEdgeLast(nextPolygon.last(), intersectPoints[1]);
+            QPointF temp;
+            if (testEdgeFirst.intersect(testEdgeLast, &temp) == QLineF::BoundedIntersection) {
+                nextPolygon << intersectPoints[0] << intersectPoints[1];
+            } else {
+                nextPolygon << intersectPoints[1] << intersectPoints[0];
+            }
+
+            currentPolygon.clear();
+            currentPolygon << nextPolygon;
+        }
     }
 
-    // Intersect the offset edges to generate new vertices
-    QPointF         newVertex;
-    for (int i=0; i<offsetLines.count(); i++) {
-        int prevIndex = i == 0 ? offsetLines.count() - 1 : i - 1;
-        auto intersect = offsetLines[prevIndex].intersect(offsetLines[i], &newVertex);
-        assert(intersect != QLineF::NoIntersection);
-
+    for (const QPointF& vertex: currentPolygon) {
         QGeoCoordinate coord;
-        convertNedToGeo(-newVertex.y(), newVertex.x(), 0, tangentOrigin, &coord);
+        convertNedToGeo(-vertex.y(), vertex.x(), 0, tangentOrigin, &coord);
         _offsetAreaPolygon.appendVertex(coord);
     };
 

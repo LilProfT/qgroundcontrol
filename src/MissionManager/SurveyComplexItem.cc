@@ -893,7 +893,7 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
     // [mismart] adjust the space phase of transects
     if ((lineList.count() > 0) && (_angleEdge.count() > 0)) {
         QGeoCoordinate center = _offsetAreaPolygon.center();
-        QGeoCoordinate edgePoint = _angleEdge[0].value<QGeoCoordinate>();
+        QGeoCoordinate edgePoint = _offsetAreaPolygon.pathModel().value<QGCQGeoCoordinate*>(_edgeIndex)->coordinate();
 
         // sampling the line list, get 1 sample
         double firstAzimuth = gridAngle + 90;
