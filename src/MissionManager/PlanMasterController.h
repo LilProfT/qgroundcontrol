@@ -108,7 +108,7 @@ public:
     void loadPolygonFromRecentFile(void);
 
 
-    double      area            (void) const;
+    double      area            (void);
     Fact*       applicationRate (void) { return _surveyComplexItem ? _surveyComplexItem->applicationRate() : nullptr; }
     Fact*       flowRate        (void) { return _surveyComplexItem ? _surveyComplexItem->sprayFlowRate() : nullptr; }
     Fact*       spacing         (void) { return _surveyComplexItem ? _surveyComplexItem->gridSpacing() : nullptr; }

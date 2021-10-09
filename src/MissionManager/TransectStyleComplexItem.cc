@@ -448,7 +448,7 @@ void TransectStyleComplexItem::_rebuildTransects (void)
 
         QGeoCoordinate downAfterFirst = first.atDistanceAndAzimuth(ascendLength, azimuth, -ascendAltitude);
         qDebug() << downAfterFirst;
-        QGeoCoordinate upBeforeSecond = second.atDistanceAndAzimuth(ascendLength, rev_azimuth, -ascendAltitude);
+        QGeoCoordinate upBeforeSecond = second.atDistanceAndAzimuth(ascendLength + 3.0, rev_azimuth, -ascendAltitude);
         qDebug() << upBeforeSecond;
 
         _model.appendWaypoint(first);
