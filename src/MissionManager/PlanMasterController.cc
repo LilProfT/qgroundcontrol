@@ -1096,9 +1096,14 @@ void PlanMasterController::setParam()
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WP_YAW_BEHAVIOR")->setProperty("value", 0);
 };
 
-double PlanMasterController::area() const
+double PlanMasterController::area()
 {
-    return _surveyComplexItem ?
+    double surveyArea = _surveyComplexItem ?
         _surveyComplexItem->coveredArea() :
         0.0;
+    double result = surveyArea;
+    for (int i=0; i<_geoFenceController.polygons()->count(); i++) {
+        result -= _geoFenceController.polygons()->value<QGCFencePolygon*>(i)->area();
+    }
+    return result;
 }
