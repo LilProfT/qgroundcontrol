@@ -32,6 +32,7 @@ Rectangle {
     property string _doneAdjusting:             qsTr("Done")
     property var    _missionItem:               missionItem
     property bool   _presetsAvailable:          _missionItem.presetNames.length !== 0
+    property int _marginSlider : 20
 
     function polygonCaptureStarted() {
         _missionItem.clearPolygon()
@@ -151,6 +152,15 @@ Rectangle {
                     }
 
                     QGCLabel { text: qsTr("Settle Velocity") }
+//                    QGCButton {
+//                                        Layout.alignment: Qt.AlignRight
+//                                        width: 20
+//                                        height: 20
+//                                        text: qsTr("+")
+//                                        onClicked: {
+//                                            //_root.value = _root.value + _root.stepSize
+//                                        }
+//                                    }
                     FactTextField {
                         fact:                   _missionItem.velocity
                         Layout.fillWidth:       true
@@ -169,6 +179,9 @@ Rectangle {
                         maximumValue:           7.0
                         stepSize:               0.1
                         tickmarksEnabled:       false
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
@@ -241,6 +254,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.firstLaneOffset.value
                         onValueChanged:         _missionItem.firstLaneOffset.value = value
@@ -274,6 +289,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.ascendAltitude.value
                         onValueChanged:         _missionItem.ascendAltitude.value = value
@@ -300,6 +317,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.ascendLength.value
                         onValueChanged:         _missionItem.ascendLength.value = value
@@ -344,6 +363,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.gridAngle.value
                         onValueChanged:         _missionItem.gridAngle.value = value
@@ -384,6 +405,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.turnAroundDistance.value
                         onValueChanged:         _missionItem.turnAroundDistance.value = value
@@ -648,6 +671,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.velocity.value
                         onValueChanged:         _missionItem.velocity.value = value
@@ -691,6 +716,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.firstLaneOffset.value
                         onValueChanged:         _missionItem.firstLaneOffset.value = value
@@ -724,6 +751,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.ascendAltitude.value
                         onValueChanged:         _missionItem.ascendAltitude.value = value
@@ -750,6 +779,8 @@ Rectangle {
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
                         Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.ascendLength.value
                         onValueChanged:         _missionItem.ascendLength.value = value

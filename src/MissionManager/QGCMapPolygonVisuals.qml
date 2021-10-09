@@ -49,7 +49,7 @@ Item {
 
     readonly property string _polygonToolsText: qsTr("Polygon Tools")
     readonly property string _traceText:        qsTr("Click in the map to add vertices. Click 'Done Tracing' when finished.")
-
+    property int _marginSlider : 20
     function addCommonVisuals() {
         if (_objMgrCommonVisuals.empty) {
             _objMgrCommonVisuals.createObject(polygonComponent, mapControl, true)
@@ -536,11 +536,34 @@ Item {
                         QGCLabel {
                             text: qsTr("Offset")
                         }
+                        QGCLabel {
+                            text:                  offsetSlider.value + " " + "m"
+                            Layout.alignment: Qt.AlignRight
+                        }
                         QGCTextField {
                             id:                 offsetField
                             unitsLabel:         "m"
                             showUnits:          true
                             Layout.fillWidth:   true
+                            visible: false
+                        }
+
+                        QGCSlider {
+                            id:                     offsetSlider
+                            minimumValue:           0
+                            maximumValue:           10
+                            stepSize:               0.5
+                            tickmarksEnabled:       false
+                            Layout.fillWidth:       true
+                            Layout.columnSpan:      2
+                            Layout.leftMargin: _marginSlider
+                            Layout.rightMargin: _marginSlider
+                            Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                            Component.onCompleted:                  offsetSlider.value = (mapPolygon.offsets[menu._editingVertexIndex.toString()] || 0).toString()
+                            value:                  (mapPolygon.offsets[menu._editingVertexIndex.toString()] || 0).toString()
+
+                            updateValueWhileDragging: true
+                            visible:            true
                         }
 
                         QGCButton {
@@ -548,6 +571,8 @@ Item {
                             Layout.alignment:   Qt.AlignRight
                             Layout.columnSpan:  2
                             onClicked: {
+                                offsetField.text = offsetSlider.value.toFixed(1)
+
                                 mapPolygon.setOffset(menu._editingVertexIndex, parseFloat(offsetField.text))
                                 reject()
                             }

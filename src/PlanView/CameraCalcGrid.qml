@@ -145,6 +145,8 @@ Column {
             tickmarksEnabled:       false
             Layout.fillWidth:       true
             Layout.columnSpan:      2
+            Layout.leftMargin: _marginSlider
+            Layout.rightMargin: _marginSlider
             Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
             value:                  cameraCalc.distanceToSurface.value
             onValueChanged:         cameraCalc.distanceToSurface.value = value
@@ -174,6 +176,8 @@ Column {
             tickmarksEnabled:       false
             Layout.fillWidth:       true
             Layout.columnSpan:      2
+            Layout.leftMargin: _marginSlider
+            Layout.rightMargin: _marginSlider
             Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
             value:                  cameraCalc.adjustedFootprintSide.value
             onValueChanged:         {

@@ -14,6 +14,7 @@ import QtQuick.Controls.Private 1.0
 
 import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
+import QtQuick.Layouts  1.2
 
 Slider {
     id:             _root
@@ -22,6 +23,8 @@ Slider {
     // Value indicator starts display from zero instead of min value
     property bool zeroCentered: false
     property bool displayValue: false
+    property int _margin : 10
+    property int _sizeButton : 20
 
     style: SliderStyle {
         groove: Item {
@@ -30,11 +33,25 @@ Slider {
             implicitHeight:         Math.round(ScreenTools.defaultFontPixelHeight * 0.3)
 
             Rectangle {
+                id:     slidebar
                 radius:         height / 2
                 anchors.fill:   parent
                 color:          qgcPal.button
                 border.width:   1
                 border.color:   qgcPal.buttonText
+                anchors.leftMargin: _margin
+                anchors.rightMargin: _margin
+            }
+
+            QGCButton {
+                anchors.right: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                width: _sizeButton
+                height: _sizeButton
+                text: qsTr("-")
+                onClicked: {
+                    _root.value = _root.value - _root.stepSize
+                }
             }
 
             Item {
@@ -43,6 +60,8 @@ Slider {
                 x:      _root.zeroCentered ? zeroCenteredIndicatorStart : 0
                 width:  _root.zeroCentered ? centerIndicatorWidth : styleData.handlePosition
                 height: parent.height
+                anchors.leftMargin: _margin
+                anchors.rightMargin: _margin
 
                 property real zeroValuePosition:            (Math.abs(control.minimumValue) / (control.maximumValue - control.minimumValue)) * parent.width
                 property real zeroCenteredIndicatorStart:   Math.min(styleData.handlePosition, zeroValuePosition)
@@ -51,9 +70,22 @@ Slider {
 
                 Rectangle {
                     anchors.fill:   parent
+                    anchors.leftMargin: _margin
+                    anchors.rightMargin: _margin
                     color:          qgcPal.colorBlue
                     border.color:   Qt.darker(color, 1.2)
                     radius:         height/2
+                }
+            }
+
+            QGCButton {
+                anchors.left: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                width: _sizeButton
+                height: _sizeButton
+                text: qsTr("+")
+                onClicked: {
+                    _root.value = _root.value + _root.stepSize
                 }
             }
         }
@@ -66,6 +98,8 @@ Slider {
             implicitWidth:  _radius * 2
             implicitHeight: _radius * 2
             radius:         _radius
+            anchors.leftMargin: _margin
+            anchors.rightMargin: _margin
 
             property real _radius: Math.round(_root.implicitHeight / 2)
 
@@ -76,6 +110,8 @@ Slider {
                 font.family:        ScreenTools.normalFontFamily
                 font.pointSize:     ScreenTools.smallFontPointSize
                 color:              qgcPal.buttonText
+                anchors.leftMargin: _margin
+                anchors.rightMargin: _margin
             }
         }
     }
