@@ -195,7 +195,7 @@ Item {
     // Pip to Window
     Image {
         id:             popupPIP
-        source:         QGroundControl.videoManager.receiverId() ? "/qmlimages/pipHide.svg" : "/qmlimages/PiP.svg"
+        source:         QGroundControl.videoManager.receiverId() ? "/res/land.svg" : "/res/takeoff.svg"
         mipmap:         true
         fillMode:       Image.PreserveAspectFit
         anchors.left:   parent.left
@@ -210,9 +210,9 @@ Item {
             onClicked:  {
                 _switchReceiver()
                 if (QGroundControl.videoManager.receiverId())
-                    popupPIP.source = "/qmlimages/pipHide.svg"
+                    popupPIP.source = "/res/takeoff.svg"
                 else
-                    popupPIP.source = "/qmlimages/PiP.svg"
+                    popupPIP.source = "/res/land.svg"
             }
         }
     }
