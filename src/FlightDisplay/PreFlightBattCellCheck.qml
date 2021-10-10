@@ -10,10 +10,11 @@ PreFlightCheckButton {
     telemetryTextFailure:           qsTr("Cell imbalance is too high")
     allowTelemetryFailureOverride:  allowFailurePercentOverride
 
-    property int    failurePercent:                 80
+    property var    failureDeltaVoltage:            0.08
     property bool   allowFailurePercentOverride:    true
-    property var    _batteryGroup:                  globals.activeVehicle && globals.activeVehicle.batteries.count ? globals.activeVehicle.batteries.get(3) : undefined
-    property var    _batteryValue:                  _batteryGroup ? _batteryGroup.percentRemaining.value : 0
-    property var    _battImbalance:                 isNaN(_batteryValue) ? 0 : _batteryValue
-    property bool   _highImbalance:                 _battImbalance < failurePercent
+    property var    _batteryGroup:                  globals.activeVehicle && globals.activeVehicle.batteries.count ? globals.activeVehicle.batteries.get(0) : undefined
+    property var    _batteryVoltMax:                _batteryGroup ? _batteryGroup.cellVoltageMax.value : 0
+    property var    _batteryVoltMin:                _batteryGroup ? _batteryGroup.cellVoltageMin.value : 0
+    property var    _cellDeltaVoltage:              (isNaN(_batteryVoltMax) || isNaN(_batteryVoltMin)) ? 0 : (_batteryVoltMax - _batteryVoltMin)
+    property bool   _highImbalance:                 _cellDeltaVoltage > failureDeltaVoltage
 }
