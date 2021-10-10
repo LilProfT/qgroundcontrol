@@ -37,7 +37,7 @@
     "name":             "SprayFlowRate",
     "shortDesc": "Spray Flow Rate.",
     "type":             "double",
-    "units":            "l/min",
+    "units":            "L/min",
     "min":              0.0,
     "max":              100.0,
     "decimalPlaces":    2,

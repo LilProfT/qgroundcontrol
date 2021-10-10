@@ -279,7 +279,7 @@ Rectangle {
                     QGCLabel { text: qsTr("Ascent Alt"); }
                     QGCLabel {
                         text:                   _missionItem.ascendAltitude.value.toFixed(1) + " " + _missionItem.ascendAltitude.units
-                        Layout.alignment: Qt.AlignRight
+                        Layout.alignment:       Qt.AlignRight
                     }
                     QGCSlider {
                         id:                     ascendAltitudeSlider
@@ -307,7 +307,7 @@ Rectangle {
                     QGCLabel { text: qsTr("Ascent Len"); }
                     QGCLabel {
                         text:                   _missionItem.ascendLength.value.toFixed(1) + " " + _missionItem.ascendLength.units
-                        Layout.alignment: Qt.AlignRight
+                        Layout.alignment:       Qt.AlignRight
                     }
                     QGCSlider {
                         id:                     ascendLengthSlider
@@ -336,8 +336,8 @@ Rectangle {
 
                     QGCButton {
                         text:               qsTr("Optimize")
+                        Layout.fillWidth:   true
                         onClicked:          _missionItem.optimize();
-                        Layout.fillWidth: true
                     }
 
                     QGCLabel { text: qsTr("Angle")
@@ -376,6 +376,7 @@ Rectangle {
                     QGCButton {
                         text:               qsTr("Rotate Angle")
                         onClicked:          _missionItem.rotateAngle();
+                        Layout.fillWidth:   true
                     }
 
                     QGCLabel {
@@ -396,7 +397,6 @@ Rectangle {
                         visible:            false
                     }
 
-
                     QGCSlider {
                         id:                     turnAroundDistSlider
                         minimumValue:           0
@@ -414,11 +414,13 @@ Rectangle {
                         updateValueWhileDragging: true
                         visible:            false
                     }
-                }
 
-                QGCButton {
-                    text:               qsTr("Rotate Entry Point")
-                    onClicked:          _missionItem.rotateEntryPoint();
+                    QGCButton {
+                        text:               qsTr("Rotate Entry Point")
+                        Layout.fillWidth:   true
+                        Layout.columnSpan:  2
+                        onClicked:          _missionItem.rotateEntryPoint();
+                    }
                 }
 
                 ColumnLayout {
