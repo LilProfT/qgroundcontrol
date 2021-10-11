@@ -25,9 +25,9 @@ ToolStripActionList {
             onTriggered:    mainWindow.showPlanView()
         },
         PreFlightCheckListShowAction { onTriggered: displayPreFlightChecklist() },
-        GuidedActionTakeoff { },
+        //GuidedActionTakeoff { },
         GuidedActionLand { },
-        GuidedActionRTL { },
+       // GuidedActionRTL { },
         GuidedActionPause { },
         GuidedActionActionList { },
         ResumeMission { },

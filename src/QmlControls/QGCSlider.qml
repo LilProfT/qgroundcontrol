@@ -23,8 +23,9 @@ Slider {
     // Value indicator starts display from zero instead of min value
     property bool zeroCentered: false
     property bool displayValue: false
-    property int _margin : 10
-    property int _sizeButton : 20
+    property int _margin : Math.round(ScreenTools.defaultFontPixelWidth *  (ScreenTools.isMobile ? 1.2 : 1.1))
+    property int _sizeButtonWidth : Math.round(ScreenTools.defaultFontPixelWidth *  (ScreenTools.isMobile ? 3.5 : 3.0))
+    property real _sizeButtonHeight:             Math.round(ScreenTools.defaultFontPixelHeight * (ScreenTools.isMobile ? 1.4 : 1.2))
 
     style: SliderStyle {
         groove: Item {
@@ -46,8 +47,8 @@ Slider {
             QGCButton {
                 anchors.right: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                width: _sizeButton
-                height: _sizeButton
+                width: _sizeButtonWidth
+                height: _sizeButtonHeight
                 text: qsTr("-")
                 onClicked: {
                     _root.value = _root.value - _root.stepSize
@@ -81,8 +82,8 @@ Slider {
             QGCButton {
                 anchors.left: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                width: _sizeButton
-                height: _sizeButton
+                width: _sizeButtonWidth
+                height: _sizeButtonHeight
                 text: qsTr("+")
                 onClicked: {
                     _root.value = _root.value + _root.stepSize

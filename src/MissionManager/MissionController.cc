@@ -84,7 +84,7 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&MissionController::_recalcFlightPathSegmentsSignal));
     qgcApp()->addCompressedSignal(QMetaMethod::fromSignal(&MissionController::recalcTerrainProfile));
 
-    //connect(this, &MissionController::visualItemsChanged, this, &MissionController::_injectDrainedWaterPoint);
+    //connect(this, &MissionController::visualItemsChanged, this, &MissionController::injectDrainedWaterPoint);
 }
 
 MissionController::~MissionController()
@@ -2887,7 +2887,10 @@ void MissionController::injectDrainedWaterPoint(double remaining)
     double spacing     = rawSpacing.toDouble();         // m
 
     double lenAppRate = areaAppRate * spacing;          // l/m
-    double volume = remaining;                                 // l
+    //double volume = remaining;                                 // l
+    double volume = _controllerVehicle->fuelPercentRemaining();
+    qCWarning(MissionControllerLog) << "volume fuel level" << volume;
+
     double len = volume / lenAppRate;
 
     double accu = 0;

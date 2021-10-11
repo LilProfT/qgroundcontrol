@@ -459,6 +459,7 @@ public:
 
     //Mismart: Custom Area Sprayed Start and Stop function
     bool _areaSprayedStart              ();
+    double fuelPercentRemaining              ();
 
     bool joystickEnabled            () const;
     void setJoystickEnabled         (bool enabled);

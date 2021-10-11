@@ -32,7 +32,7 @@ Rectangle {
     property string _doneAdjusting:             qsTr("Done")
     property var    _missionItem:               missionItem
     property bool   _presetsAvailable:          _missionItem.presetNames.length !== 0
-    property int _marginSlider : 20
+    property int _marginSlider : Math.round(ScreenTools.defaultFontPixelWidth *  (ScreenTools.isMobile ? 3.5 : 3.0))
 
     function polygonCaptureStarted() {
         _missionItem.clearPolygon()

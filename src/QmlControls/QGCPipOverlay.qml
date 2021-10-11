@@ -201,8 +201,8 @@ Item {
         anchors.left:   parent.left
         anchors.top:    parent.top
         visible:        _isExpanded
-        height:         ScreenTools.defaultFontPixelHeight * 2.5
-        width:          ScreenTools.defaultFontPixelHeight * 2.5
+        height:         ScreenTools.defaultFontPixelHeight * 2
+        width:          ScreenTools.defaultFontPixelHeight * 2
         sourceSize.height:  height
 
         MouseArea {

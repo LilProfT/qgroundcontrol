@@ -2241,7 +2241,7 @@ void Vehicle::_flightTimerStop()
 //Mismart: Custom areaSprayed start and stop functions
 bool Vehicle::_areaSprayedStart()
 {
-    if (batteries()->count() == 4) //Mismart AGR drone config, 4 batteries
+    if (batteries()->count() == 3) //Mismart AGR drone config, 3 batteries
     {
         if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() >= 50) //Arbitrary number
         {
@@ -2253,6 +2253,15 @@ bool Vehicle::_areaSprayedStart()
     } else {
         return false;
     }
+}
+
+double Vehicle::fuelPercentRemaining()
+{
+    if (batteries()->count() == 3) //Mismart AGR drone config, 3 batteries
+    {
+       return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.2;
+    }
+    return 0;
 }
 
 void Vehicle::_updateFlightTime()
