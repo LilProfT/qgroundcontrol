@@ -326,6 +326,50 @@ Rectangle {
                         updateValueWhileDragging: true
                     }
 
+                    QGCLabel { text: qsTr("Trim start"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimStart.value.toFixed(1) + " " + _missionItem.trimStart.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimStartSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimStart.value
+                        onValueChanged:         _missionItem.trimStart.value = value
+                        Component.onCompleted:  value = _missionItem.trimStart.value
+                        updateValueWhileDragging: true
+                    }
+
+                    QGCLabel { text: qsTr("Trim end"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimEnd.value.toFixed(1) + " " + _missionItem.trimEnd.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimEndSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimEnd.value
+                        onValueChanged:         _missionItem.trimEnd.value = value
+                        Component.onCompleted:  value = _missionItem.trimEnd.value
+                        updateValueWhileDragging: true
+                    }
+
                     QGCCheckBox {
                         text:               qsTr("Auto Optimize")
                         checked:            false

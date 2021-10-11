@@ -98,6 +98,7 @@ public:
     // Integrity constraints
     void setExclusionFences(QmlObjectListModel* fences);
 //    void setInclusionFences(QList<QGCFencePolygon> fences); // unimplemented
+    void setTrim(double trimStart, double trimEnd) { _trimStart = trimStart; _trimEnd = trimEnd; };
     void setStartSeqNum(int value) { _startSeqNum = value; };
     void setMissionItemParent(QObject* value) { _missionItemParent = value; };
     void setAvoidDistance(double value) { _avoidDistance = value; }
@@ -117,8 +118,10 @@ private:
     void _processSprays();
     void _processHoldAltitudes();
     void _integrateFences();
+    void _integrateTrim();
     void _integrateSequenceNumber();
 
+    double _totalLength() const;
     void _gen_PointF_From_Geo();
     void _gen_Geo_From_PointF(); // must be called after _gen_PointF_From_Geo() so _tangentOrigin is available
     QList<MissionItem*> _flatten();
@@ -129,6 +132,8 @@ private:
     int _startSeqNum;
     MAV_FRAME _mavFrame;
     QObject* _missionItemParent;
+    double _trimStart;
+    double _trimEnd;
 
     QGeoCoordinate _tangentOrigin;
     double _avoidDistance;

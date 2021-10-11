@@ -420,18 +420,23 @@ void TransectStyleComplexItem::_rebuildTransects (void)
         // Not following terrain so we can build the flight path now
         _buildRawFlightPath();
     }
+
+    auto _surveyComplexItem = qobject_cast<SurveyComplexItem*>(this);
     double requestedAltitude = _cameraCalc.distanceToSurface()->rawValue().toDouble();
     double yaw = getYaw();
     double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
+    double trimStart = _surveyComplexItem->trimStart()->cookedValue().value<double>();
+    double trimEnd = _surveyComplexItem->trimEnd()->cookedValue().value<double>();
 
     _model.setExclusionFences(_masterController->geoFenceController()->polygons());
     _model.setAvoidDistance(gridSpacing / 2);
+
+    _model.setTrim(trimStart, trimEnd);
 
     _model.clearStep();
 //    _model.appendHoldAltitude(requestedAltitude);
     _model.appendHoldYaw(yaw);
 
-    auto _surveyComplexItem = qobject_cast<SurveyComplexItem*>(this);
     bool ascend = _surveyComplexItem->ascendTerminals()->cookedValue().value<bool>();
     double ascendAltitude = _surveyComplexItem->ascendAltitude()->cookedValue().value<double>();
     double ascendLength = _surveyComplexItem->ascendLength()->cookedValue().value<double>();

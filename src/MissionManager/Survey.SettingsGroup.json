@@ -100,6 +100,22 @@
     "default":     3
 },
 {
+    "name":             "TrimStart",
+    "shortDesc": "Trim an amount of percent from the start of survey.",
+    "type":             "double",
+    "units":            "%",
+    "decimalPlaces":    1,
+    "default":     0
+},
+{
+    "name":             "TrimEnd",
+    "shortDesc": "Trim an amount of percent from the end of survey.",
+    "type":             "double",
+    "units":            "%",
+    "decimalPlaces":    1,
+    "default":     0
+},
+{
     "name":             "FirstLaneOffset",
     "shortDesc": "Offset of first lane from the edge of boundary polygon.",
     "type":             "double",
