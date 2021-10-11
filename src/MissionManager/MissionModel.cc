@@ -7,7 +7,9 @@ MissionModel::MissionModel(int startSeqNum, MAV_FRAME mavFrame, QObject* mission
     : QObject            (parent),
       _startSeqNum       (startSeqNum),
       _mavFrame          (mavFrame),
-      _missionItemParent (missionItemParent)
+      _missionItemParent (missionItemParent),
+      _trimStart         (0.0),
+      _trimEnd           (0.0)
 {}
 
 void MissionModel::clearStep() {
@@ -61,6 +63,8 @@ void MissionModel::pregenIntegrate()
 
     _gen_PointF_From_Geo();
     _integrateFences();
+    _gen_Geo_From_PointF();
+    _integrateTrim();
     _gen_Geo_From_PointF();
 
     _integrity = true;
@@ -253,7 +257,81 @@ void MissionModel::_processHoldAltitudes()
     }
 }
 
+double MissionModel::_totalLength() const
+{
+    double result = 0.0;
+    WaypointStep* prev;
+    bool isFirst = true;
+    for (Step* step: _steps) {
+        if (step->type() == Step::Type::WAYPOINT) {
+            if (isFirst) {
+                prev = qobject_cast<WaypointStep*>(step);
+                isFirst = false;
+            } else {
+                WaypointStep* curr = qobject_cast<WaypointStep*>(step);
+                result += prev->coord.distanceTo(curr->coord);
+                prev = curr;
+            }
+        }
+    }
+    return result;
+}
 
+void MissionModel::_integrateTrim()
+{
+    double total = _totalLength();
+    if (_trimStart + _trimEnd > 100) _trimEnd = 101 - _trimStart;
+    double trimStartAtMeter = _trimStart/100*total;
+    double trimEndAtMeter = (100-_trimEnd)/100*total;
+
+    double length = 0.0;
+    WaypointStep* prev;
+    bool isFirst = true;
+    bool spraying = false;
+    bool trimmedStart = false;
+    bool trimmedEnd = false;
+    QList<Step*> output;
+    for (Step* step: _steps) {
+        if (step->type() == Step::Type::WAYPOINT) {
+            if (isFirst) {
+                prev = qobject_cast<WaypointStep*>(step);
+                isFirst = false;
+            } else {
+                WaypointStep* curr = qobject_cast<WaypointStep*>(step);
+                double prevLength = length;
+                length += prev->coord.distanceTo(curr->coord);
+                if (length > trimStartAtMeter) {
+                    if (!trimmedStart) {
+                        double distance = trimStartAtMeter - prevLength;
+                        double azimuth = prev->coord.azimuthTo(curr->coord);
+                        QGeoCoordinate newCoord = prev->coord.atDistanceAndAzimuth(distance, azimuth);
+                        output << new WaypointStep(newCoord);
+                        trimmedStart = true;
+                    }
+                    if (spraying) output << new SprayStep();
+                    if (length < trimEndAtMeter) {
+                        output << step;
+                    } else if (!trimmedEnd) {
+                        double distance = trimEndAtMeter - prevLength;
+                        double azimuth = prev->coord.azimuthTo(curr->coord);
+                        QGeoCoordinate newCoord = prev->coord.atDistanceAndAzimuth(distance, azimuth);
+                        output << new WaypointStep(newCoord);
+                        trimmedEnd = true;
+                    }
+                }
+                prev = curr;
+                spraying = false;
+            }
+        } else if (step->type() == Step::Type::SPRAY) {
+            spraying = true;
+        } else {
+            output << step;
+        }
+    }
+
+    _steps.clear();
+    _steps << output;
+}
 
 void MissionModel::_integrateSequenceNumber()
 {

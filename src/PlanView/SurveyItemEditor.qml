@@ -279,7 +279,7 @@ Rectangle {
                     QGCLabel { text: qsTr("Ascent Alt"); }
                     QGCLabel {
                         text:                   _missionItem.ascendAltitude.value.toFixed(1) + " " + _missionItem.ascendAltitude.units
-                        Layout.alignment: Qt.AlignRight
+                        Layout.alignment:       Qt.AlignRight
                     }
                     QGCSlider {
                         id:                     ascendAltitudeSlider
@@ -307,7 +307,7 @@ Rectangle {
                     QGCLabel { text: qsTr("Ascent Len"); }
                     QGCLabel {
                         text:                   _missionItem.ascendLength.value.toFixed(1) + " " + _missionItem.ascendLength.units
-                        Layout.alignment: Qt.AlignRight
+                        Layout.alignment:       Qt.AlignRight
                     }
                     QGCSlider {
                         id:                     ascendLengthSlider
@@ -326,6 +326,50 @@ Rectangle {
                         updateValueWhileDragging: true
                     }
 
+                    QGCLabel { text: qsTr("Trim start"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimStart.value.toFixed(1) + " " + _missionItem.trimStart.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimStartSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimStart.value
+                        onValueChanged:         _missionItem.trimStart.value = value
+                        Component.onCompleted:  value = _missionItem.trimStart.value
+                        updateValueWhileDragging: true
+                    }
+
+                    QGCLabel { text: qsTr("Trim end"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimEnd.value.toFixed(1) + " " + _missionItem.trimEnd.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimEndSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimEnd.value
+                        onValueChanged:         _missionItem.trimEnd.value = value
+                        Component.onCompleted:  value = _missionItem.trimEnd.value
+                        updateValueWhileDragging: true
+                    }
+
                     QGCCheckBox {
                         text:               qsTr("Auto Optimize")
                         checked:            false
@@ -336,8 +380,8 @@ Rectangle {
 
                     QGCButton {
                         text:               qsTr("Optimize")
+                        Layout.fillWidth:   true
                         onClicked:          _missionItem.optimize();
-                        Layout.fillWidth: true
                     }
 
                     QGCLabel { text: qsTr("Angle")
@@ -376,6 +420,7 @@ Rectangle {
                     QGCButton {
                         text:               qsTr("Rotate Angle")
                         onClicked:          _missionItem.rotateAngle();
+                        Layout.fillWidth:   true
                     }
 
                     QGCLabel {
@@ -396,7 +441,6 @@ Rectangle {
                         visible:            false
                     }
 
-
                     QGCSlider {
                         id:                     turnAroundDistSlider
                         minimumValue:           0
@@ -414,11 +458,13 @@ Rectangle {
                         updateValueWhileDragging: true
                         visible:            false
                     }
-                }
 
-                QGCButton {
-                    text:               qsTr("Rotate Entry Point")
-                    onClicked:          _missionItem.rotateEntryPoint();
+                    QGCButton {
+                        text:               qsTr("Rotate Entry Point")
+                        Layout.fillWidth:   true
+                        Layout.columnSpan:  2
+                        onClicked:          _missionItem.rotateEntryPoint();
+                    }
                 }
 
                 ColumnLayout {

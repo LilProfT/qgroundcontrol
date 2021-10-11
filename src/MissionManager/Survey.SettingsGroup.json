@@ -37,7 +37,7 @@
     "name":             "SprayFlowRate",
     "shortDesc": "Spray Flow Rate.",
     "type":             "double",
-    "units":            "l/min",
+    "units":            "L/min",
     "min":              0.0,
     "max":              100.0,
     "decimalPlaces":    2,
@@ -98,6 +98,22 @@
     "units":            "m",
     "decimalPlaces":    1,
     "default":     3
+},
+{
+    "name":             "TrimStart",
+    "shortDesc": "Trim an amount of percent from the start of survey.",
+    "type":             "double",
+    "units":            "%",
+    "decimalPlaces":    1,
+    "default":     0
+},
+{
+    "name":             "TrimEnd",
+    "shortDesc": "Trim an amount of percent from the end of survey.",
+    "type":             "double",
+    "units":            "%",
+    "decimalPlaces":    1,
+    "default":     0
 },
 {
     "name":             "FirstLaneOffset",

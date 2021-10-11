@@ -6829,6 +6829,14 @@ Please place your vehicle in water, click the button, and wait. Note that the th
     </message>
 </context>
 <context>
+    <name>FlyViewToolStripActionList</name>
+    <message>
+        <location filename="../src/FlightDisplay/FlyViewToolStripActionList.qml" line="35"/>
+        <source>Estimate</source>
+        <translation>Ước tính</translation>
+    </message>
+</context>
+<context>
     <name>FlyViewWidgetLayer</name>
     <message>
         <location filename="../src/FlightDisplay/FlyViewWidgetLayer.qml" line="89"/>
@@ -7633,6 +7641,14 @@ Please place your vehicle in water, click the button, and wait. Note that the th
         <location filename="../src/FlightDisplay/GuidedActionList.qml" line="81"/>
         <source>Select Action</source>
         <translation>Chọn hành động</translation>
+    </message>
+</context>
+<context>
+    <name>ResumeMission</name>
+    <message>
+        <location filename="../src/FlightDisplay/ResumeMission.qml" line="6"/>
+        <source>Resume</source>
+        <translation>Tiếp tục</translation>
     </message>
 </context>
 <context>
@@ -13092,7 +13108,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</source>
     <message>
         <location filename="../src/FlightDisplay/PreFlightCheckListShowAction.qml" line="14"/>
         <source>Checklist</source>
-        <translation>Checklist</translation>
+        <translation>Kiểm tra</translation>
     </message>
 </context>
 <context>
@@ -15936,7 +15952,7 @@ Actual AMSL altitude: %1 %2</source>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="32"/>
         <source>Done</source>
-        <translation type="unfinished"></translation>
+        <translation>Hoàn thành</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="78"/>
@@ -15946,16 +15962,17 @@ Actual AMSL altitude: %1 %2</source>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="315"/>
         <source>Save Preset</source>
-        <translation>Lưu giá trị đặt trước</translation>
+        <translation>Lưu</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="291"/>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="293"/>
         <source>Delete Preset</source>
-        <translation>Xóa giá trị đặt trước</translation>
+        <translation>Xóa</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="114"/>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="587"/>
         <source>Altitude</source>
         <translation>Độ cao</translation>
     </message>
@@ -15966,14 +15983,52 @@ Actual AMSL altitude: %1 %2</source>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="119"/>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="592"/>
         <source>Spacing</source>
         <translation>Khoảng</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="126"/>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="321"/>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="637"/>
         <source>Transects</source>
-        <translation>Đường cắt ngang</translation>
+        <translation>Nâng cao</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="135"/>
+        <source>Spray Configuration</source>
+        <translation>Điều chỉnh phun tưới</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="147"/>
+        <source>Application Rate</source>
+        <translation>Thông số tưới</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="153"/>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="604"/>
+        <source>Settle Velocity</source>
+        <translation>Vận tốc bay</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="195"/>
+        <source>Spray Flow Rate</source>
+        <translation>Lưu lượng tưới</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="226"/>
+        <source>Ascend transect terminals</source>
+        <translation>Nâng độ cao cuối làn</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="238"/>
+        <source>Ascent Alt</source>
+        <translation>Độ cao nâng làn</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="264"/>
+        <source>Ascent Len</source>
+        <translation>Cách cuối làn</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="137"/>
@@ -15991,6 +16046,16 @@ Actual AMSL altitude: %1 %2</source>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="355"/>
         <source>Rotate Entry Point</source>
         <translation>Xoay điểm vào</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="293"/>
+        <source>Optimize</source>
+        <translation>Tối ưu</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="330"/>
+        <source>Rotate Angle</source>
+        <translation>Xoay góc</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="185"/>
@@ -16026,17 +16091,17 @@ Actual AMSL altitude: %1 %2</source>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="284"/>
         <source>Apply Preset</source>
-        <translation type="unfinished"></translation>
+        <translation>Áp dụng</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="298"/>
         <source>Are you sure you want to delete &apos;%1&apos; preset?</source>
-        <translation type="unfinished"></translation>
+        <translation>Bạn có chắc là muốn xóa &apos;%1&apos; không?</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="314"/>
         <source>Save Settings As New Preset</source>
-        <translation type="unfinished"></translation>
+        <translation>Lưu</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="391"/>

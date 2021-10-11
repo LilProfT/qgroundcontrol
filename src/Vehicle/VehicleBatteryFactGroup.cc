@@ -172,7 +172,7 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_mes
 
     //Mismart: Extra 4 cells for our batteries
     for (int i=0; i<4; i++) {
-        double extCellVoltage = (batteryStatus.voltages_ext[i] == UINT16_MAX || batteryStatus.voltages_ext[i] == 0)  ? qQNaN() : static_cast<double>(batteryStatus.voltages[i]) / 1000.0;
+        double extCellVoltage = (batteryStatus.voltages_ext[i] == UINT16_MAX || batteryStatus.voltages_ext[i] == 0)  ? qQNaN() : static_cast<double>(batteryStatus.voltages_ext[i]) / 1000.0;
         if (qIsNaN(extCellVoltage)) {
             break;
         }
