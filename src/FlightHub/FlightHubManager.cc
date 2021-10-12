@@ -26,7 +26,7 @@ void FlightHubManager::setToolbox(QGCToolbox* toolbox)
     QGCTool::setToolbox(toolbox);
     qCDebug(FlightHubManagerLog) << "Instatiating FlightHubManager";
 
-    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_vehicleReady);
+    //connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_vehicleReady);
 }
 
 FlightHubManager::~FlightHubManager()
