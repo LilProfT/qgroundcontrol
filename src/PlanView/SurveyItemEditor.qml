@@ -119,6 +119,7 @@ Rectangle {
                 }
 
                 CameraCalcGrid {
+                    id:                             cameraCalcGridInstance
                     cameraCalc:                     _missionItem.cameraCalc
                     vehicleFlightIsFrontal:         true
                     distanceToSurfaceLabel:         qsTr("Altitude")
@@ -685,6 +686,8 @@ Rectangle {
                                                         (_missionItem.cameraCalc.distanceToSurfaceRelative ? QGroundControl.AltitudeModeRelative : QGroundControl.AltitudeModeAbsolute)
                     //frontalDistanceLabel:           qsTr("Trigger Dist")
                     sideDistanceLabel:              qsTr("Spacing")
+
+                    friendCameraCalcGrid:           cameraCalcGridInstance
                 }
 
                 GridLayout {
@@ -721,7 +724,10 @@ Rectangle {
                         Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.velocity.value
-                        onValueChanged:         _missionItem.velocity.value = value
+                        onValueChanged:         {
+                            velocitySlider.value = value
+                            _missionItem.velocity.value = value
+                        }
                         Component.onCompleted:  value = _missionItem.velocity.value
                         updateValueWhileDragging: true
                     }
@@ -766,7 +772,10 @@ Rectangle {
                         Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.firstLaneOffset.value
-                        onValueChanged:         _missionItem.firstLaneOffset.value = value
+                        onValueChanged:         {
+                            firstLaneOffsetSlider.value = value
+                            _missionItem.firstLaneOffset.value = value
+                        }
                         Component.onCompleted:  value = _missionItem.firstLaneOffset.value
                         updateValueWhileDragging: true
                     }
@@ -801,7 +810,10 @@ Rectangle {
                         Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.ascendAltitude.value
-                        onValueChanged:         _missionItem.ascendAltitude.value = value
+                        onValueChanged:         {
+                            ascendAltitudeSlider.value = value
+                            _missionItem.ascendAltitude.value = value
+                        }
                         Component.onCompleted:  value = _missionItem.ascendAltitude.value
                         updateValueWhileDragging: true
                     }
@@ -829,7 +841,10 @@ Rectangle {
                         Layout.rightMargin: _marginSlider
                         Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
                         value:                  _missionItem.ascendLength.value
-                        onValueChanged:         _missionItem.ascendLength.value = value
+                        onValueChanged:         {
+                            ascendLengthSlider.value = value
+                            _missionItem.ascendLength.value = value
+                        }
                         Component.onCompleted:  value = _missionItem.ascendLength.value
                         updateValueWhileDragging: true
                     }
