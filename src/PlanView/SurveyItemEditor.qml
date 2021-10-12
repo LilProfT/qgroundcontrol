@@ -588,7 +588,15 @@ Rectangle {
                         Layout.fillWidth:   true
                         text:               qsTr("Apply Preset")
                         enabled:            _missionItem.presetNames.length != 0
-                        onClicked:          _missionItem.loadPreset(presetCombo.textAt(presetCombo.currentIndex))
+                        onClicked:          {
+                            _missionItem.loadPreset(presetCombo.textAt(presetCombo.currentIndex))
+
+                            cameraCalcGridPreset.refresh(_missionItem.cameraCalc.distanceToSurface.value, _missionItem.cameraCalc.adjustedFootprintSide.value)
+                            presetsVelocitySlider.value        = _missionItem.velocity.value
+                            presetsFirstLaneOffsetSlider.value = _missionItem.firstLaneOffset.value
+                            presetsAscendAltitudeSlider.value  = _missionItem.ascendAltitude.value
+                            presetsAscendLengthSlider.value    = _missionItem.ascendLength.value
+                        }
                     }
 
                     QGCButton {
@@ -678,6 +686,7 @@ Rectangle {
                 Item { height: ScreenTools.defaultFontPixelHeight; width: 1 }
 
                 CameraCalcGrid {
+                    id:                             cameraCalcGridPreset
                     cameraCalc:                     _missionItem.cameraCalc
                     vehicleFlightIsFrontal:         true
                     distanceToSurfaceLabel:         qsTr("Altitude")
