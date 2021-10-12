@@ -110,6 +110,7 @@ public:
     QList<MissionItem*> generateItems();
 
     const QList<Step*>& steps() const { return _steps; };
+    double sprayLength() const;
 
 private:
     void _clearHookedItems();

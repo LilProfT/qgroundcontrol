@@ -381,7 +381,8 @@ void TransectStyleComplexItem::_updateCoordinateAltitudes(void)
 
 double TransectStyleComplexItem::coveredArea(void) const
 {
-    return _offsetAreaPolygon.area();
+    double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
+    return gridSpacing * _model.sprayLength();
 }
 
 bool TransectStyleComplexItem::_hasTurnaround(void) const

@@ -257,6 +257,30 @@ void MissionModel::_processHoldAltitudes()
     }
 }
 
+double MissionModel::sprayLength() const
+{
+    double result = 0.0;
+    WaypointStep* prev;
+    bool isFirst = true;
+    bool spraying = false;
+    for (Step* step: _steps) {
+        if (step->type() == Step::Type::WAYPOINT) {
+            if (isFirst) {
+                prev = qobject_cast<WaypointStep*>(step);
+                isFirst = false;
+            } else {
+                WaypointStep* curr = qobject_cast<WaypointStep*>(step);
+                if (spraying) result += prev->coord.distanceTo(curr->coord);
+                prev = curr;
+                spraying = false;
+            }
+        } else if (step->type() == Step::Type::SPRAY) {
+            spraying = true;
+        }
+    }
+    return result;
+}
+
 double MissionModel::_totalLength() const
 {
     double result = 0.0;
