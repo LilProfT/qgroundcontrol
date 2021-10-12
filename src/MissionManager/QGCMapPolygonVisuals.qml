@@ -49,7 +49,7 @@ Item {
 
     readonly property string _polygonToolsText: qsTr("Polygon Tools")
     readonly property string _traceText:        qsTr("Click in the map to add vertices. Click 'Done Tracing' when finished.")
-    property int _marginSlider : 20
+    property int _marginSlider : Math.round(ScreenTools.defaultFontPixelWidth *  (ScreenTools.isMobile ? 3.5 : 3.0))
     function addCommonVisuals() {
         if (_objMgrCommonVisuals.empty) {
             _objMgrCommonVisuals.createObject(polygonComponent, mapControl, true)

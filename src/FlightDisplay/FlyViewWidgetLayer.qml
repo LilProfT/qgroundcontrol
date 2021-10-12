@@ -193,7 +193,11 @@ Item {
         visible:                !QGroundControl.videoManager.fullScreen
 
         onDisplayPreFlightChecklist: mainWindow.showPopupDialogFromComponent(preFlightChecklistPopup)
-        onDisplayResumePoint: mainWindow.showPopupDialogFromComponent(resumePointPopup)
+        onDisplayResumePoint:  {
+
+            //mainWindow.showPopupDialogFromComponent(resumePointPopup)
+            _missionController.injectDrainedWaterPoint(0)
+        }
 
         property real leftInset: x + width
     }
@@ -239,7 +243,7 @@ Item {
 
             function accept() {
                 //QGroundControl.multiVehicleManager.activeVehicle.sendParamMapRC(tuningFact.name, scale.text, centerValue.text, tuningID.currentIndex, minValue.text, maxValue.text);
-                _missionController.injectDrainedWaterPoint(remain.text)
+                v
                 hideDialog()
             }
 
