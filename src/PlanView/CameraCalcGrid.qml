@@ -21,6 +21,8 @@ Column {
     property string frontalDistanceLabel
     property string sideDistanceLabel
 
+    property var    friendCameraCalcGrid
+
     property real   _margin:            ScreenTools.defaultFontPixelWidth / 2
     property string _cameraName:        cameraCalc.cameraName.value
     property real   _fieldWidth:        ScreenTools.defaultFontPixelWidth * 10.5
@@ -32,6 +34,17 @@ Column {
     readonly property int _gridTypeManual:          0
     readonly property int _gridTypeCustomCamera:    1
     readonly property int _gridTypeCamera:          2
+
+    signal refresh(real dts, real sd)
+
+    Component.onCompleted: {
+        refresh.connect(onRefresh)
+    }
+
+    function onRefresh (dts, sd) {
+        distanceToSurfaceSlider.value = dts;
+        sideDistanceSlider.value = sd;
+    }
 
     QGCPalette { id: qgcPal; colorGroupEnabled: true }
 
@@ -149,7 +162,10 @@ Column {
             Layout.rightMargin: _marginSlider
             Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
             value:                  cameraCalc.distanceToSurface.value
-            onValueChanged:         cameraCalc.distanceToSurface.value = value
+            onValueChanged:         {
+                if (friendCameraCalcGrid) friendCameraCalcGrid.refresh(value, sideDistanceSlider.value)
+                cameraCalc.distanceToSurface.value = value
+            }
             Component.onCompleted:  value = cameraCalc.distanceToSurface.value
             updateValueWhileDragging: true
         }
@@ -181,6 +197,7 @@ Column {
             Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
             value:                  cameraCalc.adjustedFootprintSide.value
             onValueChanged:         {
+                if (friendCameraCalcGrid) friendCameraCalcGrid.refresh(distanceToSurfaceSlider.value, value)
                 cameraCalc.adjustedFootprintSide.value = value
                 //Mismart: Carbon-copy of the cameraCalc spacing, should be improved in the future
                 _vehicle.spacing.value = cameraCalc.adjustedFootprintSide.value

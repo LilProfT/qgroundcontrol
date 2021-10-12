@@ -58,18 +58,18 @@ Item {
         console.log(_angleEdge);
 
 //        console.log(_avoidances)
-        for (var i=0; i<_avoidances.count; i++) {
-            var avoidance = _avoidances[i];
-            console.log(avoidance);
-            var obj = avoidanceTransectsComponent.createObject(map, { avoidance });
+//        for (var i=0; i<_avoidances.count; i++) {
+//            var avoidance = _avoidances[i];
+//            console.log(avoidance);
+//            var obj = avoidanceTransectsComponent.createObject(map, { avoidance });
 
-            if (obj.status === Component.Error) {
-                console.log(obj.errorString())
-            };
+//            if (obj.status === Component.Error) {
+//                console.log(obj.errorString())
+//            };
 
-            objMgr.rgDynamicObjects.push(obj);
-            map.addMapItem(obj);
-        }
+//            objMgr.rgDynamicObjects.push(obj);
+//            map.addMapItem(obj);
+//        }
     }
 
     function _destroyVisualElements() {
