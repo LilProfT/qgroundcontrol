@@ -210,9 +210,9 @@ Item {
             onClicked:  {
                 _switchReceiver()
                 if (QGroundControl.videoManager.receiverId())
-                    popupPIP.source = "/res/takeoff.svg"
-                else
                     popupPIP.source = "/res/land.svg"
+                else
+                    popupPIP.source = "/res/takeoff.svg"
             }
         }
     }
