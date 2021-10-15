@@ -92,7 +92,7 @@ void QGCMapPolygon::clear(void)
 
     _polygonModel.clearAndDeleteContents();
 
-    _offsets.clear();
+//    _offsets.clear();
 
     emit cleared();
 
@@ -337,18 +337,19 @@ void QGCMapPolygon::splitPolygonSegment(int vertexIndex)
 
     double distance = firstVertex.distanceTo(nextVertex);
     double azimuth = firstVertex.azimuthTo(nextVertex);
-    QGeoCoordinate center = firstVertex.atDistanceAndAzimuth(distance / 2, azimuth);
-    QGeoCoordinate newVertex = center.atDistanceAndAzimuth(1, azimuth + 90);
-    if (_center.distanceTo(center) > _center.distanceTo(newVertex)) newVertex = center.atDistanceAndAzimuth(1, azimuth - 90);
+    QGeoCoordinate newVertex = firstVertex.atDistanceAndAzimuth(distance / 2, azimuth);
+//    QGeoCoordinate center = firstVertex.atDistanceAndAzimuth(distance / 2, azimuth);
+//    QGeoCoordinate newVertex = center.atDistanceAndAzimuth(1, azimuth + 90);
+//    if (_center.distanceTo(center) > _center.distanceTo(newVertex)) newVertex = center.atDistanceAndAzimuth(1, azimuth - 90);
 
     if (nextIndex == 0) {
         appendVertex(newVertex);
     } else {
         _polygonModel.insert(nextIndex, new QGCQGeoCoordinate(newVertex, this));
         _polygonPath.insert(nextIndex, QVariant::fromValue(newVertex));
-        for (int i=count()-1; i>=vertexIndex; i--) {
-            _offsets[QString::number(i+1)] = _offsets.value(QString::number(i), 0.0f).value<float>();
-        }
+//        for (int i=count()-1; i>=vertexIndex; i--) {
+//            _offsets[QString::number(i+1)] = _offsets.value(QString::number(i), 0.0f).value<float>();
+//        }
         emit pathChanged();
     }
 }
@@ -357,7 +358,7 @@ void QGCMapPolygon::appendVertex(const QGeoCoordinate& coordinate)
 {
     _polygonPath.append(QVariant::fromValue(coordinate));
     _polygonModel.append(new QGCQGeoCoordinate(coordinate, this));
-    _offsets[QString::number(count())] = _offsets.value(QString::number(count()-1), 0.0f).value<float>();
+    //_offsets[QString::number(count())] = _offsets.value(QString::number(count()-1), 0.0f).value<float>();
     emit pathChanged();
 }
 

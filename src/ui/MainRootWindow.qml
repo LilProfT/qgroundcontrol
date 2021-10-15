@@ -650,8 +650,8 @@ ApplicationWindow {
         id:                 criticalVehicleMessagePopup
         y:                  ScreenTools.defaultFontPixelHeight
         x:                  Math.round((mainWindow.width - width) * 0.5)
-        width:              mainWindow.width  * 0.55
-        height:             ScreenTools.defaultFontPixelHeight * 6
+        width:              mainWindow.width  * 0.4
+        height:             ScreenTools.defaultFontPixelHeight * 3
         modal:              false
         focus:              true
         closePolicy:        Popup.CloseOnEscape

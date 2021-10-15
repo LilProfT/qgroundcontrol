@@ -44,6 +44,28 @@ Slider {
                 anchors.rightMargin: _margin
             }
 
+            Timer {
+                id: updateTimerMinus
+                interval: 1
+                running: false
+                repeat: true
+                onTriggered: {
+                    // only update if scroll bar is at the bottom
+                    _root.value = _root.value - _root.stepSize
+                }
+            }
+
+            Timer {
+                id: updateTimerPlus
+                interval: 1
+                running: false
+                repeat: true
+                onTriggered: {
+                    // only update if scroll bar is at the bottom
+                    _root.value = _root.value + _root.stepSize
+                }
+            }
+
             QGCButton {
                 anchors.right: parent.left
                 anchors.verticalCenter: parent.verticalCenter
@@ -53,6 +75,8 @@ Slider {
                 onClicked: {
                     _root.value = _root.value - _root.stepSize
                 }
+                onPressAndHold: updateTimerMinus.start()
+                onReleased: updateTimerMinus.stop()
             }
 
             Item {
@@ -88,6 +112,8 @@ Slider {
                 onClicked: {
                     _root.value = _root.value + _root.stepSize
                 }
+                onPressAndHold: updateTimerPlus.start()
+                onReleased: updateTimerPlus.stop()
             }
         }
 

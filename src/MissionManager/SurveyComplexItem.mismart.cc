@@ -249,6 +249,6 @@ void SurveyComplexItem::_catchFirstEdge()
     double angle = A.azimuthTo(B);
     qDebug() << "trace mode angle: " << angle;
     _gridAngleFact.setProperty("value", angle);
-    _rebuildTransects();
-    _optimize_EntryPoint();
+//    _rebuildTransects();
+//    _optimize_EntryPoint();
 }

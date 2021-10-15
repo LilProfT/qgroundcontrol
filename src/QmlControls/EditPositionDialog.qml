@@ -47,6 +47,50 @@ QGCViewDialog {
                 rowSpacing:     _margin
                 columns:        2
 
+                Timer {
+                    id: updateTimerDown
+                    interval: 1
+                    running: false
+                    repeat: true
+                    onTriggered: {
+                        // only update if scroll bar is at the bottom
+                        controller.moveVertexDown()
+                    }
+                }
+
+                Timer {
+                    id: updateTimerLeft
+                    interval: 1
+                    running: false
+                    repeat: true
+                    onTriggered: {
+                        // only update if scroll bar is at the bottom
+                        controller.moveVertexLeft()
+                    }
+                }
+
+                Timer {
+                    id: updateTimerRight
+                    interval: 1
+                    running: false
+                    repeat: true
+                    onTriggered: {
+                        // only update if scroll bar is at the bottom
+                        controller.moveVertexRight()
+                    }
+                }
+
+                Timer {
+                    id: updateTimerUp
+                    interval: 1
+                    running: false
+                    repeat: true
+                    onTriggered: {
+                        // only update if scroll bar is at the bottom
+                        controller.moveVertexUp()
+                    }
+                }
+
                 QGCLabel {
                     visible: false
                     text: qsTr("Latitude")
@@ -180,6 +224,8 @@ QGCViewDialog {
                         Layout.fillWidth: true
                         Layout.maximumWidth : 200
                         onClicked: controller.moveVertexUp()
+                        onPressAndHold: updateTimerUp.start()
+                        onReleased: updateTimerUp.stop()
                     }
                 }
 
@@ -193,12 +239,15 @@ QGCViewDialog {
                     rowSpacing:     _margin
                     rows: 1
 
+
                     QGCButton {
                         text:              qsTr("Left")
                         horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
 
                         onClicked: controller.moveVertexLeft()
+                        onPressAndHold: updateTimerLeft.start()
+                        onReleased: updateTimerLeft.stop()
                     }
 
                     QGCButton {
@@ -207,6 +256,7 @@ QGCViewDialog {
                         Layout.fillWidth: true
 
                         onClicked: controller.undoMoveVertex()
+
                     }
 
                     QGCButton {
@@ -215,6 +265,8 @@ QGCViewDialog {
                         Layout.fillWidth: true
 
                         onClicked: controller.moveVertexRight()
+                        onPressAndHold: updateTimerRight.start()
+                        onReleased: updateTimerRight.stop()
                     }
                 }
 
@@ -225,6 +277,18 @@ QGCViewDialog {
 
                     rowSpacing:     _margin
                     rows: 1
+
+//                    Timer {
+//                        id: updateTimer
+//                        interval: 1
+//                        running: false
+//                        repeat: true
+//                        onTriggered: {
+//                            // only update if scroll bar is at the bottom
+//                            controller.moveVertexDown()
+//                        }
+//                    }
+
 
                     QGCButton {
                         text:              qsTr("Down")
@@ -235,6 +299,8 @@ QGCViewDialog {
 
                         Layout.columnSpan: 2
                         onClicked: controller.moveVertexDown()
+                        onPressAndHold: updateTimerDown.start()
+                        onReleased: updateTimerDown.stop()
                     }
                 }
 

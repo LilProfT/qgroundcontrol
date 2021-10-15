@@ -285,7 +285,7 @@ Rectangle {
                     QGCSlider {
                         id:                     ascendAltitudeSlider
                         minimumValue:           0
-                        maximumValue:           5
+                        maximumValue:           10
                         stepSize:               0.1
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true

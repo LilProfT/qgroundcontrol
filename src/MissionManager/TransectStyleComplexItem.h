@@ -143,6 +143,7 @@ protected slots:
     void _rebuildTransects                  (void);
     void _rebuildOffsetPolygon              (void);
     void _listenFences      (void);
+    void _rebuildTransects2                  (void);
 
 protected:
     virtual void _rebuildTransectsPhase1    (void) = 0; ///< Rebuilds the _transects array

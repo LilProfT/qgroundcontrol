@@ -73,7 +73,7 @@ TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterC
     connect(&_terrainAdjustMaxClimbRateFact,            &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_terrainAdjustMaxDescentRateFact,          &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_terrainAdjustToleranceFact,               &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
-    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::_rebuildTransects);
+//    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathChanged,    this, &TransectStyleComplexItem::_rebuildTransects);
     connect(&_cameraTriggerInTurnAroundFact,            &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(_cameraCalc.adjustedFootprintSide(),        &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
     connect(_cameraCalc.adjustedFootprintFrontal(),     &Fact::valueChanged,            this, &TransectStyleComplexItem::_rebuildTransects);
@@ -401,6 +401,128 @@ bool TransectStyleComplexItem::hoverAndCaptureAllowed(void) const
 }
 
 void TransectStyleComplexItem::_rebuildTransects (void)
+{
+    if (_ignoreRecalc) {
+        return;
+    }
+
+    _transects.clear();
+    _rgPathHeightInfo.clear();
+    _rgFlightPathCoordInfo.clear();
+
+    _rebuildTransectsPhase1();
+    _masterController->missionChange(true);
+    _minAMSLAltitude = _maxAMSLAltitude = qQNaN();
+
+    if (_followTerrain) {
+        // Query the terrain data. Once available terrain heights will be calculated
+        _queryTransectsPathHeightInfo();
+    } else {
+        // Not following terrain so we can build the flight path now
+        _buildRawFlightPath();
+    }
+
+    auto _surveyComplexItem = qobject_cast<SurveyComplexItem*>(this);
+    double requestedAltitude = _cameraCalc.distanceToSurface()->rawValue().toDouble();
+    double yaw = getYaw();
+    double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
+    double trimStart = _surveyComplexItem->trimStart()->cookedValue().value<double>();
+    double trimEnd = _surveyComplexItem->trimEnd()->cookedValue().value<double>();
+
+    _model.setExclusionFences(_masterController->geoFenceController()->polygons());
+    _model.setAvoidDistance(gridSpacing / 2);
+
+    _model.setTrim(trimStart, trimEnd);
+
+    _model.clearStep();
+//    _model.appendHoldAltitude(requestedAltitude);
+    _model.appendHoldYaw(yaw);
+
+    bool ascend = _surveyComplexItem->ascendTerminals()->cookedValue().value<bool>();
+    double ascendAltitude = _surveyComplexItem->ascendAltitude()->cookedValue().value<double>();
+    double ascendLength = _surveyComplexItem->ascendLength()->cookedValue().value<double>();
+
+    bool isFirst = true;
+    for (const QList<CoordInfo_t>& transect: _transects) {
+        QGeoCoordinate first  = transect[0].coord;
+        QGeoCoordinate second = transect[1].coord;
+        first.setAltitude((isFirst || ascend) ? requestedAltitude + ascendAltitude : requestedAltitude);
+        second.setAltitude(ascend ? requestedAltitude + ascendAltitude : requestedAltitude);
+        double distance = first.distanceTo(second);
+        double azimuth = first.azimuthTo(second);
+        double rev_azimuth = second.azimuthTo(first);
+
+        QGeoCoordinate downAfterFirst = first.atDistanceAndAzimuth(ascendLength, azimuth, -ascendAltitude);
+        qDebug() << downAfterFirst;
+        QGeoCoordinate upBeforeSecond = second.atDistanceAndAzimuth(ascendLength + 3.0, rev_azimuth, -ascendAltitude);
+        qDebug() << upBeforeSecond;
+
+        _model.appendWaypoint(first);
+        if ((isFirst || ascend) && (distance > ascendLength*2)) _model.appendWaypoint(downAfterFirst);
+        _model.appendSpray();
+        if (ascend && (distance > ascendLength*2)) _model.appendWaypoint(upBeforeSecond);
+        _model.appendWaypoint(second);
+
+        isFirst = false;
+    }
+
+    _model.pregenIntegrate();
+
+    // Calc bounding cube
+    double north = 0.0;
+    double south = 180.0;
+    double east  = 0.0;
+    double west  = 360.0;
+    double bottom = 100000.;
+    double top = 0.;
+    // Generate the visuals transect representation
+    _visualTransectPoints.clear();
+    for (Step* step: _model.steps()) {
+            if (step->type() != Step::Type::WAYPOINT) continue;
+            QGeoCoordinate coord = qobject_cast<WaypointStep*>(step)->coord;
+            _visualTransectPoints.append(QVariant::fromValue(coord));
+            double lat = coord.latitude()  + 90.0;
+            double lon = coord.longitude() + 180.0;
+            north   = fmax(north, lat);
+            south   = fmin(south, lat);
+            east    = fmax(east,  lon);
+            west    = fmin(west,  lon);
+            bottom  = fmin(bottom, coord.altitude());
+            top     = fmax(top, coord.altitude());
+    }
+
+    //-- Update bounding cube for airspace management control
+    _setBoundingCube(QGCGeoBoundingCube(
+                         QGeoCoordinate(north - 90.0, west - 180.0, bottom),
+                         QGeoCoordinate(south - 90.0, east - 180.0, top)));
+    emit visualTransectPointsChanged();
+
+    _coordinate = _visualTransectPoints.count() ? _visualTransectPoints.first().value<QGeoCoordinate>() : QGeoCoordinate();
+    _exitCoordinate = _visualTransectPoints.count() ? _visualTransectPoints.last().value<QGeoCoordinate>() : QGeoCoordinate();
+    emit coordinateChanged(_coordinate);
+    emit exitCoordinateChanged(_exitCoordinate);
+
+    if (_isIncomplete) {
+        _isIncomplete = false;
+        emit isIncompleteChanged();
+    }
+
+    _recalcComplexDistance();
+    _recalcCameraShots();
+
+    emit lastSequenceNumberChanged(lastSequenceNumber());
+    emit timeBetweenShotsChanged();
+    emit additionalTimeDelayChanged();
+
+    emit minAMSLAltitudeChanged();
+    emit maxAMSLAltitudeChanged();
+
+    emit _updateFlightPathSegmentsSignal();
+    _amslEntryAltChanged();
+    _amslExitAltChanged();
+}
+
+void TransectStyleComplexItem::_rebuildTransects2 (void)
 {
     if (_ignoreRecalc) {
         return;
@@ -1314,8 +1436,7 @@ void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
     convertGeoToNed(_surveyAreaPolygon.center(), tangentOrigin, &y, &x, &down);
     QPointF center(x, -y);
 
-    QPolygonF currentPolygon;
-    currentPolygon << basePolygon;
+    QList<QLineF> offsetLines;
     for (int i=0; i<basePolygon.count(); i++) {
         int     lastIndex = i == basePolygon.count() - 1 ? 0 : i + 1;
         QLineF  originalEdge(basePolygon[i], basePolygon[lastIndex]);
@@ -1333,50 +1454,18 @@ void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
         workerLine.setPoints(workerLine.p2(), intersectPoint);// swap terminals
         workerLine.setAngle(originalEdge.angle());            // rotate the crossline to create offset line on the base point
 
-        QList<QPointF> intersectPoints;
-        for (int j=0; j<currentPolygon.count(); j++) {
-            int lastj = j == currentPolygon.count() - 1 ? 0 : j+1;
-            QLineF AB(currentPolygon[j], currentPolygon[lastj]);
-            QPointF intersectPoint;
-            auto result = workerLine.intersect(AB, &intersectPoint);
-            if (result != QLineF::NoIntersection) {
-                QLineF MC(AB.center(), intersectPoint);
-                bool inboundAB = MC.length() <= AB.length()/2;
-                if (inboundAB) intersectPoints.append(intersectPoint);
-            }
-        }
-
-//        assert((intersectPoints.count() == 2) || (intersectPoints.count() == 0));
-
-        QPolygonF nextPolygon;
-        if (intersectPoints.count() == 2) {
-            float cos = workerLine.dx() / workerLine.length();
-            float sin = workerLine.dy() / workerLine.length();
-            QPointF V0 = originalEdge.p2() - workerLine.p1();
-            float originRegion = -sin*V0.x() + cos*V0.y();
-            for (const QPointF& vertex: currentPolygon) {
-                QPointF V = vertex - workerLine.p1();
-                float vertexRegion = -sin*V.x() + cos*V.y();
-                if (vertexRegion * originRegion < 0) nextPolygon << vertex;
-            }
-
-            QLineF testEdgeFirst(nextPolygon.first(), intersectPoints[0]);
-            QLineF testEdgeLast(nextPolygon.last(), intersectPoints[1]);
-            QPointF temp;
-            if (testEdgeFirst.intersect(testEdgeLast, &temp) == QLineF::BoundedIntersection) {
-                nextPolygon << intersectPoints[0] << intersectPoints[1];
-            } else {
-                nextPolygon << intersectPoints[1] << intersectPoints[0];
-            }
-
-            currentPolygon.clear();
-            currentPolygon << nextPolygon;
-        }
+        offsetLines.append(workerLine);
     }
 
-    for (const QPointF& vertex: currentPolygon) {
+    // Intersect the offset edges to generate new vertices
+    QPointF         newVertex;
+    for (int i=0; i<offsetLines.count(); i++) {
+        int prevIndex = i == 0 ? offsetLines.count() - 1 : i - 1;
+        auto intersect = offsetLines[prevIndex].intersect(offsetLines[i], &newVertex);
+        assert(intersect != QLineF::NoIntersection);
+
         QGeoCoordinate coord;
-        convertNedToGeo(-vertex.y(), vertex.x(), 0, tangentOrigin, &coord);
+        convertNedToGeo(-newVertex.y(), newVertex.x(), 0, tangentOrigin, &coord);
         _offsetAreaPolygon.appendVertex(coord);
     };
 

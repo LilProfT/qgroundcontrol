@@ -1076,13 +1076,14 @@ void PlanMasterController::setParam()
     float velocity = this->_surveyComplexItem->velocity()->property("value").toFloat();   
     float x = this->_surveyComplexItem->sprayFlowRate()->property("value").toFloat();
     float y = 0;
-    if (x >= 4.8) {
-       y = 75.0;
-    } else if (x < 2.08) {
-       y = 25.0;
+    if (x >= 5.15) {
+        y = 72.0;
+    } else if (x < 2.9) {
+        y = 25.0;
     } else {
         // y =  -1.525x4 + 22.794x3 - 118.86x2 +  271.63x - 202.45
-       y = (-1.525 * qPow(x, 4.0)) + (22.794 * qPow(x, 3.0)) + (- 118.86 * qPow(x, 2.0)) + (271.63 * x)  +  (- 202.45);
+       //y = (-1.525 * qPow(x, 4.0)) + (22.794 * qPow(x, 3.0)) + (- 118.86 * qPow(x, 2.0)) + (271.63 * x)  +  (- 202.45);
+       y = ( -7.1683 * qPow(x, 5.0)) + (147.42 * qPow(x, 4.0)) + ( - 1197.9 * qPow(x, 3.0)) + ( 4811.3 * qPow(x, 2.0)) + (- 9545.5 * x)  +  ( 7505.6);
     }
 
 //    float y = (x < 2.08) ?
