@@ -999,6 +999,7 @@ private:
     void _handleGimbalOrientation       (const mavlink_message_t& message);
     void _handleObstacleDistance        (const mavlink_message_t& message);
     void _handleEvent(uint8_t comp_id, std::unique_ptr<events::parser::ParsedEvent> event);
+    void _handleServoOutputRaw          (mavlink_message_t& message);
     // ArduPilot dialect messages
 #if !defined(NO_ARDUPILOT_DIALECT)
     void _handleCameraFeedback          (const mavlink_message_t& message);
@@ -1097,6 +1098,9 @@ private:
     bool            _readyToFlyAvailable                    = false;
     bool            _readyToFly                             = false;
     bool            _allSensorsHealthy                      = true;
+
+    //Mismart: Check if the pump is on by reading output PWM value
+    bool            _sprayerOn                              = false;
 
     SysStatusSensorInfo _sysStatusSensorInfo;
 

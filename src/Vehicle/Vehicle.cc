@@ -792,6 +792,11 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     }
         break;
 
+        //Mismart: Read CH7/CH8 PWM Output
+    case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW :
+        _handleServoOutputRaw(message);
+        break;
+
         // Following are ArduPilot dialect messages
 #if !defined(NO_ARDUPILOT_DIALECT)
     case MAVLINK_MSG_ID_CAMERA_FEEDBACK:
@@ -1509,6 +1514,25 @@ void Vehicle::_handleHomePosition(mavlink_message_t& message)
                                     homePos.longitude / 10000000.0,
                                     homePos.altitude / 1000.0);
     _setHomePosition(newHomePosition);
+}
+
+//Mismart: Currently only read Servo 7 and Servo 8 Output for sprayer trigger event
+void Vehicle::_handleServoOutputRaw(mavlink_message_t& message)
+{
+    mavlink_servo_output_raw_t servoOut;
+
+    mavlink_msg_servo_output_raw_decode(&message, &servoOut);
+
+    //Check if we are decoding the correct thing
+
+    //qDebug() << servoOut.servo1_raw << " " << servoOut.servo1_raw;
+
+    //Sprayer is on S7 and S8. Check if the sprayers are actually "on"
+    if (servoOut.servo7_raw > 1100 || servoOut.servo8_raw > 1100) {
+        _sprayerOn = true;
+    } else {
+        _sprayerOn = false;
+    }
 }
 
 void Vehicle::_updateArmed(bool armed)
@@ -2243,7 +2267,9 @@ bool Vehicle::_areaSprayedStart()
 {
     if (batteries()->count() == 3) //Mismart AGR drone config, 3 batteries
     {
-        if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() >= 50) //Arbitrary number
+        //if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() >= 50) //Arbitrary number
+        //Check sprayer PWM (from the _handleServoOutputRaw() function)
+        if (_sprayerOn)
         {
             // return (flightMode() == missionFlightMode()); //Only records when AUTO mode is used
             return true;
