@@ -50,6 +50,7 @@ public:
     Q_INVOKABLE void removeVertex(int vertexIndex);
     Q_INVOKABLE void appendVertices(const QVariantList& varCoords);
     Q_INVOKABLE void setOffset(int i, float offset) { _offsets[QString::number(i)] = QVariant::fromValue(offset); emit offsetsChanged(); };
+    Q_INVOKABLE void pathChangeDone(void);
 
     void appendVertices(const QList<QGeoCoordinate>& coordinates);
 
@@ -175,6 +176,7 @@ signals:
     void traceModeChanged   (bool traceMode);
     void showAltColorChanged(bool showAltColor);
     void selectedVertexChanged(int index);
+    void pathDone        (void);
 
 private slots:
     void _polygonModelCountChanged(int count);

@@ -160,4 +160,5 @@ void EditPositionDialogController::undoMoveVertex(void)
 void EditPositionDialogController::commitVertex(void)
 {
     _stackUndo.clear();
+    emit coordinateChangeDone();
 }

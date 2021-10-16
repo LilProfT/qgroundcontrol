@@ -377,6 +377,11 @@ void QGCMapPolygon::appendVertices(const QList<QGeoCoordinate>& coordinates)
     emit pathChanged();
 }
 
+void QGCMapPolygon::pathChangeDone()
+{
+    emit pathDone();
+}
+
 void QGCMapPolygon::appendVertices(const QVariantList& varCoords)
 {
     QList<QGeoCoordinate> rgCoords;

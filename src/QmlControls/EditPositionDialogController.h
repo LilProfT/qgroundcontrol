@@ -57,6 +57,7 @@ public:
 
 signals:
     void coordinateChanged(QGeoCoordinate coordinate);
+    void coordinateChangeDone();
 
 private:
     static QMap<QString, FactMetaData*> _metaDataMap;

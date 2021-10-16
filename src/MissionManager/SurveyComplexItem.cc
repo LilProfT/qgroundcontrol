@@ -18,7 +18,8 @@
 #include "PlanMasterController.h"
 #include "QGCApplication.h"
 #include "TakeoffMissionItem.h"
-
+#include "TakeoffMissionItem.h"
+#include "EditPositionDialogController.h"
 #include <QPolygonF>
 #include <QSignalBlocker>
 #include <QTimer>
@@ -182,6 +183,7 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
 
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                this, &SurveyComplexItem::_catchFirstEdge);
+    connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathDone,                this, &SurveyComplexItem::optimize);
 
     connect(this, &TransectStyleComplexItem::coveredAreaChanged, _masterController, &PlanMasterController::areaChanged);
 

@@ -181,6 +181,8 @@ Item {
 
     onInteractiveChanged: _handleInteractiveChanged()
 
+
+
     on_CircleModeChanged: {
         if (_circleMode) {
             addCircleVisuals()
@@ -250,6 +252,7 @@ Item {
             onTriggered: {
                 if (menu._editingVertexIndex >= 0) {
                     mapPolygon.removeVertex(menu._editingVertexIndex)
+                    mapPolygon.pathChangeDone()
                 }
             }
         }
@@ -273,7 +276,7 @@ Item {
         QGCMenuItem {
             text:           qsTr("Edit position..." )
             visible:        !_circleMode && menu._editingVertexIndex >= 0
-            onTriggered:    mainWindow.showComponentDialog(editVertexPositionDialog, qsTr("Edit Vertex Position"), mainWindow.showDialogDefaultWidth, StandardButton.Close)
+            onTriggered:    mainWindow.showComponentDialog(editVertexPositionDialog, qsTr("Edit Vertex Position"), mainWindow.showDialogDefaultWidth, StandardButton.Save)
         }
     }
 
@@ -373,7 +376,10 @@ Item {
             mapControl: _root.mapControl
             z:          _zorderDragHandle
             visible:    !_circleMode
-            onDragStop: mapPolygon.verifyClockwiseWinding()
+            onDragStop:  {
+                mapPolygon.verifyClockwiseWinding()
+                mapPolygon.pathChangeDone()
+            }
 
             property int polygonVertex
 
@@ -441,7 +447,11 @@ Item {
                 color:          Qt.rgba(1,1,1,0.8)
                 border.color:   Qt.rgba(0,0,0,0.25)
                 border.width:   1
+
             }
+
+
+
         }
     }
 
@@ -488,6 +498,14 @@ Item {
                 mapPolygon.center = coordinate
                 mapPolygon.centerDrag = false
             }
+
+
+
+//            onCoordinateChangeDone: {
+//                // Prevent spamming signals on vertex changes by setting centerDrag = true when changing center position.
+//                // This also fixes a bug where Qt gets confused by all the signalling and draws a bad visual.
+//                mapPolygon.pathDone()
+//            }
         }
     }
 
@@ -496,6 +514,10 @@ Item {
 
         EditPositionDialog {
             coordinate:             mapPolygon.vertexCoordinate(menu._editingVertexIndex)
+            function accept() {
+                mapPolygon.pathChangeDone()
+                hideDialog()
+            }
             onCoordinateChanged: {
                 mapPolygon.adjustVertex(menu._editingVertexIndex, coordinate)
                 // mapPolygon.verifyClockwiseWinding()
@@ -591,7 +613,11 @@ Item {
             z:                          _zorderCenterHandle
             onItemCoordinateChanged:    mapPolygon.center = itemCoordinate
             onDragStart:                mapPolygon.centerDrag = true
-            onDragStop:                 mapPolygon.centerDrag = false
+            onDragStop:             {
+
+                mapPolygon.centerDrag = false
+                mapPolygon.pathChangeDone()
+            }
         }
     }
 
@@ -664,6 +690,7 @@ Item {
                             _restorePreviousVertices()
                         }
                         mapPolygon.traceMode = false
+                        mapPolygon.pathChangeDone()
                     } else {
                         _saveCurrentVertices()
                         _circleMode = false

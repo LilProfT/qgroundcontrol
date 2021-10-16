@@ -278,18 +278,6 @@ QGCViewDialog {
                     rowSpacing:     _margin
                     rows: 1
 
-//                    Timer {
-//                        id: updateTimer
-//                        interval: 1
-//                        running: false
-//                        repeat: true
-//                        onTriggered: {
-//                            // only update if scroll bar is at the bottom
-//                            controller.moveVertexDown()
-//                        }
-//                    }
-
-
                     QGCButton {
                         text:              qsTr("Down")
                         horizontalAlignment: Text.AlignHCenter
@@ -326,7 +314,6 @@ QGCViewDialog {
                         horizontalAlignment: Text.AlignHCenter
                         Layout.alignment:  Qt.AlignRight
                         Layout.minimumWidth: 30
-
                         onClicked: controller.resetMoveVertex()
                     }
                 }
