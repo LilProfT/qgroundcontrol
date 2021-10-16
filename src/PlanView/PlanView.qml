@@ -568,7 +568,7 @@ Item {
                 id:             tracingAreaPolygon
 
                 border.width: 2
-                border.color: "white"
+                border.color: "#30E7F4F4"
                 color: "transparent"
                 visible: true
                 opacity:    _root.opacity

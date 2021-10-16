@@ -533,6 +533,11 @@ Item {
             property real   _margin:        ScreenTools.defaultFontPixelWidth / 2
             property real   _fieldWidth:    ScreenTools.defaultFontPixelWidth * 10.5
 
+//            function accept() {
+
+//                hideDialog()
+//            }
+
             Component.onCompleted: {
                 console.log(menu._editingVertexIndex)
                 offsetField.text = (mapPolygon.offsets[menu._editingVertexIndex.toString()] || 0).toString()
@@ -597,6 +602,7 @@ Item {
 
                                 mapPolygon.setOffset(menu._editingVertexIndex, parseFloat(offsetField.text))
                                 reject()
+                                mapPolygon.pathChangeDone()
                             }
                         }
                     }

@@ -133,6 +133,8 @@ TransectStyleComplexItem::TransectStyleComplexItem(PlanMasterController* masterC
     auto fences = _masterController->geoFenceController()->polygons();
     connect(fences, &QmlObjectListModel::countChanged, this, &TransectStyleComplexItem::_rebuildTransects);
     connect(fences, &QmlObjectListModel::countChanged, this, &TransectStyleComplexItem::_listenFences);
+//    connect(&_offsetAreaPolygon,                        &QGCMapPolygon::pathDone,    this, &TransectStyleComplexItem::_rebuildTransects);
+//    connect(&_surveyAreaPolygon,                        &QGCMapPolygon::pathDone,    this, &TransectStyleComplexItem::_rebuildTransects);
 
     setDirty(false);
 }
@@ -1448,13 +1450,14 @@ void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
         workerLine.translate(transVec);                       // translate the edge to center
         workerLine.setAngle(workerLine.angle() + 90.0);       // rotate 90 degress to create a crossline
         QPointF intersectPoint;
-        workerLine.intersect(originalEdge, &intersectPoint);
-        workerLine.setPoints(intersectPoint, center);         // crossline with intersect point
-        workerLine.setLength(offset);                         // offset the intersect point to create base point
-        workerLine.setPoints(workerLine.p2(), intersectPoint);// swap terminals
-        workerLine.setAngle(originalEdge.angle());            // rotate the crossline to create offset line on the base point
+        if (workerLine.intersect(originalEdge, &intersectPoint) != QLineF::NoIntersection) {
+            workerLine.setPoints(intersectPoint, center);         // crossline with intersect point
+            workerLine.setLength(offset);                         // offset the intersect point to create base point
+            workerLine.setPoints(workerLine.p2(), intersectPoint);// swap terminals
+            workerLine.setAngle(originalEdge.angle());            // rotate the crossline to create offset line on the base point
 
-        offsetLines.append(workerLine);
+            offsetLines.append(workerLine);
+        }
     }
 
     // Intersect the offset edges to generate new vertices
@@ -1462,11 +1465,12 @@ void TransectStyleComplexItem::_rebuildOffsetPolygon (void)
     for (int i=0; i<offsetLines.count(); i++) {
         int prevIndex = i == 0 ? offsetLines.count() - 1 : i - 1;
         auto intersect = offsetLines[prevIndex].intersect(offsetLines[i], &newVertex);
-        assert(intersect != QLineF::NoIntersection);
 
-        QGeoCoordinate coord;
-        convertNedToGeo(-newVertex.y(), newVertex.x(), 0, tangentOrigin, &coord);
-        _offsetAreaPolygon.appendVertex(coord);
+        if (intersect != QLineF::NoIntersection) {
+            QGeoCoordinate coord;
+            convertNedToGeo(-newVertex.y(), newVertex.x(), 0, tangentOrigin, &coord);
+            _offsetAreaPolygon.appendVertex(coord);
+        }
     };
 
     _offsetAreaPolygon.blockSignals(false);
