@@ -446,7 +446,7 @@ void TransectStyleComplexItem::_rebuildTransects(void)
         _queryTransectsPathHeightInfo();
         break;
 		}
-auto _surveyComplexItem = qobject_cast<SurveyComplexItem*>(this);
+	auto _surveyComplexItem = qobject_cast<SurveyComplexItem*>(this);
     double requestedAltitude = _cameraCalc.distanceToSurface()->rawValue().toDouble();
     double yaw = getYaw();
     double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();

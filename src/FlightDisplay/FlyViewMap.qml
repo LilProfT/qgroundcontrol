@@ -426,7 +426,7 @@ FlightMap {
         Connections {
             target: QGroundControl.multiVehicleManager
             function onActiveVehicleChanged() {
-                if (!activeVehicle) {
+                if (!_activeVehicle) {
                     gotoLocationItem.visible = false
                 }
             }
@@ -464,7 +464,7 @@ FlightMap {
         Connections {
             target: QGroundControl.multiVehicleManager
             function onActiveVehicleChanged() {
-                if (!activeVehicle) {
+                if (!_activeVehicle) {
                     orbitMapCircle.visible = false
                 }
             }
