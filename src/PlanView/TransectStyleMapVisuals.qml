@@ -28,7 +28,6 @@ Item {
 
     property var    _missionItem:               object
     property var    _mapPolygon:                object.surveyAreaPolygon
-//    property var    _offsetPolygon:             object.offsetAreaPolygon
     property bool   _currentItem:               object.isCurrentItem
     property var    _transectPoints:            _missionItem.visualTransectPoints
     property var    _angleEdge:                 _missionItem.angleEdge ? _missionItem.angleEdge : []
@@ -53,23 +52,6 @@ Item {
         var toAdd = [ fullTransectsComponent, entryTransectComponent, exitTransectComponent, entryPointComponent, exitPointComponent,
                      entryArrow1Component, entryArrow2Component, exitArrow1Component, exitArrow2Component ]
         objMgr.createObjects(toAdd, map, true /* parentObjectIsMap */)
-
-        console.log(_missionItem.angleEdge);
-        console.log(_angleEdge);
-
-//        console.log(_avoidances)
-//        for (var i=0; i<_avoidances.count; i++) {
-//            var avoidance = _avoidances[i];
-//            console.log(avoidance);
-//            var obj = avoidanceTransectsComponent.createObject(map, { avoidance });
-
-//            if (obj.status === Component.Error) {
-//                console.log(obj.errorString())
-//            };
-
-//            objMgr.rgDynamicObjects.push(obj);
-//            map.addMapItem(obj);
-//        }
     }
 
     function _destroyVisualElements() {
@@ -89,43 +71,14 @@ Item {
     }
 
     MapPolygon {
-
         border.width: 4
         border.color: "yellow"
         color: "yellow"
         visible:    _currentItem
         opacity:    _root.opacity
         z: 100
-        path:  [
-            { latitude: -35.3627585729104, longitude: 149.16561385359756 },
-            { latitude: -35.36323317011994, longitude: 149.166278961657554},
-            { latitude: -35.36338926624347, longitude: 149.1655693841518 },
-            { latitude: -35.36317483107069, longitude: 149.16540697403713 }
-        ]
-
-//        Connections {
-//            target:                 QGroundControl.multiVehicleManager
-//            onActiveVehicleChanged: tracingAreaPolygon.path = _mapPolygon.boundingCube()
-//        }
-
-//        Connections {
-//            target:                 _activeVehicle ? _missionController  : null
-//            onUpdateSurveyAreaPolygon:      tracingAreaPolygon.path = _mapPolygon.boundingCube()
-////            onPointsCleared:        surveyAreaPolygon.path = []
-//        }
     }
 
-//    Component {
-//        id: offsetPolygonComponent
-
-//        MapPolygon {
-//            border.width: 2
-//            border.color: 'green'
-//            path: _offsetPolygon.path
-//            visible: true
-//            opacity: _root.opacity
-//        }
-//    }
 
     // Area polygon
     QGCMapPolygonVisuals {

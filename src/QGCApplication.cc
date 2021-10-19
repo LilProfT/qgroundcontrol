@@ -17,13 +17,6 @@
  */
 
 #include <QFile>
-#include <QFlags>
-#include <QPixmap>
-#include <QDesktopWidget>
-#include <QPainter>
-#include <QStyleFactory>
-#include <QAction>
-#include <QStringListModel>
 #include <QRegularExpression>
 #include <QFontDatabase>
 #include <QQuickWindow>
@@ -73,7 +66,7 @@
 #include "VideoManager.h"
 #include "VideoReceiver.h"
 #include "LogDownloadController.h"
-#if defined(QGC_ENABLE_MAVLINK_INSPECTOR)
+#if !defined(QGC_DISABLE_MAVLINK_INSPECTOR)
 #include "MAVLinkInspectorController.h"
 #endif
 #include "HorizontalFactValueGrid.h"
@@ -442,7 +435,7 @@ void QGCApplication::setLanguage()
             _locale = QLocale(QLocale::Korean);
             break;
         case 13:
-            _locale = QLocale(QLocale::Norwegian);
+            _locale = QLocale(QLocale::NorwegianBokmal);
             break;
         case 14:
             _locale = QLocale(QLocale::Polish);
@@ -560,7 +553,7 @@ void QGCApplication::_initCommon()
     qmlRegisterUncreatableType<LogReplayLink>       (kQGroundControl,                       1, 0, "LogReplayLink",              kRefOnly);
     qmlRegisterUncreatableType<InstrumentValueData> (kQGroundControl,                       1, 0, "InstrumentValueData",        kRefOnly);
     qmlRegisterType<LogReplayLinkController>        (kQGroundControl,                       1, 0, "LogReplayLinkController");
-#if defined(QGC_ENABLE_MAVLINK_INSPECTOR)
+#if !defined(QGC_DISABLE_MAVLINK_INSPECTOR)
     qmlRegisterUncreatableType<MAVLinkChartController> (kQGroundControl,                    1, 0, "MAVLinkChart",               kRefOnly);
 #endif
 #if defined(QGC_ENABLE_PAIRING)
@@ -606,7 +599,7 @@ void QGCApplication::_initCommon()
 #endif
     qmlRegisterType<GeoTagController>               (kQGCControllers,                       1, 0, "GeoTagController");
     qmlRegisterType<MavlinkConsoleController>       (kQGCControllers,                       1, 0, "MavlinkConsoleController");
-#if defined(QGC_ENABLE_MAVLINK_INSPECTOR)
+#if !defined(QGC_DISABLE_MAVLINK_INSPECTOR)
     qmlRegisterType<MAVLinkInspectorController>     (kQGCControllers,                       1, 0, "MAVLinkInspectorController");
 #endif
 

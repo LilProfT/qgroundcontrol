@@ -34,7 +34,7 @@ public:
     Q_PROPERTY(bool             rawEdit                 READ rawEdit                WRITE setRawEdit            NOTIFY rawEditChanged)              ///< true: raw item editing with all params
     Q_PROPERTY(bool             specifiesAltitude       READ specifiesAltitude                                  NOTIFY commandChanged)
     Q_PROPERTY(Fact*            altitude                READ altitude                                           CONSTANT)                           ///< Altitude as specified by altitudeMode. Not necessarily true mission item altitude
-    Q_PROPERTY(QGroundControlQmlGlobal::AltitudeMode altitudeMode READ altitudeMode WRITE setAltitudeMode       NOTIFY altitudeModeChanged)
+    Q_PROPERTY(QGroundControlQmlGlobal::AltMode altitudeMode READ altitudeMode WRITE setAltitudeMode       NOTIFY altitudeModeChanged)
     Q_PROPERTY(Fact*            amslAltAboveTerrain     READ amslAltAboveTerrain                                CONSTANT)                           ///< Actual AMSL altitude for item if altitudeMode == AltitudeAboveTerrain
     Q_PROPERTY(int              command                 READ command                WRITE setCommand            NOTIFY commandChanged)
     Q_PROPERTY(bool             isLoiterItem            READ isLoiterItem                                       NOTIFY isLoiterItemChanged)
@@ -72,7 +72,7 @@ public:
     bool            friendlyEditAllowed (void) const;
     bool            rawEdit             (void) const;
     bool            specifiesAltitude   (void) const;
-    QGroundControlQmlGlobal::AltitudeMode altitudeMode(void) const { return _altitudeMode; }
+    QGroundControlQmlGlobal::AltMode altitudeMode(void) const { return _altitudeMode; }
     Fact*           altitude            (void) { return &_altitudeFact; }
     Fact*           amslAltAboveTerrain (void) { return &_amslAltAboveTerrainFact; }
     bool            isLoiterItem        (void) const;
@@ -90,7 +90,7 @@ public:
     QmlObjectListModel* comboboxFacts   (void) { return &_comboboxFacts; }
 
     void setRawEdit(bool rawEdit);
-    void setAltitudeMode(QGroundControlQmlGlobal::AltitudeMode altitudeMode);
+    void setAltitudeMode(QGroundControlQmlGlobal::AltMode altitudeMode);
     
     void setCommandByIndex(int index);
 
@@ -187,12 +187,13 @@ private:
     CameraSection*  _cameraSection =             nullptr;
 
     MissionCommandTree* _commandTree = nullptr;
-    bool _syncingHeadingDegreesAndParam4 = false;   ///< true: already in a sync signal, prevents signal loop  
+    bool _syncingHeadingDegreesAndParam4 = false;   ///< true: already in a sync signal, prevents signal loop
+
     Fact                _supportedCommandFact;
 
-    QGroundControlQmlGlobal::AltitudeMode   _altitudeMode = QGroundControlQmlGlobal::AltitudeModeRelative;
-    Fact                                    _altitudeFact;
-    Fact                                    _amslAltAboveTerrainFact;
+    QGroundControlQmlGlobal::AltMode    _altitudeMode = QGroundControlQmlGlobal::AltitudeModeRelative;
+    Fact                                _altitudeFact;
+    Fact                                _amslAltAboveTerrainFact;
 
     QmlObjectListModel  _textFieldFacts;
     QmlObjectListModel  _nanFacts;

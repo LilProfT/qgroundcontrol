@@ -502,6 +502,34 @@
       <decimal>2</decimal>
     </parameter>
   </group>
+  <group name="Autotune">
+    <parameter name="MC_AT_APPLY" default="1" type="INT32">
+      <short_desc>Controls when to apply the new gains</short_desc>
+      <long_desc>After the auto-tuning sequence is completed, a new set of gains is available and can be applied immediately or after landing. WARNING Applying the gains in air is dangerous as there is no guarantee that those new gains will be able to stabilize the drone properly.</long_desc>
+      <values>
+        <value code="0">Do not apply the new gains (logging only)</value>
+        <value code="1">Apply the new gains after disarm</value>
+        <value code="2">WARNING Apply the new gains in air</value>
+      </values>
+    </parameter>
+    <parameter name="MC_AT_RISE_TIME" default="0.14" type="FLOAT">
+      <short_desc>Desired angular rate closed-loop rise time</short_desc>
+      <min>0.01</min>
+      <max>0.5</max>
+      <unit>s</unit>
+      <decimal>2</decimal>
+    </parameter>
+    <parameter name="MC_AT_START" default="0" type="INT32" boolean="true">
+      <short_desc>Start the autotuning sequence</short_desc>
+      <long_desc>WARNING: this will inject steps to the rate controller and can be dangerous. Only activate if you know what you are doing, and in a safe environment. Any motion of the remote stick will abord the signal injection and reset this parameter Best is to perform the identification in position or hold mode. Increase the amplitude of the injected signal using MC_AT_SYSID_AMP for more signal/noise ratio</long_desc>
+    </parameter>
+    <parameter name="MC_AT_SYSID_AMP" default="0.7" type="FLOAT">
+      <short_desc>Amplitude of the injected signal</short_desc>
+      <min>0.1</min>
+      <max>6.0</max>
+      <decimal>1</decimal>
+    </parameter>
+  </group>
   <group name="Battery Calibration">
     <parameter name="BAT1_A_PER_V" default="-1.0" type="FLOAT">
       <short_desc>Battery 1 current per volt (A/V)</short_desc>
@@ -706,7 +734,7 @@
       <reboot_required>True</reboot_required>
     </parameter>
     <parameter name="BAT_ADC_CHANNEL" default="-1" type="INT32">
-      <short_desc>This parameter is deprecated. Please use BAT1_ADC_CHANNEL</short_desc>
+      <short_desc>This parameter is deprecated. Please use BAT1_I_CHANNEL</short_desc>
     </parameter>
     <parameter name="BAT_CRIT_THR" default="0.07" type="FLOAT">
       <short_desc>Critical threshold</short_desc>
@@ -716,7 +744,6 @@
       <unit>norm</unit>
       <decimal>2</decimal>
       <increment>0.01</increment>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="BAT_EMERGEN_THR" default="0.05" type="FLOAT">
       <short_desc>Emergency threshold</short_desc>
@@ -726,7 +753,6 @@
       <unit>norm</unit>
       <decimal>2</decimal>
       <increment>0.01</increment>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="BAT_LOW_THR" default="0.15" type="FLOAT">
       <short_desc>Low threshold</short_desc>
@@ -736,7 +762,6 @@
       <unit>norm</unit>
       <decimal>2</decimal>
       <increment>0.01</increment>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="BAT_N_CELLS" default="3" type="INT32" category="System">
       <short_desc>This parameter is deprecated. Please use BAT1_N_CELLS instead</short_desc>
@@ -854,7 +879,7 @@
     </parameter>
     <parameter name="TRIG_PINS" default="56" type="INT32">
       <short_desc>Camera trigger pin</short_desc>
-      <long_desc>Selects which FMU pin is used (range: AUX1-AUX8 on Pixhawk controllers with an I/O board, MAIN1-MAIN8 on controllers without an I/O board. The PWM interface takes two pins per camera, while relay triggers on every pin individually. Example: Value 56 would trigger on pins 5 and 6. For GPIO mode Pin 6 will be triggered followed by 5. With a value of 65 pin 5 will be triggered followed by 6. Pins may be non contiguous. I.E. 16 or 61. In GPIO mode the delay pin to pin is &lt; .2 uS. Note: only with a value of 56 or 78 it is possible to use the lower pins for actuator outputs (e.g. ESC's).</long_desc>
+      <long_desc>Selects which FMU pin is used (range: AUX1-AUX8 on Pixhawk controllers with an I/O board, MAIN1-MAIN8 on controllers without an I/O board). The PWM interface takes two pins per camera, while relay triggers on every pin individually. Example: Value 56 would trigger on pins 5 and 6. For GPIO mode Pin 6 will be triggered followed by 5. With a value of 65 pin 5 will be triggered followed by 6. Pins may be non contiguous. I.E. 16 or 61. In GPIO mode the delay pin to pin is &lt; .2 uS.</long_desc>
       <min>1</min>
       <max>12345678</max>
       <decimal>0</decimal>
@@ -928,7 +953,6 @@
       <long_desc>Setting this parameter to 22027 will disable IO safety. WARNING: ENABLING THIS CIRCUIT BREAKER IS AT OWN RISK</long_desc>
       <min>0</min>
       <max>22027</max>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="CBRK_RATE_CTRL" default="0" type="INT32" category="Developer">
       <short_desc>Circuit breaker for rate controller output</short_desc>
@@ -942,28 +966,24 @@
       <long_desc>Setting this parameter to 894281 will disable the power valid checks in the commander. WARNING: ENABLING THIS CIRCUIT BREAKER IS AT OWN RISK</long_desc>
       <min>0</min>
       <max>894281</max>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="CBRK_USB_CHK" default="197848" type="INT32" category="Developer">
       <short_desc>Circuit breaker for USB link check</short_desc>
       <long_desc>Setting this parameter to 197848 will disable the USB connected checks in the commander, setting it to 0 keeps them enabled (recommended). We are generally recommending to not fly with the USB link connected and production vehicles should set this parameter to zero to prevent users from flying USB powered. However, for R&amp;D purposes it has proven over the years to work just fine.</long_desc>
       <min>0</min>
       <max>197848</max>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="CBRK_VELPOSERR" default="0" type="INT32" category="Developer">
       <short_desc>Circuit breaker for position error check</short_desc>
       <long_desc>Setting this parameter to 201607 will disable the position and velocity accuracy checks in the commander. WARNING: ENABLING THIS CIRCUIT BREAKER IS AT OWN RISK</long_desc>
       <min>0</min>
       <max>201607</max>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="CBRK_VTOLARMING" default="0" type="INT32" category="Developer">
       <short_desc>Circuit breaker for arming in fixed-wing mode check</short_desc>
       <long_desc>Setting this parameter to 159753 will enable arming in fixed-wing mode for VTOLs. WARNING: ENABLING THIS CIRCUIT BREAKER IS AT OWN RISK</long_desc>
       <min>0</min>
       <max>159753</max>
-      <reboot_required>true</reboot_required>
     </parameter>
   </group>
   <group name="Commander">
@@ -1392,7 +1412,6 @@
       <min>1</min>
       <max>100</max>
       <unit>s</unit>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="COM_POS_FS_EPH" default="5" type="FLOAT">
       <short_desc>Horizontal position error threshold</short_desc>
@@ -1415,7 +1434,6 @@
       <min>1</min>
       <max>100</max>
       <unit>s</unit>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="COM_POWER_COUNT" default="1" type="INT32">
       <short_desc>Required number of redundant power modules</short_desc>
@@ -1480,7 +1498,7 @@
     </parameter>
     <parameter name="COM_RC_OVERRIDE" default="1" type="INT32">
       <short_desc>Enable RC stick override of auto and/or offboard modes</short_desc>
-      <long_desc>When RC stick override is enabled, moving the RC sticks more than COM_RC_STICK_OV from their center position immediately gives control back to the pilot by switching to Position mode. Note: Only has an effect on multicopters, and VTOLs in multicopter mode.</long_desc>
+      <long_desc>When RC stick override is enabled, moving the RC sticks more than COM_RC_STICK_OV from their center position immediately gives control back to the pilot by switching to Position mode. Note: Only has an effect on multicopters, and VTOLs in multicopter mode. This parameter is not considered in case of a GPS failure (Descend flight mode), where stick override is always enabled.</long_desc>
       <min>0</min>
       <max>7</max>
       <bitmask>
@@ -1514,6 +1532,15 @@
       <short_desc>Horizontal velocity error threshold</short_desc>
       <long_desc>This is the horizontal velocity error (EVH) threshold that will trigger a failsafe. The default is appropriate for a multicopter. Can be increased for a fixed-wing.</long_desc>
       <unit>m/s</unit>
+    </parameter>
+    <parameter name="COM_WIND_WARN" default="-1." type="FLOAT">
+      <short_desc>Wind speed warning threshold</short_desc>
+      <long_desc>A warning is triggered if the currently estimated wind speed is above this value. Warning is sent periodically (every 1min). A negative value disables the feature.</long_desc>
+      <min>-1</min>
+      <max>30</max>
+      <unit>m/s</unit>
+      <decimal>1</decimal>
+      <increment>0.1</increment>
     </parameter>
     <parameter name="NAV_DLL_ACT" default="0" type="INT32">
       <short_desc>Set data link loss failsafe mode</short_desc>
@@ -1936,6 +1963,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="MOT_POLE_COUNT" default="14" type="INT32">
@@ -2804,6 +2832,23 @@
       <max>1.0</max>
       <unit>m/s^2</unit>
       <decimal>3</decimal>
+    </parameter>
+  </group>
+  <group name="ESC">
+    <parameter name="ESC_BL_VER" default="0" type="INT32">
+      <short_desc>Required esc bootloader version</short_desc>
+      <min>0</min>
+      <max>65535</max>
+    </parameter>
+    <parameter name="ESC_FW_VER" default="0" type="INT32">
+      <short_desc>Required esc firmware version</short_desc>
+      <min>0</min>
+      <max>65535</max>
+    </parameter>
+    <parameter name="ESC_HW_VER" default="0" type="INT32">
+      <short_desc>Required esc hardware version</short_desc>
+      <min>0</min>
+      <max>65535</max>
     </parameter>
   </group>
   <group name="Events">
@@ -3688,7 +3733,6 @@
     <parameter name="FD_ESCS_EN" default="1" type="INT32" boolean="true">
       <short_desc>Enable checks on ESCs that report their arming state</short_desc>
       <long_desc>If enabled, failure detector will verify that all the ESCs have successfully armed when the vehicle has transitioned to the armed state. Timeout for receiving an acknowledgement from the ESCs is 0.3s, if no feedback is received the failure detector will auto disarm the vehicle.</long_desc>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="FD_EXT_ATS_EN" default="0" type="INT32" boolean="true">
       <short_desc>Enable PWM input on for engaging failsafe from an external automatic trigger system (ATS)</short_desc>
@@ -3776,6 +3820,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="GPS_1_GNSS" default="0" type="INT32">
@@ -3805,6 +3850,7 @@
         <value code="3">Ashtech / Trimble</value>
         <value code="4">Emlid Reach</value>
         <value code="5">Femtomes</value>
+        <value code="6">NMEA (generic)</value>
       </values>
     </parameter>
     <parameter name="GPS_2_CONFIG" default="0" type="INT32">
@@ -3823,6 +3869,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="GPS_2_GNSS" default="0" type="INT32">
@@ -3852,16 +3899,18 @@
         <value code="3">Ashtech / Trimble</value>
         <value code="4">Emlid Reach</value>
         <value code="5">Femtomes</value>
+        <value code="6">NMEA (generic)</value>
       </values>
     </parameter>
     <parameter name="GPS_DUMP_COMM" default="0" type="INT32">
-      <short_desc>Dump GPS communication to a file</short_desc>
-      <long_desc>If this is set to 1, all GPS communication data will be published via uORB, and written to the log file as gps_dump message.</long_desc>
+      <short_desc>Log GPS communication data</short_desc>
+      <long_desc>If this is set to 1, all GPS communication data will be published via uORB, and written to the log file as gps_dump message. If this is set to 2, the main GPS is configured to output RTCM data, which is then logged as gps_dump and can be used for PPK.</long_desc>
       <min>0</min>
-      <max>1</max>
+      <max>2</max>
       <values>
         <value code="0">Disable</value>
-        <value code="1">Enable</value>
+        <value code="1">Full communication</value>
+        <value code="2">RTCM output (PPK)</value>
       </values>
     </parameter>
     <parameter name="GPS_UBX_DYNMODEL" default="7" type="INT32">
@@ -4021,6 +4070,22 @@
       <unit>normalized_thrust/s</unit>
       <decimal>4</decimal>
     </parameter>
+    <parameter name="HTE_VXY_THR" default="10.0" type="FLOAT">
+      <short_desc>Horizontal velocity threshold for sensitivity reduction</short_desc>
+      <long_desc>Above this speed, the measurement noise is linearly increased to reduce the sensitivity of the estimator from biased measurement. Set to a low value on vehicles with large lifting surfaces.</long_desc>
+      <min>1.0</min>
+      <max>20.0</max>
+      <unit>m/s</unit>
+      <decimal>1</decimal>
+    </parameter>
+    <parameter name="HTE_VZ_THR" default="2.0" type="FLOAT">
+      <short_desc>Vertical velocity threshold for sensitivity reduction</short_desc>
+      <long_desc>Above this speed, the measurement noise is linearly increased to reduce the sensitivity of the estimator from biased measurement. Set to a low value on vehicles affected by air drag when climbing or descending.</long_desc>
+      <min>1.0</min>
+      <max>10.0</max>
+      <unit>m/s</unit>
+      <decimal>1</decimal>
+    </parameter>
   </group>
   <group name="Iridium SBD">
     <parameter name="ISBD_CONFIG" default="0" type="INT32">
@@ -4039,6 +4104,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="ISBD_READ_INT" default="0" type="INT32">
@@ -4156,7 +4222,7 @@
     </parameter>
     <parameter name="LTEST_MEAS_UNC" default="0.005" type="FLOAT">
       <short_desc>Landing target measurement uncertainty</short_desc>
-      <long_desc>Variance of the landing target measurement from the driver. Higher values results in less agressive following of the measurement and a smoother output as well as fewer rejected measurements.</long_desc>
+      <long_desc>Variance of the landing target measurement from the driver. Higher values result in less aggressive following of the measurement and a smoother output as well as fewer rejected measurements.</long_desc>
       <unit>tan(rad)^2</unit>
       <decimal>4</decimal>
     </parameter>
@@ -4191,7 +4257,7 @@
     </parameter>
     <parameter name="LTEST_VEL_UNC_IN" default="0.1" type="FLOAT">
       <short_desc>Initial landing target velocity uncertainty</short_desc>
-      <long_desc>Initial variance of the relative landing target velocity in x and y direction</long_desc>
+      <long_desc>Initial variance of the relative landing target velocity in x and y directions</long_desc>
       <min>0.001</min>
       <unit>(m/s)^2</unit>
       <decimal>3</decimal>
@@ -4443,7 +4509,7 @@
       <decimal>4</decimal>
     </parameter>
     <parameter name="LPE_VIS_DELAY" default="0.1" type="FLOAT">
-      <short_desc>Vision delay compensaton</short_desc>
+      <short_desc>Vision delay compensation</short_desc>
       <long_desc>Set to zero to enable automatic compensation from measurement timestamps</long_desc>
       <min>0</min>
       <max>0.1</max>
@@ -4512,6 +4578,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
         <value code="1000">Ethernet</value>
       </values>
     </parameter>
@@ -4584,6 +4651,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
         <value code="1000">Ethernet</value>
       </values>
     </parameter>
@@ -4656,6 +4724,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
         <value code="1000">Ethernet</value>
       </values>
     </parameter>
@@ -4718,8 +4787,8 @@
       <long_desc>Disabling the parameter hash check functionality will make the mavlink instance stream parameters continuously.</long_desc>
     </parameter>
     <parameter name="MAV_HB_FORW_EN" default="1" type="INT32" boolean="true">
-      <short_desc>Hearbeat message forwarding</short_desc>
-      <long_desc>The mavlink hearbeat message will not be forwarded if this parameter is set to 'disabled'. The main reason for disabling heartbeats to be forwarded is because they confuse dronekit.</long_desc>
+      <short_desc>Heartbeat message forwarding</short_desc>
+      <long_desc>The mavlink heartbeat message will not be forwarded if this parameter is set to 'disabled'. The main reason for disabling heartbeats to be forwarded is because they confuse dronekit.</long_desc>
     </parameter>
     <parameter name="MAV_ODOM_LP" default="0" type="INT32" boolean="true">
       <short_desc>Activate ODOMETRY loopback</short_desc>
@@ -4792,10 +4861,25 @@
       <long_desc>If set to 1 incoming HIL GPS messages are parsed.</long_desc>
     </parameter>
   </group>
+  <group name="Magnetometer Bias Estimator">
+    <parameter name="MBE_ENABLE" default="1" type="INT32" boolean="true">
+      <short_desc>Enable online mag bias calibration</short_desc>
+      <long_desc>This enables continuous calibration of the magnetometers before takeoff using gyro data.</long_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
+    <parameter name="MBE_LEARN_GAIN" default="18." type="FLOAT">
+      <short_desc>Mag bias estimator learning gain</short_desc>
+      <long_desc>Increase to make the estimator more responsive Decrease to make the estimator more robust to noise</long_desc>
+      <min>0.1</min>
+      <max>100</max>
+      <decimal>1</decimal>
+      <increment>0.1</increment>
+    </parameter>
+  </group>
   <group name="Mission">
     <parameter name="MIS_DIST_1WP" default="900" type="FLOAT">
       <short_desc>Maximal horizontal distance from home to first waypoint</short_desc>
-      <long_desc>Failsafe check to prevent running mission stored from previous flight at a new takeoff location. Set a value of zero or less to disable. The mission will not be started if the current waypoint is more distant than MIS_DIS_1WP from the home position.</long_desc>
+      <long_desc>Failsafe check to prevent running mission stored from previous flight at a new takeoff location. Set a value of zero or less to disable. The mission will not be started if the current waypoint is more distant than MIS_DIST_1WP from the home position.</long_desc>
       <min>0</min>
       <max>10000</max>
       <unit>m</unit>
@@ -5397,10 +5481,19 @@
       <increment>0.01</increment>
     </parameter>
     <parameter name="MPC_THR_MIN" default="0.12" type="FLOAT">
-      <short_desc>Minimum thrust in auto thrust control</short_desc>
-      <long_desc>It's recommended to set it &gt; 0 to avoid free fall with zero thrust.</long_desc>
+      <short_desc>Minimum collective thrust in auto thrust control</short_desc>
+      <long_desc>It's recommended to set it &gt; 0 to avoid free fall with zero thrust. Note: Without airmode zero thrust leads to zero roll/pitch control authority. (see MC_AIRMODE)</long_desc>
       <min>0.05</min>
       <max>1.0</max>
+      <unit>norm</unit>
+      <decimal>2</decimal>
+      <increment>0.01</increment>
+    </parameter>
+    <parameter name="MPC_THR_XY_MARG" default="0.3" type="FLOAT">
+      <short_desc>Horizontal thrust margin</short_desc>
+      <long_desc>Margin that is kept for horizontal control when prioritizing vertical thrust. To avoid completely starving horizontal control with high vertical error.</long_desc>
+      <min>0.0</min>
+      <max>0.5</max>
       <unit>norm</unit>
       <decimal>2</decimal>
       <increment>0.01</increment>
@@ -7154,7 +7247,7 @@
     </parameter>
     <parameter name="PLD_MAX_SRCH" default="3" type="INT32">
       <short_desc>Maximum number of search attempts</short_desc>
-      <long_desc>Maximum number of times to seach for the landing target if it is lost during the precision landing.</long_desc>
+      <long_desc>Maximum number of times to search for the landing target if it is lost during the precision landing.</long_desc>
       <min>0</min>
       <max>100</max>
     </parameter>
@@ -7194,6 +7287,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="RTPS_MAV_CONFIG" default="0" type="INT32">
@@ -7212,6 +7306,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
   </group>
@@ -7894,7 +7989,7 @@
     </parameter>
     <parameter name="RC_FAILS_THR" default="0" type="INT32">
       <short_desc>Failsafe channel PWM threshold</short_desc>
-      <long_desc>Set to a value slightly above the PWM value assumed by throttle in a failsafe event, but ensure it is below the PWM value assumed by throttle during normal operation. Use RC_MAP_FAILSAFE to specify which channel is used to check. Note: The default value of 0 is below the epxed range and hence disables the feature.</long_desc>
+      <long_desc>Use RC_MAP_FAILSAFE to specify which channel is used to indicate RC loss via this theshold. By default this is the throttle channel. Set to a PWM value slightly above the PWM value for the channel (e.g. throttle) in a failsafe event, but below the minimum PWM value for the channel during normal operation. Note: The default value of 0 disables the feature (it is below the expected range).</long_desc>
       <min>0</min>
       <max>2200</max>
       <unit>us</unit>
@@ -8060,7 +8155,7 @@
     </parameter>
     <parameter name="RC_MAP_FAILSAFE" default="0" type="INT32">
       <short_desc>Failsafe channel mapping</short_desc>
-      <long_desc>Configures which channel is used by the receiver to indicate the signal was lost. Futaba receivers do report that way. If 0, whichever channel is mapped to throttle is used otherwise the value indicates the specific RC channel to use Use RC_FAILS_THR to set the threshold indicating lost signal. By default it's below the expected range and hence diabled.</long_desc>
+      <long_desc>Configures which RC channel is used by the receiver to indicate the signal was lost (on receivers that use output a fixed signal value to report lost signal). If set to 0, the channel mapped to throttle is used. Use RC_FAILS_THR to set the threshold indicating lost signal. By default it's below the expected range and hence disabled.</long_desc>
       <min>0</min>
       <max>18</max>
       <values>
@@ -8339,26 +8434,8 @@
     </parameter>
   </group>
   <group name="Radio Switches">
-    <parameter name="RC_ACRO_TH" default="0.75" type="FLOAT">
-      <short_desc>Threshold for selecting acro mode</short_desc>
-      <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
-      <min>-1</min>
-      <max>1</max>
-    </parameter>
     <parameter name="RC_ARMSWITCH_TH" default="0.75" type="FLOAT">
       <short_desc>Threshold for the arm switch</short_desc>
-      <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
-      <min>-1</min>
-      <max>1</max>
-    </parameter>
-    <parameter name="RC_ASSIST_TH" default="0.25" type="FLOAT">
-      <short_desc>Threshold for selecting assist mode</short_desc>
-      <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
-      <min>-1</min>
-      <max>1</max>
-    </parameter>
-    <parameter name="RC_AUTO_TH" default="0.75" type="FLOAT">
-      <short_desc>Threshold for selecting auto mode</short_desc>
       <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
       <min>-1</min>
       <max>1</max>
@@ -8381,14 +8458,8 @@
       <min>-1</min>
       <max>1</max>
     </parameter>
-    <parameter name="RC_MAN_TH" default="0.75" type="FLOAT">
-      <short_desc>Threshold for the manual switch</short_desc>
-      <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
-      <min>-1</min>
-      <max>1</max>
-    </parameter>
     <parameter name="RC_MAP_ACRO_SW" default="0" type="INT32">
-      <short_desc>Acro switch channel</short_desc>
+      <short_desc>Acro switch channel (deprecated)</short_desc>
       <min>0</min>
       <max>18</max>
       <values>
@@ -8493,6 +8564,32 @@
         <value code="18">Channel 18</value>
       </values>
     </parameter>
+    <parameter name="RC_MAP_FLTM_BTN" default="0" type="INT32">
+      <short_desc>Button flight mode selection</short_desc>
+      <long_desc>This bitmask allows to specify multiple channels for changing flight modes using momentary buttons. Each channel is assigned to a mode slot ((lowest channel = slot 1). The resulting modes for each slot X is defined by the COM_FLTMODEX parameters. The functionality can be used only if RC_MAP_FLTMODE is disabled. The maximum number of available slots and hence bits set in the mask is 6.</long_desc>
+      <min>0</min>
+      <max>258048</max>
+      <bitmask>
+        <bit index="0">Mask Channel 1 as a mode button</bit>
+        <bit index="1">Mask Channel 2 as a mode button</bit>
+        <bit index="2">Mask Channel 3 as a mode button</bit>
+        <bit index="3">Mask Channel 4 as a mode button</bit>
+        <bit index="4">Mask Channel 5 as a mode button</bit>
+        <bit index="5">Mask Channel 6 as a mode button</bit>
+        <bit index="6">Mask Channel 7 as a mode button</bit>
+        <bit index="7">Mask Channel 8 as a mode button</bit>
+        <bit index="8">Mask Channel 9 as a mode button</bit>
+        <bit index="9">Mask Channel 10 as a mode button</bit>
+        <bit index="10">Mask Channel 11 as a mode button</bit>
+        <bit index="11">Mask Channel 12 as a mode button</bit>
+        <bit index="12">Mask Channel 13 as a mode button</bit>
+        <bit index="13">Mask Channel 14 as a mode button</bit>
+        <bit index="14">Mask Channel 15 as a mode button</bit>
+        <bit index="15">Mask Channel 16 as a mode button</bit>
+        <bit index="16">Mask Channel 17 as a mode button</bit>
+        <bit index="17">Mask Channel 18 as a mode button</bit>
+      </bitmask>
+    </parameter>
     <parameter name="RC_MAP_GEAR_SW" default="0" type="INT32">
       <short_desc>Landing gear switch channel</short_desc>
       <min>0</min>
@@ -8572,7 +8669,7 @@
       </values>
     </parameter>
     <parameter name="RC_MAP_MAN_SW" default="0" type="INT32">
-      <short_desc>Manual switch channel mapping</short_desc>
+      <short_desc>Manual switch channel mapping (deprecated)</short_desc>
       <min>0</min>
       <max>18</max>
       <values>
@@ -8598,7 +8695,7 @@
       </values>
     </parameter>
     <parameter name="RC_MAP_MODE_SW" default="0" type="INT32">
-      <short_desc>Mode switch channel mapping</short_desc>
+      <short_desc>Mode switch channel mapping (deprecated)</short_desc>
       <long_desc>This is the main flight mode selector. The channel index (starting from 1 for channel 1) indicates which channel should be used for deciding about the main mode. A value of zero indicates the switch is not assigned.</long_desc>
       <min>0</min>
       <max>18</max>
@@ -8651,7 +8748,7 @@
       </values>
     </parameter>
     <parameter name="RC_MAP_POSCTL_SW" default="0" type="INT32">
-      <short_desc>Position Control switch channel</short_desc>
+      <short_desc>Position Control switch channel (deprecated)</short_desc>
       <min>0</min>
       <max>18</max>
       <values>
@@ -8729,7 +8826,7 @@
       </values>
     </parameter>
     <parameter name="RC_MAP_STAB_SW" default="0" type="INT32">
-      <short_desc>Stabilize switch channel mapping</short_desc>
+      <short_desc>Stabilize switch channel mapping  (deprecated)</short_desc>
       <min>0</min>
       <max>18</max>
       <values>
@@ -8786,20 +8883,8 @@
       <min>-1</min>
       <max>1</max>
     </parameter>
-    <parameter name="RC_POSCTL_TH" default="0.75" type="FLOAT">
-      <short_desc>Threshold for selecting posctl mode</short_desc>
-      <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
-      <min>-1</min>
-      <max>1</max>
-    </parameter>
     <parameter name="RC_RETURN_TH" default="0.75" type="FLOAT">
       <short_desc>Threshold for selecting return to launch mode</short_desc>
-      <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
-      <min>-1</min>
-      <max>1</max>
-    </parameter>
-    <parameter name="RC_STAB_TH" default="0.5" type="FLOAT">
-      <short_desc>Threshold for the stabilize switch</short_desc>
       <long_desc>0-1 indicate where in the full channel range the threshold sits 0 : min 1 : max sign indicates polarity of comparison positive : true when channel&gt;th negative : true when channel&lt;th</long_desc>
       <min>-1</min>
       <max>1</max>
@@ -8911,6 +8996,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
   </group>
@@ -9196,6 +9282,15 @@
     </parameter>
   </group>
   <group name="SD Logging">
+    <parameter name="SDLOG_ALGORITHM" default="2" type="INT32">
+      <short_desc>Logfile Encryption algorithm</short_desc>
+      <long_desc>Selects the algorithm used for logfile encryption</long_desc>
+      <values>
+        <value code="0">Disabled</value>
+        <value code="2">XChaCha20</value>
+        <value code="3">AES</value>
+      </values>
+    </parameter>
     <parameter name="SDLOG_BOOT_BAT" default="0" type="INT32" boolean="true">
       <short_desc>Battery-only Logging</short_desc>
       <long_desc>When enabled, logging will not start from boot if battery power is not detected (e.g. powered via USB on a test bench). This prevents extraneous flight logs from being created during bench testing. Note that this only applies to log-from-boot modes. This has no effect on arm-based modes.</long_desc>
@@ -9206,6 +9301,18 @@
       <min>0</min>
       <max>1000</max>
       <reboot_required>true</reboot_required>
+    </parameter>
+    <parameter name="SDLOG_EXCH_KEY" default="1" type="INT32">
+      <short_desc>Logfile Encryption key exchange key</short_desc>
+      <long_desc>If the logfile is encrypted using a symmetric key algorithm, the used encryption key is generated at logging start and stored on the sdcard RSA2048 encrypted using this key.</long_desc>
+      <min>0</min>
+      <max>255</max>
+    </parameter>
+    <parameter name="SDLOG_KEY" default="2" type="INT32">
+      <short_desc>Logfile Encryption key index</short_desc>
+      <long_desc>Selects the key in keystore, used for encrypting the log. When using a symmetric encryption algorithm, the key is generated at logging start and kept stored in this index. For symmetric algorithms, the key is volatile and valid only for the duration of logging. The key is stored in encrypted format on the sdcard alongside the logfile, using an RSA2048 key defined by the SDLOG_EXCHANGE_KEY</long_desc>
+      <min>0</min>
+      <max>255</max>
     </parameter>
     <parameter name="SDLOG_MISSION" default="0" type="INT32">
       <short_desc>Mission Log</short_desc>
@@ -9344,6 +9451,11 @@
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
     </parameter>
+    <parameter name="CAL_ACC0_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Accelerometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
+    </parameter>
     <parameter name="CAL_ACC0_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Accelerometer X-axis offset</short_desc>
     </parameter>
@@ -9427,6 +9539,11 @@
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
+    </parameter>
+    <parameter name="CAL_ACC1_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Accelerometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
     </parameter>
     <parameter name="CAL_ACC1_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Accelerometer X-axis offset</short_desc>
@@ -9512,6 +9629,11 @@
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
     </parameter>
+    <parameter name="CAL_ACC2_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Accelerometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
+    </parameter>
     <parameter name="CAL_ACC2_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Accelerometer X-axis offset</short_desc>
     </parameter>
@@ -9595,6 +9717,11 @@
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
+    </parameter>
+    <parameter name="CAL_ACC3_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Accelerometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
     </parameter>
     <parameter name="CAL_ACC3_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Accelerometer X-axis offset</short_desc>
@@ -9680,6 +9807,11 @@
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
     </parameter>
+    <parameter name="CAL_GYRO0_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Gyroscope calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
+    </parameter>
     <parameter name="CAL_GYRO0_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Gyro X-axis offset</short_desc>
     </parameter>
@@ -9754,6 +9886,11 @@
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
+    </parameter>
+    <parameter name="CAL_GYRO1_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Gyroscope calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
     </parameter>
     <parameter name="CAL_GYRO1_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Gyro X-axis offset</short_desc>
@@ -9830,6 +9967,11 @@
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
     </parameter>
+    <parameter name="CAL_GYRO2_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Gyroscope calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
+    </parameter>
     <parameter name="CAL_GYRO2_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Gyro X-axis offset</short_desc>
     </parameter>
@@ -9905,6 +10047,11 @@
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
     </parameter>
+    <parameter name="CAL_GYRO3_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Gyroscope calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
+    </parameter>
     <parameter name="CAL_GYRO3_XOFF" default="0.0" type="FLOAT" volatile="true" category="System">
       <short_desc>Gyro X-axis offset</short_desc>
     </parameter>
@@ -9979,6 +10126,11 @@
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
+    </parameter>
+    <parameter name="CAL_MAG0_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Magnetometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
     </parameter>
     <parameter name="CAL_MAG0_XCOMP" default="0.0" type="FLOAT" category="System">
       <short_desc>X Axis throttle compensation for Mag 0</short_desc>
@@ -10085,6 +10237,11 @@
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
     </parameter>
+    <parameter name="CAL_MAG1_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Magnetometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
+    </parameter>
     <parameter name="CAL_MAG1_XCOMP" default="0.0" type="FLOAT" category="System">
       <short_desc>X Axis throttle compensation for Mag 1</short_desc>
       <long_desc>Coefficient describing linear relationship between X component of magnetometer in body frame axis and either current or throttle depending on value of CAL_MAG_COMP_TYP. Unit for throttle-based compensation is [G] and for current-based compensation [G/kA]</long_desc>
@@ -10190,6 +10347,11 @@
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
     </parameter>
+    <parameter name="CAL_MAG2_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Magnetometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
+    </parameter>
     <parameter name="CAL_MAG2_XCOMP" default="0.0" type="FLOAT" category="System">
       <short_desc>X Axis throttle compensation for Mag 2</short_desc>
       <long_desc>Coefficient describing linear relationship between X component of magnetometer in body frame axis and either current or throttle depending on value of CAL_MAG_COMP_TYP. Unit for throttle-based compensation is [G] and for current-based compensation [G/kA]</long_desc>
@@ -10294,6 +10456,11 @@
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
       </values>
+    </parameter>
+    <parameter name="CAL_MAG3_TEMP" default="-1000." type="FLOAT" volatile="true" category="System">
+      <short_desc>Magnetometer calibration temperature</short_desc>
+      <long_desc>Temperature during last calibration.</long_desc>
+      <unit>celcius</unit>
     </parameter>
     <parameter name="CAL_MAG3_XCOMP" default="0.0" type="FLOAT" category="System">
       <short_desc>X Axis throttle compensation for Mag 3</short_desc>
@@ -10500,14 +10667,14 @@
         <value code="4096">4096</value>
       </values>
     </parameter>
-    <parameter name="IMU_GYRO_FFT_MAX" default="192." type="FLOAT">
+    <parameter name="IMU_GYRO_FFT_MAX" default="150." type="FLOAT">
       <short_desc>IMU gyro FFT maximum frequency</short_desc>
       <min>1</min>
       <max>1000</max>
       <unit>Hz</unit>
       <reboot_required>true</reboot_required>
     </parameter>
-    <parameter name="IMU_GYRO_FFT_MIN" default="32." type="FLOAT">
+    <parameter name="IMU_GYRO_FFT_MIN" default="30." type="FLOAT">
       <short_desc>IMU gyro FFT minimum frequency</short_desc>
       <min>1</min>
       <max>1000</max>
@@ -10576,6 +10743,41 @@
     </parameter>
     <parameter name="INA226_SHUNT" default="0.0005" type="FLOAT">
       <short_desc>INA226 Power Monitor Shunt</short_desc>
+      <min>0.000000001</min>
+      <max>0.1</max>
+      <decimal>10</decimal>
+      <increment>.000000001</increment>
+    </parameter>
+    <parameter name="INA228_CONFIG" default="63779" type="INT32">
+      <short_desc>INA228 Power Monitor Config</short_desc>
+      <min>0</min>
+      <max>65535</max>
+      <decimal>1</decimal>
+      <increment>1</increment>
+    </parameter>
+    <parameter name="INA228_CURRENT" default="327.68" type="FLOAT">
+      <short_desc>INA228 Power Monitor Max Current</short_desc>
+      <min>0.1</min>
+      <max>327.68</max>
+      <decimal>2</decimal>
+      <increment>0.1</increment>
+    </parameter>
+    <parameter name="INA228_SHUNT" default="0.0005" type="FLOAT">
+      <short_desc>INA228 Power Monitor Shunt</short_desc>
+      <min>0.000000001</min>
+      <max>0.1</max>
+      <decimal>10</decimal>
+      <increment>.000000001</increment>
+    </parameter>
+    <parameter name="INA238_CURRENT" default="327.68" type="FLOAT">
+      <short_desc>INA238 Power Monitor Max Current</short_desc>
+      <min>0.1</min>
+      <max>327.68</max>
+      <decimal>2</decimal>
+      <increment>0.1</increment>
+    </parameter>
+    <parameter name="INA238_SHUNT" default="0.0003" type="FLOAT">
+      <short_desc>INA238 Power Monitor Shunt</short_desc>
       <min>0.000000001</min>
       <max>0.1</max>
       <decimal>10</decimal>
@@ -10702,6 +10904,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="SENS_CM8JL65_R_0" default="25" type="INT32">
@@ -10731,6 +10934,25 @@
       <short_desc>SMBUS Smart battery driver BQ40Z50 and BQ40Z80</short_desc>
       <reboot_required>true</reboot_required>
     </parameter>
+    <parameter name="SENS_EN_ETSASPD" default="0" type="INT32" boolean="true">
+      <short_desc>Eagle Tree airspeed sensor (external I2C)</short_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
+    <parameter name="SENS_EN_INA226" default="0" type="INT32" boolean="true">
+      <short_desc>Enable INA226 Power Monitor</short_desc>
+      <long_desc>For systems a INA226 Power Monitor, this should be set to true</long_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
+    <parameter name="SENS_EN_INA228" default="0" type="INT32" boolean="true">
+      <short_desc>Enable INA228 Power Monitor</short_desc>
+      <long_desc>For systems a INA228 Power Monitor, this should be set to true</long_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
+    <parameter name="SENS_EN_INA238" default="0" type="INT32" boolean="true">
+      <short_desc>Enable INA238 Power Monitor</short_desc>
+      <long_desc>For systems a INA238 Power Monitor, this should be set to true</long_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
     <parameter name="SENS_EN_LL40LS" default="0" type="INT32">
       <short_desc>Lidar-Lite (LL40LS)</short_desc>
       <min>0</min>
@@ -10756,6 +10978,14 @@
         <value code="1">Autodetect</value>
       </values>
     </parameter>
+    <parameter name="SENS_EN_MS4525" default="0" type="INT32" boolean="true">
+      <short_desc>TE MS4525 differential pressure sensor (external I2C)</short_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
+    <parameter name="SENS_EN_MS5525" default="0" type="INT32" boolean="true">
+      <short_desc>TE MS5525 differential pressure sensor (external I2C)</short_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
     <parameter name="SENS_EN_PAW3902" default="0" type="INT32" boolean="true">
       <short_desc>PAW3902 &amp; PAW3903 Optical Flow</short_desc>
       <reboot_required>true</reboot_required>
@@ -10772,6 +11002,10 @@
       <short_desc>PX4 Flow Optical Flow</short_desc>
       <reboot_required>true</reboot_required>
     </parameter>
+    <parameter name="SENS_EN_SDP3X" default="0" type="INT32" boolean="true">
+      <short_desc>Sensirion SDP3X differential pressure sensor (external I2C)</short_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
     <parameter name="SENS_EN_SF0X" default="1" type="INT32">
       <short_desc>Lightware Laser Rangefinder hardware model (serial)</short_desc>
       <reboot_required>true</reboot_required>
@@ -10781,6 +11015,9 @@
         <value code="3">SF10/b</value>
         <value code="4">SF10/c</value>
         <value code="5">SF11/c</value>
+        <value code="6">SF30/b</value>
+        <value code="7">SF30/c</value>
+        <value code="8">LW20/c</value>
       </values>
     </parameter>
     <parameter name="SENS_EN_SF1XX" default="0" type="INT32">
@@ -10929,6 +11166,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="SENS_MAG_MODE" default="1" type="INT32" category="System">
@@ -11381,6 +11619,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="SENS_TEMP_ID" default="0" type="INT32" category="System">
@@ -11402,6 +11641,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="SENS_TFMINI_CFG" default="0" type="INT32">
@@ -11420,6 +11660,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="SENS_ULAND_CFG" default="0" type="INT32">
@@ -11438,6 +11679,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="VOXLPM_SHUNT_BAT" default="0.00063" type="FLOAT">
@@ -11474,6 +11716,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="SER_GPS1_BAUD" default="0" type="INT32">
@@ -11545,6 +11788,39 @@
     <parameter name="SER_GPS3_BAUD" default="0" type="INT32">
       <short_desc>Baudrate for the GPS 3 Serial Port</short_desc>
       <long_desc>Configure the Baudrate for the GPS 3 Serial Port. Note: certain drivers such as the GPS can determine the Baudrate automatically.</long_desc>
+      <reboot_required>true</reboot_required>
+      <values>
+        <value code="0">Auto</value>
+        <value code="50">50 8N1</value>
+        <value code="75">75 8N1</value>
+        <value code="110">110 8N1</value>
+        <value code="134">134 8N1</value>
+        <value code="150">150 8N1</value>
+        <value code="200">200 8N1</value>
+        <value code="300">300 8N1</value>
+        <value code="600">600 8N1</value>
+        <value code="1200">1200 8N1</value>
+        <value code="1800">1800 8N1</value>
+        <value code="2400">2400 8N1</value>
+        <value code="4800">4800 8N1</value>
+        <value code="9600">9600 8N1</value>
+        <value code="19200">19200 8N1</value>
+        <value code="38400">38400 8N1</value>
+        <value code="57600">57600 8N1</value>
+        <value code="115200">115200 8N1</value>
+        <value code="230400">230400 8N1</value>
+        <value code="460800">460800 8N1</value>
+        <value code="500000">500000 8N1</value>
+        <value code="921600">921600 8N1</value>
+        <value code="1000000">1000000 8N1</value>
+        <value code="1500000">1500000 8N1</value>
+        <value code="2000000">2000000 8N1</value>
+        <value code="3000000">3000000 8N1</value>
+      </values>
+    </parameter>
+    <parameter name="SER_PPB_BAUD" default="57600" type="INT32">
+      <short_desc>Baudrate for the Pixhawk Payload Bus Serial Port</short_desc>
+      <long_desc>Configure the Baudrate for the Pixhawk Payload Bus Serial Port. Note: certain drivers such as the GPS can determine the Baudrate automatically.</long_desc>
       <reboot_required>true</reboot_required>
       <values>
         <value code="0">Auto</value>
@@ -12010,20 +12286,16 @@
       <long_desc>the time taken for the thruster to step from 0 to 100% should be about 4 times tau</long_desc>
       <unit>s</unit>
     </parameter>
+    <parameter name="SIH_VEHICLE_TYPE" default="0" type="INT32">
+      <short_desc>Vehicle type</short_desc>
+      <reboot_required>true</reboot_required>
+      <values>
+        <value code="0">MC</value>
+        <value code="1">FW</value>
+      </values>
+    </parameter>
   </group>
   <group name="System">
-    <parameter name="LED_RGB1_MAXBRT" default="31" type="INT32">
-      <short_desc>RGB Led brightness limit</short_desc>
-      <long_desc>Set to 0 to disable, 1 for minimum brightness up to 31 (max)</long_desc>
-      <min>0</min>
-      <max>31</max>
-    </parameter>
-    <parameter name="LED_RGB_MAXBRT" default="15" type="INT32">
-      <short_desc>RGB Led brightness limit</short_desc>
-      <long_desc>Set to 0 to disable, 1 for minimum brightness up to 15 (max)</long_desc>
-      <min>0</min>
-      <max>15</max>
-    </parameter>
     <parameter name="SYS_AUTOCONFIG" default="0" type="INT32">
       <short_desc>Automatically configure default values</short_desc>
       <long_desc>Set to 1 to reset parameters on next system startup (setting defaults). Platform-specific values are used if available. RC* parameters are preserved.</long_desc>
@@ -12091,6 +12363,11 @@
       <long_desc>Disable this if the board has no barometer, such as some of the Omnibus F4 SD variants. If disabled, the preflight checks will not check for the presence of a barometer.</long_desc>
       <reboot_required>true</reboot_required>
     </parameter>
+    <parameter name="SYS_HAS_GPS" default="1" type="INT32" boolean="true">
+      <short_desc>Control if the vehicle has a GPS</short_desc>
+      <long_desc>Disable this if the system has no GPS. If disabled, the sensors hub will not process sensor_gps, and GPS will not be available for the rest of the system.</long_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
     <parameter name="SYS_HAS_MAG" default="1" type="INT32" boolean="true">
       <short_desc>Control if the vehicle has a magnetometer</short_desc>
       <long_desc>Disable this if the board has no magnetometer, such as the Omnibus F4 SD. If disabled, the preflight checks will not check for the presence of a magnetometer.</long_desc>
@@ -12117,26 +12394,22 @@
         <value code="3">Q attitude estimator (no position)</value>
       </values>
     </parameter>
-    <parameter name="SYS_RESTART_TYPE" default="2" type="INT32" volatile="true" category="System">
-      <short_desc>Set restart type</short_desc>
-      <long_desc>Set by px4io to indicate type of restart</long_desc>
-      <min>0</min>
-      <max>2</max>
-      <values>
-        <value code="0">Data survives resets</value>
-        <value code="1">Data survives in-flight resets only</value>
-        <value code="2">Data does not survive reset</value>
-      </values>
+    <parameter name="SYS_RGB_MAXBRT" default="1." type="FLOAT">
+      <short_desc>RGB Led brightness limit</short_desc>
+      <long_desc>Set to 0 to disable, 1 for maximum brightness</long_desc>
+      <unit>%</unit>
     </parameter>
     <parameter name="SYS_STCK_EN" default="1" type="INT32" boolean="true">
       <short_desc>Enable stack checking</short_desc>
     </parameter>
-    <parameter name="SYS_USE_IO" default="1" type="INT32" boolean="true">
+    <parameter name="SYS_USE_IO" default="1" type="INT32">
       <short_desc>Set usage of IO board</short_desc>
-      <long_desc>Can be used to use a standard startup script but with a FMU only set-up. Set to 0 to force the FMU only set-up.</long_desc>
-      <min>0</min>
-      <max>1</max>
+      <long_desc>Can be used to use a configure the use of the IO board.</long_desc>
       <reboot_required>true</reboot_required>
+      <values>
+        <value code="0">IO PWM disabled (RC only)</value>
+        <value code="1">IO enabled (RC &amp; PWM)</value>
+      </values>
     </parameter>
   </group>
   <group name="Telemetry">
@@ -12161,6 +12434,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
     <parameter name="TEL_HOTT_CONFIG" default="0" type="INT32">
@@ -12179,6 +12453,7 @@
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
         <value code="301">Wifi Port</value>
+        <value code="401">Pixhawk Payload Bus</value>
       </values>
     </parameter>
   </group>
@@ -12768,6 +13043,10 @@
       <min>1</min>
       <max>125</max>
     </parameter>
+    <parameter name="CANNODE_TERM" default="0" type="INT32" boolean="true">
+      <short_desc>CAN built-in bus termination</short_desc>
+      <max>1</max>
+    </parameter>
     <parameter name="UAVCAN_BAT_MON" default="0" type="INT32">
       <short_desc>UAVCAN BATTERY_MONITOR battery monitor selection</short_desc>
       <long_desc>This parameter defines that the system will select the battery monitor under the following conditions 0 - default battery monitor 1 - CUAV battery monitor</long_desc>
@@ -12951,7 +13230,7 @@
     <parameter name="UAVCAN_V1_ID" default="1" type="INT32">
       <short_desc>UAVCAN v1 Node ID</short_desc>
       <long_desc>Read the specs at http://uavcan.org to learn more about Node ID.</long_desc>
-      <min>1</min>
+      <min>-1</min>
       <max>125</max>
       <reboot_required>true</reboot_required>
     </parameter>
@@ -13047,13 +13326,13 @@
       <decimal>2</decimal>
       <increment>1</increment>
     </parameter>
-    <parameter name="VT_B_DEC_FF" default="0.12" type="FLOAT">
+    <parameter name="VT_B_DEC_FF" default="0." type="FLOAT">
       <short_desc>Backtransition deceleration setpoint to pitch feedforward gain</short_desc>
       <min>0</min>
       <max>0.2</max>
       <unit>rad s^2/m</unit>
       <decimal>1</decimal>
-      <increment>0.05</increment>
+      <increment>0.01</increment>
     </parameter>
     <parameter name="VT_B_DEC_I" default="0.1" type="FLOAT">
       <short_desc>Backtransition deceleration setpoint to pitch I gain</short_desc>
@@ -13112,19 +13391,13 @@
       <decimal>2</decimal>
       <increment>0.01</increment>
     </parameter>
-    <parameter name="VT_DWN_PITCH_MAX" default="5.0" type="FLOAT">
-      <short_desc>Maximum allowed angle the vehicle is allowed to pitch down to generate forward force</short_desc>
-      <long_desc>When fixed-wing forward actuation is active (see VT_FW_TRHUST_EN). If demanded down pitch exceeds this limmit, the fixed-wing forward actuators are used instead.</long_desc>
-      <min>0.0</min>
-      <max>45.0</max>
-    </parameter>
     <parameter name="VT_ELEV_MC_LOCK" default="1" type="INT32" boolean="true">
       <short_desc>Lock elevons in multicopter mode</short_desc>
       <long_desc>If set to 1 the elevons are locked in multicopter mode</long_desc>
     </parameter>
     <parameter name="VT_FWD_THRUST_EN" default="0" type="INT32">
       <short_desc>Enable/disable usage of fixed-wing actuators in hover to generate forward force (instead of pitching down)</short_desc>
-      <long_desc>This technique can be used to avoid the plane having to pitch down in order to move forward. This prevents large, negative lift values being created when facing strong winds. Fixed-wing forward actuators refers to puller/pusher (standard VTOL), or forward-tilt (tiltrotor VTOL). Only active if demaded down pitch is above VT_DWN_PITCH_MAX, and uses VT_FWD_THRUST_SC to get from demanded down pitch to fixed-wing actuation.</long_desc>
+      <long_desc>This technique can be used to avoid the plane having to pitch down in order to move forward. This prevents large, negative lift values being created when facing strong winds. Fixed-wing forward actuators refers to puller/pusher (standard VTOL), or forward-tilt (tiltrotor VTOL). Only active if demaded down pitch is below VT_PITCH_MIN, and uses VT_FWD_THRUST_SC to get from demanded down pitch to fixed-wing actuation.</long_desc>
       <values>
         <value code="0">Disable FW forward actuation in hover.</value>
         <value code="1">Enable FW forward actuation in hover in altitude, position and auto modes (except LANDING).</value>
@@ -13137,7 +13410,7 @@
     </parameter>
     <parameter name="VT_FWD_THRUST_SC" default="0.7" type="FLOAT">
       <short_desc>Fixed-wing actuator thrust scale for hover forward flight</short_desc>
-      <long_desc>Scale applied to the demanded down-pitch to get the fixed-wing forward actuation in hover mode. Only active if demaded down pitch is above VT_DWN_PITCH_MAX. Enabled via VT_FWD_THRUST_EN.</long_desc>
+      <long_desc>Scale applied to the demanded down-pitch to get the fixed-wing forward actuation in hover mode. Only active if demaded down pitch is below VT_PITCH_MIN. Enabled via VT_FWD_THRUST_EN.</long_desc>
       <min>0.0</min>
       <max>2.0</max>
     </parameter>
@@ -13223,6 +13496,12 @@
       <decimal>0</decimal>
       <increment>1</increment>
     </parameter>
+    <parameter name="VT_LND_PTCH_MIN" default="-5.0" type="FLOAT">
+      <short_desc>Minimum pitch angle during hover landing</short_desc>
+      <long_desc>Overrides  VT_PTCH_MIN when the vehicle is in LAND mode (hovering). During landing it can be beneficial to allow lower minimum pitch angles as it can avoid the wings generating too much lift and preventing the vehicle from sinking at the desired rate.</long_desc>
+      <min>-10.0</min>
+      <max>45.0</max>
+    </parameter>
     <parameter name="VT_MC_ON_FMU" default="0" type="INT32" boolean="true">
       <short_desc>Enable the usage of AUX outputs for hover motors</short_desc>
       <long_desc>Set this parameter to true if the vehicle's hover motors are connected to the FMU (AUX) port. Not required for boards that only have a FMU, and no IO. Only applies for standard VTOL and tiltrotor.</long_desc>
@@ -13240,6 +13519,12 @@
       <max>20</max>
       <decimal>2</decimal>
       <increment>0.01</increment>
+    </parameter>
+    <parameter name="VT_PTCH_MIN" default="-5.0" type="FLOAT">
+      <short_desc>Minimum pitch angle during hover</short_desc>
+      <long_desc>Minimum pitch angle during hover flight. If the desired pitch angle is is lower than this value then the fixed-wing forward actuation can be used to compensate for the missing thrust in forward direction (see VT_FW_TRHUST_EN)</long_desc>
+      <min>-10.0</min>
+      <max>45.0</max>
     </parameter>
     <parameter name="VT_TILT_FW" default="1.0" type="FLOAT">
       <short_desc>Position of tilt servo in fw mode</short_desc>

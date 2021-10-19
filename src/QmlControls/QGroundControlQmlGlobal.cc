@@ -209,11 +209,7 @@ bool QGroundControlQmlGlobal::linesIntersect(QPointF line1A, QPointF line1B, QPo
 {
     QPointF intersectPoint;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    auto intersect = QLineF(line1A, line1B).intersect(QLineF(line2A, line2B), &intersectPoint);
-#else
     auto intersect = QLineF(line1A, line1B).intersects(QLineF(line2A, line2B), &intersectPoint);
-#endif
 
     return  intersect == QLineF::BoundedIntersection &&
             intersectPoint != line1A && intersectPoint != line1B;
@@ -262,7 +258,7 @@ QString QGroundControlQmlGlobal::qgcVersion(void) const
     return versionStr;
 }
 
-QString QGroundControlQmlGlobal::altitudeModeExtraUnits(AltitudeMode altMode)
+QString QGroundControlQmlGlobal::altitudeModeExtraUnits(AltMode altMode)
 {
     switch (altMode) {
     case AltitudeModeNone:
@@ -285,7 +281,7 @@ QString QGroundControlQmlGlobal::altitudeModeExtraUnits(AltitudeMode altMode)
     return QString();
 }
 
-QString QGroundControlQmlGlobal::altitudeModeShortDescription(AltitudeMode altMode)
+QString QGroundControlQmlGlobal::altitudeModeShortDescription(AltMode altMode)
 {
     switch (altMode) {
     case AltitudeModeNone:

@@ -96,7 +96,7 @@ Rectangle {
                 Component.onCompleted: currentIndex = QGroundControl.settingsManager.planViewSettings.displayPresetsTabFirst.rawValue ? 1 : 0
 
                 QGCTabButton { icon.source: "/qmlimages/PatternGrid.png"; icon.height: ScreenTools.defaultFontPixelHeight }
-//                QGCTabButton { icon.source: "/qmlimages/PatternTerrain.png"; icon.height: ScreenTools.defaultFontPixelHeight }
+                QGCTabButton { icon.source: "/qmlimages/PatternTerrain.png"; icon.height: ScreenTools.defaultFontPixelHeight }
                 QGCTabButton { icon.source: "/qmlimages/PatternPresets.png"; icon.height: ScreenTools.defaultFontPixelHeight }
             }
 
@@ -548,20 +548,20 @@ Rectangle {
             }*/ // Camera Column
 
             // Terrain Tab
-//            TransectStyleComplexItemTerrainFollow {
-//                anchors.left:   parent.left
-//                anchors.right:  parent.right
-//                spacing:        _margin
-//                visible:        tabBar.currentIndex === 1
-//                missionItem:    _missionItem
-//            }
+            TransectStyleComplexItemTerrainFollow {
+                anchors.left:   parent.left
+                anchors.right:  parent.right
+                spacing:        _margin
+                visible:        tabBar.currentIndex === 1
+                missionItem:    _missionItem
+            }
 
             // Presets Tab
             Column {
                 anchors.left:       parent.left
                 anchors.right:      parent.right
                 spacing:            _margin
-                visible:            tabBar.currentIndex === 1
+                visible:            tabBar.currentIndex === 2
 
                 QGCLabel {
                     //Layout.fillWidth:   true

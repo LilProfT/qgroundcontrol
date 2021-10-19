@@ -20,7 +20,6 @@
 
 AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool   (app, toolbox)
-    , _effect   (nullptr)
     , _tts      (nullptr)
 {
     if (qgcApp()->runningUnitTests()) {
@@ -37,22 +36,12 @@ AudioOutput::AudioOutput(QGCApplication* app, QGCToolbox* toolbox)
 #ifdef Q_OS_LINUX
     _tts->setLocale(QLocale("en_US"));
 #endif
-    _tts->setVolume(1.0f);
-
     connect(_tts, &QTextToSpeech::stateChanged, this, &AudioOutput::_stateChanged);
 
     // QSoundEffect
     QFile file(":/audio/audioMap.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) qDebug() << "file cannot be opened";
     _audioMap = QJsonDocument::fromJson(file.readAll()).object().toVariantMap();
-
-    _effect = new QSoundEffect(this);
-    _effect->setLoopCount(0);
-    _effect->setMuted(false);
-    _effect->setVolume(100);
-
-    connect(_effect, &QSoundEffect::playingChanged, this, &AudioOutput::_effectPlayingChanged);
-    connect(_effect, &QSoundEffect::statusChanged, this, &AudioOutput::_effectStateChanged);
 
 }
 
@@ -75,16 +64,6 @@ void AudioOutput::say(const QString& inText)
                 }
                 _texts.append(text);
             }
-        } else if (_effect->isPlaying() || _effect->status() == QSoundEffect::Loading) {
-            if(!_texts.contains(text)) {
-                //-- Some arbitrary limit
-                if(_texts.size() > 20) {
-                    _texts.removeFirst();
-                }
-                qDebug() << "append ::: " << text;
-
-                _texts.append(text);
-            }
         } else {
             _play(text);
         }
@@ -96,34 +75,6 @@ void AudioOutput::_stateChanged(QTextToSpeech::State state)
     if (state == QTextToSpeech::Ready) {
         _next();
     }
-}
-
-void AudioOutput::_effectPlayingChanged()
-{
-    qDebug() << "_effectPlayingChanged ::: " << _effect->isPlaying();
-
-    if (!_effect->isPlaying()) {
-        _next();
-    }
-}
-
-void AudioOutput::_effectStateChanged()
-{
-    qDebug() << "_effectStateChanged ::: " << _effect->status();
-
-    if (_effect->status() == QSoundEffect::Ready) {
-        _effect->play();
-    }
-}
-
-void AudioOutput::_timerSlot()
-{
-    _effect->play();
-}
-
-void AudioOutput::_playAfter(int interval)
-{
-    QTimer::singleShot(interval, this, &AudioOutput::_timerSlot);
 }
 
 void AudioOutput::_next()

@@ -114,12 +114,8 @@ void MissionSettingsItem::setSequenceNumber(int sequenceNumber)
     }
 }
 
-bool MissionSettingsItem::load(const QJsonObject& complexObject, int sequenceNumber, QString& errorString)
+bool MissionSettingsItem::load(const QJsonObject& /*complexObject*/, int /*sequenceNumber*/, QString& /*errorString*/)
 {
-    Q_UNUSED(complexObject);
-    Q_UNUSED(sequenceNumber);
-    Q_UNUSED(errorString);
-
     return true;
 }
 
@@ -286,6 +282,7 @@ double MissionSettingsItem::specifiedFlightSpeed(void)
 void MissionSettingsItem::_setHomeAltFromTerrain(double terrainAltitude)
 {
     if (!_plannedHomePositionFromVehicle && !qIsNaN(terrainAltitude)) {
+        qCDebug(MissionSettingsComplexItemLog) << "MissionSettingsItem::_setHomeAltFromTerrain" << terrainAltitude;
         _plannedHomePositionAltitudeFact.setRawValue(terrainAltitude);
     }
 }

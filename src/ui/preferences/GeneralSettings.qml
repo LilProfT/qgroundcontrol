@@ -134,21 +134,16 @@ Rectangle {
 
                             RowLayout {
                                 spacing: ScreenTools.defaultFontPixelWidth
-                                //visible: false
 
                                 FactCheckBox {
                                     text:       qsTr("Virtual Joystick")
                                     visible:    _virtualJoystick.visible
-                                    //Virtual joystick is not really needed
-                                    //visible:    false
                                     fact:       _virtualJoystick
                                 }
 
                                 FactCheckBox {
                                     text:       qsTr("Auto-Center Throttle")
                                     visible:    _virtualJoystickAutoCenterThrottle.visible
-                                    //Same as above
-                                    //visible:    false
                                     enabled:    _virtualJoystick.rawValue
                                     fact:       _virtualJoystickAutoCenterThrottle
                                 }
@@ -641,9 +636,7 @@ Rectangle {
                                 FactCheckBox {
                                     text:       qsTr("Check for Internet connection")
                                     fact:       _checkInternet
-                                    //visible:    _checkInternet && _checkInternet.visible
-                                    //Deactivate Check internet checkbox, leave as always check
-                                    visible:    false
+                                    visible:    _checkInternet && _checkInternet.visible
                                     property Fact _checkInternet: QGroundControl.settingsManager.appSettings.checkInternet
                                 }
 
@@ -781,10 +774,11 @@ Rectangle {
                                         QGroundControl.settingsManager.autoConnectSettings.autoConnectPX4Flow,
                                         QGroundControl.settingsManager.autoConnectSettings.autoConnectLibrePilot,
                                         QGroundControl.settingsManager.autoConnectSettings.autoConnectUDP,
-                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectRTKGPS
+                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectRTKGPS,
+                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectZeroConf,
                                     ]
 
-                                    property var names: [ qsTr("Pixhawk"), qsTr("SiK Radio"), qsTr("PX4 Flow"), qsTr("LibrePilot"), qsTr("UDP"), qsTr("RTK GPS") ]
+                                    property var names: [ qsTr("Pixhawk"), qsTr("SiK Radio"), qsTr("PX4 Flow"), qsTr("LibrePilot"), qsTr("UDP"), qsTr("RTK GPS"), qsTr("Zero-Conf") ]
 
                                     FactCheckBox {
                                         text:       autoConnectRepeater.names[index]
@@ -870,8 +864,7 @@ Rectangle {
                     QGCLabel {
                         id:         rtkSectionLabel
                         text:       qsTr("RTK GPS")
-                        //Disable RTK Base Config on mobile builds
-                        visible:    QGroundControl.settingsManager.rtkSettings.visible && !ScreenTools.isMobile
+                        visible:    QGroundControl.settingsManager.rtkSettings.visible
                     }
                     Rectangle {
                         Layout.preferredHeight: rtkGrid.height + (_margins * 2)
@@ -1206,7 +1199,6 @@ Rectangle {
                         Layout.preferredWidth:  adsbGrid.width + (_margins * 2)
                         color:                  qgcPal.windowShade
                         visible:                adsbSectionLabel.visible
-                        //visible:                false
                         Layout.fillWidth:       true
 
                         QGCLabel {

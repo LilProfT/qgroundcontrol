@@ -76,7 +76,6 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     connect(_planViewSettings->takeoffItemNotRequired(),    &Fact::rawValueChanged,                     this, &MissionController::_takeoffItemNotRequiredChanged);
     connect(this,                                           &MissionController::missionDistanceChanged, this, &MissionController::recalcTerrainProfile);
 
-
     // The follow is used to compress multiple recalc calls in a row to into a single call.
     connect(this, &MissionController::_recalcMissionFlightStatusSignal, this, &MissionController::_recalcMissionFlightStatus,   Qt::QueuedConnection);
     connect(this, &MissionController::_recalcFlightPathSegmentsSignal,  this, &MissionController::_recalcFlightPathSegments,    Qt::QueuedConnection);
@@ -354,14 +353,14 @@ VisualMissionItem* MissionController::_insertSimpleMissionItemWorker(QGeoCoordin
 
     if (newItem->specifiesAltitude()) {
         if (!qgcApp()->toolbox()->missionCommandTree()->isLandCommand(command)) {
-            double  prevAltitude;
-            int     prevAltitudeMode;
+            double                              prevAltitude;
+            QGroundControlQmlGlobal::AltMode    prevAltMode;
 
-            if (_findPreviousAltitude(visualItemIndex, &prevAltitude, &prevAltitudeMode)) {
+            if (_findPreviousAltitude(visualItemIndex, &prevAltitude, &prevAltMode)) {
                 newItem->altitude()->setRawValue(prevAltitude);
                 if (globalAltitudeMode() == QGroundControlQmlGlobal::AltitudeModeNone) {
                     // We are in mixed altitude modes, so copy from previous. Otherwise alt mode will be set from global setting.
-                    newItem->setAltitudeMode(static_cast<QGroundControlQmlGlobal::AltitudeMode>(prevAltitudeMode));
+                    newItem->setAltitudeMode(static_cast<QGroundControlQmlGlobal::AltMode>(prevAltMode));
                 }
             }
         }
@@ -398,12 +397,12 @@ VisualMissionItem* MissionController::insertTakeoffItem(QGeoCoordinate /*coordin
     _initVisualItem(_takeoffMissionItem);
 
     if (_takeoffMissionItem->specifiesAltitude()) {
-        double  prevAltitude;
-        int     prevAltitudeMode;
+        double                              prevAltitude;
+        QGroundControlQmlGlobal::AltMode    prevAltMode;
 
-        if (_findPreviousAltitude(visualItemIndex, &prevAltitude, &prevAltitudeMode)) {
+        if (_findPreviousAltitude(visualItemIndex, &prevAltitude, &prevAltMode)) {
             _takeoffMissionItem->altitude()->setRawValue(prevAltitude);
-            _takeoffMissionItem->setAltitudeMode(static_cast<QGroundControlQmlGlobal::AltitudeMode>(prevAltitudeMode));
+            _takeoffMissionItem->setAltitudeMode(static_cast<QGroundControlQmlGlobal::AltMode>(prevAltMode));
         }
     }
     if (visualItemIndex == -1) {
@@ -465,8 +464,17 @@ VisualMissionItem* MissionController::insertComplexMissionItem(QString itemName,
     ComplexMissionItem* newItem = nullptr;
 
     if (itemName == SurveyComplexItem::name) {
-        newItem = new SurveyComplexItem(_masterController, _flyView, QString() /* kmlFile */ /* parent */);
+        newItem = new SurveyComplexItem(_masterController, _flyView, QString() /* kmlFile */);
         newItem->setCoordinate(mapCenterCoordinate);
+
+        double                              prevAltitude;
+        QGroundControlQmlGlobal::AltMode    prevAltMode;
+        if (globalAltitudeMode() == QGroundControlQmlGlobal::AltitudeModeMixed) {
+            // We are in mixed altitude modes, so copy from previous. Otherwise alt mode will be set from global setting in constructor.
+            if (_findPreviousAltitude(visualItemIndex, &prevAltitude, &prevAltMode)) {
+                qobject_cast<SurveyComplexItem*>(newItem)->cameraCalc()->setDistanceMode(prevAltMode);
+            }
+        }
     } else if (itemName == FixedWingLandingComplexItem::name) {
         newItem = new FixedWingLandingComplexItem(_masterController, _flyView);
     } else if (itemName == VTOLLandingComplexItem::name) {
@@ -804,7 +812,7 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         appSettings->offlineEditingHoverSpeed()->setRawValue(json[_jsonHoverSpeedKey].toDouble());
     }
     if (json.contains(_jsonGlobalPlanAltitudeModeKey)) {
-        setGlobalAltitudeMode(json[_jsonGlobalPlanAltitudeModeKey].toVariant().value<QGroundControlQmlGlobal::AltitudeMode>());
+        setGlobalAltitudeMode(json[_jsonGlobalPlanAltitudeModeKey].toVariant().value<QGroundControlQmlGlobal::AltMode>());
     }
 
     QGeoCoordinate homeCoordinate;
@@ -1261,7 +1269,7 @@ double MissionController::_calcDistanceToHome(VisualMissionItem* currentItem, Vi
     return distanceOk ? homeCoord.distanceTo(currentCoord) : 0.0;
 }
 
-FlightPathSegment* MissionController::_createFlightPathSegmentWorker(VisualItemPair& pair)
+FlightPathSegment* MissionController::_createFlightPathSegmentWorker(VisualItemPair& pair, bool mavlinkTerrainFrame)
 {
     QGeoCoordinate      coord1 =            pair.first->isSimpleItem() ? pair.first->coordinate() : pair.first->exitCoordinate();
     QGeoCoordinate      coord2 =            pair.second->coordinate();
@@ -1291,15 +1299,15 @@ FlightPathSegment* MissionController::_createFlightPathSegmentWorker(VisualItemP
     return segment;
 }
 
-FlightPathSegment* MissionController::_addFlightPathSegment(FlightPathSegmentHashTable& prevItemPairHashTable, VisualItemPair& pair)
+FlightPathSegment* MissionController::_addFlightPathSegment(FlightPathSegmentHashTable& prevItemPairHashTable, VisualItemPair& pair, bool mavlinkTerrainFrame)
 {
     FlightPathSegment* segment = nullptr;
 
-    if (prevItemPairHashTable.contains(pair)) {
+    if (prevItemPairHashTable.contains(pair) && (prevItemPairHashTable[pair]->segmentType() == FlightPathSegment::SegmentTypeTerrainFrame) != mavlinkTerrainFrame) {
         // Pair already exists and connected, just re-use
         _flightPathSegmentHashTable[pair] = segment = prevItemPairHashTable.take(pair);
     } else {
-        segment = _createFlightPathSegmentWorker(pair);
+        segment = _createFlightPathSegmentWorker(pair, mavlinkTerrainFrame);
         _flightPathSegmentHashTable[pair] = segment;
     }
 
@@ -1454,7 +1462,9 @@ void MissionController::_recalcFlightPathSegments(void)
 
                     lastSegmentVisualItemPair =  VisualItemPair(lastFlyThroughVI, visualItem);
                     if (!_flyView || addDirectionArrow) {
-                        FlightPathSegment* segment = _addFlightPathSegment(oldSegmentTable, lastSegmentVisualItemPair);
+                        SimpleMissionItem* simpleItem = qobject_cast<SimpleMissionItem*>(lastFlyThroughVI);
+                        bool mavlinkTerrainFrame = simpleItem ? simpleItem->missionItem().frame() == MAV_FRAME_GLOBAL_TERRAIN_ALT : false;
+                        FlightPathSegment* segment = _addFlightPathSegment(oldSegmentTable, lastSegmentVisualItemPair, mavlinkTerrainFrame);
                         segment->setSpecialVisual(roiActive);
                         if (addDirectionArrow) {
                             _directionArrows.append(segment);
@@ -1483,7 +1493,7 @@ void MissionController::_recalcFlightPathSegments(void)
         if (_flyView) {
             //_waypointPath.append(QVariant::fromValue(_settingsItem->coordinate()));
         }
-        FlightPathSegment* segment = _addFlightPathSegment(oldSegmentTable, lastSegmentVisualItemPair);
+        FlightPathSegment* segment = _addFlightPathSegment(oldSegmentTable, lastSegmentVisualItemPair, false /* mavlinkTerrainFrame */);
         segment->setSpecialVisual(roiActive);
         lastFlyThroughVI->setSimpleFlighPathSegment(segment);
     }
@@ -1548,7 +1558,6 @@ void MissionController::_recalcFlightPathSegments(void)
         _waypointPath.append(QVariant::fromValue(QGeoCoordinate(0, 0)));
         _waypointPath.append(QVariant::fromValue(QGeoCoordinate(0, 0)));
     }
-
 
     emit waypointPathChanged();
     emit recalcTerrainProfile();
@@ -1714,14 +1723,14 @@ void MissionController::_recalcMissionFlightStatus()
                 // Keep track of the min/max AMSL altitude for entire mission so we can calculate altitude percentages in terrain status display
                 if (simpleItem) {
                     double amslAltitude = item->amslEntryAlt();
-                    _minAMSLAltitude = std::min(_minAMSLAltitude, amslAltitude);
-                    _maxAMSLAltitude = std::max(_maxAMSLAltitude, amslAltitude);
+                    _minAMSLAltitude = std::fmin(_minAMSLAltitude, amslAltitude);
+                    _maxAMSLAltitude = std::fmax(_maxAMSLAltitude, amslAltitude);
                 } else {
                     // Complex item
                     double complexMinAMSLAltitude = complexItem->minAMSLAltitude();
                     double complexMaxAMSLAltitude = complexItem->maxAMSLAltitude();
-                    _minAMSLAltitude = std::min(_minAMSLAltitude, complexMinAMSLAltitude);
-                    _maxAMSLAltitude = std::max(_maxAMSLAltitude, complexMaxAMSLAltitude);
+                    _minAMSLAltitude = std::fmin(_minAMSLAltitude, complexMinAMSLAltitude);
+                    _maxAMSLAltitude = std::fmax(_maxAMSLAltitude, complexMaxAMSLAltitude);
                 }
 
                 if (!item->isStandaloneCoordinate()) {
@@ -2125,11 +2134,11 @@ void MissionController::_inProgressChanged(bool inProgress)
     emit syncInProgressChanged(inProgress);
 }
 
-bool MissionController::_findPreviousAltitude(int newIndex, double* prevAltitude, int* prevAltitudeMode)
+bool MissionController::_findPreviousAltitude(int newIndex, double* prevAltitude, QGroundControlQmlGlobal::AltMode* prevAltitudeMode)
 {
-    bool        found = false;
-    double      foundAltitude = 0;
-    int         foundAltitudeMode = QGroundControlQmlGlobal::AltitudeModeNone;
+    bool                                found = false;
+    double                              foundAltitude = 0;
+    QGroundControlQmlGlobal::AltMode    foundAltMode = QGroundControlQmlGlobal::AltitudeModeNone;
 
     if (newIndex > _visualItems->count()) {
         return false;
@@ -2143,9 +2152,9 @@ bool MissionController::_findPreviousAltitude(int newIndex, double* prevAltitude
             if (visualItem->isSimpleItem()) {
                 SimpleMissionItem* simpleItem = qobject_cast<SimpleMissionItem*>(visualItem);
                 if (simpleItem->specifiesAltitude()) {
-                    foundAltitude = simpleItem->altitude()->rawValue().toDouble();
-                    foundAltitudeMode = simpleItem->altitudeMode();
-                    found = true;
+                    foundAltitude   = simpleItem->altitude()->rawValue().toDouble();
+                    foundAltMode    = simpleItem->altitudeMode();
+                    found           = true;
                     break;
                 }
             }
@@ -2153,8 +2162,8 @@ bool MissionController::_findPreviousAltitude(int newIndex, double* prevAltitude
     }
 
     if (found) {
-        *prevAltitude = foundAltitude;
-        *prevAltitudeMode = foundAltitudeMode;
+        *prevAltitude       = foundAltitude;
+        *prevAltitudeMode   = foundAltMode;
     }
 
     return found;
@@ -2248,46 +2257,15 @@ void MissionController::updateAreaSprayed(void)
 int MissionController::resumeMissionIndex(void) const
 {
 
-
     int resumeIndex = 0;
     qCWarning(MissionControllerLog) << "resumeMissionIndexFromDialog(void)";
     qCWarning(MissionControllerLog) << "resumeMissionIndexFromDialog: " << _resumeMissionIndexFromFile;
 
     if (_flyView) {
-        //emit _managerVehicle->clearTrajectoryPoint();
-        //_missionManager->loadResumeFromFile(true);
-            resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
-            if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
-                // Resume at the item previous to the item we were heading towards
-                resumeIndex--;
-            } else {
-                resumeIndex = 0;
-            }
-            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
-
-
-    }
-
-    return resumeIndex;
-}
-
-int MissionController::resumeMissionIndex2(void) const
-{
-    int resumeIndex = 0;
-    qCWarning(MissionControllerLog) << "_resumeMissiosnIndex(void)";
-    qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
-
-    if (_flyView) {
-        if (_missionManager->cacheResumeIndex() > 0) {
-            //resumeActive();
-            _managerVehicle->updateAreaSprayedFromFile(0);
-
-            //emit _managerVehicle->clearTrajectoryPoint();
-            _missionManager->loadResumeFromFile(true);
-
-            resumeIndex = _missionManager->cacheResumeIndex();
-            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
-
+        resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
+        if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
+            // Resume at the item previous to the item we were heading towards
+            resumeIndex--;
         } else {
             resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
             if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
@@ -2436,6 +2414,38 @@ void MissionController::resumeMission(int resumeIndex)
 
     _missionManager->generateResumeMission(resumeIndex);
 }
+
+int MissionController::resumeMissionIndex2(void) const
+{
+    int resumeIndex = 0;
+    qCWarning(MissionControllerLog) << "_resumeMissiosnIndex(void)";
+    qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
+
+    if (_flyView) {
+        if (_missionManager->cacheResumeIndex() > 0) {
+            //resumeActive();
+            _managerVehicle->updateAreaSprayedFromFile(0);
+
+            //emit _managerVehicle->clearTrajectoryPoint();
+            _missionManager->loadResumeFromFile(true);
+
+            resumeIndex = _missionManager->cacheResumeIndex();
+            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
+
+        } else {
+            resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
+            if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
+                // Resume at the item previous to the item we were heading towards
+                resumeIndex--;
+            } else {
+                resumeIndex = 0;
+            }
+        }
+    }
+
+    return resumeIndex;
+}
+
 
 void MissionController::resumeMissionFromFile()
 {
@@ -2837,12 +2847,12 @@ MissionController::SendToVehiclePreCheckState MissionController::sendToVehiclePr
     return SendToVehiclePreCheckStateOk;
 }
 
-QGroundControlQmlGlobal::AltitudeMode MissionController::globalAltitudeMode(void)
+QGroundControlQmlGlobal::AltMode MissionController::globalAltitudeMode(void)
 {
     return _globalAltMode;
 }
 
-QGroundControlQmlGlobal::AltitudeMode MissionController::globalAltitudeModeDefault(void)
+QGroundControlQmlGlobal::AltMode MissionController::globalAltitudeModeDefault(void)
 {
     if (_globalAltMode == QGroundControlQmlGlobal::AltitudeModeNone) {
         return QGroundControlQmlGlobal::AltitudeModeRelative;
@@ -2851,7 +2861,7 @@ QGroundControlQmlGlobal::AltitudeMode MissionController::globalAltitudeModeDefau
     }
 }
 
-void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeMode altMode)
+void MissionController::setGlobalAltitudeMode(QGroundControlQmlGlobal::AltMode altMode)
 {
     if (_globalAltMode != altMode) {
         _globalAltMode = altMode;

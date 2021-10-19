@@ -45,8 +45,6 @@ FlightMap {
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:      planMasterController
-    property var    _missionController:         planMasterController.missionController
-
     property var    _geoFenceController:        planMasterController.geoFenceController
     property var    _rallyPointController:      planMasterController.rallyPointController
     property var    _activeVehicleCoordinate:   _activeVehicle ? _activeVehicle.coordinate : QtPositioning.coordinate()
@@ -59,7 +57,6 @@ FlightMap {
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
-
 
     function updateAirspace(reset) {
         if(_airspaceEnabled) {
@@ -82,12 +79,6 @@ FlightMap {
         }
         _saveZoomLevelSetting = true
     }
-
-    function addPolyline() {
-
-    }
-
-
 
     onPipModeChanged: _adjustMapZoomForPipMode()
 
@@ -117,10 +108,10 @@ FlightMap {
     Connections {
         target: gesture
 
-        onPanStarted:       _disableVehicleTracking = true
-        onFlickStarted:     _disableVehicleTracking = true
-        onPanFinished:      panRecenterTimer.restart()
-        onFlickFinished:    panRecenterTimer.restart()
+        function onPanStarted() {       _disableVehicleTracking = true }
+        function onFlickStarted() {     _disableVehicleTracking = true }
+        function onPanFinished() {      panRecenterTimer.restart() }
+        function onFlickFinished() {    panRecenterTimer.restart() }
     }
 
     function pointInRect(point, rect) {
@@ -235,7 +226,7 @@ FlightMap {
     Connections {
         target:                 _missionController
         ignoreUnknownSignals:   true
-        onNewItemsFromVehicle: {
+        function onNewItemsFromVehicle() {
             var visualItems = _missionController.visualItems
             if (visualItems && visualItems.count !== 1) {
                 mapFitFunctions.fitMapViewportToMissionItems()
@@ -250,7 +241,7 @@ FlightMap {
         usePlannedHomePosition:     false
         planMasterController:       _planMasterController
     }
-    
+
     ObstacleDistanceOverlayMap {
         id: obstacleDistance
         showText: !pipMode
@@ -345,7 +336,7 @@ FlightMap {
         PlanMapItems {
             map:                    _root
             largeMapView:           !pipMode
-            planMasterController:   _planMasterController
+            planMasterController:   masterController
             vehicle:                _vehicle
 
             property var _vehicle: object
@@ -434,7 +425,7 @@ FlightMap {
 
         Connections {
             target: QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: {
+            function onActiveVehicleChanged() {
                 if (!activeVehicle) {
                     gotoLocationItem.visible = false
                 }
@@ -472,7 +463,7 @@ FlightMap {
 
         Connections {
             target: QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: {
+            function onActiveVehicleChanged() {
                 if (!activeVehicle) {
                     orbitMapCircle.visible = false
                 }

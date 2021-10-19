@@ -162,8 +162,6 @@ ApplicationWindow {
         planView.visible = true
     }
 
-
-
     function showTool(toolTitle, toolSource, toolIcon) {
         toolDrawer.backIcon     = flightView.visible ? "/qmlimages/PaperPlane.svg" : "/qmlimages/Plan.svg"
         toolDrawer.toolTitle    = toolTitle
@@ -425,7 +423,6 @@ ApplicationWindow {
                         text:               qsTr("Vehicle Setup")
                         imageColor:         qgcPal.text
                         imageResource:      "/qmlimages/Gears.svg"
-                        //visible: false
                         onClicked: {
                             if (!mainWindow.preventViewSwitch()) {
                                 mainWindow.showSetupTool()
@@ -528,7 +525,6 @@ ApplicationWindow {
     FlyView {
         id:             flightView
         anchors.fill:   parent
-
     }
 
     PlanView {
@@ -536,8 +532,6 @@ ApplicationWindow {
         anchors.fill:   parent
         visible:        false
     }
-
-
 
     Drawer {
         id:             toolDrawer
@@ -650,8 +644,8 @@ ApplicationWindow {
         id:                 criticalVehicleMessagePopup
         y:                  ScreenTools.defaultFontPixelHeight
         x:                  Math.round((mainWindow.width - width) * 0.5)
-        width:              mainWindow.width  * 0.4
-        height:             ScreenTools.defaultFontPixelHeight * 3
+        width:              mainWindow.width  * 0.5
+        height:             ScreenTools.defaultFontPixelHeight * 2.5
         modal:              false
         focus:              true
         closePolicy:        Popup.CloseOnEscape

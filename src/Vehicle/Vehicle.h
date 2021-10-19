@@ -254,7 +254,7 @@ public:
     Q_PROPERTY(bool                 allSensorsHealthy           READ allSensorsHealthy                                              NOTIFY allSensorsHealthyChanged)    //< true: all sensors in SYS_STATUS reported as healthy
     Q_PROPERTY(bool                 requiresGpsFix              READ requiresGpsFix                                                 NOTIFY requiresGpsFixChanged)
     Q_PROPERTY(double               loadProgress                READ loadProgress                                                   NOTIFY loadProgressChanged)
-    Q_PROPERTY(bool                 initialConnectComplete      READ _initialConnectComplete                                        NOTIFY initialConnectComplete)
+    Q_PROPERTY(bool                 initialConnectComplete      READ isInitialConnectComplete                                       NOTIFY initialConnectComplete)
 
     // The following properties relate to Orbit status
     Q_PROPERTY(bool             orbitActive     READ orbitActive        NOTIFY orbitActiveChanged)
@@ -291,6 +291,7 @@ public:
     Q_PROPERTY(Fact* altitudeAMSL       READ altitudeAMSL       CONSTANT)
     Q_PROPERTY(Fact* altitudeTuning     READ altitudeTuning     CONSTANT)
     Q_PROPERTY(Fact* altitudeTuningSetpoint READ altitudeTuningSetpoint CONSTANT)
+    Q_PROPERTY(Fact* xTrackError        READ xTrackError        CONSTANT)
     Q_PROPERTY(Fact* flightDistance     READ flightDistance     CONSTANT)
 
     //Mismart: Custom areaSprayed and spacing fact
@@ -428,7 +429,7 @@ public:
     Q_INVOKABLE void clearAllParamMapRC(void);
 
     /// Removes the vehicle from the system
-    Q_INVOKABLE void closeVehicle(void) { _vehicleLinkManager->closeVehicle();}
+    Q_INVOKABLE void closeVehicle(void) { _vehicleLinkManager->closeVehicle(); }
 
     /// Trigger camera using MAV_CMD_DO_DIGICAM_CONTROL command
     Q_INVOKABLE void triggerSimpleCamera(void);
@@ -437,6 +438,7 @@ public:
     Q_INVOKABLE void flashBootloader();
 #endif
 
+    bool    isInitialConnectComplete() const;
     bool    guidedModeSupported     () const;
     bool    pauseVehicleSupported   () const;
     bool    orbitModeSupported      () const;
@@ -698,6 +700,22 @@ public:
     void sendMavCommand(int compId, MAV_CMD command, bool showError, float param1 = 0.0f, float param2 = 0.0f, float param3 = 0.0f, float param4 = 0.0f, float param5 = 0.0f, float param6 = 0.0f, float param7 = 0.0f);
     void sendMavCommandInt(int compId, MAV_CMD command, MAV_FRAME frame, bool showError, float param1, float param2, float param3, float param4, double param5, double param6, float param7);
 
+    ///
+    /// \brief isMavCommandPending
+    ///     Query whether the specified MAV_CMD is in queue to be sent or has
+    /// already been sent but whose reply has not yet been received and whose
+    /// timeout has not yet expired.
+    ///
+    ///     Or, said another way: if you call `sendMavCommand(compId, command, true, ...)`
+    /// will an error be shown because you (or another part of QGC) has already
+    /// sent that command?
+    ///
+    /// \param targetCompId
+    /// \param command
+    /// \return
+    ///
+    bool isMavCommandPending(int targetCompId, MAV_CMD command);
+
     /// Same as sendMavCommand but available from Qml.
     Q_INVOKABLE void sendCommand(int compId, int command, bool showError, double param1 = 0.0, double param2 = 0.0, double param3 = 0.0, double param4 = 0.0, double param5 = 0.0, double param6 = 0.0, double param7 = 0.0);
 
@@ -745,6 +763,8 @@ public:
     int firmwareCustomMajorVersion() const { return _firmwareCustomMajorVersion; }
     int firmwareCustomMinorVersion() const { return _firmwareCustomMinorVersion; }
     int firmwareCustomPatchVersion() const { return _firmwareCustomPatchVersion; }
+    int firmwareBoardVendorId() const { return _firmwareBoardVendorId; }
+    int firmwareBoardProductId() const { return _firmwareBoardProductId; }
     QString firmwareVersionTypeString() const;
     void setFirmwareVersion(int majorVersion, int minorVersion, int patchVersion, FIRMWARE_VERSION_TYPE versionType = FIRMWARE_VERSION_TYPE_OFFICIAL);
     void setFirmwareCustomVersion(int majorVersion, int minorVersion, int patchVersion);
@@ -939,6 +959,8 @@ signals:
     void isROIEnabledChanged            ();
     void initialConnectComplete         ();
 
+    void sensorsParametersResetAck      (bool success);
+
 private slots:
     void _mavlinkMessageReceived            (LinkInterface* link, mavlink_message_t message);
     void _sendMessageMultipleNext           ();
@@ -1026,7 +1048,6 @@ private:
     void _chunkedStatusTextTimeout      (void);
     void _chunkedStatusTextCompleted    (uint8_t compId);
     void _setMessageInterval            (int messageId, int rate);
-    bool _initialConnectComplete        () const;
     EventHandler& _eventHandler         (uint8_t compid);
 
     static void _rebootCommandResultHandler(void* resultHandlerData, int compId, MAV_RESULT commandResult, MavCmdResultFailureCode_t failureCode);
@@ -1177,6 +1198,13 @@ private:
     int _firmwareCustomMinorVersion = versionNotSetValue;
     int _firmwareCustomPatchVersion = versionNotSetValue;
     FIRMWARE_VERSION_TYPE _firmwareVersionType = FIRMWARE_VERSION_TYPE_OFFICIAL;
+
+    // Vendor and Product as reported from the first autopilot version message
+    // during the initial connect. They may be zero eg ArduPilot SITL reports 0
+    // by default.
+    uint16_t       _firmwareBoardVendorId = 0;
+    uint16_t       _firmwareBoardProductId = 0;
+
 
     QString _gitHash;
     quint64 _uid = 0;

@@ -30,7 +30,7 @@ class PlanMasterController : public QObject
 public:
     PlanMasterController(QObject* parent = nullptr);
 #ifdef QT_DEBUG
-    // Used by test code to create master controll with specific firmware/vehicle type
+    // Used by test code to create master controller with specific firmware/vehicle type
     PlanMasterController(MAV_AUTOPILOT firmwareType, MAV_TYPE vehicleType, QObject* parent = nullptr);
 #endif
 
@@ -97,8 +97,6 @@ public:
     Q_INVOKABLE void setParam(void);
     Q_INVOKABLE void clearResumeFile(void);
     Q_INVOKABLE void deleteFileInResume(void);
-
-
 
     MissionController*      missionController(void)     { return &_missionController; }
     GeoFenceController*     geoFenceController(void)    { return &_geoFenceController; }

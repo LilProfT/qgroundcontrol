@@ -11,6 +11,7 @@
 
 #include "CameraSpec.h"
 #include "SettingsFact.h"
+#include "QGroundControlQmlGlobal.h"
 
 class PlanMasterController;
 
@@ -40,10 +41,10 @@ public:
     // When we are creating a manual grid we still use CameraCalc to store the manual grid information. It's a bastardization of what
     // CameraCalc is meant for but it greatly simplifies code and persistance of manual grids.
     //  grid altitude -         distanceToSurface
-    //  grid altitude mode -    distanceToSurfaceRelative
+    //  grid altitude mode -    distanceMode
     //  trigger distance -      adjustedFootprintFrontal
     //  transect spacing -      adjustedFootprintSide
-    Q_PROPERTY(bool             distanceToSurfaceRelative   READ distanceToSurfaceRelative WRITE setDistanceToSurfaceRelative   NOTIFY distanceToSurfaceRelativeChanged)
+    Q_PROPERTY(QGroundControlQmlGlobal::AltMode distanceMode READ distanceMode WRITE setDistanceMode NOTIFY distanceModeChanged)
 
     // The following values are calculated from the camera properties
     Q_PROPERTY(double imageFootprintSide    READ imageFootprintSide     NOTIFY imageFootprintSideChanged)       ///< Size of image size side in meters
@@ -77,23 +78,22 @@ public:
     bool    isCustomCamera              (void) const { return _cameraNameFact.rawValue().toString() == canonicalCustomCameraName(); }
     double  imageFootprintSide          (void) const { return _imageFootprintSide; }
     double  imageFootprintFrontal       (void) const { return _imageFootprintFrontal; }
-    bool    distanceToSurfaceRelative   (void) const { return _distanceToSurfaceRelative; }
+    QGroundControlQmlGlobal::AltMode distanceMode(void) const { return _distanceMode; }
 
-    void setDirty                       (bool dirty);
-    void setDistanceToSurfaceRelative   (bool distanceToSurfaceRelative);
+    void setDistanceMode                (QGroundControlQmlGlobal::AltMode altMode);
     void setCameraBrand                 (const QString& cameraBrand);
     void setCameraModel                 (const QString& cameraModel);
     void setFeaturedWidth               (double value) { _featuredWidth = value; emit featuredWidthChanged(); };
 
     void save(QJsonObject& json) const;
-    bool load(const QJsonObject& json, QString& errorString);
+    bool load(const QJsonObject& json, bool deprecatedFollowTerrain, QString& errorString, bool forPresets);
 
     void _setCameraNameFromV3TransectLoad   (const QString& cameraName);
 
     static const char* cameraNameName;
     static const char* valueSetIsDistanceName;
     static const char* distanceToSurfaceName;
-    static const char* distanceToSurfaceRelativeName;
+    static const char* distanceModeName;
     static const char* imageDensityName;
     static const char* frontalOverlapName;
     static const char* sideOverlapName;
@@ -104,7 +104,7 @@ signals:
     void dirtyChanged                       (bool dirty);
     void imageFootprintSideChanged          (double imageFootprintSide);
     void imageFootprintFrontalChanged       (double imageFootprintFrontal);
-    void distanceToSurfaceRelativeChanged   (bool distanceToSurfaceRelative);
+    void distanceModeChanged                (int altMode);
     void isManualCameraChanged              (void);
     void isCustomCameraChanged              (void);
     void cameraBrandChanged                 (void);
@@ -115,7 +115,6 @@ signals:
 
 private slots:
     void _recalcTriggerDistance             (void);
-    void _adjustDistanceToSurfaceRelative   (void);
     void _setDirty                          (void);
     void _cameraNameChanged                 (void);
 
@@ -130,7 +129,7 @@ private:
     QString         _cameraModel;
     QStringList     _cameraBrandList;
     QStringList     _cameraModelList;
-    bool            _distanceToSurfaceRelative  = true;
+    QGroundControlQmlGlobal::AltMode    _distanceMode               = QGroundControlQmlGlobal::AltitudeModeRelative;
     double          _imageFootprintSide         = 0;
     double          _imageFootprintFrontal      = 0;
     QVariantList    _knownCameraList;
@@ -147,13 +146,14 @@ private:
     SettingsFact _adjustedFootprintSideFact;
     SettingsFact _adjustedFootprintFrontalFact;
 
-    // The following are deprecated usage and only included in order to convert older formats
-
+    // The following are deprecated and only included in order to convert V0 formats
     enum CameraSpecType {
         CameraSpecNone,
         CameraSpecCustom,
         CameraSpecKnown
     };
+    static const char* _jsonCameraSpecTypeKeyDeprecated;
 
-    static const char* _jsonCameraSpecTypeKey;
+    // The following are deprecated and only included in order to convert V1 formats
+    static const char* _jsonDistanceToSurfaceRelativeKeyDeprecated;
 };

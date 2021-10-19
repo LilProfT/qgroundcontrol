@@ -65,12 +65,6 @@ Item {
     readonly property int       _layerGeoFence:             2
     readonly property int       _layerRallyPoints:          3
     readonly property string    _armedVehicleUploadPrompt:  qsTr("Vehicle is currently armed. Do you want to upload the mission to the vehicle?")
-    property var  _path: [
-        { latitude: -35.3627585729104, longitude: 149.16561385359756 },
-        { latitude: -35.36323317011994, longitude: 149.166278961657554},
-        { latitude: -35.36338926624347, longitude: 149.1655693841518 },
-        { latitude: -35.36317483107069, longitude: 149.16540697403713 }
-    ]
 
     function mapCenter() {
         var coordinate = editorMap.center
@@ -127,7 +121,7 @@ Item {
 
     Connections {
         target: _appSettings ? _appSettings.defaultMissionItemAltitude : null
-        onRawValueChanged: {
+        function onRawValueChanged() {
             if (_visualItems.count > 1) {
                 mainWindow.showComponentDialog(applyNewAltitude, qsTr("Apply new altitude"), mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.No)
             }
@@ -209,7 +203,7 @@ Item {
 
     Connections {
         target: QGroundControl.airspaceManager
-        onAirspaceVisibleChanged: {
+        function onAirspaceVisibleChanged() {
             planControlColapsed = QGroundControl.airspaceManager.airspaceVisible
         }
     }
@@ -338,7 +332,7 @@ Item {
     Connections {
         target: _missionController
 
-        onNewItemsFromVehicle: {
+        function onNewItemsFromVehicle() {
             if (_visualItems && _visualItems.count !== 1) {
                 mapFitFunctions.fitMapViewportToMissionItems()
             }

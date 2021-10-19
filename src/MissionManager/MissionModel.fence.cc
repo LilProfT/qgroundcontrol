@@ -333,7 +333,7 @@ QList<IntersectInfo> _intersectLinePolygon(const QLineF& line, const QPolygonF& 
         int j_ = (j == polygon.count()) ? 0 : j; // last edge (count - 1, 0)
         QLineF edge(polygon[j-1], polygon[j_]);
         QPointF intersectPoint;
-        if (line.intersect(edge, &intersectPoint) == QLineF::BoundedIntersection) {
+        if (line.intersects(edge, &intersectPoint) == QLineF::BoundedIntersection) {
             IntersectInfo info;
             info.point = intersectPoint;
             info.coord = j-0.5; // only x.5

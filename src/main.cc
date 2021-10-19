@@ -211,6 +211,18 @@ bool checkAndroidWritePermission() {
 }
 #endif
 
+// To shut down QGC on Ctrl+C on Linux
+#ifdef Q_OS_LINUX
+#include <csignal>
+
+void sigHandler(int s)
+{
+    std::signal(s, SIG_DFL);
+    QApplication::instance()->quit();
+}
+
+#endif /* Q_OS_LINUX */
+
 //-----------------------------------------------------------------------------
 /**
  * @brief Starts the application
@@ -277,6 +289,11 @@ int main(int argc, char *argv[])
         }
     }
 #endif
+
+#ifdef Q_OS_LINUX
+    std::signal(SIGINT, sigHandler);
+    std::signal(SIGTERM, sigHandler);
+#endif /* Q_OS_LINUX */
 
     // The following calls to qRegisterMetaType are done to silence debug output which warns
     // that we use these types in signals, and without calling qRegisterMetaType we can't queue
@@ -372,22 +389,22 @@ int main(int argc, char *argv[])
 
 #ifdef UNITTEST_BUILD
     if (runUnitTests) {
-//        for (int i=0; i < (stressUnitTests ? 20 : 1); i++) {
-//            if (!app->_initForUnitTests()) {
-//                return -1;
-//            }
+        for (int i=0; i < (stressUnitTests ? 20 : 1); i++) {
+            if (!app->_initForUnitTests()) {
+                return -1;
+            }
 
-//            // Run the test
-//            int failures = UnitTest::run(unitTestOptions);
-//            if (failures == 0) {
-//                qDebug() << "ALL TESTS PASSED";
-//                exitCode = 0;
-//            } else {
-//                qDebug() << failures << " TESTS FAILED!";
-//                exitCode = -failures;
-//                break;
-//            }
-//        }
+            // Run the test
+            int failures = UnitTest::run(unitTestOptions);
+            if (failures == 0) {
+                qDebug() << "ALL TESTS PASSED";
+                exitCode = 0;
+            } else {
+                qDebug() << failures << " TESTS FAILED!";
+                exitCode = -failures;
+                break;
+            }
+        }
     } else
 #endif
     {

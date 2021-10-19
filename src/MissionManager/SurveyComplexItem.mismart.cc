@@ -205,7 +205,7 @@ void SurveyComplexItem::_calcFeaturedWidth(void)
     for (const QLineF& crossvector: crossvectors) {
         for (const QLineF& edge: edges) {
             QPointF intersectPoint;
-            crossvector.intersect(edge, &intersectPoint);
+            crossvector.intersects(edge, &intersectPoint);
 
             // check bound in edge
             QLineF first(edge.p1(), intersectPoint);
