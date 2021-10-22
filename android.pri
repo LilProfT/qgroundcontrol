@@ -53,3 +53,5 @@ DISTFILES += \
     $$PWD/android/build.gradle \
     $$PWD/android/gradle/wrapper/gradle-wrapper.properties \
     $$PWD/android/gradlew.bat
+
+
