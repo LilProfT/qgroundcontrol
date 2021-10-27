@@ -19,8 +19,8 @@ import QGroundControl.FlightDisplay 1.0
 import QGroundControl.Palette       1.0
 
 ColumnLayout {
-    id:         root
-    spacing:    ScreenTools.defaultFontPixelHeight / 4
+    id:                 root
+    spacing:            ScreenTools.defaultFontPixelHeight / 4
 
     property real   _innerRadius:           (width - (_topBottomMargin * 3)) / 4
     property real   _outerRadius:           _innerRadius + _topBottomMargin
@@ -80,7 +80,7 @@ ColumnLayout {
             anchors.verticalCenter: visualInstrument.verticalCenter
             anchors.rightMargin:    _spacing
             color:                  qgcPal.window
-            visible:                _show
+            visible:                false
 
             QGCColoredImage {
                 anchors.margins:    parent.height / 8
@@ -119,5 +119,12 @@ ColumnLayout {
                 onClicked:      _show = true
             }
         }
+    }
+
+
+    //Mismart: Useless, hidden
+
+    TerrainProgress {
+        Layout.fillWidth: true
     }
 }
