@@ -62,7 +62,6 @@ public:
     QString             smartRTLFlightMode              (void) const override { return QString("Smart RTL"); }
     QString             missionFlightMode               (void) const override { return QString("Auto"); }
     QString             loiterFlightMode               (void) const override { return QString("Loiter"); }
-
     void                pauseVehicle                    (Vehicle* vehicle) override;
     void                guidedModeRTL                   (Vehicle* vehicle, bool smartRTL) override;
     void                guidedModeChangeAltitude        (Vehicle* vehicle, double altitudeChange, bool pauseVehicle) override;

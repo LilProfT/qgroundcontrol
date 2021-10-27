@@ -92,8 +92,6 @@ void QGCMapPolygon::clear(void)
 
     _polygonModel.clearAndDeleteContents();
 
-//    _offsets.clear();
-
     emit cleared();
 
     setDirty(true);
@@ -559,11 +557,7 @@ void QGCMapPolygon::offset(double distance)
         QGeoCoordinate  tangentOrigin = vertexCoordinate(0);
         for (int i=0; i<rgOffsetEdges.count(); i++) {
             int prevIndex = i == 0 ? rgOffsetEdges.count() - 1 : i - 1;
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-            auto intersect = rgOffsetEdges[prevIndex].intersect(rgOffsetEdges[i], &newVertex);
-#else
             auto intersect = rgOffsetEdges[prevIndex].intersects(rgOffsetEdges[i], &newVertex);
-#endif
             if (intersect == QLineF::NoIntersection) {
                 // FIXME: Better error handling?
                 qWarning("Intersection failed");
@@ -882,7 +876,7 @@ QList<QGCMapPolygon::CoordInfo_t> QGCMapPolygon::followEdges(const QList<QGCMapP
                     int j_ = (j == nedExtendedPolygon.count()) ? 0 : j; // handle last edge (count - 1, 0)
                     QLineF edge(nedExtendedPolygon[j-1], nedExtendedPolygon[j_]);
                     QPointF intersectPoint;
-                    if (pathLine.intersect(edge, &intersectPoint) == QLineF::BoundedIntersection) {
+                    if (pathLine.intersects(edge, &intersectPoint) == QLineF::BoundedIntersection) {
                         if (first.isNull()) {
                             first = intersectPoint;
                             continue;
@@ -898,7 +892,7 @@ QList<QGCMapPolygon::CoordInfo_t> QGCMapPolygon::followEdges(const QList<QGCMapP
                 if ((!first.isNull()) && (!second.isNull())) {
                     // got the start and end following point
                     // we want to use the code below for the case of inbound point
-                    // so let add a fake inbound point in between
+                    // so let add a fake inbound point in besstween
                     QLineF cross(first, second);
                     QPointF fakePoint = cross.center();
                     PointInfo_t toAppend;
@@ -924,7 +918,7 @@ QList<QGCMapPolygon::CoordInfo_t> QGCMapPolygon::followEdges(const QList<QGCMapP
                     int j_ = (j == nedExtendedPolygon.count()) ? 0 : j; // handle last edge (count - 1, 0)
                     QLineF edge(nedExtendedPolygon[j-1], nedExtendedPolygon[j_]);
                     QPointF intersectPoint;
-                    if (pathLine.intersect(edge, &intersectPoint) == QLineF::BoundedIntersection) {
+                    if (pathLine.intersects(edge, &intersectPoint) == QLineF::BoundedIntersection) {
                         startFollowPoint.modified = true;
                         startFollowPoint.point = intersectPoint;
                         startFollowEdgeIndex = j_;
@@ -949,7 +943,7 @@ QList<QGCMapPolygon::CoordInfo_t> QGCMapPolygon::followEdges(const QList<QGCMapP
                 int j_ = (j == nedExtendedPolygon.count()) ? 0 : j; // handle last edge (count - 1, 0)
                 QLineF edge(nedExtendedPolygon[j-1], nedExtendedPolygon[j_]);
                 QPointF intersectPoint;
-                if (pathLine.intersect(edge, &intersectPoint) == QLineF::BoundedIntersection) {
+                if (pathLine.intersects(edge, &intersectPoint) == QLineF::BoundedIntersection) {
                     endFollowPoint.modified = true;
                     endFollowPoint.point = intersectPoint;
                     endFollowEdgeIndex = j_;

@@ -53,7 +53,6 @@ Item {
             }
         }
 
-
         PreFlightCheckGroup {
             name: qsTr("Please arm the vehicle here")
 

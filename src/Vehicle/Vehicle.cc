@@ -220,9 +220,7 @@ Vehicle::Vehicle(LinkInterface*             link,
         }
     }
 #endif
-//    if (_flightHubManager == nullptr) {
-//        _flightHubManager               = new FlightHubManager(this);
-//    }
+
     _autopilotPlugin = _firmwarePlugin->autopilotPlugin(this);
     _autopilotPlugin->setParent(this);
 
@@ -1078,6 +1076,11 @@ void Vehicle::_handleAttitudeWorker(double rollRadians, double pitchRadians, dou
 
 void Vehicle::_handleAttitude(mavlink_message_t& message)
 {
+    // only accept the attitude message from the vehicle's flight controller
+    if (message.sysid != _id || message.compid != _compID) {
+        return;
+    }
+
     if (_receivingAttitudeQuaternion) {
         return;
     }
@@ -1090,6 +1093,11 @@ void Vehicle::_handleAttitude(mavlink_message_t& message)
 
 void Vehicle::_handleAttitudeQuaternion(mavlink_message_t& message)
 {
+    // only accept the attitude message from the vehicle's flight controller
+    if (message.sysid != _id || message.compid != _compID) {
+        return;
+    }
+
     _receivingAttitudeQuaternion = true;
 
     mavlink_attitude_quaternion_t attitudeQuaternion;
@@ -2859,6 +2867,11 @@ void Vehicle::sendMavCommandInt(int compId, MAV_CMD command, MAV_FRAME frame, bo
                           param1, param2, param3, param4, param5, param6, param7);
 }
 
+bool Vehicle::isMavCommandPending(int targetCompId, MAV_CMD command)
+{
+    return ((-1) < _findMavCommandListEntryIndex(targetCompId, command));
+}
+
 int Vehicle::_findMavCommandListEntryIndex(int targetCompId, MAV_CMD command)
 {
     for (int i=0; i<_mavCommandList.count(); i++) {
@@ -2904,8 +2917,7 @@ bool Vehicle::_sendMavCommandShouldRetry(MAV_CMD command)
 
 void Vehicle::_sendMavCommandWorker(bool commandInt, bool showError, MavCmdResultHandler resultHandler, void* resultHandlerData, int targetCompId, MAV_CMD command, MAV_FRAME frame, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
 {
-    int entryIndex = _findMavCommandListEntryIndex(targetCompId, command);
-    if (entryIndex != -1 || targetCompId == MAV_COMP_ID_ALL) {
+    if ((targetCompId == MAV_COMP_ID_ALL) || isMavCommandPending(targetCompId, command)) {
         bool    compIdAll       = targetCompId == MAV_COMP_ID_ALL;
         QString rawCommandName  = _toolbox->missionCommandTree()->rawName(command);
 
@@ -3073,6 +3085,11 @@ void Vehicle::_handleCommandAck(mavlink_message_t& message)
             _isROIEnabled = false;
             emit isROIEnabledChanged();
         }
+    }
+
+    if (ack.command == MAV_CMD_PREFLIGHT_STORAGE) {
+        auto result = (ack.result == MAV_RESULT_ACCEPTED);
+        emit sensorsParametersResetAck(result);
     }
 
 #if !defined(NO_ARDUPILOT_DIALECT)
@@ -3826,7 +3843,7 @@ void Vehicle::_setMessageInterval(int messageId, int rate)
                    rate);
 }
 
-bool Vehicle::_initialConnectComplete() const
+bool Vehicle::isInitialConnectComplete() const
 {
     return !_initialConnectStateMachine->active();
 }
@@ -4101,7 +4118,7 @@ void Vehicle::triggerSimpleCamera()
 }
 
 void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
-    if (flightMode == this->rtlFlightMode() || (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode())) {
+    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) || (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode())) {
         qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
         _resumeCoordinate = this->coordinate();
         _trajectoryPoints->updatePausePoint(this->coordinate());

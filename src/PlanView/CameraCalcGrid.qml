@@ -108,7 +108,7 @@ Column {
 
             AltitudeFactTextField {
                 fact:                       cameraCalc.distanceToSurface
-                altitudeMode:               distanceToSurfaceAltitudeMode
+                altitudeMode:               cameraCalc.distanceMode
                 enabled:                    fixedDistanceRadio.checked
                 Layout.fillWidth:           true
             }
@@ -141,7 +141,7 @@ Column {
         QGCLabel { text: distanceToSurfaceLabel }
         AltitudeFactTextField {
             fact:                       cameraCalc.distanceToSurface
-            altitudeMode:               distanceToSurfaceAltitudeMode
+            altitudeMode:               cameraCalc.distanceMode
             Layout.fillWidth:           true
             onUpdated:                  distanceToSurfaceSlider.value = cameraCalc.distanceToSurface.value
             visible:                    false

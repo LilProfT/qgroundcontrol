@@ -150,9 +150,6 @@ Item {
             mapControl:     map
             itemCoordinate: myGeoFenceController.breachReturnPoint
             visible:        _root.interactive
-//            onDragStop:  {
-//                            myGeoFenceController.breachReturnPoint = itemCoordinate
-//                        }
 
             onItemCoordinateChanged: myGeoFenceController.breachReturnPoint = itemCoordinate
         }

@@ -137,9 +137,9 @@ void PlanMasterController::_activeVehicleChanged(Vehicle* activeVehicle)
 
     if (_managerVehicle) {
         // Disconnect old vehicle. Be careful of wildcarding disconnect too much since _managerVehicle may equal _controllerVehicle
-        disconnect(_managerVehicle->missionManager(),       nullptr, nullptr, nullptr);
-        disconnect(_managerVehicle->geoFenceManager(),      nullptr, nullptr, nullptr);
-        disconnect(_managerVehicle->rallyPointManager(),    nullptr, nullptr, nullptr);
+        disconnect(_managerVehicle->missionManager(),       nullptr, this, nullptr);
+        disconnect(_managerVehicle->geoFenceManager(),      nullptr, this, nullptr);
+        disconnect(_managerVehicle->rallyPointManager(),    nullptr, this, nullptr);
     }
 
     bool newOffline = false;
@@ -367,7 +367,6 @@ void PlanMasterController::sendToVehicle(void)
 
 void PlanMasterController::loadFromFile(const QString& filename)
 {
-
     QString errorString;
     QString errorMessage = tr("Error loading Plan file (%1). %2").arg(filename).arg("%1");
 
@@ -1052,8 +1051,20 @@ void PlanMasterController::_updatePlanCreatorsList(void)
     if (!_flyView) {
         if (!_planCreators) {
             _planCreators = new QmlObjectListModel(this);
+            _planCreators->append(new BlankPlanCreator(this, this));
             _planCreators->append(new SurveyPlanCreator(this, this));
+            _planCreators->append(new CorridorScanPlanCreator(this, this));
             emit planCreatorsChanged(_planCreators);
+        }
+
+        if (_managerVehicle->fixedWing()) {
+            if (_planCreators->count() == 4) {
+                _planCreators->removeAt(_planCreators->count() - 1);
+            }
+        } else {
+            if (_planCreators->count() != 4) {
+                _planCreators->append(new StructureScanPlanCreator(this, this));
+            }
         }
     }
 }

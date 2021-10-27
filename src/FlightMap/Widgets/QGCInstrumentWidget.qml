@@ -80,7 +80,7 @@ ColumnLayout {
             anchors.verticalCenter: visualInstrument.verticalCenter
             anchors.rightMargin:    _spacing
             color:                  qgcPal.window
-            visible:                _show
+            visible:                false
 
             QGCColoredImage {
                 anchors.margins:    parent.height / 8
@@ -124,7 +124,7 @@ ColumnLayout {
 
     //Mismart: Useless, hidden
 
-//    TerrainProgress {
-//        Layout.fillWidth: true
-//    }
+    TerrainProgress {
+        Layout.fillWidth: true
+    }
 }

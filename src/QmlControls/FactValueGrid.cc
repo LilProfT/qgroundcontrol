@@ -144,16 +144,8 @@ void FactValueGrid::_saveValueData(QSettings& settings, InstrumentValueData* val
         break;
     }
 
-    //Copying the recent merge request of original QGC, should be merged in the future
-//    if (value->fact()) {
-//        settings.setValue(_factGroupNameKey,    value->factGroupName());
-//        settings.setValue(_factNameKey,         value->factName());
-//    } else {
-//        settings.setValue(_factGroupNameKey,    "");
-//        settings.setValue(_factNameKey,         "");
-//    }
-      settings.setValue(_factGroupNameKey,    value->factGroupName());
-      settings.setValue(_factNameKey,         value->factName());
+    settings.setValue(_factGroupNameKey,    value->factGroupName());
+    settings.setValue(_factNameKey,         value->factName());
 }
 
 void FactValueGrid::_loadValueData(QSettings& settings, InstrumentValueData* value)

@@ -77,7 +77,7 @@ Item {
 
     readonly property real _margins: ScreenTools.defaultFontPixelWidth
 
-   function getMissionTime() {
+    function getMissionTime() {
         if (!_missionTime) {
             return "00:00:00"
         }
@@ -428,24 +428,6 @@ Item {
             }
         }
     }
-
-//        QGCButton {
-//            id:          showVideo
-//            text:        qsTr("Show Video")
-//            anchors.right:      parent.right
-//            anchors.top:      parent.top
-//            onPressAndHold:   {
-//                //if (!flightView.visible) {
-//                    mainWindow.showFlyView()
-//                //}
-//            }
-//            onReleased:   {
-//                //if (!flightView.visible) {
-//                    mainWindow.showFlyView()
-//                //}
-
-//            }
-//        }
 
     // Large mission download progress bar
     Rectangle {
