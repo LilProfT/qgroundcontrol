@@ -38,8 +38,8 @@ public:
     void generateResumeMissionFromFile(int resumeIndex);
 
     int cacheResumeIndex() {return _cachedResumeIndex; };
-    int absoluteResumeIndex() {return _absoluteResumeIndex; };
-    void setAbsoluteResumeIndex(int value) { _absoluteResumeIndex = value; };
+//    int absoluteResumeIndex() {return _absoluteResumeIndex; };
+//    void setAbsoluteResumeIndex(int value) { _absoluteResumeIndex = value; };
     void loadResumeFromFile(bool load) {_loadResumeFromFile = load; };
     bool resumeFromFile(void) {return _loadResumeFromFile; };
 
@@ -59,7 +59,7 @@ private:
 
     int _cachedLastCurrentIndex;
     int _cachedResumeIndex;
-    int _absoluteResumeIndex;
-    int _adjustAbsIndex;
+//    int _absoluteResumeIndex;
+//    int _adjustAbsIndex;
     bool _loadResumeFromFile;
 };
