@@ -4118,7 +4118,18 @@ void Vehicle::triggerSimpleCamera()
 }
 
 void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
-    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) || (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode())) {
+//    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) || (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode())) {
+//        qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
+//        _resumeCoordinate = this->coordinate();
+//        _trajectoryPoints->updatePausePoint(this->coordinate());
+//    } else if (flightMode == this->missionFlightMode() && (_prevflightMode == this->loiterFlightMode() || _prevflightMode == this->rtlFlightMode())) {
+//        //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
+//        _trajectoryPoints->updateResumePoint(this->coordinate());
+//    }
+//    _prevflightMode = flightMode;
+
+    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) ||
+            (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode()) ) {
         qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
         _resumeCoordinate = this->coordinate();
         _trajectoryPoints->updatePausePoint(this->coordinate());
@@ -4126,5 +4137,11 @@ void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
         //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
         _trajectoryPoints->updateResumePoint(this->coordinate());
     }
+    if (flightMode == this->pauseFlightMode())
+        _resumeCoordinate = this->coordinate();
+
     _prevflightMode = flightMode;
+
+//    if ( flightMode == this->rtlFlightMode())
+//        _resumeCoordinate = this->coordinate();
 }

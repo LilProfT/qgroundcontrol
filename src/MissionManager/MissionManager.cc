@@ -20,7 +20,7 @@ QGC_LOGGING_CATEGORY(MissionManagerLog, "MissionManagerLog")
 
 MissionManager::MissionManager(Vehicle* vehicle)
     : PlanManager               (vehicle, MAV_MISSION_TYPE_MISSION)
-    , _cachedLastCurrentIndex   (-1), _cachedResumeIndex(-1), _absoluteResumeIndex(0), _adjustAbsIndex(0), _loadResumeFromFile(false)
+    , _cachedLastCurrentIndex   (-1), _cachedResumeIndex(-1), _loadResumeFromFile(false)
 {
     connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &MissionManager::_mavlinkMessageReceived);
 }
@@ -118,10 +118,10 @@ void MissionManager::generateResumeMission(int resumeIndex)
     }
     resumeIndex = qMax(0, resumeIndex);
     _cachedResumeIndex = resumeIndex;
-    if (_absoluteResumeIndex == -1) _absoluteResumeIndex = 0;
-    if (_absoluteResumeIndex > 0) _absoluteResumeIndex -= _adjustAbsIndex+2;
-    _absoluteResumeIndex += resumeIndex;
-    _adjustAbsIndex = 0;
+//    if (_absoluteResumeIndex == -1) _absoluteResumeIndex = 0;
+//    if (_absoluteResumeIndex > 0) _absoluteResumeIndex -= _adjustAbsIndex+2;
+//    _absoluteResumeIndex += resumeIndex;
+//    _adjustAbsIndex = 0;
 
     qCWarning(MissionManagerLog) << "_cachedResumeIndex: " << _cachedResumeIndex;
 
@@ -226,18 +226,18 @@ void MissionManager::generateResumeMission(int resumeIndex)
             MissionItem* newChangeYawItem = new MissionItem(*changeYawItem, this);
             newChangeYawItem->setIsCurrentItem(false);
             resumeMission.append(newChangeYawItem);
-            _adjustAbsIndex++;
+            //_adjustAbsIndex++;
 
             MissionItem* newHoldingWaypointItem = new MissionItem(*oldItem, this);
             newHoldingWaypointItem->setIsCurrentItem(false);
             newHoldingWaypointItem->setParam1(2.0); // delay 2 second
             resumeMission.append(newHoldingWaypointItem);
-            _adjustAbsIndex++;
+            //_adjustAbsIndex++;
 
             newChangeYawItem = new MissionItem(*changeYawItem, this);
             newChangeYawItem->setIsCurrentItem(false);
             resumeMission.append(newChangeYawItem);
-            _adjustAbsIndex++;
+            //_adjustAbsIndex++;
 
             // NOTE if not ascendingTerminal, the (first, second, third, fourth) is wrong
             // but below conditions still apply
@@ -267,7 +267,7 @@ void MissionManager::generateResumeMission(int resumeIndex)
                     descWaypointItem->setParam7(missionAltitude);
                     descWaypointItem->setIsCurrentItem(false);
                     resumeMission.append(descWaypointItem);
-                    _adjustAbsIndex++;
+                   //_adjustAbsIndex++;
                 }
             }
         }
@@ -385,7 +385,7 @@ void MissionManager::generateResumeMissionFromFile(int resumeIndex)
     }
     resumeIndex = qMax(0, resumeIndex);
     _cachedResumeIndex = resumeIndex;
-    _adjustAbsIndex = 0;
+    //_adjustAbsIndex = 0;
 
     qCWarning(MissionManagerLog) << "_cachedResumeIndex: " << _cachedResumeIndex;
 
@@ -461,18 +461,18 @@ void MissionManager::generateResumeMissionFromFile(int resumeIndex)
                     MissionItem* newChangeYawItem = new MissionItem(*changeYawItem, this);
                     newChangeYawItem->setIsCurrentItem(false);
                     resumeMission.append(newChangeYawItem);
-                    _adjustAbsIndex++;
+                    //_adjustAbsIndex++;
 
                     MissionItem* newHoldingWaypointItem = new MissionItem(*oldItem, this);
                     newHoldingWaypointItem->setIsCurrentItem(false);
                     newHoldingWaypointItem->setParam1(2.0);
                     resumeMission.append(newHoldingWaypointItem);
-                    _adjustAbsIndex++;
+                    //_adjustAbsIndex++;
 
                     newChangeYawItem = new MissionItem(*changeYawItem, this);
                     newChangeYawItem->setIsCurrentItem(false);
                     resumeMission.append(newChangeYawItem);
-                    _adjustAbsIndex++;
+                    //_adjustAbsIndex++;
                 }
 
     }
@@ -548,7 +548,7 @@ void MissionManager::generateResumeMissionFromFile(int resumeIndex)
 }
 
 void MissionManager::autoSaveMission(void) {
-    if (_absoluteResumeIndex > 0)
+    if (_cachedResumeIndex > 0)
         emit autoSaved();
 }
 
