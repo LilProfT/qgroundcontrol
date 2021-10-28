@@ -52,7 +52,7 @@ VehicleDistanceSensorFactGroup::VehicleDistanceSensorFactGroup(QObject* parent)
     _addFact(&_maxDistanceFact,         _maxDistanceFactName);
 }
 
-void VehicleDistanceSensorFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
+void VehicleDistanceSensorFactGroup::handleMessage(Vehicle* vehicle, mavlink_message_t& message)
 {
     if (message.msgid != MAVLINK_MSG_ID_DISTANCE_SENSOR) {
         return;
@@ -85,6 +85,18 @@ void VehicleDistanceSensorFactGroup::handleMessage(Vehicle* /* vehicle */, mavli
         const orientation2Fact_s& orientation2Fact = rgOrientation2Fact[i];
         if (orientation2Fact.orientation == distanceSensor.orientation) {
             orientation2Fact.fact->setRawValue(distanceSensor.current_distance / 100.0); // cm to meters
+        }
+    }
+
+    //Mismart: Use altimeter when available
+    if (distanceSensor.orientation == MAV_SENSOR_ROTATION_PITCH_270) {
+        if (distanceSensor.current_distance < distanceSensor.max_distance) {
+            //Valid
+            vehicle->setUseAltimeter(true);
+
+            vehicle->altitudeRelative()->setRawValue(distanceSensor.current_distance / 100.0); //cm to meters
+        } else {
+            vehicle->setUseAltimeter(false);
         }
     }
 
