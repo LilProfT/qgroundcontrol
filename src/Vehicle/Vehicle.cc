@@ -1150,7 +1150,7 @@ void Vehicle::_handleGlobalPositionInt(mavlink_message_t& message)
     mavlink_global_position_int_t globalPositionInt;
     mavlink_msg_global_position_int_decode(&message, &globalPositionInt);
 
-    if (!_altitudeMessageAvailable) {
+    if (!_altitudeMessageAvailable && !_useAltimeter) {
         _altitudeRelativeFact.setRawValue(globalPositionInt.relative_alt / 1000.0);
         _altitudeAMSLFact.setRawValue(globalPositionInt.alt / 1000.0);
     }
@@ -1287,8 +1287,15 @@ void Vehicle::_handleAltitude(mavlink_message_t& message)
 
     // Data from ALTITUDE message takes precedence over gps messages
     _altitudeMessageAvailable = true;
-    _altitudeRelativeFact.setRawValue(altitude.altitude_relative);
+
     _altitudeAMSLFact.setRawValue(altitude.altitude_amsl);
+
+    //Mismart: Let the altimeter handle the altitude fact when available
+    if (_useAltimeter) {
+        return;
+    }
+
+    _altitudeRelativeFact.setRawValue(altitude.altitude_relative);
 }
 
 void Vehicle::_setCapabilities(uint64_t capabilityBits)
@@ -4144,4 +4151,8 @@ void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
 
 //    if ( flightMode == this->rtlFlightMode())
 //        _resumeCoordinate = this->coordinate();
+}
+
+void Vehicle::setUseAltimeter(bool valid) {
+    _useAltimeter   = valid;
 }

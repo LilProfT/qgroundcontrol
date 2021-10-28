@@ -847,6 +847,9 @@ public:
 
     void setEventsMetadata(uint8_t compid, const QString& metadataJsonFileName, const QString& translationJsonFileName);
 
+    //Mismart: Set useAltimeter to true if available and valid
+    void        setUseAltimeter         (bool valid);
+
 public slots:
     void setVtolInFwdFlight                 (bool vtolInFwdFlight);
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
@@ -1122,6 +1125,9 @@ private:
 
     //Mismart: Check if the pump is on by reading output PWM value
     bool            _sprayerOn                              = false;
+
+    //Mismart: Use altimeter if available and valid
+    bool            _useAltimeter                           = false;
 
     SysStatusSensorInfo _sysStatusSensorInfo;
 
