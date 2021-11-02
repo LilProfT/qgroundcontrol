@@ -141,8 +141,8 @@ void NTRIPTCPLink::timerSlot()
                 .arg("0");
 
         QString hexadecimal;
-        //QString s = QString("$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031");
-        //hexadecimal.setNum(calc_NMEA_Checksum (s.toStdString().c_str(), s.length()),16);
+//        QString s = QString("$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031");
+//        hexadecimal.setNum(_calcNMEAChecksum (s.toStdString().c_str(), s.length()),16);
 
         hexadecimal.setNum(_calcNMEAChecksum(GPGGA.toStdString().c_str(), GPGGA.length()), 16);
         QString nmea = QString("%0*%1").arg(GPGGA).arg(hexadecimal);
@@ -290,10 +290,10 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             //TODO: Restore the following when upstreamed in Driver repo
             //uint16_t id = _rtcm_parsing->messageId();
             u_int16_t id = ((u_int8_t)message[3] << 4) | ((u_int8_t)message[4] >> 4);
-            qCDebug(RTKGPSLog) << QString::fromStdString(message.toStdString());
+            qCWarning(RTKGPSLog) << "_parse: " << QString::fromStdString(message.toStdString());
 
             emit gotRTCMData(message);
-            qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
+            qCWarning(NTRIPLog) << "Sending " << id << "of size " << message.length();
 
             _rtcm_parsing->reset();
         }
@@ -303,21 +303,22 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
 void NTRIPTCPLink::_readBytes(void)
 {
     if (_tcpSocket) {
-        QByteArray bytes = _tcpSocket->readAll();
+        QByteArray bytes = _tcpSocket->read(_tcpSocket->bytesAvailable());
         QString response = QString::fromStdString(bytes.toStdString());
 
-        if(_state == NTRIPState::waiting_for_http_response) {
-            QString line = _tcpSocket->readLine();
-            if (line.contains("200")){
-                _state = NTRIPState::waiting_for_rtcm_header;
-            } else {
-                qCWarning(NTRIPLog) << "Server responded with " << line;
-                // TODO: Handle failure. Reconnect?
-                // Just move into parsing mode and hope for now.
-                _state = NTRIPState::waiting_for_rtcm_header;
-            }
-        }
-        _parse(bytes);
+//        if(_state == NTRIPState::waiting_for_http_response) {
+//            QString line = _tcpSocket->readLine();
+//            if (line.contains("200")){
+//                _state = NTRIPState::waiting_for_rtcm_header;
+//            } else {
+//                qCWarning(NTRIPLog) << "Server responded with " << line;
+//                // TODO: Handle failure. Reconnect?
+//                // Just move into parsing mode and hope for now.
+//                _state = NTRIPState::waiting_for_rtcm_header;
+//            }
+//        }
+        emit gotRTCMData(bytes);
+        //_parse(bytes);
     }
 }
 

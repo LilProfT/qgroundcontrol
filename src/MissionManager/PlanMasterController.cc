@@ -84,7 +84,6 @@ void PlanMasterController::_commonInit(void)
     connect(&_geoFenceController,   &GeoFenceController::syncInProgressChanged,     this, &PlanMasterController::syncInProgressChanged);
     connect(&_rallyPointController, &RallyPointController::syncInProgressChanged,   this, &PlanMasterController::syncInProgressChanged);
 
-    connect(&_missionController, &MissionController::syncInProgressChanged,   qgcApp()->toolbox()->ntrip(), &NTRIP::_syncInProgressChanged);
 
     // Offline vehicle can change firmware/vehicle type
     connect(_controllerVehicle,     &Vehicle::vehicleTypeChanged,                   this, &PlanMasterController::_updatePlanCreatorsList);

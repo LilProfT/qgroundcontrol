@@ -387,6 +387,9 @@ void Vehicle::_commonInit()
     connect(_missionManager, &MissionManager::currentIndexChanged,      this, &Vehicle::_updateHeadingToNextWP);
     connect(_missionManager, &MissionManager::currentIndexChanged,      this, &Vehicle::_updateMissionItemIndex);
 
+    connect(_missionManager, &MissionManager::inProgressChanged, _toolbox->ntrip(), &NTRIP::syncInProgressChanged);
+    connect(_missionManager, &MissionManager::sendComplete, _toolbox->ntrip(), &NTRIP::sendComplete);
+
 //    connect(_missionManager, &MissionManager::sendComplete,             _trajectoryPoints, &TrajectoryPoints::clear);
 //    connect(_missionManager, &MissionManager::newMissionItemsAvailable, _trajectoryPoints, &TrajectoryPoints::clear);
 
