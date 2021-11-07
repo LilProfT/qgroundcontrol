@@ -243,7 +243,6 @@ Item {
 
             function accept() {
                 //QGroundControl.multiVehicleManager.activeVehicle.sendParamMapRC(tuningFact.name, scale.text, centerValue.text, tuningID.currentIndex, minValue.text, maxValue.text);
-                v
                 hideDialog()
             }
 

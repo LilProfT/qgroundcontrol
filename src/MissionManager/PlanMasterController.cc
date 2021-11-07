@@ -800,10 +800,7 @@ PlanMasterController::saveToCurrentInBackground()
 {
     if(!_currentPlanFile.isEmpty()) {
         _saveToCurrentOnResumeFolder2();
-
-        int resumeIndex =  _missionController.resumeMissionIndexFromFile();
         saveToFile(_currentPlanFile);
-        _missionController.updateResumeMissionIndexFromFile(resumeIndex);
     }
 }
 
@@ -1081,31 +1078,51 @@ void PlanMasterController::showPlanFromManagerVehicle(void)
     }
 }
 
+//void PlanMasterController::setParam()
+//{
+//    float velocity = this->_surveyComplexItem->velocity()->property("value").toFloat();
+//    float x = this->_surveyComplexItem->sprayFlowRate()->property("value").toFloat();
+//    float y = 0;
+//    if (x >= 5.15) {
+//        y = 72.0;
+//    } else if (x < 2.9) {
+//        y = 25.0;
+//    } else {
+//        // y =  -1.525x4 + 22.794x3 - 118.86x2 +  271.63x - 202.45
+//       //y = (-1.525 * qPow(x, 4.0)) + (22.794 * qPow(x, 3.0)) + (- 118.86 * qPow(x, 2.0)) + (271.63 * x)  +  (- 202.45);
+//       y = ( -7.1683 * qPow(x, 5.0)) + (147.42 * qPow(x, 4.0)) + ( - 1197.9 * qPow(x, 3.0)) + ( 4811.3 * qPow(x, 2.0)) + (- 9545.5 * x)  +  ( 7505.6);
+//    }
+
+//    //<toanpt>
+//    y = y / velocity;
+//    this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "SPRAY_PUMP_RATE")->setProperty("value", y);
+//    this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WPNAV_SPEED")->setProperty("value", (100 * velocity));
+//    this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WP_YAW_BEHAVIOR")->setProperty("value", 0);
+//};
+
+// <toanpt>: centrifugal RPM
 void PlanMasterController::setParam()
 {
-    float velocity = this->_surveyComplexItem->velocity()->property("value").toFloat();   
+    float velocity = this->_surveyComplexItem->velocity()->property("value").toFloat();
     float x = this->_surveyComplexItem->sprayFlowRate()->property("value").toFloat();
     float y = 0;
-    if (x >= 5.15) {
-        y = 72.0;
-    } else if (x < 2.9) {
-        y = 25.0;
+    if (x >= 6.74) {
+        y = 53;
+    } else if (x < 2.38) {
+        y = 13;
     } else {
-        // y =  -1.525x4 + 22.794x3 - 118.86x2 +  271.63x - 202.45
-       //y = (-1.525 * qPow(x, 4.0)) + (22.794 * qPow(x, 3.0)) + (- 118.86 * qPow(x, 2.0)) + (271.63 * x)  +  (- 202.45);
-       y = ( -7.1683 * qPow(x, 5.0)) + (147.42 * qPow(x, 4.0)) + ( - 1197.9 * qPow(x, 3.0)) + ( 4811.3 * qPow(x, 2.0)) + (- 9545.5 * x)  +  ( 7505.6);
+        if (x < 4.62)
+            y = (4.4068 * qPow(x, 5.0)) + (- 76.658 * qPow(x, 4.0)) + (527.93 * qPow(x, 3.0)) + (- 1799 * qPow(x, 2.0))  +  (3039.1 * x) + (- 2022.9);
+        else
+            y = (-8.2058 * qPow(x, 6.0)) + (274.96 * qPow(x, 5.0)) + (- 3821.5 * qPow(x, 4.0)) + (28196 * qPow(x, 3.0)) + (- 116470 * qPow(x, 2.0))  +  (255383 * x) + (- 232201);
     }
 
-//    float y = (x < 2.08) ?
-//        25.0 :
-//        // y =  -1.525x4 + 22.794x3 - 118.86x2 +  271.63x - 202.45
-//        (-1.525 * qPow(x, 4.0)) + (22.794 * qPow(x, 3.0)) + (- 118.86 * qPow(x, 2.0)) + (271.63 * x)  +  (- 202.45);
-    //<toanpt>
     y = y / velocity;
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "SPRAY_PUMP_RATE")->setProperty("value", y);
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WPNAV_SPEED")->setProperty("value", (100 * velocity));
     this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WP_YAW_BEHAVIOR")->setProperty("value", 0);
 };
+
 
 double PlanMasterController::area()
 {

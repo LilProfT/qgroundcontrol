@@ -114,6 +114,8 @@ public:
     double              maxAMSLAltitude             (void) const final;
 	virtual double getYaw(void) = 0;
 
+    MissionModel* missionModel() { return &_model; };
+
     static const char* turnAroundDistanceName;
     static const char* turnAroundDistanceMultiRotorName;
     static const char* cameraTriggerInTurnAroundName;

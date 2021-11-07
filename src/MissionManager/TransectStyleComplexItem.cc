@@ -452,11 +452,16 @@ void TransectStyleComplexItem::_rebuildTransects(void)
     double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
     double trimStart = _surveyComplexItem->trimStart()->cookedValue().value<double>();
     double trimEnd = _surveyComplexItem->trimEnd()->cookedValue().value<double>();
+    double trimResume = _surveyComplexItem->trimResume()->rawValue().value<double>();
+    qDebug() << "trim resume in rebuildTransects" << trimResume;
+    double centrifugal = _surveyComplexItem->centrifugalRPM()->rawValue().value<double>();
 
     _model.setExclusionFences(_masterController->geoFenceController()->polygons());
     _model.setAvoidDistance(gridSpacing / 2);
 
     _model.setTrim(trimStart, trimEnd);
+    _model.setTrimResume(trimResume);
+    _model.setCentrifugalRPM(centrifugal);
 
     _model.clearStep();
 //    _model.appendHoldAltitude(requestedAltitude);
@@ -490,6 +495,7 @@ void TransectStyleComplexItem::_rebuildTransects(void)
         isFirst = false;
     }
 
+    _model.backup();
     _model.pregenIntegrate();
 
     // Calc bounding cube

@@ -35,18 +35,9 @@ public:
     /// Generates a new mission which starts from the specified index. It will include all the CMD_DO items
     /// from mission start to resumeIndex in the generate mission.
     void generateResumeMission(int resumeIndex);
-    void generateResumeMissionFromFile(int resumeIndex);
 
-    int cacheResumeIndex() {return _cachedResumeIndex; };
-//    int absoluteResumeIndex() {return _absoluteResumeIndex; };
-//    void setAbsoluteResumeIndex(int value) { _absoluteResumeIndex = value; };
-    void loadResumeFromFile(bool load) {_loadResumeFromFile = load; };
-    bool resumeFromFile(void) {return _loadResumeFromFile; };
-
-    void updateCacheResumeIndex(int resumeIndex) {_cachedResumeIndex = resumeIndex; };
     void autoSaveMission(void);
     void deleteResumeMission(void);
-
 private slots:
     void _mavlinkMessageReceived(const mavlink_message_t& message);
 
@@ -58,8 +49,4 @@ private:
     void _handleHeartbeat(const mavlink_message_t& message);
 
     int _cachedLastCurrentIndex;
-    int _cachedResumeIndex;
-//    int _absoluteResumeIndex;
-//    int _adjustAbsIndex;
-    bool _loadResumeFromFile;
 };

@@ -217,8 +217,8 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
                     enterMarked = true;
                     qDebug() << "[parse mission] entering waypoint found";
                 };
-                exitWaypoint = lastWaypoint;
             }
+            exitWaypoint = lastWaypoint;
             if (simpleItem->missionItem().commandInt() == 16 /* MAV_CMD_NAV_WAYPOINT */) lastWaypoint = &(simpleItem->missionItem());
         }
         if (exitWaypoint) {
@@ -226,11 +226,6 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
             qDebug() << "[parse mission] exit waypoint found";
             _masterController->loadPolygonFromRecentFile();
             emit updateSurveyAreaPolygon();
-
-            if (!_missionManager->resumeFromFile()) {
-                //emit _managerVehicle->clearTrajectoryPoint();
-                //_managerVehicle->updateAreaSprayedFromFile(0);
-            }
         }
 
         _visualItems = newControllerMissionItems;
@@ -648,8 +643,6 @@ void MissionController::removeAll(void)
 
         QGeoCoordinate coordinate;
         _managerVehicle->updateResumeCoordinate(coordinate);
-        _missionManager->loadResumeFromFile(false);
-        _missionManager->updateCacheResumeIndex(-1);
         _masterController->clearTracingPolygon();
         _masterController->saveSprayedArea(0);
     }
@@ -819,27 +812,6 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
     if (!JsonHelper::loadGeoCoordinate(json[_jsonPlannedHomePositionKey], true /* altitudeRequired */, homeCoordinate, errorString)) {
         return false;
     }
-    _missionManager->loadResumeFromFile(false);
-
-    QGeoCoordinate resumeCoordinate;
-    //_missionManager->setAbsoluteResumeIndex(0);
-    if (JsonHelper::loadGeoCoordinate(json[_jsonResumePositionKey], true /* altitudeRequired */, resumeCoordinate, errorString)) {
-        qCWarning(MissionControllerLog) << "json resumeIndex: " << json[_jsonResumeIndexKey];
-        int resumeIndex = -1;
-        if (json.contains(_jsonResumeIndexKey)) {
-            resumeIndex = json[_jsonResumeIndexKey].toInt();
-            qCWarning(MissionControllerLog) << "resumeIndex: " << resumeIndex;
-        }
-
-        qCWarning(MissionControllerLog) << "resumeCoordinate isValid: " << resumeCoordinate.isValid() << resumeCoordinate;
-        if (resumeCoordinate.isValid() && resumeIndex > 0) {
-            _managerVehicle->updateResumeCoordinate(resumeCoordinate);
-            _missionManager->updateCacheResumeIndex(resumeIndex);
-            qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
-        }
-    }
-
-
 
     if (json.contains(_jsonSprayAreaKey)) {
         double area = json[_jsonSprayAreaKey].toDouble();
@@ -1189,24 +1161,12 @@ void MissionController::save(QJsonObject& json)
         return;
     }
     QJsonValue coordinateValue;
-    QJsonValue resumeCoordinateValue;
-
-    qCWarning(MissionControllerLog) << "resumeCoordinate: " << _managerVehicle->resumeCoordinate();
-    qCWarning(MissionControllerLog) << "resumeMissionIndex: " << _missionManager->cacheResumeIndex();
     if (_managerVehicle->resumeCoordinate().isValid()) {
-        JsonHelper::saveGeoCoordinate(_managerVehicle->resumeCoordinate(), true /* writeAltitude */, resumeCoordinateValue);
-        json[_jsonResumePositionKey]            = resumeCoordinateValue;
-        json[_jsonResumeIndexKey]               = _missionManager->cacheResumeIndex();
         if (_managerVehicle->areaSprayed()->rawValue().toDouble() > 0)
             json[_jsonSprayAreaKey]                 = _managerVehicle->areaSprayed()->rawValue().toDouble();
         else
             json[_jsonSprayAreaKey]                 = _masterController->sprayedArea();
-        _missionManager->updateCacheResumeIndex(-1);
     } else {
-        QGeoCoordinate saveCoordinate;
-        JsonHelper::saveGeoCoordinate(saveCoordinate, true /* writeAltitude */, resumeCoordinateValue);
-        json[_jsonResumePositionKey]            = resumeCoordinateValue;
-        json[_jsonResumeIndexKey]               = -1;
         json[_jsonSprayAreaKey] = 0;
     }
 
@@ -2255,72 +2215,6 @@ void MissionController::updateAreaSprayed(void)
     _managerVehicle->updateAreaSprayedFromFile(_masterController->sprayedArea());
 }
 
-int MissionController::resumeMissionIndex(void) const
-{
-
-    int resumeIndex = 0;
-    qCWarning(MissionControllerLog) << "resumeMissionIndexFromDialog(void)";
-    qCWarning(MissionControllerLog) << "resumeMissionIndexFromDialog: " << _resumeMissionIndexFromFile;
-
-    if (_flyView) {
-        //emit _managerVehicle->clearTrajectoryPoint();
-        //_missionManager->loadResumeFromFile(true);
-            resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
-            if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
-                // Resume at the item previous to the item we were heading towards
-                resumeIndex--;
-            } else {
-                resumeIndex = 0;
-            }
-            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
-
-
-    }
-
-    return resumeIndex;
-}
-
-int MissionController::resumeMissionIndex2(void) const
-{
-    int resumeIndex = 0;
-    qCWarning(MissionControllerLog) << "_resumeMissiosnIndex(void)";
-    qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
-
-    if (_flyView) {
-        if (_missionManager->cacheResumeIndex() > 0) {
-            //resumeActive();
-            _managerVehicle->updateAreaSprayedFromFile(0);
-
-            //emit _managerVehicle->clearTrajectoryPoint();
-            _missionManager->loadResumeFromFile(true);
-
-            resumeIndex = _missionManager->cacheResumeIndex();
-            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
-
-        } else {
-            resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
-            if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
-                // Resume at the item previous to the item we were heading towards
-                resumeIndex--;
-            } else {
-                resumeIndex = 0;
-            }
-        }
-    }
-
-    return resumeIndex;
-}
-
-int MissionController::resumeMissionIndexFromFile(void) const
-{
-    return _missionManager->cacheResumeIndex();
-}
-
-void MissionController::updateResumeMissionIndexFromFile(int resumeIndex) const
-{
-    _missionManager->updateCacheResumeIndex(resumeIndex);
-}
-
 int MissionController::currentMissionIndex(void) const
 {
     if (!_flyView) {
@@ -2438,55 +2332,12 @@ QStringList MissionController::complexMissionItemNames(void) const
 
 void MissionController::resumeMission(int resumeIndex)
 {
-    if (!_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle()) {
-        resumeIndex--;
-    }
-    qCWarning(MissionManagerLog) << "resumeMission resumeIndex: " << resumeIndex;
-
     _missionManager->generateResumeMission(resumeIndex);
 }
 
-//int MissionController::resumeMissionIndex2(void) const
-//{
-//    int resumeIndex = 0;
-//    qCWarning(MissionControllerLog) << "_resumeMissiosnIndex(void)";
-//    qCWarning(MissionControllerLog) << "_resumeMissionIndexFromFile: " << _resumeMissionIndexFromFile;
-
-//    if (_flyView) {
-//        if (_missionManager->cacheResumeIndex() > 0) {
-//            //resumeActive();
-//            _managerVehicle->updateAreaSprayedFromFile(0);
-
-//            //emit _managerVehicle->clearTrajectoryPoint();
-//            _missionManager->loadResumeFromFile(true);
-
-//            resumeIndex = _missionManager->cacheResumeIndex();
-//            qCWarning(MissionControllerLog) << "resumeIndex: " << _missionManager->cacheResumeIndex();
-
-//        } else {
-//            resumeIndex = _missionManager->lastCurrentIndex() + (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() ? 0 : 1);
-//            if (resumeIndex > 1 && resumeIndex != _visualItems->value<VisualMissionItem*>(_visualItems->count() - 1)->sequenceNumber()) {
-//                // Resume at the item previous to the item we were heading towards
-//                resumeIndex--;
-//            } else {
-//                resumeIndex = 0;
-//            }
-//        }
-//    }
-
-//    return resumeIndex;
-//}
-
-
 void MissionController::resumeMissionFromFile()
 {
-    int resumeIndex = resumeMissionIndex2();
-    if (!_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle()) {
-        resumeIndex--;
-    }
-    qCWarning(MissionManagerLog) << "resumeMission resumeIndex: " << resumeIndex;
-
-    _missionManager->generateResumeMissionFromFile(resumeIndex);
+    _missionManager->generateResumeMission(0/* placeholder */);
 }
 
 QGeoCoordinate MissionController::plannedHomePosition(void) const

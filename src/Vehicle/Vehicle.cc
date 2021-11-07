@@ -134,7 +134,10 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _firmwarePluginManager        (firmwarePluginManager)
     , _joystickManager              (joystickManager)
     , _trajectoryPoints             (new TrajectoryPoints(this, this))
+    , _resumeCoordinates        (new QmlObjectListModel(this))
+
     , _mavlinkStreamConfig          (std::bind(&Vehicle::_setMessageInterval, this, std::placeholders::_1, std::placeholders::_2))
+
     , _rollFact                     (0, _rollFactName,              FactMetaData::valueTypeDouble)
     , _pitchFact                    (0, _pitchFactName,             FactMetaData::valueTypeDouble)
     , _headingFact                  (0, _headingFactName,           FactMetaData::valueTypeDouble)
@@ -3956,10 +3959,33 @@ void Vehicle::gimbalPitchStep(int direction)
 void Vehicle::gimbalYawStep(int direction)
 {
     if(_haveGimbalData) {
-        //qDebug() << "Yaw:" << _curGimbalYaw << direction << (_curGimbalYaw + direction);
+        qDebug() << "Yaw:" << _curGimbalYaw << direction << (_curGimbalYaw + direction);
         double y = static_cast<double>(_curGimbalYaw + direction);
         gimbalControlValue(static_cast<double>(_curGimbalPitch), y);
     }
+}
+
+void Vehicle::setServoCentrifugal      (double percent)
+{
+    int max = 1750;
+    int min  = 1050;
+    double ratio = (max - min) / 100;
+    int pwm = min + (int) (percent * ratio);
+    qDebug() << "setServoCentrifugal pwm:" << pwm;
+
+    sendMavCommand(defaultComponentId(),    // target component
+                             MAV_CMD_DO_SET_SERVO,             // command id
+                             false,                              // showError
+                             9, pwm);  // chanel 9
+
+    QTimer::singleShot(3000, this, &Vehicle::_resetCentrifugal);
+}
+
+void Vehicle::_resetCentrifugal() {
+    sendMavCommand(defaultComponentId(),    // target component
+                             MAV_CMD_DO_SET_SERVO,             // command id
+                             false,                              // showError
+                             9, 1050);  // chanel 9
 }
 
 void Vehicle::centerGimbal()
@@ -4128,18 +4154,9 @@ void Vehicle::triggerSimpleCamera()
 }
 
 void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
-//    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) || (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode())) {
-//        qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
-//        _resumeCoordinate = this->coordinate();
-//        _trajectoryPoints->updatePausePoint(this->coordinate());
-//    } else if (flightMode == this->missionFlightMode() && (_prevflightMode == this->loiterFlightMode() || _prevflightMode == this->rtlFlightMode())) {
-//        //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
-//        _trajectoryPoints->updateResumePoint(this->coordinate());
-//    }
-//    _prevflightMode = flightMode;
 
-    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) ||
-            (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode()) ) {
+
+    if ((_prevflightMode == this->missionFlightMode() && flightMode != this->missionFlightMode())) {
         qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
         _resumeCoordinate = this->coordinate();
         _trajectoryPoints->updatePausePoint(this->coordinate());
@@ -4147,13 +4164,16 @@ void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
         //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
         _trajectoryPoints->updateResumePoint(this->coordinate());
     }
-    if (flightMode == this->pauseFlightMode())
-        _resumeCoordinate = this->coordinate();
+//    if (flightMode == this->pauseFlightMode())
+//        _resumeCoordinate = this->coordinate();
 
     _prevflightMode = flightMode;
 
-//    if ( flightMode == this->rtlFlightMode())
-//        _resumeCoordinate = this->coordinate();
+    QGCQGeoCoordinate* qgcPoint = new QGCQGeoCoordinate(_resumeCoordinate, this);
+
+    _resumeCoordinates->clear();
+    _resumeCoordinates->append(qgcPoint);
+    emit resumeCoordinateChanged();
 }
 
 void Vehicle::setUseAltimeter(bool valid) {

@@ -159,6 +159,8 @@ public:
     Q_PROPERTY(QGeoCoordinate       coordinate                  READ coordinate                                                     NOTIFY coordinateChanged)
     Q_PROPERTY(QGeoCoordinate       homePosition                READ homePosition                                                   NOTIFY homePositionChanged)
     Q_PROPERTY(QGeoCoordinate       armedPosition               READ armedPosition                                                  NOTIFY armedPositionChanged)
+    Q_PROPERTY(QmlObjectListModel*  resumeCoordinates                   READ resumeCoordinates                  NOTIFY resumeCoordinateChanged)
+
     Q_PROPERTY(QGeoCoordinate       resumeCoordinate            READ resumeCoordinate                                               CONSTANT)
     Q_PROPERTY(bool                 armed                       READ armed                      WRITE setArmedShowError             NOTIFY armedChanged)
     Q_PROPERTY(bool                 autoDisarm                  READ autoDisarm                                                     NOTIFY autoDisarmChanged)
@@ -421,6 +423,7 @@ public:
     Q_INVOKABLE void gimbalYawStep      (int direction);
     Q_INVOKABLE void centerGimbal       ();
     Q_INVOKABLE void forceArm           ();
+    Q_INVOKABLE void setServoCentrifugal      (double percent);
 
     /// Sends PARAM_MAP_RC message to vehicle
     Q_INVOKABLE void sendParamMapRC(const QString& paramName, double scale, double centerValue, int tuningID, double minValue, double maxValue);
@@ -849,6 +852,7 @@ public:
 
     //Mismart: Set useAltimeter to true if available and valid
     void        setUseAltimeter         (bool valid);
+    QmlObjectListModel* resumeCoordinates               (void) { return _resumeCoordinates; }
 
 public slots:
     void setVtolInFwdFlight                 (bool vtolInFwdFlight);
@@ -859,6 +863,7 @@ signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
     void pointAddedFromfile              (QGeoCoordinate coordinate);
     void clearTrajectoryPoint              (void);
+    void resumeCoordinateChanged               (void);
 
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
@@ -1052,6 +1057,7 @@ private:
     void _chunkedStatusTextCompleted    (uint8_t compId);
     void _setMessageInterval            (int messageId, int rate);
     EventHandler& _eventHandler         (uint8_t compid);
+    void _resetCentrifugal            ();
 
     static void _rebootCommandResultHandler(void* resultHandlerData, int compId, MAV_RESULT commandResult, MavCmdResultFailureCode_t failureCode);
     void _saveResumeCoordinate(const QString& flightMode);
@@ -1170,6 +1176,9 @@ private:
     QElapsedTimer                   _flightTimer;
     QTimer                          _flightTimeUpdater;
     TrajectoryPoints*               _trajectoryPoints = nullptr;
+
+    QmlObjectListModel*         _resumeCoordinates =                nullptr;
+
     QVariantList    _polyPoints;
 
 

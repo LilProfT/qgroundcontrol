@@ -192,6 +192,8 @@ Rectangle {
                         updateValueWhileDragging: true
                     }
 
+
+
                     QGCLabel { text: qsTr("Nozzle Rate"); visible: false }
                     FactTextField {
                         fact:                   _missionItem.nozzleRate
@@ -313,7 +315,7 @@ Rectangle {
                     QGCSlider {
                         id:                     ascendLengthSlider
                         minimumValue:           0
-                        maximumValue:           5
+                        maximumValue:           10
                         stepSize:               0.1
                         tickmarksEnabled:       false
                         Layout.fillWidth:       true
@@ -369,6 +371,63 @@ Rectangle {
                         onValueChanged:         _missionItem.trimEnd.value = value
                         Component.onCompleted:  value = _missionItem.trimEnd.value
                         updateValueWhileDragging: true
+                    }
+
+                    QGCLabel { text: qsTr("Trim resume"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimResume.value.toFixed(1) + " " + _missionItem.trimResume.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimResumeSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimResume.value
+                        onValueChanged:         _missionItem.trimResume.value = value
+                        Component.onCompleted:  value = _missionItem.trimResume.value
+                        updateValueWhileDragging: true
+
+                        Connections {
+                            target: _missionItem.trimResume
+                            onValueChanged: trimResumeSlider.value = _missionItem.trimResume.value
+                        }
+                    }
+                    //<toanpt>: centrifugal RPM
+                    QGCLabel { text: qsTr("Centrifugal RPM"); }
+                    QGCLabel {
+                        text:                   _missionItem.centrifugalRPM.value.toFixed(1) + " " + _missionItem.centrifugalRPM.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     centrifugalRPMSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               5
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.centrifugalRPM.value
+                        onValueChanged:         {
+                            _missionItem.centrifugalRPM.value = value
+                            _vehicle.setServoCentrifugal(value)
+                        }
+                        Component.onCompleted:  value = _missionItem.centrifugalRPM.value
+                        updateValueWhileDragging: true
+
+                        Connections {
+                            target: _missionItem.centrifugalRPM
+                            onValueChanged: centrifugalRPMSlider.value = _missionItem.centrifugalRPM.value
+                        }
                     }
 
                     QGCCheckBox {
@@ -740,6 +799,8 @@ Rectangle {
                         Component.onCompleted:  value = _missionItem.velocity.value
                         updateValueWhileDragging: true
                     }
+
+
                 }
 
                 SectionHeader {

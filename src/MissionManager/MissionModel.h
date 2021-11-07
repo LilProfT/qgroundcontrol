@@ -44,6 +44,8 @@ class WaypointStep : public Step
 public:
     WaypointStep(QGeoCoordinate coord_) { coord = coord_; };
     WaypointStep(QPointF pointf_) { pointf = pointf_; };
+    WaypointStep(QPointF pointf_, double nedDown_) { pointf = pointf_; nedDown = nedDown_; };
+    WaypointStep(WaypointStep& other);
     QGeoCoordinate coord;
     QPointF pointf;
     double nedDown;
@@ -66,6 +68,7 @@ class HoldYawStep : public Step
     Q_OBJECT
 public:
     HoldYawStep(double yaw_) { yaw = yaw_; };
+    HoldYawStep(HoldYawStep& other);
     double yaw;
     Type type() const override final { return Step::Type::HOLD_YAW; };
     QString repr() const override final;
@@ -76,6 +79,7 @@ class HoldAltitudeStep : public Step
     Q_OBJECT
 public:
     HoldAltitudeStep(double altitude_) { altitude = altitude_; };
+    HoldAltitudeStep(HoldAltitudeStep& other);
     double altitude;
     Type type() const override final { return Step::Type::HOLD_ALTITUDE; };
     QString repr() const override final;
@@ -98,7 +102,14 @@ public:
     // Integrity constraints
     void setExclusionFences(QmlObjectListModel* fences);
 //    void setInclusionFences(QList<QGCFencePolygon> fences); // unimplemented
-    void setTrim(double trimStart, double trimEnd) { _trimStart = trimStart; _trimEnd = trimEnd; };
+    void setTrim(double trimStart, double trimEnd) { _trimStart = trimStart; _trimEnd = trimEnd; _integrity = false; };
+    void setTrimResume(double trimResume) { _trimResume = trimResume; _integrity = false; };
+    void setCentrifugalRPM(double centrifugal) { _centrifugalRPM = centrifugal; };
+
+    double trimResume() { return _trimResume; }
+    void setResumeCoord(QGeoCoordinate value) { _resumeCoord = value; _integrity = false; }
+    void setUseResumeCoord()   { _useResumeCoord = true; }
+    void clearUseResumeCoord() { _useResumeCoord = false; }
     void setStartSeqNum(int value) { _startSeqNum = value; };
     void setMissionItemParent(QObject* value) { _missionItemParent = value; };
     void setAvoidDistance(double value) { _avoidDistance = value; }
@@ -111,6 +122,9 @@ public:
 
     const QList<Step*>& steps() const { return _steps; };
     double sprayLength() const;
+
+    void backup();
+    void restore();
 
 private:
     void _clearHookedItems();
@@ -128,6 +142,7 @@ private:
     QList<MissionItem*> _flatten();
 
     QList<Step*> _steps;
+    QList<Step*> _backupSteps;
 
     QmlObjectListModel* _fences;
     int _startSeqNum;
@@ -135,6 +150,11 @@ private:
     QObject* _missionItemParent;
     double _trimStart;
     double _trimEnd;
+    double _trimResume;
+    double _centrifugalRPM;
+
+    QGeoCoordinate _resumeCoord;
+    bool _useResumeCoord;
 
     QGeoCoordinate _tangentOrigin;
     double _avoidDistance;

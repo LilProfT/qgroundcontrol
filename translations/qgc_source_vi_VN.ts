@@ -15929,7 +15929,7 @@ Actual AMSL altitude: %1 %2</source>
         <location filename="../src/MissionManager/SurveyComplexItem.h" line="55"/>
         <location filename="../src/MissionManager/SurveyComplexItem.cc" line="25"/>
         <source>Survey</source>
-        <translation>Tưới</translation>
+        <translation>Chỉnh nhiệm vụ</translation>
     </message>
     <message>
         <location filename="../src/MissionManager/SurveyComplexItem.h" line="56"/>
