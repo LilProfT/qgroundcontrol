@@ -45,7 +45,6 @@ public:
     Q_PROPERTY(Fact* trimStart              READ trimStart              CONSTANT)
     Q_PROPERTY(Fact* trimEnd                READ trimEnd                CONSTANT)
     Q_PROPERTY(Fact* trimResume             READ trimResume             CONSTANT)
-    Q_PROPERTY(Fact* centrifugalRPM             READ centrifugalRPM             CONSTANT)
 
     Q_PROPERTY(QVariantList  angleEdge      READ angleEdge              NOTIFY angleEdgeChanged)
 	Q_PROPERTY(QGeoCoordinate   centerCoordinate       READ centerCoordinate       WRITE setCenterCoordinate)
@@ -66,7 +65,6 @@ public:
     Fact* trimStart             (void) { return &_trimStartFact; }
     Fact* trimEnd               (void) { return &_trimEndFact; }
     Fact* trimResume            (void) { return &_trimResumeFact; }
-    Fact* centrifugalRPM            (void) { return &_centrifugalRPMFact; }
 
     Fact* gridSpacing           (void) { return _cameraCalc.adjustedFootprintSide(); }
 
@@ -131,7 +129,6 @@ public:
     static const char* trimStartName;
     static const char* trimEndName;
     static const char* trimResumeName;
-    static const char* centrifugalRPMName;
 
     static const char* jsonV3ComplexItemTypeValue;
 
@@ -217,7 +214,6 @@ private:
     SettingsFact    _trimStartFact;
     SettingsFact    _trimEndFact;
     SettingsFact    _trimResumeFact;
-    SettingsFact    _centrifugalRPMFact;
 
     int             _entryPoint;
     int             _edgeIndex = 0;
@@ -244,7 +240,6 @@ private:
     static const char* _jsonVelocityKey;
     static const char* _jsonMissionEnterPointKey;
     static const char* _jsonEdgeIndexKey;
-    static const char* _jsonCentrifugalRPMKey;
 
     static const char* _jsonV3GridObjectKey;
     static const char* _jsonV3GridAltitudeKey;

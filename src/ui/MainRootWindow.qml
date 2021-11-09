@@ -223,7 +223,7 @@ ApplicationWindow {
     ///     @param buttons Buttons to show in dialog using StandardButton enum
 
     readonly property int showDialogFullWidth:      -1  ///< Use for full width dialog
-    readonly property int showDialogDefaultWidth:   40  ///< Use for default dialog width
+    readonly property int showDialogDefaultWidth:   32  ///< Use for default dialog width
 
     function showComponentDialog(component, title, charWidth, buttons) {
         var dialogWidth = charWidth === showDialogFullWidth ? mainWindow.width : ScreenTools.defaultFontPixelWidth * charWidth
@@ -639,12 +639,12 @@ ApplicationWindow {
             criticalVehicleMessagePopup.open()
         }
     }
-
+    // <toanpt>: edit size critical popup
     Popup {
         id:                 criticalVehicleMessagePopup
         y:                  ScreenTools.defaultFontPixelHeight
         x:                  Math.round((mainWindow.width - width) * 0.5)
-        width:              mainWindow.width  * 0.5
+        width:              mainWindow.width  * 0.35
         height:             ScreenTools.defaultFontPixelHeight * 2.5
         modal:              false
         focus:              true

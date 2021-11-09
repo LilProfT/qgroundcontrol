@@ -48,5 +48,8 @@ private:
     void _updateMissionIndex(int index);
     void _handleHeartbeat(const mavlink_message_t& message);
 
+    void _maybeResetTrimResume(int currentIndex);
+
     int _cachedLastCurrentIndex;
+    bool _blockNextResume;
 };

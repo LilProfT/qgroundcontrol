@@ -454,7 +454,8 @@ void TransectStyleComplexItem::_rebuildTransects(void)
     double trimEnd = _surveyComplexItem->trimEnd()->cookedValue().value<double>();
     double trimResume = _surveyComplexItem->trimResume()->rawValue().value<double>();
     qDebug() << "trim resume in rebuildTransects" << trimResume;
-    double centrifugal = _surveyComplexItem->centrifugalRPM()->rawValue().value<double>();
+    double centrifugal = qgcApp()->toolbox()->settingsManager()->agriSettings()->sprayCentrifugalRPMSetting()->rawValue().value<double>();
+    qDebug() << "centrifugal: " << centrifugal;
 
     _model.setExclusionFences(_masterController->geoFenceController()->polygons());
     _model.setAvoidDistance(gridSpacing / 2);
@@ -486,14 +487,22 @@ void TransectStyleComplexItem::_rebuildTransects(void)
         QGeoCoordinate upBeforeSecond = second.atDistanceAndAzimuth(ascendLength + 3.0, rev_azimuth, -ascendAltitude);
         qDebug() << upBeforeSecond;
 
+        if (!isFirst) _model.appendSpray();
         _model.appendWaypoint(first);
-        if ((isFirst || ascend) && (distance > ascendLength*2)) _model.appendWaypoint(downAfterFirst);
+        if ((isFirst || ascend) && (distance > ascendLength*2)) {
+            _model.appendSpray();
+            _model.appendWaypoint(downAfterFirst);
+        }
         _model.appendSpray();
-        if (ascend && (distance > ascendLength*2)) _model.appendWaypoint(upBeforeSecond);
+        if (ascend && (distance > ascendLength*2)) {
+            _model.appendWaypoint(upBeforeSecond);
+            _model.appendSpray();
+        }
         _model.appendWaypoint(second);
 
         isFirst = false;
     }
+    qDebug() << "before pregen" << _model.steps();
 
     _model.backup();
     _model.pregenIntegrate();

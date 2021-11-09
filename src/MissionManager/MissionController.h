@@ -425,8 +425,6 @@ private:
     static const char*  _jsonPlannedHomePositionKey;
     static const char*  _jsonParamsKey;
     static const char*  _jsonGlobalPlanAltitudeModeKey;
-    static const char*  _jsonResumePositionKey;
-    static const char*  _jsonResumeIndexKey;
     static const char*  _jsonSprayAreaKey;
     static const char*  _jsonPresetTemplateKey;
     // Deprecated V1 format keys

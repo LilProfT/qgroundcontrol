@@ -34,6 +34,8 @@ QGCViewDialog {
         anchors.fill:   parent
         contentHeight:  column.height
 
+
+
         Column {
             id:             column
             anchors.left:   parent.left

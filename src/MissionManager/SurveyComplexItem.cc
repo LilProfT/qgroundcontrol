@@ -49,7 +49,6 @@ const char* SurveyComplexItem::ascendLengthName =           "AscendLength";
 const char* SurveyComplexItem::trimStartName =              "TrimStart";
 const char* SurveyComplexItem::trimEndName =                "TrimEnd";
 const char* SurveyComplexItem::trimResumeName =             "TrimResume";
-const char* SurveyComplexItem::centrifugalRPMName =             "CentrifugalRPM";
 
 const char* SurveyComplexItem::_jsonGridAngleKey =          "angle";
 const char* SurveyComplexItem::_jsonEntryPointKey =         "entryLocation";
@@ -92,7 +91,6 @@ const char* SurveyComplexItem::_jsonApplicationRateKey =                "applica
 const char* SurveyComplexItem::_jsonVelocityKey =                       "velocity";
 const char* SurveyComplexItem::_jsonMissionEnterPointKey =              "missionEnterPoint";
 const char* SurveyComplexItem::_jsonEdgeIndexKey =                      "edgeIndex";
-const char* SurveyComplexItem::_jsonCentrifugalRPMKey =                        "centrifugalRPM";
 
 SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, bool flyView, const QString& kmlOrShpFile)
     : TransectStyleComplexItem  (masterController, flyView, settingsGroup)
@@ -131,7 +129,6 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     _trimStartFact.setRawValue(0);
     _trimEndFact.setRawValue(0);
     _trimResumeFact.setRawValue(0);
-    _centrifugalRPMFact.setRawValue(0);
 
     if (_controllerVehicle && !(_controllerVehicle->fixedWing() || _controllerVehicle->vtol())) {
         // Only fixed wing flight paths support alternate transects
@@ -159,7 +156,6 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     connect(&_trimStartFact,            &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_trimEndFact,              &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_trimResumeFact,           &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
-    connect(&_centrifugalRPMFact,           &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
 
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_setDirty);
 
@@ -195,7 +191,6 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
 //    connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                &_timer_optimize_Angle_EntryPoint, QOverload<>::of(&QTimer::start));
     connect(_masterController->missionController()->takeoffMissionItem(), &TakeoffMissionItem::launchCoordinateChanged, this, &SurveyComplexItem::_optimize_EntryPoint);
 
-    QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
 
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                this, &SurveyComplexItem::_catchFirstEdge);
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathDone,                this, &SurveyComplexItem::optimize);
@@ -246,7 +241,6 @@ void SurveyComplexItem::_saveCommon(QJsonObject& saveObject)
     saveObject[_jsonApplicationRateKey] =                 _applicationRateFact.rawValue().toDouble();
     saveObject[_jsonVelocityKey] =                 _velocityFact.rawValue().toDouble();
     saveObject[_jsonEdgeIndexKey] = _edgeIndex;
-    saveObject[_jsonCentrifugalRPMKey] =                            _centrifugalRPMFact.rawValue().toDouble();
 
     // Polygon shape
     _surveyAreaPolygon.saveToJson(saveObject);    
@@ -328,8 +322,7 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         { _jsonAscendLengthKey,                         QJsonValue::Double, false },
         { _jsonTrimStartKey,                            QJsonValue::Double, false },
         { _jsonTrimEndKey,                              QJsonValue::Double, false },
-        { _jsonTrimResumeKey,                           QJsonValue::Double, false },
-        { _jsonCentrifugalRPMKey,                           QJsonValue::Double, false }
+        { _jsonTrimResumeKey,                           QJsonValue::Double, false }
 
     };
 
@@ -390,13 +383,12 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
     else
         _trimResumeFact.setRawValue(0);
 
-    if (complexObject.contains(_jsonCentrifugalRPMKey))
-        _centrifugalRPMFact.setRawValue             (complexObject[_jsonCentrifugalRPMKey].toDouble());
-    else
-        _centrifugalRPMFact.setRawValue(0);
+
 
     _edgeIndex = (int)complexObject[_jsonEdgeIndexKey].toDouble();
     _isEdgeIndexFromFile = true;
+    QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
+
     qDebug() << " _jsonVelocityKey: " << complexObject[_jsonVelocityKey].toDouble() ;
     qDebug() << " _jsonEdgeIndexKey: " << _edgeIndex ;
     qDebug() << " _isEdgeIndexFromFile: " << _isEdgeIndexFromFile ;

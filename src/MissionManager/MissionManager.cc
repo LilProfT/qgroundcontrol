@@ -22,8 +22,11 @@ QGC_LOGGING_CATEGORY(MissionManagerLog, "MissionManagerLog")
 MissionManager::MissionManager(Vehicle* vehicle)
     : PlanManager               (vehicle, MAV_MISSION_TYPE_MISSION)
     , _cachedLastCurrentIndex   (-1)
+    , _blockNextResume          (false)
 {
     connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &MissionManager::_mavlinkMessageReceived);
+
+    connect(this, &PlanManager::currentIndexChanged, this, &MissionManager::_maybeResetTrimResume);
 }
 
 MissionManager::~MissionManager()
@@ -79,6 +82,10 @@ void MissionManager::writeArduPilotGuidedMissionItem(const QGeoCoordinate& gotoC
 
 void MissionManager::generateResumeMission(int resumeIndex)
 {
+    if (_blockNextResume) {
+        _blockNextResume = false;
+        return;
+    }
     auto survey = qgcApp()->toolbox()->planMasterControllerPlanView()->surveyComplexItem();
 
     bool addHomePosition = _vehicle->firmwarePlugin()->sendHomePositionToVehicle();
@@ -207,3 +214,15 @@ void MissionManager::_handleHeartbeat(const mavlink_message_t& message)
     }
 }
 
+void MissionManager::_maybeResetTrimResume(int currentIndex)
+{
+    if (_missionItems.count() == 0) return;
+    if (_currentMissionIndex >= _missionItems.count()-1) {
+        auto survey = qgcApp()->toolbox()->planMasterControllerPlanView()->surveyComplexItem();
+        if (survey) {
+            survey->trimResume()->setRawValue(0.0);
+            survey->missionModel()->clearUseResumeCoord();
+            _blockNextResume = true;
+        }
+    }
+}

@@ -423,7 +423,6 @@ public:
     Q_INVOKABLE void gimbalYawStep      (int direction);
     Q_INVOKABLE void centerGimbal       ();
     Q_INVOKABLE void forceArm           ();
-    Q_INVOKABLE void setServoCentrifugal      (double percent);
 
     /// Sends PARAM_MAP_RC message to vehicle
     Q_INVOKABLE void sendParamMapRC(const QString& paramName, double scale, double centerValue, int tuningID, double minValue, double maxValue);
@@ -1058,6 +1057,7 @@ private:
     void _setMessageInterval            (int messageId, int rate);
     EventHandler& _eventHandler         (uint8_t compid);
     void _resetCentrifugal            ();
+    void _centrifugalRPMSettingChanged     (QVariant value);
 
     static void _rebootCommandResultHandler(void* resultHandlerData, int compId, MAV_RESULT commandResult, MavCmdResultFailureCode_t failureCode);
     void _saveResumeCoordinate(const QString& flightMode);
@@ -1219,6 +1219,7 @@ private:
     // by default.
     uint16_t       _firmwareBoardVendorId = 0;
     uint16_t       _firmwareBoardProductId = 0;
+    QTimer             _centrifugalTimer;
 
 
     QString _gitHash;

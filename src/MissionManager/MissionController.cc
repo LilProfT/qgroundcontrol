@@ -47,8 +47,6 @@ const char* MissionController::_jsonCruiseSpeedKey =            "cruiseSpeed";
 const char* MissionController::_jsonHoverSpeedKey =             "hoverSpeed";
 const char* MissionController::_jsonParamsKey =                 "params";
 const char* MissionController::_jsonGlobalPlanAltitudeModeKey = "globalPlanAltitudeMode";
-const char* MissionController::_jsonResumePositionKey =             "resumePosition";
-const char* MissionController::_jsonResumeIndexKey =             "resumeIndex";
 const char* MissionController::_jsonSprayAreaKey =             "resumeSprayedArea";
 const char* MissionController::_jsonPresetTemplateKey =             "presetTemplate";
 
@@ -761,8 +759,6 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         { _jsonCruiseSpeedKey,              QJsonValue::Double, false },
         { _jsonHoverSpeedKey,               QJsonValue::Double, false },
         { _jsonGlobalPlanAltitudeModeKey,   QJsonValue::Double, false },
-        { _jsonResumePositionKey,      QJsonValue::Array,  false },
-        { _jsonResumeIndexKey,             QJsonValue::Double, false },
         { _jsonSprayAreaKey,             QJsonValue::Double, false },
         { _jsonPresetTemplateKey,      QJsonValue::Array,  false },
 
@@ -959,7 +955,7 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
     if (!tracingPolygon.loadTracingFromJson(json, true /* required */, errorString)) {
         tracingPolygon.clear();
     } else {
-        _masterController->setTracingPolygon(tracingPolygon);
+        _masterController->setTracingPolygonFromFile(tracingPolygon);
     }
 
     return true;

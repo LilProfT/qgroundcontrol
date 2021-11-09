@@ -109,6 +109,114 @@ Rectangle {
                 spacing:            _margin
                 visible:            tabBar.currentIndex === 0
 
+                GridLayout {
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    columnSpacing:  _margin
+                    rowSpacing:     _margin
+                    columns:        2
+                    visible:        transectsHeader.checked
+                    width:          _root.width - _margin*2
+
+
+
+                    QGCCheckBox {
+                        text:               qsTr("Auto Optimize")
+                        checked:            false
+                        onClicked:          _missionItem.autoOptimize.value = checked
+                        Layout.columnSpan:  2
+                        visible:            false
+                    }
+
+                    QGCButton {
+                        text:               qsTr("Optimize")
+                        Layout.fillWidth:   true
+                        onClicked:          _missionItem.optimize();
+                    }
+
+                    QGCLabel { text: qsTr("Angle")
+                        visible:                false}
+                    FactTextField {
+                        fact:                   _missionItem.gridAngle
+                        Layout.fillWidth:       true
+                        onUpdated:              angleSlider.value = _missionItem.gridAngle.value
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.gridAngle.value.toFixed(1) + " " + _missionItem.gridAngle.units
+                        //                      font.pointSize:     ScreenTools.mediumFontPointSize
+                        Layout.alignment:   Qt.AlignRight
+                        visible:                false
+                    }
+
+                    QGCSlider {
+                        id:                     angleSlider
+                        minimumValue:           0
+                        maximumValue:           359
+                        stepSize:               1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.gridAngle.value
+                        onValueChanged:         _missionItem.gridAngle.value = value
+                        Component.onCompleted:  value = _missionItem.gridAngle.value
+                        updateValueWhileDragging: true
+                        visible:                false
+                    }
+
+                    QGCButton {
+                        text:               qsTr("Rotate Angle")
+                        onClicked:          _missionItem.rotateAngle();
+                        Layout.fillWidth:   true
+                    }
+
+                    QGCLabel {
+                        text:       qsTr("Turnaround dist")
+                        Layout.fillWidth:       true
+                        visible:            false
+                    }
+                    FactTextField {
+                        fact:               _missionItem.turnAroundDistance
+                        Layout.fillWidth:   true
+                        onUpdated:          turnAroundDistSlider.value = _missionItem.turnAroundDistance.value
+                        visible:            false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.turnAroundDistance.value.toFixed(2) + " " + _missionItem.turnAroundDistance.units
+                        //                        font.pointSize:     ScreenTools.mediumFontPointSize
+                        Layout.alignment:   Qt.AlignRight
+                        visible:            false
+                    }
+
+                    QGCSlider {
+                        id:                     turnAroundDistSlider
+                        minimumValue:           0
+                        maximumValue:           10
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.turnAroundDistance.value
+                        onValueChanged:         _missionItem.turnAroundDistance.value = value
+                        Component.onCompleted:  value = _missionItem.turnAroundDistance.value
+                        updateValueWhileDragging: true
+                        visible:            false
+                    }
+
+                    QGCButton {
+                        text:               qsTr("Rotate Entry Point")
+                        Layout.fillWidth:   true
+                        Layout.columnSpan:  2
+                        onClicked:          _missionItem.rotateEntryPoint();
+                    }
+                }
+
                 QGCLabel {
                     anchors.left:   parent.left
                     anchors.right:  parent.right
@@ -118,9 +226,17 @@ Rectangle {
                     visible:        _missionItem.cameraShots > 0 && _cameraMinTriggerInterval !== 0 && _cameraMinTriggerInterval > _missionItem.timeBetweenShots
                 }
 
+                SectionHeader {
+                    id:             basicConfigHeader
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    text:           qsTr("Basic flight")
+                }
+
                 CameraCalcGrid {
                     id:                             cameraCalcGridInstance
                     cameraCalc:                     _missionItem.cameraCalc
+                    visible:        basicConfigHeader.checked
                     vehicleFlightIsFrontal:         true
                     distanceToSurfaceLabel:         qsTr("Altitude")
                     distanceToSurfaceAltitudeMode:  _missionItem.followTerrain ?
@@ -267,6 +383,8 @@ Rectangle {
                     }
 
                     QGCCheckBox {
+                        id:                     ascendCheckbox
+
                         text:               qsTr("Ascend transect terminals")
                         checked:            _missionItem.ascendTerminals.value
                         onClicked:          _missionItem.ascendTerminals.value = checked
@@ -279,10 +397,16 @@ Rectangle {
                         onUpdated:              ascendAltitude.value = _missionItem.ascendAltitude.value
                         visible:                false
                     }
-                    QGCLabel { text: qsTr("Ascent Alt"); }
+                    QGCLabel {
+                        text: qsTr("Ascent Alt");
+                        visible:                ascendCheckbox.checked
+
+                    }
                     QGCLabel {
                         text:                   _missionItem.ascendAltitude.value.toFixed(1) + " " + _missionItem.ascendAltitude.units
                         Layout.alignment:       Qt.AlignRight
+                        visible:                ascendCheckbox.checked
+
                     }
                     QGCSlider {
                         id:                     ascendAltitudeSlider
@@ -299,6 +423,8 @@ Rectangle {
                         onValueChanged:         _missionItem.ascendAltitude.value = value
                         Component.onCompleted:  value = _missionItem.ascendAltitude.value
                         updateValueWhileDragging: true
+                        visible:                ascendCheckbox.checked
+
                     }
 
                     FactTextField {
@@ -307,10 +433,16 @@ Rectangle {
                         onUpdated:              ascendLength.value = _missionItem.ascendLength.value
                         visible:                false
                     }
-                    QGCLabel { text: qsTr("Ascent Len"); }
+                    QGCLabel {
+                        text: qsTr("Ascent Len");
+                        visible:                ascendCheckbox.checked
+
+                    }
                     QGCLabel {
                         text:                   _missionItem.ascendLength.value.toFixed(1) + " " + _missionItem.ascendLength.units
                         Layout.alignment:       Qt.AlignRight
+                        visible:                ascendCheckbox.checked
+
                     }
                     QGCSlider {
                         id:                     ascendLengthSlider
@@ -327,6 +459,8 @@ Rectangle {
                         onValueChanged:         _missionItem.ascendLength.value = value
                         Component.onCompleted:  value = _missionItem.ascendLength.value
                         updateValueWhileDragging: true
+                        visible:                ascendCheckbox.checked
+
                     }
 
                     QGCLabel { text: qsTr("Trim start"); }
@@ -398,132 +532,6 @@ Rectangle {
                             target: _missionItem.trimResume
                             onValueChanged: trimResumeSlider.value = _missionItem.trimResume.value
                         }
-                    }
-                    //<toanpt>: centrifugal RPM
-                    QGCLabel { text: qsTr("Centrifugal RPM"); }
-                    QGCLabel {
-                        text:                   _missionItem.centrifugalRPM.value.toFixed(1) + " " + _missionItem.centrifugalRPM.units
-                        Layout.alignment:       Qt.AlignRight
-                    }
-                    QGCSlider {
-                        id:                     centrifugalRPMSlider
-                        minimumValue:           0
-                        maximumValue:           100
-                        stepSize:               5
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.centrifugalRPM.value
-                        onValueChanged:         {
-                            _missionItem.centrifugalRPM.value = value
-                            _vehicle.setServoCentrifugal(value)
-                        }
-                        Component.onCompleted:  value = _missionItem.centrifugalRPM.value
-                        updateValueWhileDragging: true
-
-                        Connections {
-                            target: _missionItem.centrifugalRPM
-                            onValueChanged: centrifugalRPMSlider.value = _missionItem.centrifugalRPM.value
-                        }
-                    }
-
-                    QGCCheckBox {
-                        text:               qsTr("Auto Optimize")
-                        checked:            false
-                        onClicked:          _missionItem.autoOptimize.value = checked
-                        Layout.columnSpan:  2
-                        visible:            false
-                    }
-
-                    QGCButton {
-                        text:               qsTr("Optimize")
-                        Layout.fillWidth:   true
-                        onClicked:          _missionItem.optimize();
-                    }
-
-                    QGCLabel { text: qsTr("Angle")
-                        visible:                false}
-                    FactTextField {
-                        fact:                   _missionItem.gridAngle
-                        Layout.fillWidth:       true
-                        onUpdated:              angleSlider.value = _missionItem.gridAngle.value
-                        visible:                false
-                    }
-                    QGCLabel {
-                        text:               _missionItem.gridAngle.value.toFixed(1) + " " + _missionItem.gridAngle.units
-                        //                      font.pointSize:     ScreenTools.mediumFontPointSize
-                        Layout.alignment:   Qt.AlignRight
-                        visible:                false
-                    }
-
-                    QGCSlider {
-                        id:                     angleSlider
-                        minimumValue:           0
-                        maximumValue:           359
-                        stepSize:               1
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.gridAngle.value
-                        onValueChanged:         _missionItem.gridAngle.value = value
-                        Component.onCompleted:  value = _missionItem.gridAngle.value
-                        updateValueWhileDragging: true
-                        visible:                false
-                    }
-
-                    QGCButton {
-                        text:               qsTr("Rotate Angle")
-                        onClicked:          _missionItem.rotateAngle();
-                        Layout.fillWidth:   true
-                    }
-
-                    QGCLabel {
-                        text:       qsTr("Turnaround dist")
-                        Layout.fillWidth:       true
-                        visible:            false
-                    }
-                    FactTextField {
-                        fact:               _missionItem.turnAroundDistance
-                        Layout.fillWidth:   true
-                        onUpdated:          turnAroundDistSlider.value = _missionItem.turnAroundDistance.value
-                        visible:            false
-                    }
-                    QGCLabel {
-                        text:               _missionItem.turnAroundDistance.value.toFixed(2) + " " + _missionItem.turnAroundDistance.units
-                        //                        font.pointSize:     ScreenTools.mediumFontPointSize
-                        Layout.alignment:   Qt.AlignRight
-                        visible:            false
-                    }
-
-                    QGCSlider {
-                        id:                     turnAroundDistSlider
-                        minimumValue:           0
-                        maximumValue:           10
-                        stepSize:               0.1
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.turnAroundDistance.value
-                        onValueChanged:         _missionItem.turnAroundDistance.value = value
-                        Component.onCompleted:  value = _missionItem.turnAroundDistance.value
-                        updateValueWhileDragging: true
-                        visible:            false
-                    }
-
-                    QGCButton {
-                        text:               qsTr("Rotate Entry Point")
-                        Layout.fillWidth:   true
-                        Layout.columnSpan:  2
-                        onClicked:          _missionItem.rotateEntryPoint();
                     }
                 }
 

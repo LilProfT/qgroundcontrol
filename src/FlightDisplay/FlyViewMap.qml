@@ -208,13 +208,13 @@ FlightMap {
         model: _missionController.drainedPoints
         delegate: MapQuickItem {
             coordinate: object.coordinate
-            anchorPoint.x: sourceItem.width/2
-            anchorPoint.y: sourceItem.height/2
+            anchorPoint.x: sourceItemDrain.width/2
+            anchorPoint.y: sourceItemDrain.height/2
             sourceItem: Rectangle {
-                id:                             sourceItem
+                id:                             sourceItemDrain
                 width:                          _radius * 2
                 height:                         width
-                color:                          "orange"
+                color:                          "purple"
                 radius:                         _radius
                 z:                              QGroundControl.zOrderMapItems + 2
                 property int _radiusRaw: Math.ceil(ScreenTools.defaultFontPixelHeight / 1.5)
@@ -227,10 +227,10 @@ FlightMap {
         model: _activeVehicle.resumeCoordinates
         delegate: MapQuickItem {
             coordinate: object.coordinate
-            anchorPoint.x: resumePoint.width/2
-            anchorPoint.y: resumePoint.height/2
+            anchorPoint.x: sourceItemResume.width/2
+            anchorPoint.y: sourceItemResume.height/2
             sourceItem: Rectangle {
-                id:                             resumePoint
+                id:                             sourceItemResume
                 width:                          _radius * 2
                 height:                         width
                 color:                          "orange"

@@ -69,8 +69,11 @@ void MissionModel::pregenIntegrate()
 
     _gen_PointF_From_Geo();
     _integrateFences();
+    qDebug() << "after fences" << _steps.count();
+    qDebug() << "after fences" << _steps;
     _gen_Geo_From_PointF();
     _integrateTrim();
+    qDebug() << "after trim" << _steps.count();
     _gen_Geo_From_PointF();
 
     _integrity = true;
@@ -83,8 +86,12 @@ void MissionModel::postgenIntegrate()
 
 QList<MissionItem*> MissionModel::generateItems()
 {
+    qDebug() << "before pregen" << _steps.count();
+
     pregenIntegrate();
     _clearHookedItems();
+
+    qDebug() << "after pregen" << _steps.count();
 
     // The order of method calls is important
     _processWaypoints();
@@ -199,6 +206,24 @@ void MissionModel::_processSprays()
     double ratio = (max - min) / 100;
     int pwm = min + (int) (_centrifugalRPM * ratio);
 
+    // find out the correct firstWaypoint
+    Step* firstWaypoint = nullptr;
+    for (int i=0; i<_steps.count(); i++) {
+        if (_steps[i]->type() == Step::Type::WAYPOINT) {
+            firstWaypoint = _steps[i];
+            break;
+        }
+    }
+    MissionItem* setServoItem = new MissionItem(0,   // set it later
+                                                MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
+                                                _mavFrame,
+                                                9, // servo 9
+                                                pwm, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                true,                                        // autoContinue
+                                                false,                                       // isCurrentItem
+                                                _missionItemParent);
+    if (firstWaypoint) firstWaypoint->items.append(setServoItem);
+
     for (Step* step: _steps) {
         if ((!spraying) && (step->type() == Step::Type::SPRAY)) {
             MissionItem* enableItem = new MissionItem(0,   // set it later
@@ -210,33 +235,22 @@ void MissionModel::_processSprays()
                                                 false,                                       // isCurrentItem
                                                 _missionItemParent);
             step->items.append(enableItem);
-
-            enableItem = new MissionItem(0,   // set it later
-                                                MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
-                                                _mavFrame,
-                                                9, // servo 9
-                                                pwm, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
-                                                true,                                        // autoContinue
-                                                false,                                       // isCurrentItem
-                                                _missionItemParent);
-            step->items.append(enableItem);
-
             spraying = true;
             passed = false;
         }
 
-//        if (spraying && passed && (step->type() == Step::Type::WAYPOINT)) {
-//            MissionItem* disableItem = new MissionItem(0,   // set it later
-//                                                216, // MAV_CMD_DO_SPRAYER,
-//                                                _mavFrame,
-//                                                0.0, // disable
-//                                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
-//                                                true,                                        // autoContinue
-//                                                false,                                       // isCurrentItem
-//                                                _missionItemParent);
-//            lastWaypoint->items.append(disableItem);
-//            spraying = false;
-//        }
+        if (spraying && passed && (step->type() == Step::Type::WAYPOINT)) {
+            MissionItem* disableItem = new MissionItem(0,   // set it later
+                                                216, // MAV_CMD_DO_SPRAYER,
+                                                _mavFrame,
+                                                0.0, // disable
+                                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                true,                                        // autoContinue
+                                                false,                                       // isCurrentItem
+                                                _missionItemParent);
+            lastWaypoint->items.append(disableItem);
+            spraying = false;
+        }
 
         if (spraying && (step->type() == Step::Type::WAYPOINT)) {
             lastWaypoint = step;
@@ -245,6 +259,15 @@ void MissionModel::_processSprays()
 
         if (spraying && (step->type() == Step::Type::SPRAY)) {
             passed = false;
+        }
+    }
+
+    // find out the correct lastWaypoint
+    // the current value should be ok, but we go on to ensure it
+    for (int i=_steps.count()-1; i>=0; i--) {
+        if (_steps[i]->type() == Step::Type::WAYPOINT) {
+            lastWaypoint = _steps[i];
+            break;
         }
     }
 
@@ -259,16 +282,15 @@ void MissionModel::_processSprays()
                                         _missionItemParent);
     if (lastWaypoint) lastWaypoint->items.append(disableItem);
 
-    disableItem = new MissionItem(0,   // set it later
-                                            MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
-                                            _mavFrame,
-                                            9, // servo 9
-                                            min, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
-                                            true,                                        // autoContinue
-                                            false,                                       // isCurrentItem
-                                            _missionItemParent);
-
-    if (lastWaypoint) lastWaypoint->items.append(disableItem);
+    setServoItem = new MissionItem(0,   // set it later
+                                   MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
+                                   _mavFrame,
+                                   9, // servo 9
+                                   min, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                   true,                                        // autoContinue
+                                   false,                                       // isCurrentItem
+                                   _missionItemParent);
+    _steps[_steps.count() - 1]->items.append(setServoItem);
 }
 
 void MissionModel::_processHoldAltitudes()
@@ -344,7 +366,7 @@ void MissionModel::_integrateTrim()
 
     if (!_useResumeCoord) qDebug() << "trim resume used by model" << _trimResume;
 
-   // TrajectoryPoints* trajectoryPoints = qgcApp()->toolbox()->planMasterControllerFlyView()->managerVehicle()->property("trajectoryPoints").value<TrajectoryPoints*>();
+//    TrajectoryPoints* trajectoryPoints = qgcApp()->toolbox()->planMasterControllerFlyView()->managerVehicle()->property("trajectoryPoints").value<TrajectoryPoints*>();
 
     double length = 0.0;
     WaypointStep* prev;
@@ -367,7 +389,6 @@ void MissionModel::_integrateTrim()
                 length += prev->coord.distanceTo(curr->coord);
                 qDebug() << "trim count length: " << length;
 
-                //trajectoryPoints->pointAddedFromfile(prev->coord);
 
                 if (length > trimStartAtMeter) {
                     double azimuth = prev->coord.azimuthTo(curr->coord);
@@ -379,6 +400,8 @@ void MissionModel::_integrateTrim()
                     }
                     if (length < trimEndAtMeter) {
                         if (!passedResume) {
+//                            trajectoryPoints->pointAddedFromfile(prev->coord);
+
                             QLineF flyLine(prev->pointf, curr->pointf);
                             QGeoCoordinate testFirst = _resumeCoord.atDistanceAndAzimuth(_avoidDistance, azimuth+90);
                             double y, x, down;
@@ -400,7 +423,7 @@ void MissionModel::_integrateTrim()
                                 QGeoCoordinate intersectCoord;
                                 convertNedToGeo(-intersectPoint.y(), intersectPoint.x(), prev->nedDown, _tangentOrigin, &intersectCoord);
                                 output << new WaypointStep(intersectCoord);
-                                //trajectoryPoints->pointAddedFromfile(intersectCoord);
+//                                trajectoryPoints->pointAddedFromfile(intersectCoord);
                                 passedResume = true;
                                 _trimResume = (prevLength + prev->coord.distanceTo(intersectCoord))/total*100.0;
                                 qDebug() << "trim resume gen by model" << _trimResume;
@@ -415,6 +438,7 @@ void MissionModel::_integrateTrim()
                         double distance = trimEndAtMeter - prevLength;
                         double azimuth = prev->coord.azimuthTo(curr->coord);
                         QGeoCoordinate newCoord = prev->coord.atDistanceAndAzimuth(distance, azimuth);
+                        if (spraying) output << new SprayStep();
                         output << new WaypointStep(newCoord);
                         trimmedEnd = true;
                     }
@@ -428,8 +452,6 @@ void MissionModel::_integrateTrim()
             output << step;
         }
     }
-
-    qDebug() << this;
 
     _steps.clear();
     _steps << output;

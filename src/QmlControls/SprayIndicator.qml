@@ -43,6 +43,11 @@ Rectangle {
             font.bold:                  true
         }
         QGCLabel {
+            id:                         _totalArea
+            text:                       _vehicle.totalArea.value.toFixed(2) + " "
+            font.pointSize:             ScreenTools.mediumFontPointSize //King sized
+        }
+        QGCLabel {
             id:                         _units
             anchors.verticalCenter:     _value.verticalCenter
             text:                       _vehicle.areaSprayed.units

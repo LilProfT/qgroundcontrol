@@ -347,6 +347,9 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
 
     connect(_settingsManager->appSettings()->offlineEditingCruiseSpeed(),   &Fact::rawValueChanged, this, &Vehicle::_offlineCruiseSpeedSettingChanged);
     connect(_settingsManager->appSettings()->offlineEditingHoverSpeed(),    &Fact::rawValueChanged, this, &Vehicle::_offlineHoverSpeedSettingChanged);
+    connect(_settingsManager->agriSettings()->sprayCentrifugalRPMSetting(),    &Fact::rawValueChanged, this, &Vehicle::_centrifugalRPMSettingChanged);
+
+    connect(&_centrifugalTimer, &QTimer::timeout, this, &Vehicle::_resetCentrifugal);
 
     _offlineFirmwareTypeSettingChanged(_firmwareType);  // This adds correct terrain capability bit
     _firmwarePlugin->initializeVehicle(this);
@@ -424,6 +427,7 @@ void Vehicle::_commonInit()
     connect(_toolbox->corePlugin(), &QGCCorePlugin::showAdvancedUIChanged, this, &Vehicle::flightModesChanged);
 
     connect(_imageProtocolManager, &ImageProtocolManager::imageReady, this, &Vehicle::_imageProtocolImageReady);
+
 
     // Build FactGroup object model
 
@@ -942,10 +946,10 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
             severity = MAV_SEVERITY_CRITICAL;
         } else if (messageText.startsWith("Sprayer LOW")) {
             readAloud = true;
-            severity = MAV_SEVERITY_CRITICAL;
+            severity = MAV_SEVERITY_INFO;
         } else if (messageText.startsWith("Sprayer HIGH")) {
             readAloud = true;
-            severity = MAV_SEVERITY_CRITICAL;
+            severity = MAV_SEVERITY_INFO;
         }
     }
 
@@ -3965,12 +3969,12 @@ void Vehicle::gimbalYawStep(int direction)
     }
 }
 
-void Vehicle::setServoCentrifugal      (double percent)
+void Vehicle::_centrifugalRPMSettingChanged     (QVariant value)
 {
     int max = 1750;
     int min  = 1050;
     double ratio = (max - min) / 100;
-    int pwm = min + (int) (percent * ratio);
+    int pwm = min + (int) (value.toDouble() * ratio);
     qDebug() << "setServoCentrifugal pwm:" << pwm;
 
     sendMavCommand(defaultComponentId(),    // target component
@@ -3978,10 +3982,13 @@ void Vehicle::setServoCentrifugal      (double percent)
                              false,                              // showError
                              9, pwm);  // chanel 9
 
-    QTimer::singleShot(3000, this, &Vehicle::_resetCentrifugal);
+    _centrifugalTimer.stop();
+    _centrifugalTimer.start(5000);
 }
 
 void Vehicle::_resetCentrifugal() {
+    qDebug() << "_resetCentrifugal";
+    _centrifugalTimer.stop();
     sendMavCommand(defaultComponentId(),    // target component
                              MAV_CMD_DO_SET_SERVO,             // command id
                              false,                              // showError

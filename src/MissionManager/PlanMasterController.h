@@ -136,7 +136,10 @@ public:
     QJsonDocument saveToJson    ();
     QJsonDocument saveRecentFileToJson    (const QString& filename);
     QGCMapPolygon loadTracingPolygon(void) { return _tracingAreaPolygon;};
+
     void setTracingPolygon(QGCMapPolygon tracingPolygon);
+    void setTracingPolygonFromFile(QGCMapPolygon tracingPolygon);
+
     void clearTracingPolygon();
 
     Vehicle* controllerVehicle(void) { return _controllerVehicle; }
