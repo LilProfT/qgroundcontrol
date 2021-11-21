@@ -115,13 +115,18 @@ Rectangle {
         anchors.bottom:         parent.bottom
         anchors.margins:        ScreenTools.defaultFontPixelHeight * 0.66
         id:                 showVideo
-        text:               qsTr("Show Video")
-        onPressAndHold: {
-            mainWindow.showFlyViewTransparency()
+        text:               qsTr("Turn Centrifugal Off")
+        visible:            false
+        onClicked: {
+            _activeVehicle.updateCentrifugal(0);
         }
-        onReleased:   {
-            mainWindow.showPlanViewTransparency()
-        }
+
+//        onPressAndHold: {
+//            mainWindow.showFlyViewTransparency()
+//        }
+//        onReleased:   {
+//            mainWindow.showPlanViewTransparency()
+//        }
     }
 
     //-------------------------------------------------------------------------

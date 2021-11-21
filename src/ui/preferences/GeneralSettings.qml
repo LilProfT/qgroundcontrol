@@ -65,8 +65,13 @@ property int _marginSlider : Math.round(ScreenTools.defaultFontPixelWidth *  (Sc
 
     property string gpsDisabled: "Disabled"
     property string gpsUdpPort:  "UDP Port"
+    property int prevCentrifugalValue : 0
 
     readonly property real _internalWidthRatio: 0.8
+
+    FactPanelController {
+        id: controller
+    }
 
         QGCFlickable {
             clip:               true
@@ -1250,21 +1255,41 @@ property int _marginSlider : Math.round(ScreenTools.defaultFontPixelWidth *  (Sc
                                 Layout.leftMargin: _marginSlider
                                 Layout.rightMargin: _marginSlider
                                 Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                                value:                   agriGrid.agriSettings.sprayCentrifugalRPMSetting.value
+                                value:                  agriGrid.agriSettings.sprayCentrifugalRPMSetting.value
                                 onValueChanged:         {
                                     agriGrid.agriSettings.sprayCentrifugalRPMSetting.value = value
+                                    if (prevCentrifugalValue != 0) {
+                                        controller.vehicle.updateCentrifugal(value)
+                                    }
+                                    prevCentrifugalValue = value
+//                                    if (value != 0) {
+//                                        motorTimer.restart()
+//                                    }
                                 }
                                 Component.onCompleted:  value = agriGrid.agriSettings.sprayCentrifugalRPMSetting.value
                                 updateValueWhileDragging: true
+
+
+
+//                                Timer {
+//                                    id:             motorTimer
+//                                    interval:       3 * 1000
+//                                    repeat:         false
+//                                    running:        false
+
+//                                    onTriggered: {
+//                                        controller.vehicle.updateCentrifugal(0)
+//                                    }
+//                                }
                             }
 
-                            FactTextField {
-                                id:                     centrifugalRPMField
-                                fact:                   agriGrid.agriSettings.sprayCentrifugalRPMSetting
-                                visible:                false
-                                Layout.fillWidth:       true
-                                showHelp:               false
-                            }
+//                            FactTextField {
+//                                id:                     centrifugalRPMField
+//                                fact:                   agriGrid.agriSettings.sprayCentrifugalRPMSetting
+//                                visible:                true
+//                                Layout.fillWidth:       true
+//                                showHelp:               false
+//                            }
                         }
                     }
 

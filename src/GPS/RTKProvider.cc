@@ -71,8 +71,9 @@ RTKProvider::~RTKProvider()
 
 void RTKProvider::gotRTCMData(QByteArray data)
 {
+    submitCount ++;
     if (!syncInProgress) {
-        qCWarning(RTKGPSLog) << "RTCMDataUpdate";
+        //qCWarning(RTKGPSLog) << "RTCMDataUpdate";
         emit RTCMDataUpdate(data);
     }
 }
@@ -150,7 +151,7 @@ void NTRIPTCPLink::timerSlot()
 
         _tcpSocket->write(nmea.toUtf8());
     }
-    startTimer(2000);
+    startTimer(5000);
 }
 
 void NTRIPTCPLink::run(void)
@@ -278,7 +279,9 @@ int NTRIPTCPLink::_calcNMEAChecksum(const char *buf, int cnt )
 
 void NTRIPTCPLink::_parse(const QByteArray &buffer)
 {
-    for(const u_int8_t& byte : buffer){
+    for(const char& b : buffer){
+        u_int8_t byte = (u_int8_t)b;
+        //uint8 byte = uint8(b);
         if(_state == NTRIPState::waiting_for_rtcm_header){
             if(byte != RTCM3_PREAMBLE)
                 continue;
@@ -290,10 +293,16 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             //TODO: Restore the following when upstreamed in Driver repo
             //uint16_t id = _rtcm_parsing->messageId();
             u_int16_t id = ((u_int8_t)message[3] << 4) | ((u_int8_t)message[4] >> 4);
-            qCWarning(RTKGPSLog) << "_parse: " << QString::fromStdString(message.toStdString());
+            qCWarning(RTKGPSLog) << "_rtcm_parsing id: " << id;
 
-            emit gotRTCMData(message);
-            qCWarning(NTRIPLog) << "Sending " << id << "of size " << message.length();
+            if (_whitelist.contains(id)) {
+                qCWarning(RTKGPSLog) << "_whitelist id: " << id;
+
+//                qCWarning(RTKGPSLog) << "_parse: " << QString::fromStdString(message.toStdString());
+
+                emit gotRTCMData(message);
+//                qCWarning(NTRIPLog) << "Sending " << id << "of size " << message.length();
+            }
 
             _rtcm_parsing->reset();
         }
@@ -303,22 +312,24 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
 void NTRIPTCPLink::_readBytes(void)
 {
     if (_tcpSocket) {
-        QByteArray bytes = _tcpSocket->read(_tcpSocket->bytesAvailable());
+        QByteArray bytes = _tcpSocket->readAll();
         QString response = QString::fromStdString(bytes.toStdString());
 
-//        if(_state == NTRIPState::waiting_for_http_response) {
-//            QString line = _tcpSocket->readLine();
-//            if (line.contains("200")){
-//                _state = NTRIPState::waiting_for_rtcm_header;
-//            } else {
-//                qCWarning(NTRIPLog) << "Server responded with " << line;
-//                // TODO: Handle failure. Reconnect?
-//                // Just move into parsing mode and hope for now.
-//                _state = NTRIPState::waiting_for_rtcm_header;
-//            }
-//        }
-        emit gotRTCMData(bytes);
-        //_parse(bytes);
+        //qCWarning(NTRIPLog) << "response " << response;
+
+        if(_state == NTRIPState::waiting_for_http_response) {
+            QString line = _tcpSocket->readLine();
+            if (line.contains("200")){
+                _state = NTRIPState::waiting_for_rtcm_header;
+            } else {
+                qCWarning(NTRIPLog) << "Server responded with " << line;
+                // TODO: Handle failure. Reconnect?
+                // Just move into parsing mode and hope for now.
+                _state = NTRIPState::waiting_for_rtcm_header;
+            }
+        }
+        //emit gotRTCMData(bytes);
+        _parse(bytes);
     }
 }
 

@@ -9415,6 +9415,11 @@ Please place your vehicle in water, click the button, and wait. Note that the th
         <source>Disconnect</source>
         <translation>Ngắt kết nối</translation>
     </message>
+    <message>
+        <location filename="../src/ui/toolbar/MainToolBar.qml" line="82"/>
+        <source>Turn Centrifugal Off</source>
+        <translation>Tắt ly tâm</translation>
+    </message>
 </context>
 <context>
     <name>MapScale</name>

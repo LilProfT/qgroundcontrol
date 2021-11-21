@@ -347,7 +347,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
 
     connect(_settingsManager->appSettings()->offlineEditingCruiseSpeed(),   &Fact::rawValueChanged, this, &Vehicle::_offlineCruiseSpeedSettingChanged);
     connect(_settingsManager->appSettings()->offlineEditingHoverSpeed(),    &Fact::rawValueChanged, this, &Vehicle::_offlineHoverSpeedSettingChanged);
-    connect(_settingsManager->agriSettings()->sprayCentrifugalRPMSetting(),    &Fact::rawValueChanged, this, &Vehicle::_centrifugalRPMSettingChanged);
+//    connect(_settingsManager->agriSettings()->sprayCentrifugalRPMSetting(),    &Fact::rawValueChanged, this, &Vehicle::_centrifugalRPMSettingChanged);
 
     connect(&_centrifugalTimer, &QTimer::timeout, this, &Vehicle::_resetCentrifugal);
 
@@ -2290,7 +2290,7 @@ void Vehicle::_flightTimerStop()
 //Mismart: Custom areaSprayed start and stop functions
 bool Vehicle::_areaSprayedStart()
 {
-    if (batteries()->count() == 3) //Mismart AGR drone config, 3 batteries
+    if (batteries()->count() >= 2) //Mismart AGR drone config, 3 batteries
     {
         //if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() >= 50) //Arbitrary number
         //Check sprayer PWM (from the _handleServoOutputRaw() function)
@@ -3969,30 +3969,43 @@ void Vehicle::gimbalYawStep(int direction)
     }
 }
 
-void Vehicle::_centrifugalRPMSettingChanged     (QVariant value)
+void Vehicle::updateCentrifugal(double percent)
 {
     int max = 1750;
     int min  = 1050;
     double ratio = (max - min) / 100;
-    int pwm = min + (int) (value.toDouble() * ratio);
+    int pwm = min + (int) (percent * ratio);
     qDebug() << "setServoCentrifugal pwm:" << pwm;
-
-    sendMavCommand(defaultComponentId(),    // target component
+    _toolbox->ntrip()->syncInProgressChanged(true);
+    sendMavCommand(_defaultComponentId,    // target component
                              MAV_CMD_DO_SET_SERVO,             // command id
                              false,                              // showError
-                             9, pwm);  // chanel 9
+                             9, pwm);  // servo 9
 
-    _centrifugalTimer.stop();
-    _centrifugalTimer.start(5000);
+    QTimer::singleShot(1000, this, &Vehicle::_resetCentrifugal);
 }
+
+//void Vehicle::_centrifugalRPMSettingChanged     (QVariant value)
+//{
+//    int max = 1750;
+//    int min  = 1050;
+//    double ratio = (max - min) / 100;
+//    int pwm = min + (int) (value.toDouble() * ratio);
+//    qDebug() << "setServoCentrifugal pwm:" << pwm;
+
+//    sendMavCommand(_defaultComponentId,    // target component
+//                             MAV_CMD_DO_SET_SERVO,             // command id
+//                             false,                              // showError
+//                             9, pwm);  // servo 9
+
+//    _centrifugalTimer.stop();
+//    _centrifugalTimer.start(5000);
+//}
 
 void Vehicle::_resetCentrifugal() {
     qDebug() << "_resetCentrifugal";
-    _centrifugalTimer.stop();
-    sendMavCommand(defaultComponentId(),    // target component
-                             MAV_CMD_DO_SET_SERVO,             // command id
-                             false,                              // showError
-                             9, 1050);  // chanel 9
+    //_centrifugalTimer.stop();
+    _toolbox->ntrip()->syncInProgressChanged(false);
 }
 
 void Vehicle::centerGimbal()
@@ -4171,8 +4184,9 @@ void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
         //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
         _trajectoryPoints->updateResumePoint(this->coordinate());
     }
-//    if (flightMode == this->pauseFlightMode())
-//        _resumeCoordinate = this->coordinate();
+
+    if (flightMode == this->pauseFlightMode())
+        _resumeCoordinate = this->coordinate();
 
     _prevflightMode = flightMode;
 

@@ -37,7 +37,7 @@ void NTRIP::connectGPSNTRIP()
     //qCWarning(RTKGPSLog) << "connectGPSNTRIP";
     //qCWarning(RTKGPSLog) << gcsPosition.longitude();
     _positionChanged++;
-    qCWarning(RTKGPSLog) << "_positionChanged: " << _positionChanged ;
+    //qCWarning(RTKGPSLog) << "_positionChanged: " << _positionChanged ;
 
     if (ntripSettings->ntripServerConnectEnable()->rawValue().toBool() && (gcsPosition.longitude() == gcsPosition.longitude()) && _positionChanged >= 10 ){
         if (!_rtkProvider) {

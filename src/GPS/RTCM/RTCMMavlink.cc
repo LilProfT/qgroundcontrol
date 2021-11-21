@@ -24,7 +24,7 @@ RTCMMavlink::RTCMMavlink(QGCToolbox& toolbox)
 void RTCMMavlink::RTCMDataUpdate(QByteArray message)
 {
     /* statistics */
-    qWarning() << "RTCMMavlink::RTCMDataUpdate" << message;
+    //qWarning() << "RTCMMavlink::RTCMDataUpdate" << message;
 
 
     _bandwidthByteCounter += message.size();
@@ -43,7 +43,7 @@ void RTCMMavlink::RTCMDataUpdate(QByteArray message)
         mavlinkRtcmData.len = message.size();
         mavlinkRtcmData.flags = (_sequenceId & 0x1F) << 3;
         memcpy(&mavlinkRtcmData.data, message.data(), message.size());
-        qWarning() << "RTCMMavlink::RTCMDataUpdate 01" << message;
+        //qWarning() << "RTCMMavlink::RTCMDataUpdate 01" << message;
 
 
         sendMessageToVehicle(mavlinkRtcmData);
@@ -59,7 +59,7 @@ void RTCMMavlink::RTCMDataUpdate(QByteArray message)
             mavlinkRtcmData.flags |= (_sequenceId & 0x1F) << 3;     // Next 5 bits are sequence id
             mavlinkRtcmData.len = length;
             memcpy(&mavlinkRtcmData.data, message.data() + start, length);
-            qWarning() << "RTCMMavlink::RTCMDataUpdate 02" << message;
+            //qWarning() << "RTCMMavlink::RTCMDataUpdate 02" << message;
 
             sendMessageToVehicle(mavlinkRtcmData);
             start += length;
@@ -85,7 +85,7 @@ void RTCMMavlink::sendMessageToVehicle(const mavlink_gps_rtcm_data_t& msg)
                                                   sharedLink->mavlinkChannel(),
                                                   &message,
                                                   &msg);
-            qWarning() << "RTCMMavlink::sendMessageToVehicle" << message.checksum;
+            //qWarning() << "RTCMMavlink::sendMessageToVehicle" << message.checksum;
 
 
             vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), message);

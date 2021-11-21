@@ -476,6 +476,10 @@ void MissionModel::_gen_PointF_From_Geo()
             if (waypoint->coord.isValid()) {
                 if (isFirst) {
                     _tangentOrigin = waypoint->coord;
+                    QPointF pointf(0, 0);
+                    waypoint->pointf = pointf;
+                    waypoint->nedDown = 0;
+
                     isFirst = false;
                 } else {
                     double y, x, down;
