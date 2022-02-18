@@ -7,11 +7,12 @@
  *
  ****************************************************************************/
 
+#pragma once
 
-// #pragma once
-
-// #include <QString>
-// #include <QByteArray>
+#include <QString>
+#include <QByteArray>
+#include <QObject>
+#include <QNetworkAccessManager>
 // #include <QtMqtt/QMqttClient>
 
 // class FlightHubMqtt : public QMqttClient
@@ -40,3 +41,21 @@
 //     QString _user;
 //     QString _passwd;
 // };
+
+class FlightHubHttpClient : public QObject
+{
+    Q_OBJECT
+public:
+    FlightHubHttpClient(QObject *parent);
+    ~FlightHubHttpClient();
+    void init();
+    void setParams(const QString &hostAddress, const QString& deviceToken);
+    // public slots:
+    //     void publishPosition();
+
+private:
+    QNetworkAccessManager *_getAccessTokenManager = nullptr;
+    QString _hostAddress;
+    QString _accessToken;
+    QString _deviceToken;
+};

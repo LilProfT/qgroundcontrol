@@ -1281,11 +1281,11 @@ INCLUDEPATH += \
 
 HEADERS += \
     src/FlightHub/FlightHubManager.h \
-    src/FlightHub/FlightHubMqtt.h \
+    src/FlightHub/FlightHubHttpClient.h \
 
 SOURCES += \
     src/FlightHub/FlightHubManager.cc \
-    src/FlightHub/FlightHubMqtt.cc \
+    src/FlightHub/FlightHubHttpClient.cc \
 
 
 #-------------------------------------------------------------------------------------

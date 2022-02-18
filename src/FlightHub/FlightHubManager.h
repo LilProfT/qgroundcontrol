@@ -18,9 +18,9 @@
 #include "UASInterface.h"
 #include "QGCLoggingCategory.h"
 #include "QGCMAVLink.h"
-#include "FlightHubMqtt.h"
+#include "FlightHubHttpClient.h"
 #include "QJsonObject"
-
+#include "QJsonArray"
 Q_DECLARE_LOGGING_CATEGORY(FlightHubManagerLog)
 
 class Vehicle;
@@ -32,10 +32,10 @@ class FlightHubManager : public QGCTool
     friend class Vehicle;
 
 public:
-    FlightHubManager(QGCApplication* app, QGCToolbox* toolbox);
-   // FlightHubManager(Vehicle* vehicle);
+    FlightHubManager(QGCApplication *app, QGCToolbox *toolbox);
+    // FlightHubManager(Vehicle* vehicle);
     ~FlightHubManager();
-    void setToolbox(QGCToolbox* toolbox) final;
+    void setToolbox(QGCToolbox *toolbox) final;
 
     /// Downloads the specified file.
     ///     @param fromURI  File to download from vehicle, fully qualified path. May be in the format "mftp://[;comp=<id>]..." where the component id is specified.
@@ -43,26 +43,26 @@ public:
     ///     @param toDir    Local directory to download file to
     /// @return true: download has started, false: error, no download
     /// Signals downloadComplete, commandError, commandProgress
-    //bool download(const QString& fromURI, const QString& toDir);
+    // bool download(const QString& fromURI, const QString& toDir);
     void startTimer(int interval);
 
 signals:
     void publishMsg(QByteArray message);
 public slots:
     void timerSlot();
+
 private:
-    void    _mavlinkMessageReceived     (const mavlink_message_t& message);
-    void    _vehicleReady(bool ready);
-    QString _handleAltitude     (const mavlink_message_t& message);
-    QString _handleGpsRawInt    (const mavlink_message_t& message);
-    QString _handleBatteryStatus(const mavlink_message_t& message);
-    void _handleHighLatency(const mavlink_message_t& message);
-    void _handleHighLatency2(const mavlink_message_t& message);
+    void _mavlinkMessageReceived(const mavlink_message_t &message);
+    void _vehicleReady(bool ready);
+    QString _handleAltitude(const mavlink_message_t &message);
+    QString _handleGpsRawInt(const mavlink_message_t &message);
+    QString _handleBatteryStatus(const mavlink_message_t &message);
+    void _handleHighLatency(const mavlink_message_t &message);
+    void _handleHighLatency2(const mavlink_message_t &message);
 
-    Vehicle*                _vehicle;
+    Vehicle *_vehicle;
     // FlightHubMqtt   *_flightHubMQtt     = nullptr;
-    QThread _mqttclientThread;
-    QJsonArray _positionArray = QJsonArray();
-
+    FlightHubHttpClient *_flightHubHttpClient = nullptr;
+    QThread _clientThread;
+    QJsonArray _positionArray;
 };
-

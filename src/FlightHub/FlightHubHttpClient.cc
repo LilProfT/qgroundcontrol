@@ -7,18 +7,29 @@
 //  *
 //  ****************************************************************************/
 
-
 // #include "FlightHubMqtt.h"
-// #include "QGCApplication.h"
-// #include <QDebug>
+#include "QGCApplication.h"
+#include <QDebug>
+#include "FlightHubHttpClient.h"
 
-// FlightHubMqtt::FlightHubMqtt(QObject *parent):QMqttClient(parent)
-// {
-// }
+FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent),
+                                                            _getAccessTokenManager(new QNetworkAccessManager(this))
+{
+}
 
-// FlightHubMqtt::~FlightHubMqtt()
-// {
-// }
+FlightHubHttpClient::~FlightHubHttpClient()
+{
+}
+
+void FlightHubHttpClient::init()
+{
+}
+
+void FlightHubHttpClient::setParams(const QString &hostAddress, const QString& deviceToken)
+{
+    _hostAddress = hostAddress;
+    _deviceToken = deviceToken;
+}
 
 // void FlightHubMqtt::initParams(const QString& hostAddress, int port, const QString& user, const QString& passwd)
 // {
