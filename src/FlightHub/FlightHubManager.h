@@ -56,13 +56,13 @@ private:
     QString _handleAltitude     (const mavlink_message_t& message);
     QString _handleGpsRawInt    (const mavlink_message_t& message);
     QString _handleBatteryStatus(const mavlink_message_t& message);
-    QString _handleHighLatency(const mavlink_message_t& message);
-    QString _handleHighLatency2(const mavlink_message_t& message);
+    void _handleHighLatency(const mavlink_message_t& message);
+    void _handleHighLatency2(const mavlink_message_t& message);
 
     Vehicle*                _vehicle;
-    FlightHubMqtt   *_flightHubMQtt     = nullptr;
-    QThread mqttclientThread;
-    QJsonObject jsonObj = QJsonObject();
+    // FlightHubMqtt   *_flightHubMQtt     = nullptr;
+    QThread _mqttclientThread;
+    QJsonArray _positionArray = QJsonArray();
 
 };
 

@@ -8,35 +8,35 @@
  ****************************************************************************/
 
 
-#pragma once
+// #pragma once
 
-#include <QString>
-#include <QByteArray>
-#include <QtMqtt/QMqttClient>
+// #include <QString>
+// #include <QByteArray>
+// #include <QtMqtt/QMqttClient>
 
-class FlightHubMqtt : public QMqttClient
-{
-    Q_OBJECT
-public:
+// class FlightHubMqtt : public QMqttClient
+// {
+//     Q_OBJECT
+// public:
 
-    FlightHubMqtt(QObject *parent);
-    ~FlightHubMqtt();
+//     FlightHubMqtt(QObject *parent);
+//     ~FlightHubMqtt();
 
-    void init();
-    void initParams(const QString& hostAddress, int port, const QString& user, const QString& passwd);
+//     void init();
+//     void initParams(const QString& hostAddress, int port, const QString& user, const QString& passwd);
 
-public slots:
-    void publishMsg(QByteArray message);
+// public slots:
+//     void publishMsg(QByteArray message);
 
-private slots:
-    void updateLogStateChange();
-    void updateConnected();
-    void updateDisConnected();
+// private slots:
+//     void updateLogStateChange();
+//     void updateConnected();
+//     void updateDisConnected();
 
-private:
+// private:
 
-    QString _hostAddress;
-    int     _port;
-    QString _user;
-    QString _passwd;
-};
+//     QString _hostAddress;
+//     int     _port;
+//     QString _user;
+//     QString _passwd;
+// };
