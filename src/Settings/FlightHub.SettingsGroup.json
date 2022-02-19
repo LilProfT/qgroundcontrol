@@ -15,7 +15,7 @@
     "name" :                "flightHubServerHostAddress",
     "shortDesc":            "Host Address",
     "type":                 "string",
-    "default":              "flighthub.mismart.ai"
+    "default":              "https://dronehub.api.mismart.ai"
 },
 {
     "name" :                "flightHubServerPort",

@@ -12,7 +12,10 @@
 #include <QString>
 #include <QByteArray>
 #include <QObject>
+#include <QJsonDocument>
 #include <QNetworkAccessManager>
+#include "QGCLoggingCategory.h"
+Q_DECLARE_LOGGING_CATEGORY(FlightHubHttpClientLog)
 // #include <QtMqtt/QMqttClient>
 
 // class FlightHubMqtt : public QMqttClient
@@ -48,14 +51,28 @@ class FlightHubHttpClient : public QObject
 public:
     FlightHubHttpClient(QObject *parent);
     ~FlightHubHttpClient();
+
+    void setParams(const QString &hostAddress, const QString &deviceToken);
+public slots:
     void init();
-    void setParams(const QString &hostAddress, const QString& deviceToken);
-    // public slots:
-    //     void publishPosition();
+    void publishTelemetry(QJsonDocument doc);
+
+private slots:
+    void _onGetAccessTokenFinished(QNetworkReply * reply);
+    void _onPublishTelemetryFinished(QNetworkReply * reply);
+
+signals:
+    void parameterReadyClientAvailableChanged(bool isReady);
+
 
 private:
+
+    QString _getAccessToken();
     QNetworkAccessManager *_getAccessTokenManager = nullptr;
     QString _hostAddress;
     QString _accessToken;
     QString _deviceToken;
+    const QString _nullToken = QString();
+    QNetworkAccessManager *_publishTelemetryManager = nullptr;
+    bool _triedGetToken = false;
 };

@@ -17,6 +17,7 @@
 
 #include "UASInterface.h"
 #include "QGCLoggingCategory.h"
+#include <QGeoCoordinate>
 #include "QGCMAVLink.h"
 #include "FlightHubHttpClient.h"
 #include "QJsonObject"
@@ -47,13 +48,16 @@ public:
     void startTimer(int interval);
 
 signals:
-    void publishMsg(QByteArray message);
+    void publishTelemetry(QJsonDocument doc);
 public slots:
     void timerSlot();
 
+private slots:
+    void _vehicleCoordinatedChanged(const QGeoCoordinate& coordinate);
+    void _vehicleReady(bool isReady);
+    void _clientReady(bool isReady);
 private:
-    void _mavlinkMessageReceived(const mavlink_message_t &message);
-    void _vehicleReady(bool ready);
+
     QString _handleAltitude(const mavlink_message_t &message);
     QString _handleGpsRawInt(const mavlink_message_t &message);
     QString _handleBatteryStatus(const mavlink_message_t &message);

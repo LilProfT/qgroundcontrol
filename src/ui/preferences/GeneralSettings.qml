@@ -1114,53 +1114,53 @@ Rectangle {
                             property var  flightHubSettings:    QGroundControl.settingsManager.flightHubSettings
 
 
-                            FactCheckBox {
-                                fact:                   flightHubGrid.flightHubSettings.flightHubServerConnectEnable
-                                text:                   flightHubGrid.flightHubSettings.flightHubServerConnectEnable.shortDescription
-                                visible:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.visible
-                                Layout.columnSpan:      2
-                            }
+                         //   FactCheckBox {
+                        //        fact:                   flightHubGrid.flightHubSettings.flightHubServerConnectEnable
+                          //      text:                   flightHubGrid.flightHubSettings.flightHubServerConnectEnable.shortDescription
+                          //      visible:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.visible
+                          //      Layout.columnSpan:      2
+                          //  }
 
                             QGCLabel {
                                 text:               flightHubGrid.flightHubSettings.flightHubServerHostAddress.shortDescription
                                 visible:            flightHubGrid.flightHubSettings.flightHubServerHostAddress.visible
-                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                           //     enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
 
                             }
                             FactTextField {
                                 fact:                   flightHubGrid.flightHubSettings.flightHubServerHostAddress
                                 visible:                flightHubGrid.flightHubSettings.flightHubServerHostAddress.visible
                                 Layout.fillWidth:       true
-                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                          //      enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                             }
 
-                            QGCLabel {
-                                text:               flightHubGrid.flightHubSettings.flightHubServerPort.shortDescription
-                                visible:            flightHubGrid.flightHubSettings.flightHubServerPort.visible
-                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
-                            }
-                            FactTextField {
-                                fact:                   flightHubGrid.flightHubSettings.flightHubServerPort
-                                visible:                flightHubGrid.flightHubSettings.flightHubServerPort.visible
-                                Layout.fillWidth:       true
-                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
-                            }
+                     //       QGCLabel {
+                      //          text:               flightHubGrid.flightHubSettings.flightHubServerPort.shortDescription
+                      //          visible:            flightHubGrid.flightHubSettings.flightHubServerPort.visible
+                      //          enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                       //     }
+                       //     FactTextField {
+                       //         fact:                   flightHubGrid.flightHubSettings.flightHubServerPort
+                          //      visible:                flightHubGrid.flightHubSettings.flightHubServerPort.visible
+                         //       Layout.fillWidth:       true
+                         //       enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                       //     }
                             QGCLabel {
                                 text:               flightHubGrid.flightHubSettings.flightHubUserName.shortDescription
                                 visible:            flightHubGrid.flightHubSettings.flightHubUserName.visible
-                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                          //      enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                             }
                             FactTextField {
                                 fact:                   flightHubGrid.flightHubSettings.flightHubUserName
                                 visible:                flightHubGrid.flightHubSettings.flightHubUserName.visible
                                 Layout.fillWidth:       true
-                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            //    enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                                 showHelp:               false
                             }
                             QGCLabel {
                                 text:               flightHubGrid.flightHubSettings.flightHubPasswd.shortDescription
                                 visible:            flightHubGrid.flightHubSettings.flightHubPasswd.visible
-                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                             //   enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
 
                             }
                             FactTextField {
@@ -1168,19 +1168,19 @@ Rectangle {
                                 echoMode:               TextInput.Password
                                 visible:                flightHubGrid.flightHubSettings.flightHubPasswd.visible
                                 Layout.fillWidth:       true
-                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            //    enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                                 showHelp:               false
                             }
                             QGCLabel {
                                 text:               flightHubGrid.flightHubSettings.flightHubDeviceToken.shortDescription
                                 visible:            flightHubGrid.flightHubSettings.flightHubDeviceToken.visible
-                                enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            //    enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                             }
                             FactTextField {
                                 fact:                   flightHubGrid.flightHubSettings.flightHubDeviceToken
                                 visible:                flightHubGrid.flightHubSettings.flightHubDeviceToken.visible
                                 Layout.fillWidth:       true
-                                enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                             //   enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                                 showHelp:               false
                             }
                         }

@@ -31,48 +31,50 @@ void FlightHubManager::setToolbox(QGCToolbox *toolbox)
 
 FlightHubManager::~FlightHubManager()
 {
-    // if (_flightHubMQtt) {
-    //     mqttclientThread.quit();
-    //     //Note that we need a relatively high timeout to be sure the GPS thread finished.
-    //     if (!mqttclientThread.wait(2000)) {
-    //         qWarning() << "Failed to wait for GPS thread exit. Consider increasing the timeout";
-    //     }
-    //     delete(_flightHubMQtt);
-    //     _flightHubMQtt = nullptr;
-    // }
+    if (_flightHubHttpClient)
+    {
+        _clientThread.quit();
+        // Note that we need a relatively high timeout to be sure the GPS thread finished.
+        if (!_clientThread.wait(2000))
+        {
+            qWarning() << "Failed to wait for GPS thread exit. Consider increasing the timeout";
+        }
+        delete (_flightHubHttpClient);
+        _flightHubHttpClient = nullptr;
+    }
 }
 
 //-----------------------------------------------------------------------------
-void FlightHubManager::_vehicleReady(bool ready)
+void FlightHubManager::_vehicleReady(bool isReady)
 {
-    qCWarning(FlightHubManagerLog) << "_vehicleReady(" << ready << ")";
-    if (ready)
+    qCWarning(FlightHubManagerLog) << "_vehicleReady(" << isReady << ")";
+    if (isReady)
     {
-        _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
-        if (qgcApp()->toolbox()->multiVehicleManager()->activeVehicle() == _vehicle)
+        if (qgcApp()->toolbox()->multiVehicleManager()->activeVehicle() != _vehicle)
         {
-            connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &FlightHubManager::_mavlinkMessageReceived);
-
             FlightHubSettings *flightHubSettings = qgcApp()->toolbox()->settingsManager()->flightHubSettings();
-            qCWarning(FlightHubManagerLog) << "flightHubServerHostAddress(" << flightHubSettings->flightHubServerHostAddress()->rawValue().toString() << ")";
-            qCWarning(FlightHubManagerLog) << "flightHubServerPort(" << flightHubSettings->flightHubServerPort()->rawValue().toInt() << ")";
-            qCWarning(FlightHubManagerLog) << "flightHubDeviceToken(" << flightHubSettings->flightHubDeviceToken()->rawValue().toString() << ")";
-
-            //            _flightHubMQtt = new FlightHubMqtt(this);
             _flightHubHttpClient = new FlightHubHttpClient(nullptr);
-            // _flightHubMQtt->initParams(flightHubSettings->flightHubServerHostAddress()->rawValue().toString(),
-            //                            flightHubSettings->flightHubServerPort()->rawValue().toInt(),
-            //                            flightHubSettings->flightHubDeviceToken()->rawValue().toString(),
-            //                            flightHubSettings->flightHubDeviceToken()->rawValue().toString());
             _flightHubHttpClient->setParams(flightHubSettings->flightHubServerHostAddress()->rawValueString(), flightHubSettings->flightHubDeviceToken()->rawValueString());
-            // connect(this, &FlightHubManager::publishMsg, _flightHubMQtt, &FlightHubMqtt::publishMsg);
-
             _flightHubHttpClient->moveToThread(&_clientThread);
             connect(&_clientThread, &QThread::started, _flightHubHttpClient, &FlightHubHttpClient::init);
+
+            connect(_flightHubHttpClient, &FlightHubHttpClient::parameterReadyClientAvailableChanged, this, &FlightHubManager::_clientReady);
+
+            // connect(this, &FlightHubManager::publishMsg, _flightHubMQtt, &FlightHubMqtt::publishMsg);
 
             _clientThread.start();
             startTimer(5000);
         }
+    }
+}
+
+void FlightHubManager::_clientReady(bool isReady)
+{
+    if (isReady)
+    {
+        _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+        connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_vehicleCoordinatedChanged);
+        connect(this,&FlightHubManager::publishTelemetry, _flightHubHttpClient , &FlightHubHttpClient::publishTelemetry);
     }
 }
 
@@ -84,93 +86,51 @@ void FlightHubManager::startTimer(int interval)
 void FlightHubManager::timerSlot()
 {
 
-    //    QJsonObject jsonObj = QJsonObject();
 
-    //    if (!jsonObj.isEmpty())
-    //    {
-    //        QString telemetry;
-    //        telemetry = QString(QJsonDocument(jsonObj).toJson(QJsonDocument::Compact));
-    //        if (!telemetry.isEmpty())
-    //        {
-    //            jsonObj = QJsonObject();
-    //            qWarning() << telemetry;
-    //            emit publishMsg(telemetry.toUtf8());
-    //        }
-    //    }
 
-    if (!_positionArray.isEmpty()){
+    if (!_positionArray.isEmpty())
+    {
+        QJsonObject dataObj;
+        dataObj.insert("data",_positionArray);
         QJsonDocument doc;
-        doc.setArray(_positionArray);
+        doc.setObject(dataObj);
 
-        QString dataToString(doc.toJson());
-        qCWarning(FlightHubManagerLog) << "timerSlot" << dataToString;
+
+        qCWarning(FlightHubManagerLog) << "count" << _positionArray.count();
+        emit publishTelemetry(doc);
+        _positionArray = QJsonArray();
+
     }
     else
     {
-        qCWarning(FlightHubManagerLog) << "timerSlot" << "empty";
+        qCWarning(FlightHubManagerLog) << "timerSlot"
+                                       << "empty";
     }
-
 
     startTimer(5000);
 }
 
 ////-----------------------------------------------------------------------------
-void FlightHubManager::_mavlinkMessageReceived(const mavlink_message_t &message)
+void FlightHubManager::_vehicleCoordinatedChanged(const QGeoCoordinate &coordinate)
 {
     //-- Only pay attention to camera components, as identified by their compId
-    qCWarning(FlightHubManagerLog)<<"Mavlink received-"<<message.sysid <<message.msgid;
-    if (message.sysid == _vehicle->id())
-    {
-        QString telemetry;
-
-        switch (message.msgid)
-        {
-        case MAVLINK_MSG_ID_ALTITUDE:
-            // telemetry = _handleAltitude(message);
-            break;
-        case MAVLINK_MSG_ID_GPS_RAW_INT:
-            // telemetry = QString(_handleGpsRawInt(message));
-            break;
-        case MAVLINK_MSG_ID_STORAGE_INFORMATION:
-            //_handleStorageInfo(message);
-            break;
-        case MAVLINK_MSG_ID_HEARTBEAT:
-            //_handleHeartbeat(message);
-            break;
-        case MAVLINK_MSG_ID_CAMERA_INFORMATION:
-            //_handleCameraInfo(message);
-            break;
-        case MAVLINK_MSG_ID_CAMERA_SETTINGS:
-            //_handleCameraSettings(message);
-            break;
-        case MAVLINK_MSG_ID_PARAM_EXT_ACK:
-            //_handleParamAck(message);
-            break;
-        case MAVLINK_MSG_ID_PARAM_EXT_VALUE:
-            //_handleParamValue(message);
-            break;
-        case MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION:
-            //_handleVideoStreamInfo(message);
-            break;
-        case MAVLINK_MSG_ID_VIDEO_STREAM_STATUS:
-            //_handleVideoStreamStatus(message);
-            break;
-        case MAVLINK_MSG_ID_BATTERY_STATUS:
-            telemetry = QString(_handleBatteryStatus(message));
-            break;
-        case MAVLINK_MSG_ID_HIGH_LATENCY:
-            _handleHighLatency(message);
-            break;
-        case MAVLINK_MSG_ID_HIGH_LATENCY2:
-            _handleHighLatency2(message);
-            break;
-        }
-        //        //telemetry = "{\"longitude\":106.6137614, \"latitude\":10.6137614}";
-        //        if (!telemetry.isEmpty()) {
-        //            qWarning() << telemetry;
-        //            emit publishMsg(telemetry.toUtf8());
-        //        }
-    }
+//    qCWarning(FlightHubManagerLog) << "Mavlink received-" << _vehicle->coordinate().longitude()
+//                                   << _vehicle->coordinate().latitude()
+//                                   << _vehicle->heading()->rawValue().toDouble()
+//                                   << _vehicle->vehicleUIDStr();
+    QJsonObject newObj = QJsonObject();
+    newObj.insert("longitude", _vehicle->coordinate().longitude());
+    newObj.insert("latitude", _vehicle->coordinate().latitude());
+    newObj.insert("direction",_vehicle->heading()->rawValue().toDouble());
+    newObj.insert("airspeed", _vehicle->airSpeed()->rawValue().toDouble());
+    newObj.insert("groundspeed",  _vehicle->groundSpeed()->rawValue().toDouble());
+    newObj.insert("climbRate", _vehicle->climbRate()->rawValue().toDouble());
+    _positionArray.append(newObj);
+    //        //telemetry = "{\"longitude\":106.6137614, \"latitude\":10.6137614}";
+    //        if (!telemetry.isEmpty()) {
+    //            qWarning() << telemetry;
+    //            emit publishMsg(telemetry.toUtf8());
+    //        }
 }
 
 QString FlightHubManager::_handleAltitude(const mavlink_message_t &message)
@@ -237,8 +197,8 @@ void FlightHubManager::_handleHighLatency(const mavlink_message_t &message)
     newObj.insert("groundspeed", (double)highLatency.groundspeed);
     newObj.insert("climb_rate", (double)highLatency.climb_rate);
     newObj.insert("heading", (double)highLatency.heading);
-    qCWarning(FlightHubManagerLog)<< "latency"
-                                  << "lng" << newPosition.longitude() << "heading" << (double)highLatency.heading;
+    qCWarning(FlightHubManagerLog) << "latency"
+                                   << "lng" << newPosition.longitude() << "heading" << (double)highLatency.heading;
     _positionArray.append(newObj);
 }
 
@@ -255,8 +215,8 @@ void FlightHubManager::_handleHighLatency2(const mavlink_message_t &message)
     newObj.insert("groundspeed", (double)highLatency2.groundspeed);
     newObj.insert("climb_rate", (double)highLatency2.climb_rate);
     newObj.insert("heading", (double)highLatency2.heading);
-    qCWarning(FlightHubManagerLog)<< "latency2"
-                                  << "lng" << (double)highLatency2.longitude << "heading" << (double)highLatency2.heading;
+    qCWarning(FlightHubManagerLog) << "latency2"
+                                   << "lng" << (double)highLatency2.longitude << "heading" << (double)highLatency2.heading;
 
     _positionArray.append(newObj);
 }
