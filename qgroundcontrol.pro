@@ -1538,4 +1538,4 @@ contains (CONFIG, QGC_DISABLE_INSTALLER_SETUP) {
 DISTFILES += \
     src/QmlControls/QGroundControl/Specific/qmldir
 
-QT += mqtt
+# QT += mqtt
