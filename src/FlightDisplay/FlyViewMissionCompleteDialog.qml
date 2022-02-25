@@ -49,7 +49,9 @@ Item {
     property bool _readyToResetAreaSprayed:         false
 
     on_VehicleArmedChanged: {
+
         if (_vehicleArmed) {
+
             _vehicleWasArmed = true
             _vehicleWasInMissionFlightMode = _vehicleInMissionFlightMode
 
@@ -59,14 +61,24 @@ Item {
 //                _readyToResetAreaSprayed = false
 //            }
 
+
         } else {
+//            _activeVehicle.publishMissionCompleted()
+
+
             if (_showMissionCompleteDialog) {
+
                 globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMission, null, null)
+                   // Upload static after finishish mission
+
 
                 //mainWindow.showComponentDialog(missionCompleteDialogComponent, qsTr("Flight Plan complete"), mainWindow.showDialogDefaultWidth, StandardButton.Close)
+
             } else {
                 //_planController.deleteFileInResume()
+
                 if (_showMissionResumeDialog) {
+
                     globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionDeleteMission, null, null)
                 }
 
@@ -74,6 +86,8 @@ Item {
 
             //Mismart: Checking if the mission is really completed
             if (_sprayComplete) {
+
+                 _activeVehicle.publishMissionCompleted()
                 _readyToResetAreaSprayed = true
             }
 

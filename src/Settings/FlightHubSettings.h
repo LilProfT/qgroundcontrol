@@ -11,8 +11,10 @@ class FlightHubSettings : public SettingsGroup
 
         DEFINE_SETTINGFACT(flightHubServerConnectEnable)
         DEFINE_SETTINGFACT(flightHubServerHostAddress)
+        DEFINE_SETTINGFACT(authServerHostAddress)
         DEFINE_SETTINGFACT(flightHubServerPort)
         DEFINE_SETTINGFACT(flightHubUserName)
         DEFINE_SETTINGFACT(flightHubPasswd)
         DEFINE_SETTINGFACT(flightHubDeviceToken)
+        DEFINE_SETTINGFACT(flightHubLocation)
 };

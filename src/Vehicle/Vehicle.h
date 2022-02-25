@@ -294,6 +294,10 @@ public:
     Q_PROPERTY(Fact* xTrackError        READ xTrackError        CONSTANT)
     Q_PROPERTY(Fact* flightDistance     READ flightDistance     CONSTANT)
 
+
+    //Mismart: get flight time
+    Q_PROPERTY(Fact* flightTime         READ flightTime         CONSTANT)
+
     //Mismart: Custom areaSprayed and spacing fact
     Q_PROPERTY(Fact* areaSprayed        READ areaSprayed        CONSTANT)
     Q_PROPERTY(Fact* spacing            READ spacing            CONSTANT)
@@ -433,6 +437,9 @@ public:
 
     /// Trigger camera using MAV_CMD_DO_DIGICAM_CONTROL command
     Q_INVOKABLE void triggerSimpleCamera(void);
+
+    // Mismart publish mission
+    Q_INVOKABLE void publishMissionCompleted(void);
 
 #if !defined(NO_ARDUPILOT_DIALECT)
     Q_INVOKABLE void flashBootloader();
@@ -652,6 +659,9 @@ public:
     Fact* altitudeTuningSetpoint            () { return &_altitudeTuningSetpointFact; }
     Fact* xTrackError                       () { return &_xTrackErrorFact; }
     Fact* flightDistance                    () { return &_flightDistanceFact; }
+
+    //Mismart: get flight time
+    Fact* flightTime                        () { return &_flightTimeFact; }
     //Mismart: Custom areaSprayed and spacing fact
     Fact* areaSprayed                       () { return &_areaSprayedFact; }
     Fact* spacing                           () { return &_spacingFact;}
@@ -859,6 +869,9 @@ signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
     void pointAddedFromfile              (QGeoCoordinate coordinate);
     void clearTrajectoryPoint              (void);
+
+    // Mismart: create signal on mission completed
+    void missionCompleted                   (void);
 
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
@@ -1363,7 +1376,6 @@ private:
     VehicleLinkManager*             _vehicleLinkManager         = nullptr;
     FTPManager*                     _ftpManager                 = nullptr;
     ImageProtocolManager*           _imageProtocolManager       = nullptr;
-	FlightHubManager*                     _flightHubManager                 = nullptr;
     InitialConnectStateMachine*     _initialConnectStateMachine = nullptr;
 
     static const char* _rollFactName;

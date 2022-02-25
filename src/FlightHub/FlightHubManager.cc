@@ -26,7 +26,7 @@ void FlightHubManager::setToolbox(QGCToolbox *toolbox)
     QGCTool::setToolbox(toolbox);
     qCWarning(FlightHubManagerLog) << "Instatiating FlightHubManager";
 
-    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_vehicleReady);
+    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_onVehicleReady);
 }
 
 FlightHubManager::~FlightHubManager()
@@ -45,20 +45,25 @@ FlightHubManager::~FlightHubManager()
 }
 
 //-----------------------------------------------------------------------------
-void FlightHubManager::_vehicleReady(bool isReady)
+void FlightHubManager::_onVehicleReady(bool isReady)
 {
-    qCWarning(FlightHubManagerLog) << "_vehicleReady(" << isReady << ")";
     if (isReady)
     {
+
         if (qgcApp()->toolbox()->multiVehicleManager()->activeVehicle() != _vehicle)
         {
+            _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
             FlightHubSettings *flightHubSettings = qgcApp()->toolbox()->settingsManager()->flightHubSettings();
             _flightHubHttpClient = new FlightHubHttpClient(nullptr);
-            _flightHubHttpClient->setParams(flightHubSettings->flightHubServerHostAddress()->rawValueString(), flightHubSettings->flightHubDeviceToken()->rawValueString());
+            _flightHubHttpClient->setParams(flightHubSettings->flightHubServerHostAddress()->rawValueString(),
+                                            flightHubSettings->flightHubDeviceToken()->rawValueString(),
+                                            flightHubSettings->authServerHostAddress()->rawValueString(),
+                                            flightHubSettings->flightHubUserName()->rawValueString(),
+                                            flightHubSettings->flightHubPasswd()->rawValueString());
             _flightHubHttpClient->moveToThread(&_clientThread);
             connect(&_clientThread, &QThread::started, _flightHubHttpClient, &FlightHubHttpClient::init);
 
-            connect(_flightHubHttpClient, &FlightHubHttpClient::parameterReadyClientAvailableChanged, this, &FlightHubManager::_clientReady);
+            connect(_flightHubHttpClient, &FlightHubHttpClient::parameterReadyClientAvailableChanged, this, &FlightHubManager::_onClientReady);
 
             // connect(this, &FlightHubManager::publishMsg, _flightHubMQtt, &FlightHubMqtt::publishMsg);
 
@@ -67,14 +72,63 @@ void FlightHubManager::_vehicleReady(bool isReady)
         }
     }
 }
+void FlightHubManager::_onVehicelMissionCompleted()
+{
+    qCWarning(FlightHubManagerLog) << "mission completed -----------------------";
+    auto missionManager = _vehicle->missionManager();
+    auto items = missionManager->missionItems();
+    auto flightTime = _vehicle->flightTime()->rawValue().toDouble();
+    flightTime = flightTime / 3600;
+    double distance = 0.0;
+    QList<MissionItem *> selectedItems;
+    foreach (auto item, items)
+    {
 
-void FlightHubManager::_clientReady(bool isReady)
+        if (item->commandInt() == 16)
+        {
+            selectedItems.append(item);
+        }
+    }
+
+    for (auto i = 0; i < selectedItems.count() - 1; i++)
+    {
+        auto currentItem = selectedItems[i];
+        auto nextItem = selectedItems[i + 1];
+        {
+            auto additionalDistance = currentItem->coordinate().distanceTo(nextItem->coordinate());
+            distance += additionalDistance;
+        }
+    }
+    distance = distance + 1;
+    QJsonObject obj;
+    obj["flightDuration"] = flightTime;
+    obj["flights"] = 1;
+    obj["taskArea"] = _vehicle->areaSprayed()->rawValue().toDouble();
+    QJsonArray flywayPoints;
+    foreach (auto item, selectedItems)
+    {
+        QJsonObject value;
+        value["longitude"] = item->coordinate().longitude();
+        value["latitude"] = item->coordinate().latitude();
+        flywayPoints.append(value);
+    }
+    obj["flywayPoints"] = flywayPoints;
+    obj["taskLocation"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
+    obj["fieldName"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
+
+    qCWarning(FlightHubManagerLog) << "publish stat";
+    emit publishStat(obj);
+}
+
+void FlightHubManager::_onClientReady(bool isReady)
 {
     if (isReady)
     {
-        _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
-        connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_vehicleCoordinatedChanged);
-        connect(this,&FlightHubManager::publishTelemetry, _flightHubHttpClient , &FlightHubHttpClient::publishTelemetry);
+        qCWarning(FlightHubManagerLog) << "Client ready";
+        connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_onVehicleCoordinatedChanged);
+        connect(_vehicle, &Vehicle::missionCompleted, this, &FlightHubManager::_onVehicelMissionCompleted);
+        connect(this, &FlightHubManager::publishTelemetry, _flightHubHttpClient, &FlightHubHttpClient::publishTelemetry);
+        connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
     }
 }
 
@@ -86,45 +140,38 @@ void FlightHubManager::startTimer(int interval)
 void FlightHubManager::timerSlot()
 {
 
-
-
     if (!_positionArray.isEmpty())
     {
         QJsonObject dataObj;
-        dataObj.insert("data",_positionArray);
-        QJsonDocument doc;
-        doc.setObject(dataObj);
+        dataObj.insert("data", _positionArray);
 
-
-        qCWarning(FlightHubManagerLog) << "count" << _positionArray.count();
-        emit publishTelemetry(doc);
+        emit publishTelemetry(dataObj);
         _positionArray = QJsonArray();
-
-    }
-    else
-    {
-        qCWarning(FlightHubManagerLog) << "timerSlot"
-                                       << "empty";
     }
 
     startTimer(5000);
 }
 
 ////-----------------------------------------------------------------------------
-void FlightHubManager::_vehicleCoordinatedChanged(const QGeoCoordinate &coordinate)
+void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordinate)
 {
     //-- Only pay attention to camera components, as identified by their compId
-//    qCWarning(FlightHubManagerLog) << "Mavlink received-" << _vehicle->coordinate().longitude()
-//                                   << _vehicle->coordinate().latitude()
-//                                   << _vehicle->heading()->rawValue().toDouble()
-//                                   << _vehicle->vehicleUIDStr();
+    //    qCWarning(FlightHubManagerLog) << "Mavlink received-" << _vehicle->coordinate().longitude()
+    //                                   << _vehicle->coordinate().latitude()
+    //                                   << _vehicle->heading()->rawValue().toDouble()
+    //                                   << _vehicle->vehicleUIDStr();
     QJsonObject newObj = QJsonObject();
     newObj.insert("longitude", _vehicle->coordinate().longitude());
     newObj.insert("latitude", _vehicle->coordinate().latitude());
-    newObj.insert("direction",_vehicle->heading()->rawValue().toDouble());
-    newObj.insert("airspeed", _vehicle->airSpeed()->rawValue().toDouble());
-    newObj.insert("groundspeed",  _vehicle->groundSpeed()->rawValue().toDouble());
-    newObj.insert("climbRate", _vehicle->climbRate()->rawValue().toDouble());
+    newObj.insert("direction", _vehicle->heading()->rawValue().toDouble());
+
+    QJsonObject additinalInformationObj;
+    additinalInformationObj.insert("airspeed", _vehicle->airSpeed()->rawValue().toDouble());
+    additinalInformationObj.insert("groundspeed", _vehicle->groundSpeed()->rawValue().toDouble());
+    additinalInformationObj.insert("climbRate", _vehicle->climbRate()->rawValue().toDouble());
+
+
+    newObj.insert("additionalInformation", additinalInformationObj);
     _positionArray.append(newObj);
     //        //telemetry = "{\"longitude\":106.6137614, \"latitude\":10.6137614}";
     //        if (!telemetry.isEmpty()) {

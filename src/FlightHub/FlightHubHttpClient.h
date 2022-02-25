@@ -13,37 +13,11 @@
 #include <QByteArray>
 #include <QObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkAccessManager>
 #include "QGCLoggingCategory.h"
 Q_DECLARE_LOGGING_CATEGORY(FlightHubHttpClientLog)
-// #include <QtMqtt/QMqttClient>
 
-// class FlightHubMqtt : public QMqttClient
-// {
-//     Q_OBJECT
-// public:
-
-//     FlightHubMqtt(QObject *parent);
-//     ~FlightHubMqtt();
-
-//     void init();
-//     void initParams(const QString& hostAddress, int port, const QString& user, const QString& passwd);
-
-// public slots:
-//     void publishMsg(QByteArray message);
-
-// private slots:
-//     void updateLogStateChange();
-//     void updateConnected();
-//     void updateDisConnected();
-
-// private:
-
-//     QString _hostAddress;
-//     int     _port;
-//     QString _user;
-//     QString _passwd;
-// };
 
 class FlightHubHttpClient : public QObject
 {
@@ -52,27 +26,40 @@ public:
     FlightHubHttpClient(QObject *parent);
     ~FlightHubHttpClient();
 
-    void setParams(const QString &hostAddress, const QString &deviceToken);
+    void setParams(const QString &hostAddress, const QString &deviceToken ,const QString &userHostAddress, const QString &email, const QString &password);
 public slots:
     void init();
-    void publishTelemetry(QJsonDocument doc);
+    void publishTelemetry(QJsonObject obj);
+    void publishStat(QJsonObject obj);
 
 private slots:
-    void _onGetAccessTokenFinished(QNetworkReply * reply);
+    void _onGetDeviceAccessTokenFinished(QNetworkReply * reply);
     void _onPublishTelemetryFinished(QNetworkReply * reply);
-
+    void _onGetUserAccessTokenFinished(QNetworkReply * reply);
+    void _onPublishStatFinished(QNetworkReply * reply);
 signals:
     void parameterReadyClientAvailableChanged(bool isReady);
 
 
 private:
 
-    QString _getAccessToken();
+    QString _getDeviceAccessToken();
+    QString _getUserAccessToken();
     QNetworkAccessManager *_getAccessTokenManager = nullptr;
-    QString _hostAddress;
-    QString _accessToken;
-    QString _deviceToken;
-    const QString _nullToken = QString();
+    QNetworkAccessManager *_getUserAccessTokenManager = nullptr;
     QNetworkAccessManager *_publishTelemetryManager = nullptr;
+    QNetworkAccessManager *_publishStatManager = nullptr;
+    QString _hostAddress;
+    QString _userHostAddress;
+    QString _deviceAccessToken ;
+    QString _userAccessToken ;
+    QString _deviceToken;
+    QString _email;
+    QString _password;
+    const QString _nullToken = QString();
+
+    QJsonObject user;
+
     bool _triedGetToken = false;
+    bool _triedGetUserToken = false;
 };

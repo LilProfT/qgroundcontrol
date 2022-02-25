@@ -71,7 +71,7 @@ public:
     /// a nightmare of circular header dependency problems.
     Q_INVOKABLE int readyForSaveState(void) const { return _missionController.readyForSaveState(); };
     Q_INVOKABLE bool        isMissionChange         (void) const { return _isMissionChange; };
-
+    
     /// Replaces any current plan with the plan from the manager vehicle even if offline.
     Q_INVOKABLE void showPlanFromManagerVehicle(void);
 

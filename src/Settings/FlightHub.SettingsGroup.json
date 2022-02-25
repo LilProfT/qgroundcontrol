@@ -1,45 +1,63 @@
 {
-    "version":      1,
-    "fileType":  "FactMetaData",
-    "QGC.MetaData.Facts":
-[
-{
-    "name" :                "flightHubServerConnectEnable",
-    "shortDesc":            "Connect to FlightHub server",
-    "longDesc":             "Connect to FlightHub server using information provided",
-    "type":                 "bool",
-    "default":              "false",
-    "qgcRebootRequired":    true
-},
-{
-    "name" :                "flightHubServerHostAddress",
-    "shortDesc":            "Host Address",
-    "type":                 "string",
-    "default":              "https://dronehub.api.mismart.ai"
-},
-{
-    "name" :                "flightHubServerPort",
-    "shortDesc":            "Port",
-    "type":                 "string",
-    "default":              "1883"
-},
-{
-    "name" :                "flightHubUserName",
-    "shortDesc":            "User Name",
-    "type":                 "string",
-    "default":              ""
-},
-{
-    "name" :                "flightHubPasswd",
-    "shortDesc":            "Password",
-    "type":                 "string",
-    "default":              ""
-},
-{
-    "name" :                "flightHubDeviceToken",
-    "shortDesc":            "Device Token",
-    "type":                 "string",
-    "default":              ""
-}
-]
+    "version": 1,
+    "fileType": "FactMetaData",
+    "QGC.MetaData.Facts": [
+        {
+            "name": "flightHubServerConnectEnable",
+            "shortDesc": "Connect to FlightHub server",
+            "longDesc": "Connect to FlightHub server using information provided",
+            "type": "bool",
+            "default": "false",
+            "qgcRebootRequired": true
+        },
+        {
+            "name": "flightHubServerHostAddress",
+            "shortDesc": "Host Address",
+            "type": "string",
+            "default": "https://dronehub.api.mismart.ai",
+            "qgcRebootRequired": true
+        },
+        {
+            "name": "authServerHostAddress",
+            "shortDesc": "Auth Host Address",
+            "type": "string",
+            "default": "https://auth.flighthub.api.mismart.ai",
+            "qgcRebootRequired": true
+        },
+        {
+            "name": "flightHubServerPort",
+            "shortDesc": "Port",
+            "type": "string",
+            "default": "1883",
+            "qgcRebootRequired": true
+        },
+        {
+            "name": "flightHubUserName",
+            "shortDesc": "User Name",
+            "type": "string",
+            "default": "",
+            "qgcRebootRequired": true
+        },
+        {
+            "name": "flightHubPasswd",
+            "shortDesc": "Password",
+            "type": "string",
+            "default": "",
+            "qgcRebootRequired": true
+        },
+        {
+            "name": "flightHubDeviceToken",
+            "shortDesc": "Device Token",
+            "type": "string",
+            "default": "",
+            "qgcRebootRequired": true
+        },
+        {
+            "name": "flightHubLocation",
+            "shortDesc": "Current Location",
+            "type": "string",
+            "default": "",
+            "qgcRebootRequired": true
+        }
+    ]
 }

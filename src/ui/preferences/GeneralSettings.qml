@@ -1124,14 +1124,14 @@ Rectangle {
                             QGCLabel {
                                 text:               flightHubGrid.flightHubSettings.flightHubServerHostAddress.shortDescription
                                 visible:            flightHubGrid.flightHubSettings.flightHubServerHostAddress.visible
-                           //     enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                                enabled:           false
 
                             }
                             FactTextField {
                                 fact:                   flightHubGrid.flightHubSettings.flightHubServerHostAddress
                                 visible:                flightHubGrid.flightHubSettings.flightHubServerHostAddress.visible
                                 Layout.fillWidth:       true
-                          //      enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                                enabled:               false
                             }
 
                      //       QGCLabel {
@@ -1179,6 +1179,18 @@ Rectangle {
                             FactTextField {
                                 fact:                   flightHubGrid.flightHubSettings.flightHubDeviceToken
                                 visible:                flightHubGrid.flightHubSettings.flightHubDeviceToken.visible
+                                Layout.fillWidth:       true
+                             //   enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                                showHelp:               false
+                            }
+                               QGCLabel {
+                                text:               flightHubGrid.flightHubSettings.flightHubLocation.shortDescription
+                                visible:            flightHubGrid.flightHubSettings.flightHubLocation.visible
+                            //    enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                            }
+                            FactTextField {
+                                fact:                   flightHubGrid.flightHubSettings.flightHubLocation
+                                visible:                flightHubGrid.flightHubSettings.flightHubLocation.visible
                                 Layout.fillWidth:       true
                              //   enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                                 showHelp:               false
