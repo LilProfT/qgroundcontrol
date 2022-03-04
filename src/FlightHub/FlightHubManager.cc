@@ -124,6 +124,7 @@ void FlightHubManager::_onClientReady(bool isReady)
 {
     if (isReady)
     {
+        qgcApp()->showAppMessage("Connected", "Flighthub");
         qCWarning(FlightHubManagerLog) << "Client ready";
         connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_onVehicleCoordinatedChanged);
         connect(_vehicle, &Vehicle::missionCompleted, this, &FlightHubManager::_onVehicelMissionCompleted);
