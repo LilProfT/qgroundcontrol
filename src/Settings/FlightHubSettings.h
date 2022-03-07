@@ -17,4 +17,5 @@ class FlightHubSettings : public SettingsGroup
         DEFINE_SETTINGFACT(flightHubPasswd)
         DEFINE_SETTINGFACT(flightHubDeviceToken)
         DEFINE_SETTINGFACT(flightHubLocation)
+        DEFINE_SETTINGFACT(deviceCode)
 };

@@ -44,7 +44,7 @@ void FlightHubHttpClient::_onGetUserAccessTokenFinished(QNetworkReply * reply){
     auto accessToken = data["accessToken"].toString();
     _userAccessToken = accessToken;
     user = data["user"].toObject();
-    qCWarning(FlightHubHttpClientLog)<<"Retrivce user token" << _userAccessToken;
+
     if (_deviceAccessToken.isEmpty() || _deviceAccessToken.isNull()){
         return;
     }
@@ -134,6 +134,7 @@ void FlightHubHttpClient::publishTelemetry(QJsonObject obj)
     request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
 
     QByteArray data = doc.toJson();
+
     QDateTime date = QDateTime::currentDateTime();
     QString formattedTime = date.toString("dd.MM.yyyy hh:mm:ss");
     QByteArray formattedTimeMsg = formattedTime.toLocal8Bit();
@@ -159,7 +160,7 @@ void FlightHubHttpClient::_onGetDeviceAccessTokenFinished(QNetworkReply * reply)
 }
 
 void FlightHubHttpClient::_onPublishTelemetryFinished(QNetworkReply * reply){
-
+  qCWarning(FlightHubHttpClientLog)<<"publish -----------------------------" <<reply->readAll();
 }
 
 QString FlightHubHttpClient::_getDeviceAccessToken()
@@ -189,21 +190,25 @@ QString FlightHubHttpClient::_getDeviceAccessToken()
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         QJsonObject obj;
         obj["deviceToken"] = token;
+        obj["deviceCode"] = _deviceCode;
+
+
         QJsonDocument doc(obj);
         QByteArray data = doc.toJson();
 
-
+        qCWarning(FlightHubHttpClientLog)<<"Retrivce device token" << data;
         _getAccessTokenManager->post(request, data);
     }
     return _deviceAccessToken;
 }
 
-void FlightHubHttpClient::setParams(const QString &hostAddress, const QString &deviceToken ,const QString &userHostAddress, const QString &email, const QString &password)
+void FlightHubHttpClient::setParams(const QString &hostAddress, const QString &deviceToken ,const QString &userHostAddress, const QString &email, const QString &password,const QString &deviceCode)
 {
     _hostAddress = hostAddress;
     _deviceToken = deviceToken;
     _userHostAddress  = userHostAddress;
     _email = email;
     _password = password;
+    _deviceCode = deviceCode;
 }
 

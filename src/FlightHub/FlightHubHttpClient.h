@@ -26,7 +26,7 @@ public:
     FlightHubHttpClient(QObject *parent);
     ~FlightHubHttpClient();
 
-    void setParams(const QString &hostAddress, const QString &deviceToken ,const QString &userHostAddress, const QString &email, const QString &password);
+    void setParams(const QString &hostAddress, const QString &deviceToken ,const QString &userHostAddress, const QString &email, const QString &password,const QString &deviceCode);
 public slots:
     void init();
     void publishTelemetry(QJsonObject obj);
@@ -50,6 +50,7 @@ private:
     QNetworkAccessManager *_publishTelemetryManager = nullptr;
     QNetworkAccessManager *_publishStatManager = nullptr;
     QString _hostAddress;
+    QString _deviceCode;
     QString _userHostAddress;
     QString _deviceAccessToken ;
     QString _userAccessToken ;

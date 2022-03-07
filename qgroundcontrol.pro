@@ -1539,3 +1539,4 @@ DISTFILES += \
     src/QmlControls/QGroundControl/Specific/qmldir
 
 # QT += mqtt
+android: include(/home/namhuynh/Android/Sdk/android_openssl/openssl.pri)

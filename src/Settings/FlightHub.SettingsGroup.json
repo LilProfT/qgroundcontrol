@@ -53,8 +53,15 @@
             "qgcRebootRequired": true
         },
         {
+            "name": "deviceCode",
+            "shortDesc": "Mã thiết bị",
+            "type": "string",
+            "default": "",
+            "qgcRebootRequired": true
+        },
+        {
             "name": "flightHubLocation",
-            "shortDesc": "Current Location",
+            "shortDesc": "Vị trí hiện tại",
             "type": "string",
             "default": "",
             "qgcRebootRequired": true

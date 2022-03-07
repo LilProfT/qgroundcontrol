@@ -1183,6 +1183,18 @@ Rectangle {
                              //   enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                                 showHelp:               false
                             }
+                            QGCLabel {
+                             text:               flightHubGrid.flightHubSettings.deviceCode.shortDescription
+                             visible:            flightHubGrid.flightHubSettings.deviceCode.visible
+                         //    enabled:            flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                         }
+                         FactTextField {
+                             fact:                   flightHubGrid.flightHubSettings.deviceCode
+                             visible:                flightHubGrid.flightHubSettings.deviceCode.visible
+                             Layout.fillWidth:       true
+                          //   enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
+                             showHelp:               false
+                         }
                                QGCLabel {
                                 text:               flightHubGrid.flightHubSettings.flightHubLocation.shortDescription
                                 visible:            flightHubGrid.flightHubSettings.flightHubLocation.visible

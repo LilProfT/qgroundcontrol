@@ -59,7 +59,9 @@ void FlightHubManager::_onVehicleReady(bool isReady)
                                             flightHubSettings->flightHubDeviceToken()->rawValueString(),
                                             flightHubSettings->authServerHostAddress()->rawValueString(),
                                             flightHubSettings->flightHubUserName()->rawValueString(),
-                                            flightHubSettings->flightHubPasswd()->rawValueString());
+                                            flightHubSettings->flightHubPasswd()->rawValueString(),
+                                            flightHubSettings->deviceCode()->rawValueString()
+                                            );
             _flightHubHttpClient->moveToThread(&_clientThread);
             connect(&_clientThread, &QThread::started, _flightHubHttpClient, &FlightHubHttpClient::init);
 
@@ -148,6 +150,10 @@ void FlightHubManager::timerSlot()
 
         emit publishTelemetry(dataObj);
         _positionArray = QJsonArray();
+        qCWarning(FlightHubManagerLog) << "publish";
+    }
+    else {
+         qCWarning(FlightHubManagerLog) << "Array is empty";
     }
 
     startTimer(5000);
@@ -157,10 +163,10 @@ void FlightHubManager::timerSlot()
 void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordinate)
 {
     //-- Only pay attention to camera components, as identified by their compId
-    //    qCWarning(FlightHubManagerLog) << "Mavlink received-" << _vehicle->coordinate().longitude()
-    //                                   << _vehicle->coordinate().latitude()
-    //                                   << _vehicle->heading()->rawValue().toDouble()
-    //                                   << _vehicle->vehicleUIDStr();
+//        qCWarning(FlightHubManagerLog) << "Mavlink received-" << _vehicle->coordinate().longitude()
+//                                       << _vehicle->coordinate().latitude()
+//                                       << _vehicle->heading()->rawValue().toDouble()
+//                                       << _vehicle->vehicleUIDStr();
     QJsonObject newObj = QJsonObject();
     newObj.insert("longitude", _vehicle->coordinate().longitude());
     newObj.insert("latitude", _vehicle->coordinate().latitude());
