@@ -153,7 +153,7 @@ Column {
         QGCSlider {
             id:                     distanceToSurfaceSlider
             minimumValue:           2
-            maximumValue:           20
+            maximumValue:           35
             stepSize:               0.2
             tickmarksEnabled:       false
             Layout.fillWidth:       true

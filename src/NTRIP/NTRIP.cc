@@ -32,38 +32,38 @@ void NTRIP::setToolbox(QGCToolbox* toolbox)
 
 void NTRIP::connectGPSNTRIP()
 {
-    NTRIPSettings* ntripSettings = qgcApp()->toolbox()->settingsManager()->ntripSettings();
-    QGeoCoordinate gcsPosition = _toolbox->qgcPositionManager()->gcsPosition();
+//    NTRIPSettings* ntripSettings = qgcApp()->toolbox()->settingsManager()->ntripSettings();
+//    QGeoCoordinate gcsPosition = _toolbox->qgcPositionManager()->gcsPosition();
     //qCWarning(RTKGPSLog) << "connectGPSNTRIP";
     //qCWarning(RTKGPSLog) << gcsPosition.longitude();
     _positionChanged++;
     //qCWarning(RTKGPSLog) << "_positionChanged: " << _positionChanged ;
 
-    if (ntripSettings->ntripServerConnectEnable()->rawValue().toBool() && (gcsPosition.longitude() == gcsPosition.longitude()) && _positionChanged >= 10 ){
-        if (!_rtkProvider) {
-            qCWarning(RTKGPSLog) << "_rtkProvider" ;
-            _requestRTKStop = false;
-            _rtkProvider = new RTKProvider(ntripSettings->ntripServerHostAddress()->rawValue().toString(),
-                                           ntripSettings->ntripServerPort()->rawValue().toInt(),
-                                           ntripSettings->ntripServerUserName()->rawValue().toString(),
-                                           ntripSettings->ntripServerPasswd()->rawValue().toString(),
-                                           ntripSettings->ntripServerMntpnt()->rawValue().toString(),
-                                           _requestRTKStop);
-            _rtkProvider->start();
-            _rtkProvider->vhcPosition = _vhcPosition;
-            _rtkProvider->syncInProgress = false;
+//    if (ntripSettings->ntripServerConnectEnable()->rawValue().toBool() && (gcsPosition.longitude() == gcsPosition.longitude()) && _positionChanged >= 10 ){
+//        if (!_rtkProvider) {
+//            qCWarning(RTKGPSLog) << "_rtkProvider" ;
+//            _requestRTKStop = false;
+//            _rtkProvider = new RTKProvider(ntripSettings->ntripServerHostAddress()->rawValue().toString(),
+//                                           ntripSettings->ntripServerPort()->rawValue().toInt(),
+//                                           ntripSettings->ntripServerUserName()->rawValue().toString(),
+//                                           ntripSettings->ntripServerPasswd()->rawValue().toString(),
+//                                           ntripSettings->ntripServerMntpnt()->rawValue().toString(),
+//                                           _requestRTKStop);
+//            _rtkProvider->start();
+//            _rtkProvider->vhcPosition = _vhcPosition;
+//            _rtkProvider->syncInProgress = false;
 
-            _rtcmMavlink = new RTCMMavlink(*_toolbox);
+//            _rtcmMavlink = new RTCMMavlink(*_toolbox);
 
-            connect(_rtkProvider, &RTKProvider::RTCMDataUpdate, _rtcmMavlink, &RTCMMavlink::RTCMDataUpdate);
+//            connect(_rtkProvider, &RTKProvider::RTCMDataUpdate, _rtcmMavlink, &RTCMMavlink::RTCMDataUpdate);
 
-            //test: connect to position update
-            connect(_rtkProvider, &RTKProvider::positionUpdate,         this, &NTRIP::GPSPositionUpdate);
-            connect(_rtkProvider, &RTKProvider::satelliteInfoUpdate,    this, &NTRIP::GPSSatelliteUpdate);
-            connect(_rtkProvider, &RTKProvider::finished,               this, &NTRIP::onDisconnect);
-            connect(_rtkProvider, &RTKProvider::surveyInStatus,         this, &NTRIP::surveyInStatus);
-        }
-    }
+//            //test: connect to position update
+//            connect(_rtkProvider, &RTKProvider::positionUpdate,         this, &NTRIP::GPSPositionUpdate);
+//            connect(_rtkProvider, &RTKProvider::satelliteInfoUpdate,    this, &NTRIP::GPSSatelliteUpdate);
+//            connect(_rtkProvider, &RTKProvider::finished,               this, &NTRIP::onDisconnect);
+//            connect(_rtkProvider, &RTKProvider::surveyInStatus,         this, &NTRIP::surveyInStatus);
+//        }
+//    }
 }
 
 void NTRIP::_coordinateChanged(QGeoCoordinate coordinate)

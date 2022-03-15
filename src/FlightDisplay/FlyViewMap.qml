@@ -312,18 +312,20 @@ FlightMap {
         }
     }
 
-
     // Add the vehicles to the map
     MapItemView {
+        id: vehicleMapItem
         model: QGroundControl.multiVehicleManager.vehicles
         delegate: VehicleMapItem {
             vehicle:        object
             coordinate:     object.coordinate
             map:            _root
             size:           pipMode ? ScreenTools.defaultFontPixelHeight : ScreenTools.defaultFontPixelHeight * 3
-            z:              QGroundControl.zOrderVehicles
+            //z:              QGroundControl.zOrderVehicles
+            z: QGroundControl.zOrderTopMost
         }
     }
+
     // Add distance sensor view
     MapItemView{
         model: QGroundControl.multiVehicleManager.vehicles
@@ -332,6 +334,7 @@ FlightMap {
             coordinate:     object.coordinate
             map:            _root
             z:              QGroundControl.zOrderVehicles
+
         }
     }
     // Add ADSB vehicles to the map
@@ -362,7 +365,10 @@ FlightMap {
 
             PlanMasterController {
                 id: masterController
-                Component.onCompleted: startStaticActiveVehicle(object)
+                Component.onCompleted: {
+                    startStaticActiveVehicle(object)
+                    vehicleMapItem.z = 100
+                }
             }
         }
     }
@@ -468,6 +474,8 @@ FlightMap {
             hide()
         }
     }
+
+
 
     // Orbit editing visuals
     QGCMapCircleVisuals {
