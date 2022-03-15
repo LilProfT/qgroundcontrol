@@ -529,6 +529,7 @@ Item {
     Component {
         id: editEdgeOffsetDialog
 
+
         QGCViewDialog {
             property real   _margin:        ScreenTools.defaultFontPixelWidth / 2
             property real   _fieldWidth:    ScreenTools.defaultFontPixelWidth * 10.5
@@ -546,6 +547,7 @@ Item {
             QGCFlickable {
                 anchors.fill:   parent
                 contentHeight:  column.height
+
 
                 Column {
                     id:             column

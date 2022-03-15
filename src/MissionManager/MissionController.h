@@ -83,7 +83,6 @@ public:
     Q_PROPERTY(double               progressPct                     READ progressPct                    NOTIFY progressPctChanged)
     Q_PROPERTY(int                  missionItemCount                READ missionItemCount               NOTIFY missionItemCountChanged)         ///< True mission item command count (only valid in Fly View)
     Q_PROPERTY(int                  currentMissionIndex             READ currentMissionIndex            NOTIFY currentMissionIndexChanged)
-    Q_PROPERTY(int                  resumeMissionIndex              READ resumeMissionIndex             NOTIFY resumeMissionIndexChanged)       ///< Returns the item index two which a mission should be resumed. -1 indicates resume mission not available.
     Q_PROPERTY(int                  currentPlanViewSeqNum           READ currentPlanViewSeqNum          NOTIFY currentPlanViewSeqNumChanged)
     Q_PROPERTY(int                  currentPlanViewVIIndex          READ currentPlanViewVIIndex         NOTIFY currentPlanViewVIIndexChanged)
     Q_PROPERTY(VisualMissionItem*   currentPlanViewItem             READ currentPlanViewItem            NOTIFY currentPlanViewItemChanged)
@@ -247,12 +246,8 @@ public:
 
     int missionItemCount            (void) const { return _missionItemCount; }
     int currentMissionIndex         (void) const;
-    int resumeMissionIndex          (void) const;
     int currentPlanViewSeqNum       (void) const { return _currentPlanViewSeqNum; }
     int currentPlanViewVIIndex      (void) const { return _currentPlanViewVIIndex; }
-    int resumeMissionIndex2          (void) const;
-    void  updateResumeMissionIndexFromFile        (int resumeIndex) const;
-    int resumeMissionIndexFromFile          (void) const;
 
     double  missionDistance         (void) const { return _missionFlightStatus.totalDistance; }
     double  missionTime             (void) const { return _missionFlightStatus.totalTime; }
@@ -430,8 +425,6 @@ private:
     static const char*  _jsonPlannedHomePositionKey;
     static const char*  _jsonParamsKey;
     static const char*  _jsonGlobalPlanAltitudeModeKey;
-    static const char*  _jsonResumePositionKey;
-    static const char*  _jsonResumeIndexKey;
     static const char*  _jsonSprayAreaKey;
     static const char*  _jsonPresetTemplateKey;
     // Deprecated V1 format keys

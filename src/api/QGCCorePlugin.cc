@@ -163,7 +163,7 @@ QVariantList &QGCCorePlugin::settingsPages()
 #endif
 
 //Hiding unused features on Mismart release build
-#if defined(QT_DEBUG)
+//if defined(QT_DEBUG)
         _p->pMAVLink = new QmlComponentInfo(tr("MAVLink"),
                                             QUrl::fromUserInput("qrc:/qml/MavlinkSettings.qml"),
                                             QUrl::fromUserInput("qrc:/res/waves.svg"));
@@ -174,7 +174,7 @@ QVariantList &QGCCorePlugin::settingsPages()
         _p->pHelp = new QmlComponentInfo(tr("Help"),
                                          QUrl::fromUserInput("qrc:/qml/HelpSettings.qml"));
         _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pHelp)));
-#endif
+//endif
 
 #if defined(QT_DEBUG)
         //-- These are always present on Debug builds

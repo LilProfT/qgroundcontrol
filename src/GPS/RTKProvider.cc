@@ -71,8 +71,9 @@ RTKProvider::~RTKProvider()
 
 void RTKProvider::gotRTCMData(QByteArray data)
 {
+    submitCount ++;
     if (!syncInProgress) {
-        qCWarning(RTKGPSLog) << "RTCMDataUpdate";
+        //qCWarning(RTKGPSLog) << "RTCMDataUpdate";
         emit RTCMDataUpdate(data);
     }
 }
@@ -141,8 +142,8 @@ void NTRIPTCPLink::timerSlot()
                 .arg("0");
 
         QString hexadecimal;
-        //QString s = QString("$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031");
-        //hexadecimal.setNum(calc_NMEA_Checksum (s.toStdString().c_str(), s.length()),16);
+//        QString s = QString("$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031");
+//        hexadecimal.setNum(_calcNMEAChecksum (s.toStdString().c_str(), s.length()),16);
 
         hexadecimal.setNum(_calcNMEAChecksum(GPGGA.toStdString().c_str(), GPGGA.length()), 16);
         QString nmea = QString("%0*%1").arg(GPGGA).arg(hexadecimal);
@@ -150,7 +151,7 @@ void NTRIPTCPLink::timerSlot()
 
         _tcpSocket->write(nmea.toUtf8());
     }
-    startTimer(2000);
+    startTimer(5000);
 }
 
 void NTRIPTCPLink::run(void)
@@ -278,7 +279,9 @@ int NTRIPTCPLink::_calcNMEAChecksum(const char *buf, int cnt )
 
 void NTRIPTCPLink::_parse(const QByteArray &buffer)
 {
-    for(const u_int8_t& byte : buffer){
+    for(const char& b : buffer){
+        u_int8_t byte = (u_int8_t)b;
+        //uint8 byte = uint8(b);
         if(_state == NTRIPState::waiting_for_rtcm_header){
             if(byte != RTCM3_PREAMBLE)
                 continue;
@@ -290,10 +293,16 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             //TODO: Restore the following when upstreamed in Driver repo
             //uint16_t id = _rtcm_parsing->messageId();
             u_int16_t id = ((u_int8_t)message[3] << 4) | ((u_int8_t)message[4] >> 4);
-            qCDebug(RTKGPSLog) << QString::fromStdString(message.toStdString());
+            qCWarning(RTKGPSLog) << "_rtcm_parsing id: " << id;
 
-            emit gotRTCMData(message);
-            qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
+            if (_whitelist.contains(id)) {
+                qCWarning(RTKGPSLog) << "_whitelist id: " << id;
+
+//                qCWarning(RTKGPSLog) << "_parse: " << QString::fromStdString(message.toStdString());
+
+                emit gotRTCMData(message);
+//                qCWarning(NTRIPLog) << "Sending " << id << "of size " << message.length();
+            }
 
             _rtcm_parsing->reset();
         }
@@ -306,6 +315,8 @@ void NTRIPTCPLink::_readBytes(void)
         QByteArray bytes = _tcpSocket->readAll();
         QString response = QString::fromStdString(bytes.toStdString());
 
+        //qCWarning(NTRIPLog) << "response " << response;
+
         if(_state == NTRIPState::waiting_for_http_response) {
             QString line = _tcpSocket->readLine();
             if (line.contains("200")){
@@ -317,6 +328,7 @@ void NTRIPTCPLink::_readBytes(void)
                 _state = NTRIPState::waiting_for_rtcm_header;
             }
         }
+        //emit gotRTCMData(bytes);
         _parse(bytes);
     }
 }

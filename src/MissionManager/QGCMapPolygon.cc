@@ -335,10 +335,10 @@ void QGCMapPolygon::splitPolygonSegment(int vertexIndex)
 
     double distance = firstVertex.distanceTo(nextVertex);
     double azimuth = firstVertex.azimuthTo(nextVertex);
-    QGeoCoordinate newVertex = firstVertex.atDistanceAndAzimuth(distance / 2, azimuth);
-//    QGeoCoordinate center = firstVertex.atDistanceAndAzimuth(distance / 2, azimuth);
-//    QGeoCoordinate newVertex = center.atDistanceAndAzimuth(1, azimuth + 90);
-//    if (_center.distanceTo(center) > _center.distanceTo(newVertex)) newVertex = center.atDistanceAndAzimuth(1, azimuth - 90);
+//    QGeoCoordinate newVertex = firstVertex.atDistanceAndAzimuth(distance / 2, azimuth);
+    QGeoCoordinate center = firstVertex.atDistanceAndAzimuth(distance / 2, azimuth);
+    QGeoCoordinate newVertex = center.atDistanceAndAzimuth(1, azimuth + 90);
+    if (_center.distanceTo(center) > _center.distanceTo(newVertex)) newVertex = center.atDistanceAndAzimuth(1, azimuth - 90);
 
     if (nextIndex == 0) {
         appendVertex(newVertex);

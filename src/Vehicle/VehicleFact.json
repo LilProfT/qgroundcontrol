@@ -95,6 +95,13 @@
     "units":            "m^2"
 },
 {
+    "name":             "totalArea",
+    "shortDesc": "total Area",
+    "type":             "double",
+    "decimalPlaces":    1,
+    "units":            "m^2"
+},
+{
     "name":             "spacing",
     "shortDesc": "Spacing",
     "type":             "double",

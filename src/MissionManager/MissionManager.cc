@@ -14,15 +14,19 @@
 #include "QGCApplication.h"
 #include "MissionCommandTree.h"
 #include "MissionCommandUIInfo.h"
+#include "PlanMasterController.h"
 #include <QGeoCoordinate>
 
 QGC_LOGGING_CATEGORY(MissionManagerLog, "MissionManagerLog")
 
 MissionManager::MissionManager(Vehicle* vehicle)
     : PlanManager               (vehicle, MAV_MISSION_TYPE_MISSION)
-    , _cachedLastCurrentIndex   (-1), _cachedResumeIndex(-1), _loadResumeFromFile(false)
+    , _cachedLastCurrentIndex   (-1)
+    , _blockNextResume          (false)
 {
     connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &MissionManager::_mavlinkMessageReceived);
+
+    connect(this, &PlanManager::currentIndexChanged, this, &MissionManager::_maybeResetTrimResume);
 }
 
 MissionManager::~MissionManager()
@@ -78,251 +82,36 @@ void MissionManager::writeArduPilotGuidedMissionItem(const QGeoCoordinate& gotoC
 
 void MissionManager::generateResumeMission(int resumeIndex)
 {
-    if (_vehicle->isOfflineEditingVehicle()) {
+    if (_blockNextResume) {
+        _blockNextResume = false;
         return;
     }
-    qCWarning(MissionManagerLog) << "before resumeIndex: " << resumeIndex;
-
-    if (inProgress()) {
-        qCDebug(MissionManagerLog) << "generateResumeMission called while transaction in progress";
-        return;
-    }
-
-    if (resumeIndex <= 0)
-        return;
-
-    for (int i=0; i<_missionItems.count(); i++) {
-        MissionItem* item = _missionItems[i];
-        if (item->command() == MAV_CMD_DO_JUMP) {
-            qgcApp()->showAppMessage(tr("Unable to generate resume mission due to MAV_CMD_DO_JUMP command."));
-            return;
-        }
-    }
-
-    // Be anal about crap input
-    resumeIndex = qMax(0, qMin(resumeIndex, _missionItems.count() - 1));
-    qCWarning(MissionManagerLog) << "resumeIndex: " << resumeIndex;
-
-    // Adjust resume index to be a location based command
-    const MissionCommandUIInfo* uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), _missionItems[resumeIndex]->command());
-    if (!uiInfo || uiInfo->isStandaloneCoordinate() || !uiInfo->specifiesCoordinate()) {
-        // We have to back up to the last command which the vehicle flies through
-        while (--resumeIndex > 0) {
-            uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), _missionItems[resumeIndex]->command());
-            if (uiInfo && (uiInfo->specifiesCoordinate() && !uiInfo->isStandaloneCoordinate())) {
-                // Found it
-                break;
-            }
-
-        }
-    }
-    resumeIndex = qMax(0, resumeIndex);
-    _cachedResumeIndex = resumeIndex;
-//    if (_absoluteResumeIndex == -1) _absoluteResumeIndex = 0;
-//    if (_absoluteResumeIndex > 0) _absoluteResumeIndex -= _adjustAbsIndex+2;
-//    _absoluteResumeIndex += resumeIndex;
-//    _adjustAbsIndex = 0;
-
-    qCWarning(MissionManagerLog) << "_cachedResumeIndex: " << _cachedResumeIndex;
-
-    QList<MissionItem*> resumeMission;
-
-    QList<MAV_CMD> includedResumeCommands;
-
-    // If any command in this list occurs before the resumeIndex it will be added to the front of the mission
-    includedResumeCommands << MAV_CMD_DO_CONTROL_VIDEO
-                           << MAV_CMD_DO_SET_ROI
-                           << MAV_CMD_DO_DIGICAM_CONFIGURE
-                           << MAV_CMD_DO_DIGICAM_CONTROL
-                           << MAV_CMD_DO_MOUNT_CONFIGURE
-                           << MAV_CMD_DO_MOUNT_CONTROL
-                           << MAV_CMD_DO_SET_CAM_TRIGG_DIST
-                           << MAV_CMD_DO_FENCE_ENABLE
-                           << MAV_CMD_IMAGE_START_CAPTURE
-                           << MAV_CMD_IMAGE_STOP_CAPTURE
-                           << MAV_CMD_VIDEO_START_CAPTURE
-                           << MAV_CMD_VIDEO_STOP_CAPTURE
-                           << MAV_CMD_DO_CHANGE_SPEED
-                           << MAV_CMD_SET_CAMERA_MODE
-                           << MAV_CMD_NAV_TAKEOFF;
+    auto survey = qgcApp()->toolbox()->planMasterControllerPlanView()->surveyComplexItem();
 
     bool addHomePosition = _vehicle->firmwarePlugin()->sendHomePositionToVehicle();
-
-    MissionItem* changeYawItem;
-    int prefixCommandCount = 0;
-    int firstAddedPoints = 0;
-
-    QGeoCoordinate resumeCoordinate = _vehicle->resumeCoordinate();
-
-    // arquire mission params
-    int j=0;
-    QGeoCoordinate first, second, third, fourth;
-    for (int i=0; (i<_missionItems.count()) && (j<5); i++) {
-        MissionItem* oldItem = _missionItems[i];
-        if (oldItem->command() == MAV_CMD_NAV_WAYPOINT) {
-            if (j==2) first  = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
-            if (j==3) second = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
-            if (j==4) third  = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
-            if (j==5) fourth = QGeoCoordinate(oldItem->param5(), oldItem->param6(), oldItem->param7());
-            j++;
-        };
-    }
-
-    //          ->
-    //   desc  spray  asc
-    // \-----_________---/
-    // 1     2        3  4
-//    bool isAscendingTerminal = qFuzzyCompare(first.azimuthTo(second), third.azimuthTo(fourth));
-    double missionAltitude = second.altitude();
-    double ascendingAltitude = first.altitude() - missionAltitude;
-//    double ascendingLength = third.distanceTo(fourth); // unused yet
-    double descendingLength = first.distanceTo(second);
-
+    QList<MissionItem*> resumeMission;
     for (int i=0; i<_missionItems.count(); i++) {
         MissionItem* oldItem = _missionItems[i];
-        if (oldItem->command() == MAV_CMD_CONDITION_YAW) {
-            changeYawItem = oldItem;
-        }
-        if ( i <= resumeIndex && oldItem->coordinate().longitude() != 0 && oldItem->coordinate().latitude() != 0) {
-            qCWarning(MissionManagerLog) << "oldItem->command()  " << oldItem->command() << " , i: " << i;
-
-            if (oldItem->command() == MAV_CMD_NAV_WAYPOINT) {
-                firstAddedPoints++;
-                qCWarning(MissionManagerLog) << "_cachedResumeIndex i: " << i;
-
-            }
-//            if (firstAddedPoints > 1)
-//                emit _vehicle->pointAddedFromfile(oldItem->coordinate());
-        }
-
-        double oldParam7 = oldItem->param7();
-        if (i == resumeIndex) {
-            
-            QGeoCoordinate coordinate = _vehicle->resumeCoordinate();
-            // [UGLY] this monstrosity comes from SimpleMissionItem::setCoordinate
-            // There isn't MissionItem::setCoordinate (but MissionItem::coordinate exists, what the heck).
-            // And now I'm reluctant to write that method.
-            // Are there reasons upstream not do it ??
-            qCWarning(MissionManagerLog) << "coordinate: " << coordinate << "at resumeIndex: " << resumeIndex;
-            //emit _vehicle->pointAddedFromfile(coordinate);
-
-            //qDebug() << coordinate;
-            if (oldItem->param5() != coordinate.latitude() || oldItem->param6() != coordinate.longitude()) {
-                oldItem->setParam5(coordinate.latitude());
-                oldItem->setParam6(coordinate.longitude());
-                oldItem->setParam7(missionAltitude + ascendingAltitude); // ascending altitude
-            }
-            // [/UGLY]
-        };
-        if ((i == 0 && addHomePosition) || i >= resumeIndex || includedResumeCommands.contains(oldItem->command()) || (uiInfo && uiInfo->isTakeoffCommand())) {
-            if (i < resumeIndex) {
-                prefixCommandCount++;
-            }
+        if ((addHomePosition && (i==0)) || (oldItem->command() == MAV_CMD_NAV_TAKEOFF)) {
             MissionItem* newItem = new MissionItem(*oldItem, this);
             newItem->setIsCurrentItem(false);
             resumeMission.append(newItem);
         }
-        if ((i == resumeIndex) && changeYawItem) {
-            MissionItem* newChangeYawItem = new MissionItem(*changeYawItem, this);
-            newChangeYawItem->setIsCurrentItem(false);
-            resumeMission.append(newChangeYawItem);
-            //_adjustAbsIndex++;
-
-            MissionItem* newHoldingWaypointItem = new MissionItem(*oldItem, this);
-            newHoldingWaypointItem->setIsCurrentItem(false);
-            newHoldingWaypointItem->setParam1(2.0); // delay 2 second
-            resumeMission.append(newHoldingWaypointItem);
-            //_adjustAbsIndex++;
-
-            newChangeYawItem = new MissionItem(*changeYawItem, this);
-            newChangeYawItem->setIsCurrentItem(false);
-            resumeMission.append(newChangeYawItem);
-            //_adjustAbsIndex++;
-
-            // NOTE if not ascendingTerminal, the (first, second, third, fourth) is wrong
-            // but below conditions still apply
-            bool isSecondOrThird = qFuzzyCompare(oldParam7, missionAltitude);
-            bool isSecond = false;
-            QGeoCoordinate thirdCoord;
-            if (isSecondOrThird) {
-                for (int j = resumeIndex+1; j<_missionItems.count(); j++) {
-                    MissionItem* item = _missionItems[j];
-                    if (item->command() == MAV_CMD_NAV_WAYPOINT) {
-                        isSecond = qFuzzyCompare(item->param7(), missionAltitude);
-                        thirdCoord = QGeoCoordinate(item->param5(), item->param6(), item->param7());
-                        break;
-                    }
-                }
-            }
-
-            if (isSecond) {
-                QGeoCoordinate resumeCoord(oldItem->param5(), oldItem->param6(), oldItem->param7());
-                double distance = resumeCoord.distanceTo(thirdCoord);
-                if (distance > descendingLength) {
-                    double azimuth = resumeCoord.azimuthTo(thirdCoord);
-                    QGeoCoordinate descCoord = resumeCoord.atDistanceAndAzimuth(descendingLength, azimuth);
-                    MissionItem* descWaypointItem = new MissionItem(*oldItem, this);
-                    descWaypointItem->setParam5(descCoord.latitude());
-                    descWaypointItem->setParam6(descCoord.longitude());
-                    descWaypointItem->setParam7(missionAltitude);
-                    descWaypointItem->setIsCurrentItem(false);
-                    resumeMission.append(descWaypointItem);
-                   //_adjustAbsIndex++;
-                }
-            }
-        }
     }
-    prefixCommandCount = qMax(0, qMin(prefixCommandCount, resumeMission.count()));  // Anal prevention against crashes
 
-    // De-dup and remove no-ops from the commands which were added to the front of the mission
-    bool foundROI = false;
-    bool foundCameraSetMode = false;
-    bool foundCameraStartStop = false;
-    prefixCommandCount--;   // Change from count to array index
-    while (prefixCommandCount >= 0) {
-        MissionItem* resumeItem = resumeMission[prefixCommandCount];
-        switch (resumeItem->command()) {
-        case MAV_CMD_SET_CAMERA_MODE:
-            // Only keep the last one
-            if (foundCameraSetMode) {
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundCameraSetMode = true;
-            break;
-        case MAV_CMD_DO_SET_ROI:
-            // Only keep the last one
-            if (foundROI) {
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundROI = true;
-            break;
-        case MAV_CMD_DO_SET_CAM_TRIGG_DIST:
-        case MAV_CMD_IMAGE_STOP_CAPTURE:
-        case MAV_CMD_VIDEO_START_CAPTURE:
-        case MAV_CMD_VIDEO_STOP_CAPTURE:
-            // Only keep the first of these commands that are found
-            if (foundCameraStartStop) {
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundCameraStartStop = true;
-            break;
-        case MAV_CMD_IMAGE_START_CAPTURE:
-            if (resumeItem->param3() != 0) {
-                // Remove commands which do not trigger by time
-                resumeMission.removeAt(prefixCommandCount);
-                break;
-            }
-            if (foundCameraStartStop) {
-                // Only keep the first of these commands that are found
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundCameraStartStop = true;
-            break;
-        default:
-            break;
-        }
+    survey->missionModel()->restore();
+    survey->missionModel()->setResumeCoord(_vehicle->resumeCoordinate());
+    survey->missionModel()->setUseResumeCoord();
+    survey->missionModel()->setMissionItemParent(_missionItems[0]->parent());
+    resumeMission << survey->missionModel()->generateItems();
+    qDebug() << "trim resume in manager" << survey->missionModel()->trimResume();
+    survey->trimResume()->setRawValue(survey->missionModel()->trimResume());
 
-        prefixCommandCount--;
+    MissionItem* lastRTL = _missionItems[_missionItems.count()-1];
+    if (lastRTL->command() == MAV_CMD_NAV_RETURN_TO_LAUNCH) {
+        MissionItem* newItem = new MissionItem(*lastRTL, this);
+        newItem->setIsCurrentItem(false);
+        resumeMission.append(newItem);
     }
 
     // Adjust sequence numbers and current item
@@ -340,221 +129,14 @@ void MissionManager::generateResumeMission(int resumeIndex)
     }
     _resumeMission = true;
     _writeMissionItemsWorker();
-    qCWarning(MissionManagerLog) << "_loadResumeFromFile: " << _loadResumeFromFile;
-}
-
-void MissionManager::generateResumeMissionFromFile(int resumeIndex)
-{
-    if (_vehicle->isOfflineEditingVehicle()) {
-        return;
-    }
-    qCWarning(MissionManagerLog) << "before resumeIndex: " << resumeIndex;
-
-    if (inProgress()) {
-        qCDebug(MissionManagerLog) << "generateResumeMission called while transaction in progress";
-        return;
-    }
-
-    if (resumeIndex <= 0)
-        return;
-
-    for (int i=0; i<_missionItems.count(); i++) {
-        MissionItem* item = _missionItems[i];
-        if (item->command() == MAV_CMD_DO_JUMP) {
-            qgcApp()->showAppMessage(tr("Unable to generate resume mission due to MAV_CMD_DO_JUMP command."));
-            return;
-        }
-    }
-
-    // Be anal about crap input
-    resumeIndex = qMax(0, qMin(resumeIndex, _missionItems.count() - 1));
-    qCWarning(MissionManagerLog) << "resumeIndex: " << resumeIndex;
-
-    // Adjust resume index to be a location based command
-    const MissionCommandUIInfo* uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), _missionItems[resumeIndex]->command());
-    if (!uiInfo || uiInfo->isStandaloneCoordinate() || !uiInfo->specifiesCoordinate()) {
-        // We have to back up to the last command which the vehicle flies through
-        while (--resumeIndex > 0) {
-            uiInfo = qgcApp()->toolbox()->missionCommandTree()->getUIInfo(_vehicle, _vehicle->vehicleClass(), _missionItems[resumeIndex]->command());
-            if (uiInfo && (uiInfo->specifiesCoordinate() && !uiInfo->isStandaloneCoordinate())) {
-                // Found it
-                break;
-            }
-
-        }
-    }
-    resumeIndex = qMax(0, resumeIndex);
-    _cachedResumeIndex = resumeIndex;
-    //_adjustAbsIndex = 0;
-
-    qCWarning(MissionManagerLog) << "_cachedResumeIndex: " << _cachedResumeIndex;
-
-    QList<MissionItem*> resumeMission;
-
-    QList<MAV_CMD> includedResumeCommands;
-
-    // If any command in this list occurs before the resumeIndex it will be added to the front of the mission
-    includedResumeCommands << MAV_CMD_DO_CONTROL_VIDEO
-                           << MAV_CMD_DO_SET_ROI
-                           << MAV_CMD_DO_DIGICAM_CONFIGURE
-                           << MAV_CMD_DO_DIGICAM_CONTROL
-                           << MAV_CMD_DO_MOUNT_CONFIGURE
-                           << MAV_CMD_DO_MOUNT_CONTROL
-                           << MAV_CMD_DO_SET_CAM_TRIGG_DIST
-                           << MAV_CMD_DO_FENCE_ENABLE
-                           << MAV_CMD_IMAGE_START_CAPTURE
-                           << MAV_CMD_IMAGE_STOP_CAPTURE
-                           << MAV_CMD_VIDEO_START_CAPTURE
-                           << MAV_CMD_VIDEO_STOP_CAPTURE
-                           << MAV_CMD_DO_CHANGE_SPEED
-                           << MAV_CMD_SET_CAMERA_MODE
-                           << MAV_CMD_NAV_TAKEOFF;
-
-    bool addHomePosition = _vehicle->firmwarePlugin()->sendHomePositionToVehicle();
-
-    MissionItem* changeYawItem;
-    int prefixCommandCount = 0;
-    int firstAddedPoints = 0;
-    for (int i=0; i<_missionItems.count(); i++) {
-        MissionItem* oldItem = _missionItems[i];
-        if (oldItem->command() == MAV_CMD_CONDITION_YAW) {
-            changeYawItem = oldItem;
-        }
-        if ( i <= resumeIndex && oldItem->coordinate().longitude() != 0 && oldItem->coordinate().latitude() != 0) {
-            qCWarning(MissionManagerLog) << "oldItem->command()  " << oldItem->command() << " , i: " << i;
-
-            if (oldItem->command() == MAV_CMD_NAV_WAYPOINT) {
-                firstAddedPoints++;
-                qCWarning(MissionManagerLog) << "_cachedResumeIndex i: " << i;
-
-            }
-            if (firstAddedPoints > 1)
-                emit _vehicle->pointAddedFromfile(oldItem->coordinate());
-        }
-
-        if (i == resumeIndex) {
-
-            QGeoCoordinate coordinate = _vehicle->resumeCoordinate();
-            // [UGLY] this monstrosity comes from SimpleMissionItem::setCoordinate
-            // There isn't MissionItem::setCoordinate (but MissionItem::coordinate exists, what the heck).
-            // And now I'm reluctant to write that method.
-            // Are there reasons upstream not do it ??
-            qCWarning(MissionManagerLog) << "coordinate: " << coordinate << "at resumeIndex: " << resumeIndex;
-            emit _vehicle->pointAddedFromfile(coordinate);
-
-            //qDebug() << coordinate;
-            if (oldItem->param5() != coordinate.latitude() || oldItem->param6() != coordinate.longitude()) {
-                oldItem->setParam5(coordinate.latitude());
-                oldItem->setParam6(coordinate.longitude());
-            }
-            // [/UGLY]
-        };
-        if ((i == 0 && addHomePosition) || i >= resumeIndex || includedResumeCommands.contains(oldItem->command()) || (uiInfo && uiInfo->isTakeoffCommand())) {
-            if (i < resumeIndex) {
-                prefixCommandCount++;
-            }
-            MissionItem* newItem = new MissionItem(*oldItem, this);
-            newItem->setIsCurrentItem(false);
-            resumeMission.append(newItem);
-        }
-        if ((i == resumeIndex) && changeYawItem) {
-                    MissionItem* newChangeYawItem = new MissionItem(*changeYawItem, this);
-                    newChangeYawItem->setIsCurrentItem(false);
-                    resumeMission.append(newChangeYawItem);
-                    //_adjustAbsIndex++;
-
-                    MissionItem* newHoldingWaypointItem = new MissionItem(*oldItem, this);
-                    newHoldingWaypointItem->setIsCurrentItem(false);
-                    newHoldingWaypointItem->setParam1(2.0);
-                    resumeMission.append(newHoldingWaypointItem);
-                    //_adjustAbsIndex++;
-
-                    newChangeYawItem = new MissionItem(*changeYawItem, this);
-                    newChangeYawItem->setIsCurrentItem(false);
-                    resumeMission.append(newChangeYawItem);
-                    //_adjustAbsIndex++;
-                }
-
-    }
-    prefixCommandCount = qMax(0, qMin(prefixCommandCount, resumeMission.count()));  // Anal prevention against crashes
-
-    // De-dup and remove no-ops from the commands which were added to the front of the mission
-    bool foundROI = false;
-    bool foundCameraSetMode = false;
-    bool foundCameraStartStop = false;
-    prefixCommandCount--;   // Change from count to array index
-    while (prefixCommandCount >= 0) {
-        MissionItem* resumeItem = resumeMission[prefixCommandCount];
-        switch (resumeItem->command()) {
-        case MAV_CMD_SET_CAMERA_MODE:
-            // Only keep the last one
-            if (foundCameraSetMode) {
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundCameraSetMode = true;
-            break;
-        case MAV_CMD_DO_SET_ROI:
-            // Only keep the last one
-            if (foundROI) {
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundROI = true;
-            break;
-        case MAV_CMD_DO_SET_CAM_TRIGG_DIST:
-        case MAV_CMD_IMAGE_STOP_CAPTURE:
-        case MAV_CMD_VIDEO_START_CAPTURE:
-        case MAV_CMD_VIDEO_STOP_CAPTURE:
-            // Only keep the first of these commands that are found
-            if (foundCameraStartStop) {
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundCameraStartStop = true;
-            break;
-        case MAV_CMD_IMAGE_START_CAPTURE:
-            if (resumeItem->param3() != 0) {
-                // Remove commands which do not trigger by time
-                resumeMission.removeAt(prefixCommandCount);
-                break;
-            }
-            if (foundCameraStartStop) {
-                // Only keep the first of these commands that are found
-                resumeMission.removeAt(prefixCommandCount);
-            }
-            foundCameraStartStop = true;
-            break;
-        default:
-            break;
-        }
-
-        prefixCommandCount--;
-    }
-
-    // Adjust sequence numbers and current item
-    int seqNum = 0;
-    for (int i=0; i<resumeMission.count(); i++) {
-        resumeMission[i]->setSequenceNumber(seqNum++);
-    }
-    int setCurrentIndex = addHomePosition ? 1 : 0;
-    resumeMission[setCurrentIndex]->setIsCurrentItem(true);
-
-    // Send to vehicle
-    _clearAndDeleteWriteMissionItems();
-    for (int i=0; i<resumeMission.count(); i++) {
-        _writeMissionItems.append(new MissionItem(*resumeMission[i], this));
-    }
-    _resumeMission = true;
-    _writeMissionItemsWorker();
-    qCWarning(MissionManagerLog) << "_loadResumeFromFile: " << _loadResumeFromFile;
 }
 
 void MissionManager::autoSaveMission(void) {
-    if (_cachedResumeIndex > 0)
-        emit autoSaved();
+    emit autoSaved();
 }
 
 void MissionManager::deleteResumeMission(void) {
-//    if (_cachedResumeIndex > 0)
-        emit deleteResumed();
+    emit deleteResumed();
 }
 
 /// Called when a new mavlink message for out vehicle is received
@@ -632,3 +214,15 @@ void MissionManager::_handleHeartbeat(const mavlink_message_t& message)
     }
 }
 
+void MissionManager::_maybeResetTrimResume(int currentIndex)
+{
+    if (_missionItems.count() == 0) return;
+    if (_currentMissionIndex >= _missionItems.count()-1) {
+        auto survey = qgcApp()->toolbox()->planMasterControllerPlanView()->surveyComplexItem();
+        if (survey) {
+            survey->trimResume()->setRawValue(0.0);
+            survey->missionModel()->clearUseResumeCoord();
+            _blockNextResume = true;
+        }
+    }
+}

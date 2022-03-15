@@ -61,7 +61,7 @@ Canvas {
     property real   _smallRadius:       (_smallRadiusRaw + ((_smallRadiusRaw % 2 == 0) ? 1 : 0)) * 0.7 // odd number for better centering
     property real   _normalRadiusRaw:   Math.ceil(ScreenTools.defaultFontPixelHeight * 0.35)
     property real   _normalRadius:      _normalRadiusRaw + ((_normalRadiusRaw % 2 == 0) ? 1 : 0)
-    property real   _specialRadiusRaw:  _smallRadiusRaw * 2.1
+    property real   _specialRadiusRaw:  _smallRadiusRaw * 1.4
     property real   _specialRadius:     _specialRadiusRaw + ((_specialRadiusRaw % 2 == 0) ? 1 : 0)
     property real   _indicatorRadius:   getIndicatorRadius()
     property real   _gimbalRadians:     degreesToRadians(vehicleYaw + gimbalYaw - 90)

@@ -1,0 +1,23 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":             "sprayOption",
+    "shortDesc": "Video source",
+    "longDesc":  "Source for video. UDP, TCP, RTSP and UVC Cameras may be supported depending on Vehicle and ground station version.",
+    "type":             "string",
+    "default":     ""
+},
+{
+    "name":             "sprayCentrifugalRPMSetting",
+    "shortDesc": "Centrifugal RPM",
+    "longDesc":  "Centrifugal RPM",
+    "type":             "uint16",
+    "min":              0,
+    "max":              100,
+    "default":     50
+}
+]
+}

@@ -185,6 +185,7 @@ void MissionModel::_integrateFences()
         int s = 0; // index on sprayIndices
         bool isPrevInbound;
         bool spraying = false;
+        double nedDown = 0.0;
         QList<Step*> holdQueue;
         IntersectInfo enterIntersect;
 
@@ -259,7 +260,7 @@ void MissionModel::_integrateFences()
                         const AvoidanceInfo& avoidance = clockwise ? clockwiseAvoidance : invClockwiseAvoidance;
                         QList<Step*> avoidWaypoints;
                         for (int j=0; j <avoidance.path.count(); j++) {
-                            avoidWaypoints.append(new WaypointStep(avoidance.path[j]));
+                            avoidWaypoints.append(new WaypointStep(avoidance.path[j], prevWP->nedDown));
                         }
 
                         // collect all                           already have WAYPOINT (prev)
@@ -273,6 +274,7 @@ void MissionModel::_integrateFences()
                 } else if (isPrevOutbound && isCurrInbound) { // enter
                     QLineF path(pp, cp);
                     enterIntersect = _intersectLinePolygon(path, extendedFence).first();
+                    nedDown = prevWP->nedDown;
                     if (spraying) outputSteps.append(new SprayStep()); // SPRAY
                 } else if (isPrevInbound && isCurrOutbound) { // exit
                     QLineF path(pp, cp);
@@ -286,7 +288,7 @@ void MissionModel::_integrateFences()
                     const AvoidanceInfo& avoidance = clockwise ? clockwiseAvoidance : invClockwiseAvoidance;
                     QList<Step*> avoidWaypoints;
                     for (int j=0; j <avoidance.path.count(); j++) {
-                        avoidWaypoints.append(new WaypointStep(avoidance.path[j]));
+                        avoidWaypoints.append(new WaypointStep(avoidance.path[j], nedDown));
                     }
 
                     // collect all                           already have WAYPOINT (prev)

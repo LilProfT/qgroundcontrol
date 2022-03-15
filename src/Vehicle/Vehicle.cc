@@ -134,7 +134,10 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _firmwarePluginManager        (firmwarePluginManager)
     , _joystickManager              (joystickManager)
     , _trajectoryPoints             (new TrajectoryPoints(this, this))
+    , _resumeCoordinates        (new QmlObjectListModel(this))
+
     , _mavlinkStreamConfig          (std::bind(&Vehicle::_setMessageInterval, this, std::placeholders::_1, std::placeholders::_2))
+
     , _rollFact                     (0, _rollFactName,              FactMetaData::valueTypeDouble)
     , _pitchFact                    (0, _pitchFactName,             FactMetaData::valueTypeDouble)
     , _headingFact                  (0, _headingFactName,           FactMetaData::valueTypeDouble)
@@ -344,6 +347,9 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
 
     connect(_settingsManager->appSettings()->offlineEditingCruiseSpeed(),   &Fact::rawValueChanged, this, &Vehicle::_offlineCruiseSpeedSettingChanged);
     connect(_settingsManager->appSettings()->offlineEditingHoverSpeed(),    &Fact::rawValueChanged, this, &Vehicle::_offlineHoverSpeedSettingChanged);
+//    connect(_settingsManager->agriSettings()->sprayCentrifugalRPMSetting(),    &Fact::rawValueChanged, this, &Vehicle::_centrifugalRPMSettingChanged);
+
+    connect(&_centrifugalTimer, &QTimer::timeout, this, &Vehicle::_resetCentrifugal);
 
     _offlineFirmwareTypeSettingChanged(_firmwareType);  // This adds correct terrain capability bit
     _firmwarePlugin->initializeVehicle(this);
@@ -391,6 +397,9 @@ void Vehicle::_commonInit()
     connect(_missionManager, &MissionManager::currentIndexChanged,      this, &Vehicle::_updateHeadingToNextWP);
     connect(_missionManager, &MissionManager::currentIndexChanged,      this, &Vehicle::_updateMissionItemIndex);
 
+    connect(_missionManager, &MissionManager::inProgressChanged, _toolbox->ntrip(), &NTRIP::syncInProgressChanged);
+    connect(_missionManager, &MissionManager::sendComplete, _toolbox->ntrip(), &NTRIP::sendComplete);
+
 //    connect(_missionManager, &MissionManager::sendComplete,             _trajectoryPoints, &TrajectoryPoints::clear);
 //    connect(_missionManager, &MissionManager::newMissionItemsAvailable, _trajectoryPoints, &TrajectoryPoints::clear);
 
@@ -422,6 +431,7 @@ void Vehicle::_commonInit()
     connect(_toolbox->corePlugin(), &QGCCorePlugin::showAdvancedUIChanged, this, &Vehicle::flightModesChanged);
 
     connect(_imageProtocolManager, &ImageProtocolManager::imageReady, this, &Vehicle::_imageProtocolImageReady);
+
 
     // Build FactGroup object model
 
@@ -940,10 +950,10 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
             severity = MAV_SEVERITY_CRITICAL;
         } else if (messageText.startsWith("Sprayer LOW")) {
             readAloud = true;
-            severity = MAV_SEVERITY_CRITICAL;
+            severity = MAV_SEVERITY_INFO;
         } else if (messageText.startsWith("Sprayer HIGH")) {
             readAloud = true;
-            severity = MAV_SEVERITY_CRITICAL;
+            severity = MAV_SEVERITY_INFO;
         }
     }
 
@@ -2284,7 +2294,7 @@ void Vehicle::_flightTimerStop()
 //Mismart: Custom areaSprayed start and stop functions
 bool Vehicle::_areaSprayedStart()
 {
-    if (batteries()->count() == 3) //Mismart AGR drone config, 3 batteries
+    if (batteries()->count() >= 2) //Mismart AGR drone config, 3 batteries
     {
         //if (batteries()->value<VehicleBatteryFactGroup*>(2)->current()->rawValue() >= 50) //Arbitrary number
         //Check sprayer PWM (from the _handleServoOutputRaw() function)
@@ -3957,10 +3967,49 @@ void Vehicle::gimbalPitchStep(int direction)
 void Vehicle::gimbalYawStep(int direction)
 {
     if(_haveGimbalData) {
-        //qDebug() << "Yaw:" << _curGimbalYaw << direction << (_curGimbalYaw + direction);
+        qDebug() << "Yaw:" << _curGimbalYaw << direction << (_curGimbalYaw + direction);
         double y = static_cast<double>(_curGimbalYaw + direction);
         gimbalControlValue(static_cast<double>(_curGimbalPitch), y);
     }
+}
+
+void Vehicle::updateCentrifugal(double percent)
+{
+    int max = 1750;
+    int min  = 1050;
+    double ratio = (max - min) / 100;
+    int pwm = min + (int) (percent * ratio);
+    qDebug() << "setServoCentrifugal pwm:" << pwm;
+    _toolbox->ntrip()->syncInProgressChanged(true);
+    sendMavCommand(_defaultComponentId,    // target component
+                             MAV_CMD_DO_SET_SERVO,             // command id
+                             false,                              // showError
+                             9, pwm);  // servo 9
+
+    QTimer::singleShot(1000, this, &Vehicle::_resetCentrifugal);
+}
+
+//void Vehicle::_centrifugalRPMSettingChanged     (QVariant value)
+//{
+//    int max = 1750;
+//    int min  = 1050;
+//    double ratio = (max - min) / 100;
+//    int pwm = min + (int) (value.toDouble() * ratio);
+//    qDebug() << "setServoCentrifugal pwm:" << pwm;
+
+//    sendMavCommand(_defaultComponentId,    // target component
+//                             MAV_CMD_DO_SET_SERVO,             // command id
+//                             false,                              // showError
+//                             9, pwm);  // servo 9
+
+//    _centrifugalTimer.stop();
+//    _centrifugalTimer.start(5000);
+//}
+
+void Vehicle::_resetCentrifugal() {
+    qDebug() << "_resetCentrifugal";
+    //_centrifugalTimer.stop();
+    _toolbox->ntrip()->syncInProgressChanged(false);
 }
 
 void Vehicle::centerGimbal()
@@ -4129,18 +4178,9 @@ void Vehicle::triggerSimpleCamera()
 }
 
 void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
-//    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) || (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode())) {
-//        qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
-//        _resumeCoordinate = this->coordinate();
-//        _trajectoryPoints->updatePausePoint(this->coordinate());
-//    } else if (flightMode == this->missionFlightMode() && (_prevflightMode == this->loiterFlightMode() || _prevflightMode == this->rtlFlightMode())) {
-//        //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
-//        _trajectoryPoints->updateResumePoint(this->coordinate());
-//    }
-//    _prevflightMode = flightMode;
 
-    if ((_prevflightMode == this->missionFlightMode() && flightMode == this->rtlFlightMode()) ||
-            (_prevflightMode == this->missionFlightMode() && flightMode == this->loiterFlightMode()) ) {
+
+    if ((_prevflightMode == this->missionFlightMode() && flightMode != this->missionFlightMode())) {
         qWarning() << "save RTL coord flightMode: " << flightMode << ", _prevflightMode: " << _prevflightMode;
         _resumeCoordinate = this->coordinate();
         _trajectoryPoints->updatePausePoint(this->coordinate());
@@ -4148,13 +4188,17 @@ void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
         //qWarning() << "return flightMode: " << flightMode << ", _prevflightMode: " <<  _prevflightMode;
         _trajectoryPoints->updateResumePoint(this->coordinate());
     }
+
     if (flightMode == this->pauseFlightMode())
         _resumeCoordinate = this->coordinate();
 
     _prevflightMode = flightMode;
 
-//    if ( flightMode == this->rtlFlightMode())
-//        _resumeCoordinate = this->coordinate();
+    QGCQGeoCoordinate* qgcPoint = new QGCQGeoCoordinate(_resumeCoordinate, this);
+
+    _resumeCoordinates->clear();
+    _resumeCoordinates->append(qgcPoint);
+    emit resumeCoordinateChanged();
 }
 
 void Vehicle::setUseAltimeter(bool valid) {

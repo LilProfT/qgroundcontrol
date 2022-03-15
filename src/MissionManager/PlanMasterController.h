@@ -98,14 +98,15 @@ public:
     Q_INVOKABLE void clearResumeFile(void);
     Q_INVOKABLE void deleteFileInResume(void);
 
+
+
     MissionController*      missionController(void)     { return &_missionController; }
     GeoFenceController*     geoFenceController(void)    { return &_geoFenceController; }
     RallyPointController*   rallyPointController(void)  { return &_rallyPointController; }
 
-    SurveyComplexItem* _surveyComplexItem = nullptr;
     void loadPolygonFromRecentFile(void);
 
-
+    SurveyComplexItem* surveyComplexItem(){ return _surveyComplexItem; };
     double      area            (void);
     Fact*       applicationRate (void) { return _surveyComplexItem ? _surveyComplexItem->applicationRate() : nullptr; }
     Fact*       flowRate        (void) { return _surveyComplexItem ? _surveyComplexItem->sprayFlowRate() : nullptr; }
@@ -135,11 +136,16 @@ public:
     QJsonDocument saveToJson    ();
     QJsonDocument saveRecentFileToJson    (const QString& filename);
     QGCMapPolygon loadTracingPolygon(void) { return _tracingAreaPolygon;};
+
     void setTracingPolygon(QGCMapPolygon tracingPolygon);
+    void setTracingPolygonFromFile(QGCMapPolygon tracingPolygon);
+
     void clearTracingPolygon();
 
     Vehicle* controllerVehicle(void) { return _controllerVehicle; }
     Vehicle* managerVehicle(void) { return _managerVehicle; }
+
+    void setSurveyComplexItem(SurveyComplexItem* value) { _surveyComplexItem = value; };
 
     static const int    kPlanFileVersion;
     static const char*  kPlanFileType;
@@ -209,4 +215,5 @@ private:
     double           _sprayedArea;
     bool                    _isMissionChange = false;
 
+    SurveyComplexItem* _surveyComplexItem = nullptr;
 };

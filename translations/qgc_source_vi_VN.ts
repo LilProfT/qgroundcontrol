@@ -4834,7 +4834,7 @@ Please place your vehicle in water, click the button, and wait. Note that the th
     <message>
         <location filename="../src/PlanView/CorridorScanEditor.qml" line="186"/>
         <source>Rotate Entry Point</source>
-        <translation>Xoay Điểm Vào</translation>
+        <translation>Chọn điểm bắt đầu</translation>
     </message>
     <message>
         <location filename="../src/PlanView/CorridorScanEditor.qml" line="194"/>
@@ -7375,7 +7375,7 @@ Please place your vehicle in water, click the button, and wait. Note that the th
     <message>
         <location filename="../src/PlanView/GeoFenceEditor.qml" line="121"/>
         <source>Polygon Fence</source>
-        <translation>Đa giác Fence</translation>
+        <translation>Tạo vật cản</translation>
     </message>
     <message>
         <location filename="../src/PlanView/GeoFenceEditor.qml" line="133"/>
@@ -7385,7 +7385,7 @@ Please place your vehicle in water, click the button, and wait. Note that the th
     <message>
         <location filename="../src/PlanView/GeoFenceEditor.qml" line="147"/>
         <source>Polygon Fences</source>
-        <translation>Đa giác Fence</translation>
+        <translation>Các vật cản</translation>
     </message>
     <message>
         <location filename="../src/PlanView/GeoFenceEditor.qml" line="151"/>
@@ -9414,6 +9414,11 @@ Please place your vehicle in water, click the button, and wait. Note that the th
         <location filename="../src/ui/toolbar/MainToolBar.qml" line="82"/>
         <source>Disconnect</source>
         <translation>Ngắt kết nối</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/toolbar/MainToolBar.qml" line="82"/>
+        <source>Turn Centrifugal Off</source>
+        <translation>Tắt ly tâm</translation>
     </message>
 </context>
 <context>
@@ -12309,7 +12314,7 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
     <message>
         <location filename="../src/PlanView/PlanToolBarIndicators.qml" line="238"/>
         <source>Upload Required</source>
-        <translation>Yêu cầu tải lên</translation>
+        <translation>Tải nhiệm vụ</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanToolBarIndicators.qml" line="238"/>
@@ -12505,7 +12510,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</source>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="824"/>
         <source>Fence</source>
-        <translation>Hàng rào</translation>
+        <translation>Vật cản</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="829"/>
@@ -13562,7 +13567,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</source>
     <message>
         <location filename="../src/MissionManager/QGCMapPolygonVisuals.qml" line="542"/>
         <source>Done Tracing</source>
-        <translation>Kết thúc theo dấu</translation>
+        <translation>Hoàn thành</translation>
     </message>
     <message>
         <location filename="../src/MissionManager/QGCMapPolygonVisuals.qml" line="542"/>
@@ -13573,6 +13578,16 @@ Click &apos;Ok&apos; to upload the Plan anyway.</source>
         <location filename="../src/MissionManager/QGCMapPolygonVisuals.qml" line="560"/>
         <source>Load KML/SHP...</source>
         <translation>Tải KML/SHP...</translation>
+    </message>
+    <message>
+        <location filename="../src/MissionManager/QGCMapPolygonVisuals.qml" line="678"/>
+        <source>Set from Vehicle</source>
+        <translation>Định vị máy bay</translation>
+    </message>
+    <message>
+        <location filename="../src/MissionManager/QGCMapPolygonVisuals.qml" line="685"/>
+        <source>Set from GCS</source>
+        <translation>Định vị GCS</translation>
     </message>
 </context>
 <context>
@@ -15929,7 +15944,7 @@ Actual AMSL altitude: %1 %2</source>
         <location filename="../src/MissionManager/SurveyComplexItem.h" line="55"/>
         <location filename="../src/MissionManager/SurveyComplexItem.cc" line="25"/>
         <source>Survey</source>
-        <translation>Tưới</translation>
+        <translation>Chỉnh nhiệm vụ</translation>
     </message>
     <message>
         <location filename="../src/MissionManager/SurveyComplexItem.h" line="56"/>
@@ -15998,7 +16013,7 @@ Actual AMSL altitude: %1 %2</source>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="135"/>
         <source>Spray Configuration</source>
         <translation>Điều chỉnh phun tưới</translation>
-    </message>
+    </message>   
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="147"/>
         <source>Application Rate</source>
@@ -16055,7 +16070,7 @@ Actual AMSL altitude: %1 %2</source>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="330"/>
         <source>Rotate Angle</source>
-        <translation>Xoay góc</translation>
+        <translation>Chỉnh làn</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="185"/>
@@ -16117,6 +16132,11 @@ Actual AMSL altitude: %1 %2</source>
         <location filename="../src/PlanView/SurveyItemEditor.qml" line="410"/>
         <source>Select Polygon File</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/SurveyItemEditor.qml" line="233"/>
+        <source>Basic flight</source>
+        <translation>Thông số cơ bản</translation>
     </message>
 </context>
 <context>

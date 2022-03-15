@@ -37,9 +37,11 @@ void NTRIP::connectGPSNTRIP()
     //qCWarning(RTKGPSLog) << "connectGPSNTRIP";
     //qCWarning(RTKGPSLog) << gcsPosition.longitude();
     _positionChanged++;
+    //qCWarning(RTKGPSLog) << "_positionChanged: " << _positionChanged ;
+
     if (ntripSettings->ntripServerConnectEnable()->rawValue().toBool() && (gcsPosition.longitude() == gcsPosition.longitude()) && _positionChanged >= 10 ){
         if (!_rtkProvider) {
-            qCWarning(RTKGPSLog) << "_rtkProvider";
+            qCWarning(RTKGPSLog) << "_rtkProvider" ;
             _requestRTKStop = false;
             _rtkProvider = new RTKProvider(ntripSettings->ntripServerHostAddress()->rawValue().toString(),
                                            ntripSettings->ntripServerPort()->rawValue().toInt(),
@@ -49,6 +51,7 @@ void NTRIP::connectGPSNTRIP()
                                            _requestRTKStop);
             _rtkProvider->start();
             _rtkProvider->vhcPosition = _vhcPosition;
+            _rtkProvider->syncInProgress = false;
 
             _rtcmMavlink = new RTCMMavlink(*_toolbox);
 
@@ -70,15 +73,23 @@ void NTRIP::_coordinateChanged(QGeoCoordinate coordinate)
         _rtkProvider->vhcPosition = _vhcPosition;
 }
 
-void NTRIP::_syncInProgressChanged(bool syncInProgress)
+void NTRIP::syncInProgressChanged(bool syncInProgress)
 {
     if (_rtkProvider != nullptr) {
-        qCWarning(RTKGPSLog) << "syncInProgress: ";
-        qCWarning(RTKGPSLog) << syncInProgress;
+        qCWarning(RTKGPSLog) << "syncInProgress: " << syncInProgress;
 
         _rtkProvider->syncInProgress = syncInProgress;
     }
 }
+
+void NTRIP::sendComplete(bool error) {
+    if (_rtkProvider != nullptr) {
+        qCWarning(RTKGPSLog) << "sendComplete error: " << error;
+
+        _rtkProvider->syncInProgress = false;
+    }
+}
+
 
 void NTRIP::_tcpError(const QString errorMsg)
 {

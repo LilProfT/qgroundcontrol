@@ -34,6 +34,8 @@ SettingsManager::SettingsManager(QGCApplication* app, QGCToolbox* toolbox)
 #if !defined(NO_ARDUPILOT_DIALECT)
     , _apmMavlinkStreamRateSettings (nullptr)
 #endif
+    , _agriSettings (nullptr)
+
 {
 
 }
@@ -58,10 +60,13 @@ void SettingsManager::setToolbox(QGCToolbox *toolbox)
     _offlineMapsSettings =          new OfflineMapsSettings         (this);
     _firmwareUpgradeSettings =      new FirmwareUpgradeSettings     (this);
     _adsbVehicleManagerSettings =   new ADSBVehicleManagerSettings  (this);
+
 #if !defined(NO_ARDUPILOT_DIALECT)
     _apmMavlinkStreamRateSettings = new APMMavlinkStreamRateSettings(this);
 #endif
 #if defined(QGC_AIRMAP_ENABLED)
     _airMapSettings =               new AirMapSettings          (this);
 #endif
+    _agriSettings =              new AgriSettings             (this);
+
 }

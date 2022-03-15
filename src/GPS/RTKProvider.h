@@ -57,6 +57,7 @@ private slots:
     void _readBytes(void);
     void _newConnection(void);
 
+
 private:
     enum class NTRIPState {
             uninitialised,
@@ -81,6 +82,8 @@ private:
     bool            _serverMode = true;
     RTCMParsing*    _rtcm_parsing{nullptr};
     NTRIPState      _state;
+    QVector<int>    _whitelist = { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1009, 1010, 1011, 1012, 1033, 1074, 1075, 1077, 1084, 1085, 1087, 1094, 1095, 1097, 1124, 1125, 1127, 1230 };
+
 };
 
 class RTKProvider : public QThread
@@ -94,6 +97,8 @@ public:
     ~RTKProvider();
     QGeoCoordinate          vhcPosition;
     bool                    syncInProgress;
+    int                    submitCount;
+
     /**
      * this is called by the callback method
      */

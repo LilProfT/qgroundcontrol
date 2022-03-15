@@ -48,6 +48,7 @@ Rectangle {
     property var    _planViewSettings:          QGroundControl.settingsManager.planViewSettings
     property var    _flyViewSettings:           QGroundControl.settingsManager.flyViewSettings
     property var    _videoSettings:             QGroundControl.settingsManager.videoSettings
+    property var    _agriSettings:             QGroundControl.settingsManager.agriSettings
     property string _videoSource:               _videoSettings.videoSource.rawValue
     property bool   _isGst:                     QGroundControl.videoManager.isGStreamer
     property bool   _isUDP264:                  _isGst && _videoSource === _videoSettings.udp264VideoSource
@@ -58,11 +59,19 @@ Rectangle {
     property bool   _videoAutoStreamConfig:     QGroundControl.videoManager.autoStreamConfigured
     property bool   _showSaveVideoSettings:     _isGst || _videoAutoStreamConfig
     property bool   _disableAllDataPersistence: QGroundControl.settingsManager.appSettings.disableAllPersistence.rawValue
+    property string _sprayOption:               _agriSettings.sprayOption.rawValue
+    property bool _isSprayCentrifugal:          _sprayOption === _agriSettings.sprayCentrifugalType
+property int _marginSlider : Math.round(ScreenTools.defaultFontPixelWidth *  (ScreenTools.isMobile ? 3.5 : 3.0))
 
     property string gpsDisabled: "Disabled"
     property string gpsUdpPort:  "UDP Port"
+    property int prevCentrifugalValue : 0
 
     readonly property real _internalWidthRatio: 0.8
+
+    FactPanelController {
+        id: controller
+    }
 
         QGCFlickable {
             clip:               true
@@ -1207,6 +1216,104 @@ Rectangle {
                              //   enabled:                flightHubGrid.flightHubSettings.flightHubServerConnectEnable.value
                                 showHelp:               false
                             }
+                        }
+                    }
+
+
+                    Item { width: 1; height: _margins; visible: agriSectionLabel.visible }
+                    QGCLabel {
+                        id:         agriSectionLabel
+                        text:       qsTr("Agri config")
+                    }
+                    Rectangle {
+                        Layout.preferredHeight: agriGrid.height + (_margins * 2)
+                        Layout.preferredWidth:  agriSectionLabel.width + (_margins * 2)
+                        color:                  qgcPal.windowShade
+                        visible:                agriSectionLabel.visible
+                        Layout.fillWidth:       true
+
+                        GridLayout {
+                            id:                         agriGrid
+                            anchors.topMargin:          _margins
+                            anchors.top:                parent.top
+                            Layout.fillWidth:           true
+                            anchors.horizontalCenter:   parent.horizontalCenter
+                            columns:                    2
+
+                            property var  agriSettings:    QGroundControl.settingsManager.agriSettings
+
+                            QGCLabel {
+                                id:         sprayOptionLabel
+                                text:       qsTr("Spray Option")
+                            }
+
+                            FactComboBox {
+                                id:                     sprayOption
+                                Layout.preferredWidth:  _comboFieldWidth
+                                indexModel:             false
+                                fact:                   agriGrid.agriSettings.sprayOption
+                                visible:                true
+                            }
+
+                            QGCLabel {
+                                id:         centrifugalRPMLabel
+                                text:       qsTr("Centrifugal RPM")
+                                visible:    _isSprayCentrifugal
+                            }
+
+                            QGCLabel {
+                                                    text:                   centrifugalRPMSlider.value.toFixed(1) + " " + "%"
+                                                    Layout.alignment:       Qt.AlignRight
+                                                    visible:                centrifugalRPMLabel.visible
+                            }
+
+                            QGCSlider {
+                                id:             centrifugalRPMSlider
+                                visible:                centrifugalRPMLabel.visible
+                                minimumValue:           0
+                                maximumValue:           100
+                                stepSize:               5
+                                tickmarksEnabled:       false
+                                Layout.fillWidth:       true
+                                Layout.columnSpan:      2
+                                Layout.leftMargin: _marginSlider
+                                Layout.rightMargin: _marginSlider
+                                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                                value:                  agriGrid.agriSettings.sprayCentrifugalRPMSetting.value
+                                onValueChanged:         {
+                                    agriGrid.agriSettings.sprayCentrifugalRPMSetting.value = value
+                                    if (prevCentrifugalValue != 0) {
+                                        controller.vehicle.updateCentrifugal(value)
+                                    }
+                                    prevCentrifugalValue = value
+//                                    if (value != 0) {
+//                                        motorTimer.restart()
+//                                    }
+                                }
+                                Component.onCompleted:  value = agriGrid.agriSettings.sprayCentrifugalRPMSetting.value
+                                updateValueWhileDragging: true
+
+
+
+//                                Timer {
+//                                    id:             motorTimer
+//                                    interval:       3 * 1000
+//                                    repeat:         false
+//                                    running:        false
+
+//                                    onTriggered: {
+//                                        controller.vehicle.updateCentrifugal(0)
+//                                    }
+//                                }
+                            }
+
+//                            FactTextField {
+//                                id:                     centrifugalRPMField
+//                                fact:                   agriGrid.agriSettings.sprayCentrifugalRPMSetting
+//                                visible:                true
+//                                Layout.fillWidth:       true
+//                                showHelp:               false
+//                            }
                         }
                     }
 

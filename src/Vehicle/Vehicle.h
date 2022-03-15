@@ -159,6 +159,8 @@ public:
     Q_PROPERTY(QGeoCoordinate       coordinate                  READ coordinate                                                     NOTIFY coordinateChanged)
     Q_PROPERTY(QGeoCoordinate       homePosition                READ homePosition                                                   NOTIFY homePositionChanged)
     Q_PROPERTY(QGeoCoordinate       armedPosition               READ armedPosition                                                  NOTIFY armedPositionChanged)
+    Q_PROPERTY(QmlObjectListModel*  resumeCoordinates                   READ resumeCoordinates                  NOTIFY resumeCoordinateChanged)
+
     Q_PROPERTY(QGeoCoordinate       resumeCoordinate            READ resumeCoordinate                                               CONSTANT)
     Q_PROPERTY(bool                 armed                       READ armed                      WRITE setArmedShowError             NOTIFY armedChanged)
     Q_PROPERTY(bool                 autoDisarm                  READ autoDisarm                                                     NOTIFY autoDisarmChanged)
@@ -437,6 +439,7 @@ public:
 
     /// Trigger camera using MAV_CMD_DO_DIGICAM_CONTROL command
     Q_INVOKABLE void triggerSimpleCamera(void);
+    Q_INVOKABLE void updateCentrifugal(double percent);
 
     // Mismart publish mission
     Q_INVOKABLE void publishMissionCompleted(void);
@@ -859,6 +862,7 @@ public:
 
     //Mismart: Set useAltimeter to true if available and valid
     void        setUseAltimeter         (bool valid);
+    QmlObjectListModel* resumeCoordinates               (void) { return _resumeCoordinates; }
 
 public slots:
     void setVtolInFwdFlight                 (bool vtolInFwdFlight);
@@ -869,6 +873,7 @@ signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
     void pointAddedFromfile              (QGeoCoordinate coordinate);
     void clearTrajectoryPoint              (void);
+    void resumeCoordinateChanged               (void);
 
     // Mismart: create signal on mission completed
     void missionCompleted                   (void);
@@ -1065,6 +1070,8 @@ private:
     void _chunkedStatusTextCompleted    (uint8_t compId);
     void _setMessageInterval            (int messageId, int rate);
     EventHandler& _eventHandler         (uint8_t compid);
+    void _resetCentrifugal            ();
+    void _centrifugalRPMSettingChanged     (QVariant value);
 
     static void _rebootCommandResultHandler(void* resultHandlerData, int compId, MAV_RESULT commandResult, MavCmdResultFailureCode_t failureCode);
     void _saveResumeCoordinate(const QString& flightMode);
@@ -1183,6 +1190,9 @@ private:
     QElapsedTimer                   _flightTimer;
     QTimer                          _flightTimeUpdater;
     TrajectoryPoints*               _trajectoryPoints = nullptr;
+
+    QmlObjectListModel*         _resumeCoordinates =                nullptr;
+
     QVariantList    _polyPoints;
 
 
@@ -1223,6 +1233,7 @@ private:
     // by default.
     uint16_t       _firmwareBoardVendorId = 0;
     uint16_t       _firmwareBoardProductId = 0;
+    QTimer             _centrifugalTimer;
 
 
     QString _gitHash;

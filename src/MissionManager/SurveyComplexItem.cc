@@ -48,6 +48,7 @@ const char* SurveyComplexItem::firstLaneOffsetName =        "FirstLaneOffset";
 const char* SurveyComplexItem::ascendLengthName =           "AscendLength";
 const char* SurveyComplexItem::trimStartName =              "TrimStart";
 const char* SurveyComplexItem::trimEndName =                "TrimEnd";
+const char* SurveyComplexItem::trimResumeName =             "TrimResume";
 
 const char* SurveyComplexItem::_jsonGridAngleKey =          "angle";
 const char* SurveyComplexItem::_jsonEntryPointKey =         "entryLocation";
@@ -85,6 +86,7 @@ const char* SurveyComplexItem::_jsonFirstLaneOffsetKey =                "firstLa
 const char* SurveyComplexItem::_jsonAscendLengthKey =                   "ascendLength";
 const char* SurveyComplexItem::_jsonTrimStartKey =                      "trimStart";
 const char* SurveyComplexItem::_jsonTrimEndKey =                        "trimEnd";
+const char* SurveyComplexItem::_jsonTrimResumeKey =                        "trimResume";
 const char* SurveyComplexItem::_jsonApplicationRateKey =                "applicationRate";
 const char* SurveyComplexItem::_jsonVelocityKey =                       "velocity";
 const char* SurveyComplexItem::_jsonMissionEnterPointKey =              "missionEnterPoint";
@@ -108,11 +110,12 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     , _ascendLengthFact         (settingsGroup, _metaDataMap[ascendLengthName])
     , _trimStartFact            (settingsGroup, _metaDataMap[trimStartName])
     , _trimEndFact              (settingsGroup, _metaDataMap[trimEndName])
+    , _trimResumeFact           (settingsGroup, _metaDataMap[trimResumeName])
     , _entryPoint               (EntryLocationTopLeft)
     , _timer_optimize_Angle_EntryPoint       (this)
 {
     _editorQml = "qrc:/qml/SurveyItemEditor.qml";
-    masterController->_surveyComplexItem = this;
+    masterController->setSurveyComplexItem(this);
     emit masterController->surveyInited();
 
     // If the user hasn't changed turnaround from the default (which is a fixed wing default) and we are multi-rotor set the multi-rotor default.
@@ -123,6 +126,9 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     }
     //<Mismart>:
     _turnAroundDistanceFact.setRawValue(0);
+    _trimStartFact.setRawValue(0);
+    _trimEndFact.setRawValue(0);
+    _trimResumeFact.setRawValue(0);
 
     if (_controllerVehicle && !(_controllerVehicle->fixedWing() || _controllerVehicle->vtol())) {
         // Only fixed wing flight paths support alternate transects
@@ -149,7 +155,11 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     connect(&_ascendLengthFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_trimStartFact,            &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
     connect(&_trimEndFact,              &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+    connect(&_trimResumeFact,           &Fact::valueChanged,                        this, &SurveyComplexItem::_setDirty);
+
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_setDirty);
+
+    connect(&_trimResumeFact,           &Fact::valueChanged,                        &_model, &MissionModel::clearUseResumeCoord);
 
     connect(&_gridAngleFact,            &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_flyAlternateTransectsFact,&Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
@@ -160,6 +170,7 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
     connect(&_ascendLengthFact,         &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_trimStartFact,            &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(&_trimEndFact,              &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
+    connect(&_trimResumeFact,           &Fact::valueChanged,                        this, &SurveyComplexItem::_rebuildTransects);
     connect(this,                       &SurveyComplexItem::refly90DegreesChanged,  this, &SurveyComplexItem::_rebuildTransects);
 
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::isValidChanged,             this, &SurveyComplexItem::_updateWizardMode);
@@ -180,7 +191,6 @@ SurveyComplexItem::SurveyComplexItem(PlanMasterController* masterController, boo
 //    connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                &_timer_optimize_Angle_EntryPoint, QOverload<>::of(&QTimer::start));
     connect(_masterController->missionController()->takeoffMissionItem(), &TakeoffMissionItem::launchCoordinateChanged, this, &SurveyComplexItem::_optimize_EntryPoint);
 
-    QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
 
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathChanged,                this, &SurveyComplexItem::_catchFirstEdge);
     connect(&_surveyAreaPolygon,        &QGCMapPolygon::pathDone,                this, &SurveyComplexItem::optimize);
@@ -226,6 +236,7 @@ void SurveyComplexItem::_saveCommon(QJsonObject& saveObject)
     saveObject[_jsonAscendLengthKey] =                          _ascendLengthFact.rawValue().toDouble();
     saveObject[_jsonTrimStartKey] =                             _trimStartFact.rawValue().toDouble();
     saveObject[_jsonTrimEndKey] =                               _trimEndFact.rawValue().toDouble();
+    saveObject[_jsonTrimResumeKey] =                            _trimResumeFact.rawValue().toDouble();
     saveObject[_jsonEntryPointKey] =                            _entryPoint;
     saveObject[_jsonApplicationRateKey] =                 _applicationRateFact.rawValue().toDouble();
     saveObject[_jsonVelocityKey] =                 _velocityFact.rawValue().toDouble();
@@ -310,7 +321,9 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
         { _jsonFirstLaneOffsetKey,                      QJsonValue::Double, false },
         { _jsonAscendLengthKey,                         QJsonValue::Double, false },
         { _jsonTrimStartKey,                            QJsonValue::Double, false },
-        { _jsonTrimEndKey,                              QJsonValue::Double, false }
+        { _jsonTrimEndKey,                              QJsonValue::Double, false },
+        { _jsonTrimResumeKey,                           QJsonValue::Double, false }
+
     };
 
     if(version == 5) {
@@ -354,11 +367,28 @@ bool SurveyComplexItem::_loadV4V5(const QJsonObject& complexObject, int sequence
     _ascendAltitudeFact.setRawValue         (complexObject[_jsonAscendAltitudeKey].toDouble());
     _firstLaneOffsetFact.setRawValue        (complexObject[_jsonFirstLaneOffsetKey].toDouble());
     _ascendLengthFact.setRawValue           (complexObject[_jsonAscendLengthKey].toDouble());
-    _trimStartFact.setRawValue              (complexObject[_jsonTrimStartKey].toDouble());
-    _trimEndFact.setRawValue                (complexObject[_jsonTrimEndKey].toDouble());
+
+    if (complexObject.contains(_jsonTrimStartKey))
+        _trimStartFact.setRawValue             (complexObject[_jsonTrimStartKey].toDouble());
+    else
+        _trimStartFact.setRawValue(0);
+
+    if (complexObject.contains(_jsonTrimEndKey))
+        _trimEndFact.setRawValue             (complexObject[_jsonTrimEndKey].toDouble());
+    else
+        _trimEndFact.setRawValue(0);
+
+    if (complexObject.contains(_jsonTrimResumeKey))
+        _trimResumeFact.setRawValue             (complexObject[_jsonTrimResumeKey].toDouble());
+    else
+        _trimResumeFact.setRawValue(0);
+
+
 
     _edgeIndex = (int)complexObject[_jsonEdgeIndexKey].toDouble();
     _isEdgeIndexFromFile = true;
+    QTimer::singleShot(2000, this, &SurveyComplexItem::_updateAngle);
+
     qDebug() << " _jsonVelocityKey: " << complexObject[_jsonVelocityKey].toDouble() ;
     qDebug() << " _jsonEdgeIndexKey: " << _edgeIndex ;
     qDebug() << " _isEdgeIndexFromFile: " << _isEdgeIndexFromFile ;

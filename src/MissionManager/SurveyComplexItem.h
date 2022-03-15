@@ -44,6 +44,8 @@ public:
     Q_PROPERTY(Fact* ascendLength           READ ascendLength           CONSTANT)
     Q_PROPERTY(Fact* trimStart              READ trimStart              CONSTANT)
     Q_PROPERTY(Fact* trimEnd                READ trimEnd                CONSTANT)
+    Q_PROPERTY(Fact* trimResume             READ trimResume             CONSTANT)
+
     Q_PROPERTY(QVariantList  angleEdge      READ angleEdge              NOTIFY angleEdgeChanged)
 	Q_PROPERTY(QGeoCoordinate   centerCoordinate       READ centerCoordinate       WRITE setCenterCoordinate)
 
@@ -62,6 +64,8 @@ public:
     Fact* ascendLength          (void) { return &_ascendLengthFact; }
     Fact* trimStart             (void) { return &_trimStartFact; }
     Fact* trimEnd               (void) { return &_trimEndFact; }
+    Fact* trimResume            (void) { return &_trimResumeFact; }
+
     Fact* gridSpacing           (void) { return _cameraCalc.adjustedFootprintSide(); }
 
     QVariantList angleEdge() { return _angleEdge; }
@@ -124,6 +128,7 @@ public:
     static const char* ascendLengthName;
     static const char* trimStartName;
     static const char* trimEndName;
+    static const char* trimResumeName;
 
     static const char* jsonV3ComplexItemTypeValue;
 
@@ -208,6 +213,8 @@ private:
     SettingsFact    _ascendLengthFact;
     SettingsFact    _trimStartFact;
     SettingsFact    _trimEndFact;
+    SettingsFact    _trimResumeFact;
+
     int             _entryPoint;
     int             _edgeIndex = 0;
     bool            _isEdgeIndexFromFile = false;
@@ -228,6 +235,7 @@ private:
     static const char* _jsonAscendLengthKey;
     static const char* _jsonTrimStartKey;
     static const char* _jsonTrimEndKey;
+    static const char* _jsonTrimResumeKey;
     static const char* _jsonApplicationRateKey;
     static const char* _jsonVelocityKey;
     static const char* _jsonMissionEnterPointKey;

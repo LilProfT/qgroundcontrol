@@ -179,7 +179,7 @@
         <file alias="QGroundControl/Controls/TerrainStatus.qml">src/PlanView/TerrainStatus.qml</file>
         <file alias="QGroundControl/Controls/TakeoffItemMapVisual.qml">src/PlanView/TakeoffItemMapVisual.qml</file>
         <file alias="QGroundControl/Controls/ToolStrip.qml">src/QmlControls/ToolStrip.qml</file>
-       	<file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButton.qml</file>
+        <file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButton.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleComplexItemEditor.qml">src/PlanView/TransectStyleComplexItemEditor.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleComplexItemStats.qml">src/PlanView/TransectStyleComplexItemStats.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleComplexItemTabBar.qml">src/PlanView/TransectStyleComplexItemTabBar.qml</file>
@@ -206,7 +206,7 @@
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">src/FlightDisplay/FlyViewCustomLayer.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewInstrumentPanel.qml">src/FlightDisplay/FlyViewInstrumentPanel.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">src/FlightDisplay/FlyViewMap.qml</file>
-        <file alias="QGroundControl/FlightDisplay/TrajectionFlightPaths.qml">src/FlightDisplay/TrajectionFlightPaths.qml</file>        
+        <file alias="QGroundControl/FlightDisplay/TrajectionFlightPaths.qml">src/FlightDisplay/TrajectionFlightPaths.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">src/FlightDisplay/FlyViewMissionCompleteDialog.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewPreFlightChecklistPopup.qml">src/FlightDisplay/FlyViewPreFlightChecklistPopup.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewToolStrip.qml">src/FlightDisplay/FlyViewToolStrip.qml</file>
@@ -320,7 +320,8 @@
         <file alias="RCToParamDialog.FactMetaData.json">src/QmlControls/RCToParamDialog.FactMetaData.json</file>
         <file alias="RTK.SettingsGroup.json">src/Settings/RTK.SettingsGroup.json</file>
         <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
-        <file alias="FlightHub.SettingsGroup.json">src/Settings/FlightHub.SettingsGroup.json</file>        
+        <file alias="FlightHub.SettingsGroup.json">src/Settings/FlightHub.SettingsGroup.json</file>
+        <file alias="Agri.SettingsGroup.json">src/Settings/Agri.SettingsGroup.json</file>
         <file alias="SpeedSection.FactMetaData.json">src/MissionManager/SpeedSection.FactMetaData.json</file>
         <file alias="StructureScan.SettingsGroup.json">src/MissionManager/StructureScan.SettingsGroup.json</file>
         <file alias="Survey.SettingsGroup.json">src/MissionManager/Survey.SettingsGroup.json</file>
@@ -370,13 +371,13 @@
         <file alias="prearm_tank_fs.wav">resources/audio/prearm_tank_fs.wav</file>
         <file alias="cell_drift_warning.wav">resources/audio/cell_drift_warning.wav</file>
         <file alias="Proximity.wav">resources/audio/Proximity.wav</file>
-        <file alias="Readytofly.wav">resources/audio/Readytofly.wav</file>      
-        <file alias="avoidprox_HIGH.wav">resources/audio/avoidprox_HIGH.wav</file>      
-        <file alias="avoidprox_LOW.wav">resources/audio/avoidprox_LOW.wav</file>      
-        <file alias="Pump_on.wav">resources/audio/Pump_on.wav</file>      
-        <file alias="Pump_off.wav">resources/audio/Pump_off.wav</file>      
-        <file alias="Proximity_avoidance_warning.wav">resources/audio/Proximity_avoidance_warning.wav</file>  
-	<file alias="Upload_done.wav">resources/audio/Upload_done.wav</file>                              
+        <file alias="Readytofly.wav">resources/audio/Readytofly.wav</file>
+        <file alias="avoidprox_HIGH.wav">resources/audio/avoidprox_HIGH.wav</file>
+        <file alias="avoidprox_LOW.wav">resources/audio/avoidprox_LOW.wav</file>
+        <file alias="Pump_on.wav">resources/audio/Pump_on.wav</file>
+        <file alias="Pump_off.wav">resources/audio/Pump_off.wav</file>
+        <file alias="Proximity_avoidance_warning.wav">resources/audio/Proximity_avoidance_warning.wav</file>
+        <file alias="Upload_done.wav">resources/audio/Upload_done.wav</file>
     </qresource>
     <qresource prefix="/MockLink">
         <file alias="APMArduSubMockLink.params">src/comm/APMArduSubMockLink.params</file>

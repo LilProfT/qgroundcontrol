@@ -66,6 +66,10 @@ Item {
 //            _activeVehicle.publishMissionCompleted()
 
 
+            console.log("showMissionComplete")
+            console.log(_showMissionCompleteDialog)
+            console.log("showMissionResume")
+            console.log(_showMissionResumeDialog)
             if (_showMissionCompleteDialog) {
 
                 globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMission, null, null)
@@ -78,8 +82,7 @@ Item {
                 //_planController.deleteFileInResume()
 
                 if (_showMissionResumeDialog) {
-
-                    globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionDeleteMission, null, null)
+                    globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionResumeMission, null, null)
                 }
 
             }

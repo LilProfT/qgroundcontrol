@@ -109,124 +109,6 @@ Rectangle {
                 spacing:            _margin
                 visible:            tabBar.currentIndex === 0
 
-                QGCLabel {
-                    anchors.left:   parent.left
-                    anchors.right:  parent.right
-                    text:           qsTr("WARNING: Photo interval is below minimum interval (%1 secs) supported by camera.").arg(_cameraMinTriggerInterval.toFixed(1))
-                    wrapMode:       Text.WordWrap
-                    color:          qgcPal.warningText
-                    visible:        _missionItem.cameraShots > 0 && _cameraMinTriggerInterval !== 0 && _cameraMinTriggerInterval > _missionItem.timeBetweenShots
-                }
-
-                CameraCalcGrid {
-                    id:                             cameraCalcGridInstance
-                    cameraCalc:                     _missionItem.cameraCalc
-                    vehicleFlightIsFrontal:         true
-                    distanceToSurfaceLabel:         qsTr("Altitude")
-                    distanceToSurfaceAltitudeMode:  _missionItem.followTerrain ?
-                                                        QGroundControl.AltitudeModeCalcAboveTerrain :
-                                                        (_missionItem.cameraCalc.distanceToSurfaceRelative ? QGroundControl.AltitudeModeRelative : QGroundControl.AltitudeModeAbsolute)
-                    //frontalDistanceLabel:           qsTr("Trigger Dist")
-                    sideDistanceLabel:              qsTr("Spacing")
-                }
-
-                SectionHeader {
-                    id:             sprayConfigHeader
-                    anchors.left:   parent.left
-                    anchors.right:  parent.right
-                    text:           qsTr("Spray Configuration")
-                }
-
-                GridLayout {
-                    anchors.left:   parent.left
-                    anchors.right:  parent.right
-                    columnSpacing:  _margin
-                    rowSpacing:     _margin
-                    columns:        2
-                    visible:        sprayConfigHeader.checked
-                    width:          _root.width - _margin*2
-
-                    QGCLabel { text: qsTr("Application Rate") }
-                    FactTextField {
-                        fact:                   _missionItem.applicationRate
-                        Layout.fillWidth:       true
-                    }
-
-                    QGCLabel { text: qsTr("Settle Velocity") }
-//                    QGCButton {
-//                                        Layout.alignment: Qt.AlignRight
-//                                        width: 20
-//                                        height: 20
-//                                        text: qsTr("+")
-//                                        onClicked: {
-//                                            //_root.value = _root.value + _root.stepSize
-//                                        }
-//                                    }
-                    FactTextField {
-                        fact:                   _missionItem.velocity
-                        Layout.fillWidth:       true
-                        onUpdated:              velocitySlider.value = _missionItem.velocity.value
-                        visible:                false
-                    }
-                    QGCLabel {
-                        text:               _missionItem.velocity.value.toFixed(1) + " " + _missionItem.velocity.units
-//                        font.pointSize:     ScreenTools.mediumFontPointSize
-                        Layout.alignment:  Qt.AlignRight
-                    }
-
-                    QGCSlider {
-                        id:                     velocitySlider
-                        minimumValue:           4.0
-                        maximumValue:           7.0
-                        stepSize:               0.1
-                        tickmarksEnabled:       false
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.velocity.value
-                        onValueChanged:         _missionItem.velocity.value = value
-                        Component.onCompleted:  value = _missionItem.velocity.value
-                        updateValueWhileDragging: true
-                    }
-
-                    QGCLabel { text: qsTr("Nozzle Rate"); visible: false }
-                    FactTextField {
-                        fact:                   _missionItem.nozzleRate
-                        Layout.fillWidth:       true
-                        visible:                false
-                    }
-
-                    QGCLabel { text: qsTr("Nozzle Offset"); visible: false }
-                    FactTextField {
-                        fact:                   _missionItem.nozzleOffset
-                        Layout.fillWidth:       true
-                        visible:                false
-                    }
-
-                    QGCLabel { text: qsTr("Spray Flow Rate") }
-                    FactTextField {
-                        fact:                   _missionItem.sprayFlowRate
-                        Layout.fillWidth:       true
-                        visible:                false
-                    }
-                    QGCLabel {
-                        text:               _missionItem.sprayFlowRate.value.toFixed(2) + " " + _missionItem.sprayFlowRate.units
-                        font.pointSize:     ScreenTools.largeFontPointSize
-                        color:              qgcPal.globalTheme !== QGCPalette.Light ? "deepskyblue" : "forestgreen"
-                        Layout.alignment:   Qt.AlignHCenter
-                    }
-                }
-
-                SectionHeader {
-                    id:             transectsHeader
-                    anchors.left:   parent.left
-                    anchors.right:  parent.right
-                    text:           qsTr("Transects")
-                }
-
                 GridLayout {
                     anchors.left:   parent.left
                     anchors.right:  parent.right
@@ -236,140 +118,7 @@ Rectangle {
                     visible:        transectsHeader.checked
                     width:          _root.width - _margin*2
 
-                    FactTextField {
-                        fact:                   _missionItem.firstLaneOffset
-                        Layout.fillWidth:       true
-                        onUpdated:              firstLaneOffset.value = _missionItem.firstLaneOffset.value
-                        visible:                false
-                    }
-                    QGCLabel { text: qsTr("1st lane offset"); }
-                    QGCLabel {
-                        text:                   (_missionItem.firstLaneOffset.value * 100).toFixed() + " %" + _missionItem.firstLaneOffset.units
-                        Layout.alignment: Qt.AlignRight
-                    }
-                    QGCSlider {
-                        id:                     firstLaneOffsetSlider
-                        minimumValue:           0.05
-                        maximumValue:           1
-                        stepSize:               0.05
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.firstLaneOffset.value
-                        onValueChanged:         _missionItem.firstLaneOffset.value = value
-                        Component.onCompleted:  value = _missionItem.firstLaneOffset.value
-                        updateValueWhileDragging: true
-                    }
 
-                    QGCCheckBox {
-                        text:               qsTr("Ascend transect terminals")
-                        checked:            _missionItem.ascendTerminals.value
-                        onClicked:          _missionItem.ascendTerminals.value = checked
-                        Layout.columnSpan: 2
-                    }
-
-                    FactTextField {
-                        fact:                   _missionItem.ascendAltitude
-                        Layout.fillWidth:       true
-                        onUpdated:              ascendAltitude.value = _missionItem.ascendAltitude.value
-                        visible:                false
-                    }
-                    QGCLabel { text: qsTr("Ascent Alt"); }
-                    QGCLabel {
-                        text:                   _missionItem.ascendAltitude.value.toFixed(1) + " " + _missionItem.ascendAltitude.units
-                        Layout.alignment:       Qt.AlignRight
-                    }
-                    QGCSlider {
-                        id:                     ascendAltitudeSlider
-                        minimumValue:           0
-                        maximumValue:           10
-                        stepSize:               0.1
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.ascendAltitude.value
-                        onValueChanged:         _missionItem.ascendAltitude.value = value
-                        Component.onCompleted:  value = _missionItem.ascendAltitude.value
-                        updateValueWhileDragging: true
-                    }
-
-                    FactTextField {
-                        fact:                   _missionItem.ascendLength
-                        Layout.fillWidth:       true
-                        onUpdated:              ascendLength.value = _missionItem.ascendLength.value
-                        visible:                false
-                    }
-                    QGCLabel { text: qsTr("Ascent Len"); }
-                    QGCLabel {
-                        text:                   _missionItem.ascendLength.value.toFixed(1) + " " + _missionItem.ascendLength.units
-                        Layout.alignment:       Qt.AlignRight
-                    }
-                    QGCSlider {
-                        id:                     ascendLengthSlider
-                        minimumValue:           0
-                        maximumValue:           5
-                        stepSize:               0.1
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.ascendLength.value
-                        onValueChanged:         _missionItem.ascendLength.value = value
-                        Component.onCompleted:  value = _missionItem.ascendLength.value
-                        updateValueWhileDragging: true
-                    }
-
-                    QGCLabel { text: qsTr("Trim start"); }
-                    QGCLabel {
-                        text:                   _missionItem.trimStart.value.toFixed(1) + " " + _missionItem.trimStart.units
-                        Layout.alignment:       Qt.AlignRight
-                    }
-                    QGCSlider {
-                        id:                     trimStartSlider
-                        minimumValue:           0
-                        maximumValue:           100
-                        stepSize:               0.1
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.trimStart.value
-                        onValueChanged:         _missionItem.trimStart.value = value
-                        Component.onCompleted:  value = _missionItem.trimStart.value
-                        updateValueWhileDragging: true
-                    }
-
-                    QGCLabel { text: qsTr("Trim end"); }
-                    QGCLabel {
-                        text:                   _missionItem.trimEnd.value.toFixed(1) + " " + _missionItem.trimEnd.units
-                        Layout.alignment:       Qt.AlignRight
-                    }
-                    QGCSlider {
-                        id:                     trimEndSlider
-                        minimumValue:           0
-                        maximumValue:           100
-                        stepSize:               0.1
-                        tickmarksEnabled:       false
-                        Layout.fillWidth:       true
-                        Layout.columnSpan:      2
-                        Layout.leftMargin: _marginSlider
-                        Layout.rightMargin: _marginSlider
-                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
-                        value:                  _missionItem.trimEnd.value
-                        onValueChanged:         _missionItem.trimEnd.value = value
-                        Component.onCompleted:  value = _missionItem.trimEnd.value
-                        updateValueWhileDragging: true
-                    }
 
                     QGCCheckBox {
                         text:               qsTr("Auto Optimize")
@@ -465,6 +214,324 @@ Rectangle {
                         Layout.fillWidth:   true
                         Layout.columnSpan:  2
                         onClicked:          _missionItem.rotateEntryPoint();
+                    }
+                }
+
+                QGCLabel {
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    text:           qsTr("WARNING: Photo interval is below minimum interval (%1 secs) supported by camera.").arg(_cameraMinTriggerInterval.toFixed(1))
+                    wrapMode:       Text.WordWrap
+                    color:          qgcPal.warningText
+                    visible:        _missionItem.cameraShots > 0 && _cameraMinTriggerInterval !== 0 && _cameraMinTriggerInterval > _missionItem.timeBetweenShots
+                }
+
+                SectionHeader {
+                    id:             basicConfigHeader
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    text:           qsTr("Basic flight")
+                }
+
+                CameraCalcGrid {
+                    id:                             cameraCalcGridInstance
+                    cameraCalc:                     _missionItem.cameraCalc
+                    visible:        basicConfigHeader.checked
+                    vehicleFlightIsFrontal:         true
+                    distanceToSurfaceLabel:         qsTr("Altitude")
+                    distanceToSurfaceAltitudeMode:  _missionItem.followTerrain ?
+                                                        QGroundControl.AltitudeModeCalcAboveTerrain :
+                                                        (_missionItem.cameraCalc.distanceToSurfaceRelative ? QGroundControl.AltitudeModeRelative : QGroundControl.AltitudeModeAbsolute)
+                    //frontalDistanceLabel:           qsTr("Trigger Dist")
+                    sideDistanceLabel:              qsTr("Spacing")
+                }
+
+                SectionHeader {
+                    id:             sprayConfigHeader
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    text:           qsTr("Spray Configuration")
+                }
+
+                GridLayout {
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    columnSpacing:  _margin
+                    rowSpacing:     _margin
+                    columns:        2
+                    visible:        sprayConfigHeader.checked
+                    width:          _root.width - _margin*2
+
+                    QGCLabel { text: qsTr("Application Rate") }
+                    FactTextField {
+                        fact:                   _missionItem.applicationRate
+                        Layout.fillWidth:       true
+                    }
+
+                    QGCLabel { text: qsTr("Settle Velocity") }
+//                    QGCButton {
+//                                        Layout.alignment: Qt.AlignRight
+//                                        width: 20
+//                                        height: 20
+//                                        text: qsTr("+")
+//                                        onClicked: {
+//                                            //_root.value = _root.value + _root.stepSize
+//                                        }
+//                                    }
+                    FactTextField {
+                        fact:                   _missionItem.velocity
+                        Layout.fillWidth:       true
+                        onUpdated:              velocitySlider.value = _missionItem.velocity.value
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.velocity.value.toFixed(1) + " " + _missionItem.velocity.units
+//                        font.pointSize:     ScreenTools.mediumFontPointSize
+                        Layout.alignment:  Qt.AlignRight
+                    }
+
+                    QGCSlider {
+                        id:                     velocitySlider
+                        minimumValue:           4.0
+                        maximumValue:           7.0
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.velocity.value
+                        onValueChanged:         _missionItem.velocity.value = value
+                        Component.onCompleted:  value = _missionItem.velocity.value
+                        updateValueWhileDragging: true
+                    }
+
+
+
+                    QGCLabel { text: qsTr("Nozzle Rate"); visible: false }
+                    FactTextField {
+                        fact:                   _missionItem.nozzleRate
+                        Layout.fillWidth:       true
+                        visible:                false
+                    }
+
+                    QGCLabel { text: qsTr("Nozzle Offset"); visible: false }
+                    FactTextField {
+                        fact:                   _missionItem.nozzleOffset
+                        Layout.fillWidth:       true
+                        visible:                false
+                    }
+
+                    QGCLabel { text: qsTr("Spray Flow Rate") }
+                    FactTextField {
+                        fact:                   _missionItem.sprayFlowRate
+                        Layout.fillWidth:       true
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text:               _missionItem.sprayFlowRate.value.toFixed(2) + " " + _missionItem.sprayFlowRate.units
+                        font.pointSize:     ScreenTools.largeFontPointSize
+                        color:              qgcPal.globalTheme !== QGCPalette.Light ? "deepskyblue" : "forestgreen"
+                        Layout.alignment:   Qt.AlignHCenter
+                    }
+                }
+
+                SectionHeader {
+                    id:             transectsHeader
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    text:           qsTr("Transects")
+                }
+
+                GridLayout {
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    columnSpacing:  _margin
+                    rowSpacing:     _margin
+                    columns:        2
+                    visible:        transectsHeader.checked
+                    width:          _root.width - _margin*2
+
+                    FactTextField {
+                        fact:                   _missionItem.firstLaneOffset
+                        Layout.fillWidth:       true
+                        onUpdated:              firstLaneOffset.value = _missionItem.firstLaneOffset.value
+                        visible:                false
+                    }
+                    QGCLabel { text: qsTr("1st lane offset"); }
+                    QGCLabel {
+                        text:                   (_missionItem.firstLaneOffset.value * 100).toFixed() + " %" + _missionItem.firstLaneOffset.units
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     firstLaneOffsetSlider
+                        minimumValue:           0.05
+                        maximumValue:           1
+                        stepSize:               0.05
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.firstLaneOffset.value
+                        onValueChanged:         _missionItem.firstLaneOffset.value = value
+                        Component.onCompleted:  value = _missionItem.firstLaneOffset.value
+                        updateValueWhileDragging: true
+                    }
+
+                    QGCCheckBox {
+                        id:                     ascendCheckbox
+
+                        text:               qsTr("Ascend transect terminals")
+                        checked:            _missionItem.ascendTerminals.value
+                        onClicked:          _missionItem.ascendTerminals.value = checked
+                        Layout.columnSpan: 2
+                    }
+
+                    FactTextField {
+                        fact:                   _missionItem.ascendAltitude
+                        Layout.fillWidth:       true
+                        onUpdated:              ascendAltitude.value = _missionItem.ascendAltitude.value
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text: qsTr("Ascent Alt");
+                        visible:                ascendCheckbox.checked
+
+                    }
+                    QGCLabel {
+                        text:                   _missionItem.ascendAltitude.value.toFixed(1) + " " + _missionItem.ascendAltitude.units
+                        Layout.alignment:       Qt.AlignRight
+                        visible:                ascendCheckbox.checked
+
+                    }
+                    QGCSlider {
+                        id:                     ascendAltitudeSlider
+                        minimumValue:           0
+                        maximumValue:           10
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.ascendAltitude.value
+                        onValueChanged:         _missionItem.ascendAltitude.value = value
+                        Component.onCompleted:  value = _missionItem.ascendAltitude.value
+                        updateValueWhileDragging: true
+                        visible:                ascendCheckbox.checked
+
+                    }
+
+                    FactTextField {
+                        fact:                   _missionItem.ascendLength
+                        Layout.fillWidth:       true
+                        onUpdated:              ascendLength.value = _missionItem.ascendLength.value
+                        visible:                false
+                    }
+                    QGCLabel {
+                        text: qsTr("Ascent Len");
+                        visible:                ascendCheckbox.checked
+
+                    }
+                    QGCLabel {
+                        text:                   _missionItem.ascendLength.value.toFixed(1) + " " + _missionItem.ascendLength.units
+                        Layout.alignment:       Qt.AlignRight
+                        visible:                ascendCheckbox.checked
+
+                    }
+                    QGCSlider {
+                        id:                     ascendLengthSlider
+                        minimumValue:           0
+                        maximumValue:           10
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.ascendLength.value
+                        onValueChanged:         _missionItem.ascendLength.value = value
+                        Component.onCompleted:  value = _missionItem.ascendLength.value
+                        updateValueWhileDragging: true
+                        visible:                ascendCheckbox.checked
+
+                    }
+
+                    QGCLabel { text: qsTr("Trim start"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimStart.value.toFixed(1) + " " + _missionItem.trimStart.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimStartSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimStart.value
+                        onValueChanged:         _missionItem.trimStart.value = value
+                        Component.onCompleted:  value = _missionItem.trimStart.value
+                        updateValueWhileDragging: true
+                    }
+
+                    QGCLabel { text: qsTr("Trim end"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimEnd.value.toFixed(1) + " " + _missionItem.trimEnd.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimEndSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimEnd.value
+                        onValueChanged:         _missionItem.trimEnd.value = value
+                        Component.onCompleted:  value = _missionItem.trimEnd.value
+                        updateValueWhileDragging: true
+                    }
+
+                    QGCLabel { text: qsTr("Trim resume"); }
+                    QGCLabel {
+                        text:                   _missionItem.trimResume.value.toFixed(1) + " " + _missionItem.trimResume.units
+                        Layout.alignment:       Qt.AlignRight
+                    }
+                    QGCSlider {
+                        id:                     trimResumeSlider
+                        minimumValue:           0
+                        maximumValue:           100
+                        stepSize:               0.1
+                        tickmarksEnabled:       false
+                        Layout.fillWidth:       true
+                        Layout.columnSpan:      2
+                        Layout.leftMargin: _marginSlider
+                        Layout.rightMargin: _marginSlider
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                        value:                  _missionItem.trimResume.value
+                        onValueChanged:         _missionItem.trimResume.value = value
+                        Component.onCompleted:  value = _missionItem.trimResume.value
+                        updateValueWhileDragging: true
+
+                        Connections {
+                            target: _missionItem.trimResume
+                            onValueChanged: trimResumeSlider.value = _missionItem.trimResume.value
+                        }
                     }
                 }
 
@@ -740,6 +807,8 @@ Rectangle {
                         Component.onCompleted:  value = _missionItem.velocity.value
                         updateValueWhileDragging: true
                     }
+
+
                 }
 
                 SectionHeader {
