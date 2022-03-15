@@ -417,8 +417,8 @@ void MissionModel::_integrateTrim()
                             auto result = testLine.intersects(flyLine, &intersectPoint);
 
                             if (result == QLineF::BoundedIntersection) {
-                                assert(output[0]->type() == Step::Type::HOLD_YAW);
-                                assert(output[1]->type() == Step::Type::WAYPOINT);
+                                //assert(output[0]->type() == Step::Type::HOLD_YAW);
+                                //assert(output[1]->type() == Step::Type::WAYPOINT);
                                 output.takeAt(1); // WORKAROUND: remove first waypoint - second step
                                 QGeoCoordinate intersectCoord;
                                 convertNedToGeo(-intersectPoint.y(), intersectPoint.x(), prev->nedDown, _tangentOrigin, &intersectCoord);

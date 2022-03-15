@@ -65,6 +65,7 @@ public:
 
     int             cameraShots             (void) const { return _cameraShots; }
     double          coveredArea             (void) const;
+    double          realCoveredArea             (void) const;
     bool            hoverAndCaptureAllowed  (void) const;
 
     virtual double  timeBetweenShots        (void) { return 0; } // Most be overridden. Implementation here is needed for unit testing.

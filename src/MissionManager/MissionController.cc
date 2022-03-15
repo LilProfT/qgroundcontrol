@@ -2784,7 +2784,7 @@ void MissionController::injectDrainedWaterPoint(double remaining)
     double accu = 0;
     bool spraying = false;
     const QGeoCoordinate invalid(qQNaN(), qQNaN());
-    assert(invalid.isValid() == false);
+    //assert(invalid.isValid() == false);
     QGeoCoordinate lastWaypoint = invalid;
     _drainedPoints->clear();
     for (int i = 1; i < _visualItems->count(); i++) {
@@ -2798,7 +2798,7 @@ void MissionController::injectDrainedWaterPoint(double remaining)
             double lat = item->missionItem().param5();
             double lon = item->missionItem().param6();
             QGeoCoordinate currentWaypoint(lat, lon);
-            assert(currentWaypoint.isValid());
+            //assert(currentWaypoint.isValid());
             if (spraying && lastWaypoint.isValid()) {
                 double distance = lastWaypoint.distanceTo(currentWaypoint);
                 accu += distance;

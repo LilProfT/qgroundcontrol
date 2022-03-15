@@ -1159,7 +1159,13 @@ void PlanMasterController::setParam()
 
 double PlanMasterController::area()
 {
-    return _surveyComplexItem ?
-        _surveyComplexItem->coveredArea() :
-        0.0;
+    double surveyArea = _surveyComplexItem ?
+            _surveyComplexItem->realCoveredArea() :
+            0.0;
+        double result = surveyArea;
+        for (int i=0; i<_geoFenceController.polygons()->count(); i++) {
+            result -= _geoFenceController.polygons()->value<QGCFencePolygon*>(i)->area();
+        }
+        return result;
+
 }

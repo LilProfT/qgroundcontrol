@@ -401,6 +401,11 @@ double TransectStyleComplexItem::coveredArea(void) const
     return gridSpacing * _model.sprayLength();
 }
 
+double TransectStyleComplexItem::realCoveredArea(void) const
+{
+    return _surveyAreaPolygon.area();
+}
+
 bool TransectStyleComplexItem::_hasTurnaround(void) const
 {
     return _turnAroundDistance() > 0;
@@ -487,7 +492,8 @@ void TransectStyleComplexItem::_rebuildTransects(void)
         QGeoCoordinate upBeforeSecond = second.atDistanceAndAzimuth(ascendLength + 3.0, rev_azimuth, -ascendAltitude);
         qDebug() << upBeforeSecond;
 
-        if (!isFirst) _model.appendSpray();
+        //tur off spray
+        //if (!isFirst) _model.appendSpray();
         _model.appendWaypoint(first);
         if ((isFirst || ascend) && (distance > ascendLength*2)) {
             _model.appendSpray();
