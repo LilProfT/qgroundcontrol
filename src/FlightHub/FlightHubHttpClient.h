@@ -59,8 +59,11 @@ private:
     QString _password;
     const QString _nullToken = QString();
 
-    QJsonObject user;
+    QJsonObject _user;
+
+    QJsonObject _currentStat;
 
     bool _triedGetToken = false;
     bool _triedGetUserToken = false;
+
 };

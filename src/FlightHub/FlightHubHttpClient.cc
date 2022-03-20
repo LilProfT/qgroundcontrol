@@ -11,28 +11,66 @@
 #include "QGCApplication.h"
 #include <QDebug>
 #include "FlightHubHttpClient.h"
+#include "SettingsManager.h"
+#include <QFile>
 QGC_LOGGING_CATEGORY(FlightHubHttpClientLog, "FlightHubHttpClientLog")
 
-FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent)
-  ,_getAccessTokenManager(new QNetworkAccessManager(this))
-  ,_getUserAccessTokenManager(new QNetworkAccessManager(this))
-  ,_publishTelemetryManager(new QNetworkAccessManager(this))
-  ,_publishStatManager(new QNetworkAccessManager(this))
+
+
+FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _getAccessTokenManager(new QNetworkAccessManager(this)), _getUserAccessTokenManager(new QNetworkAccessManager(this)), _publishTelemetryManager(new QNetworkAccessManager(this)), _publishStatManager(new QNetworkAccessManager(this))
 
 {
 
-    connect(_getAccessTokenManager, &QNetworkAccessManager::finished , this,  &FlightHubHttpClient::_onGetDeviceAccessTokenFinished);
+    connect(_getAccessTokenManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onGetDeviceAccessTokenFinished);
 
-    connect(_publishTelemetryManager, &QNetworkAccessManager::finished , this,  &FlightHubHttpClient::_onPublishTelemetryFinished);
+    connect(_publishTelemetryManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishTelemetryFinished);
 
-    connect(_getUserAccessTokenManager, &QNetworkAccessManager::finished , this,  &FlightHubHttpClient::_onGetUserAccessTokenFinished);
-    connect(_publishStatManager, &QNetworkAccessManager::finished, this, & FlightHubHttpClient::_onPublishStatFinished);
-
+    connect(_getUserAccessTokenManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onGetUserAccessTokenFinished);
+    connect(_publishStatManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishStatFinished);
 }
-void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply * reply){
-    qCWarning(FlightHubHttpClientLog)<<reply->readAll();
+void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
+{
+    qCWarning(FlightHubHttpClientLog) << reply->readAll();
+    if (reply->error())
+    {
+        if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError)
+        {
+            auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
+            QDir  dir(folderPath);
+            dir.cdUp();
+            auto filePath = dir.filePath("offline_stats.json");
+
+            QFile readFile (filePath);
+            QString text = "[]";
+            if (readFile.exists()){
+                if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+                    text = readFile.readAll();
+                }
+            }
+            qWarning() << "text---" << text;
+            QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
+            QJsonArray array = doc.array();
+            _currentStat["deviceAccessToken"] =  _deviceAccessToken;
+
+            array.append(_currentStat);
+
+            QFile writeFile(filePath);
+
+
+            if (writeFile.open(QIODevice::WriteOnly)){
+                QTextStream stream(&writeFile);
+                QJsonDocument doc;
+                doc.setArray(array);
+                qCWarning(FlightHubHttpClientLog) << "Writing file"<< doc.toJson();
+                stream << doc.toJson() <<Qt::endl;
+            }
+
+
+        }
+    }
 }
-void FlightHubHttpClient::_onGetUserAccessTokenFinished(QNetworkReply * reply){
+void FlightHubHttpClient::_onGetUserAccessTokenFinished(QNetworkReply *reply)
+{
 
     if (reply->error())
     {
@@ -43,13 +81,13 @@ void FlightHubHttpClient::_onGetUserAccessTokenFinished(QNetworkReply * reply){
     auto data = json.object().value("data").toObject();
     auto accessToken = data["accessToken"].toString();
     _userAccessToken = accessToken;
-    user = data["user"].toObject();
+    _user = data["user"].toObject();
 
-    if (_deviceAccessToken.isEmpty() || _deviceAccessToken.isNull()){
+    if (_deviceAccessToken.isEmpty() || _deviceAccessToken.isNull())
+    {
         return;
     }
     emit parameterReadyClientAvailableChanged(true);
-
 }
 FlightHubHttpClient::~FlightHubHttpClient()
 {
@@ -62,11 +100,13 @@ void FlightHubHttpClient::init()
     _getDeviceAccessToken();
 }
 
-QString FlightHubHttpClient::_getUserAccessToken(){
-    if (!_triedGetUserToken){
-        _triedGetUserToken =  true;
+QString FlightHubHttpClient::_getUserAccessToken()
+{
+    if (!_triedGetUserToken)
+    {
+        _triedGetUserToken = true;
         QString domain = _userHostAddress;
-        qCWarning(FlightHubHttpClientLog)<<"login" << domain<<_email<<_password;
+        qCWarning(FlightHubHttpClientLog) << "login" << domain << _email << _password;
         if (domain.isEmpty() || domain.isNull())
         {
             _userAccessToken = _nullToken;
@@ -84,15 +124,18 @@ QString FlightHubHttpClient::_getUserAccessToken(){
         QJsonDocument doc(obj);
         QByteArray data = doc.toJson();
 
-        qCWarning(FlightHubHttpClientLog)<<"login" << url<<_email<<_password<<data;
+        qCWarning(FlightHubHttpClientLog) << "login" << url << _email << _password << data;
         _getUserAccessTokenManager->post(request, data);
     }
     return _userAccessToken;
 }
 
-void FlightHubHttpClient::publishStat(QJsonObject obj){
+void FlightHubHttpClient::publishStat(QJsonObject obj)
+{
     obj["accessToken"] = _userAccessToken;
-    obj["pilotName"] = user["email"].toString();
+    obj["pilotName"] = _user["email"].toString();
+    auto now = QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddThh:mm:ss");
+    obj["flightTime"] = now;
 
     QJsonDocument doc;
     doc.setObject(obj);
@@ -108,11 +151,12 @@ void FlightHubHttpClient::publishStat(QJsonObject obj){
     request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
 
     QByteArray data = doc.toJson();
-    qCWarning(FlightHubHttpClientLog)<<"publish -----------------------------" <<data;
+    qCWarning(FlightHubHttpClientLog) << "publish -----------------------------" << data;
     QDateTime date = QDateTime::currentDateTime();
     QString formattedTime = date.toString("dd.MM.yyyy hh:mm:ss");
     QByteArray formattedTimeMsg = formattedTime.toLocal8Bit();
     auto conn = std::make_shared<QMetaObject::Connection>();
+    _currentStat = obj;
     _publishStatManager->post(request, data);
 }
 
@@ -141,7 +185,8 @@ void FlightHubHttpClient::publishTelemetry(QJsonObject obj)
     auto conn = std::make_shared<QMetaObject::Connection>();
     _publishTelemetryManager->post(request, data);
 }
-void FlightHubHttpClient::_onGetDeviceAccessTokenFinished(QNetworkReply * reply){
+void FlightHubHttpClient::_onGetDeviceAccessTokenFinished(QNetworkReply *reply)
+{
     if (reply->error())
     {
 
@@ -152,15 +197,17 @@ void FlightHubHttpClient::_onGetDeviceAccessTokenFinished(QNetworkReply * reply)
     auto data = json.object().value("data").toObject();
     auto accessToken = data["accessToken"].toString();
     _deviceAccessToken = accessToken;
-    qCWarning(FlightHubHttpClientLog)<<"Retrivce token" << _deviceAccessToken;
-    if (_userAccessToken.isEmpty() || _userAccessToken.isNull()){
+    qCWarning(FlightHubHttpClientLog) << "Retrivce token" << _deviceAccessToken;
+    if (_userAccessToken.isEmpty() || _userAccessToken.isNull())
+    {
         return;
     }
     emit parameterReadyClientAvailableChanged(true);
 }
 
-void FlightHubHttpClient::_onPublishTelemetryFinished(QNetworkReply * reply){
-  qCWarning(FlightHubHttpClientLog)<<"publish -----------------------------" <<reply->readAll();
+void FlightHubHttpClient::_onPublishTelemetryFinished(QNetworkReply *reply)
+{
+    qCWarning(FlightHubHttpClientLog) << "publish -----------------------------" << reply->readAll();
 }
 
 QString FlightHubHttpClient::_getDeviceAccessToken()
@@ -192,23 +239,21 @@ QString FlightHubHttpClient::_getDeviceAccessToken()
         obj["deviceToken"] = token;
         obj["deviceCode"] = _deviceCode;
 
-
         QJsonDocument doc(obj);
         QByteArray data = doc.toJson();
 
-        qCWarning(FlightHubHttpClientLog)<<"Retrivce device token" << data;
+        qCWarning(FlightHubHttpClientLog) << "Retrivce device token" << data;
         _getAccessTokenManager->post(request, data);
     }
     return _deviceAccessToken;
 }
 
-void FlightHubHttpClient::setParams(const QString &hostAddress, const QString &deviceToken ,const QString &userHostAddress, const QString &email, const QString &password,const QString &deviceCode)
+void FlightHubHttpClient::setParams(const QString &hostAddress, const QString &deviceToken, const QString &userHostAddress, const QString &email, const QString &password, const QString &deviceCode)
 {
     _hostAddress = hostAddress;
     _deviceToken = deviceToken;
-    _userHostAddress  = userHostAddress;
+    _userHostAddress = userHostAddress;
     _email = email;
     _password = password;
     _deviceCode = deviceCode;
 }
-

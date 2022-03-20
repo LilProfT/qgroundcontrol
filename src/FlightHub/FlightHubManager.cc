@@ -19,6 +19,7 @@ QGC_LOGGING_CATEGORY(FlightHubManagerLog, "FlightHubManagerLog")
 FlightHubManager::FlightHubManager(QGCApplication *app, QGCToolbox *toolbox)
     : QGCTool(app, toolbox)
 {
+
 }
 
 void FlightHubManager::setToolbox(QGCToolbox *toolbox)
@@ -27,7 +28,11 @@ void FlightHubManager::setToolbox(QGCToolbox *toolbox)
     qCWarning(FlightHubManagerLog) << "Instatiating FlightHubManager";
 
     connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_onVehicleReady);
+
+
+    startUploadOfflineStatTimer(0);
 }
+
 
 FlightHubManager::~FlightHubManager()
 {
@@ -53,24 +58,7 @@ void FlightHubManager::_onVehicleReady(bool isReady)
         if (qgcApp()->toolbox()->multiVehicleManager()->activeVehicle() != _vehicle)
         {
             _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
-            FlightHubSettings *flightHubSettings = qgcApp()->toolbox()->settingsManager()->flightHubSettings();
-            _flightHubHttpClient = new FlightHubHttpClient(nullptr);
-            _flightHubHttpClient->setParams(flightHubSettings->flightHubServerHostAddress()->rawValueString(),
-                                            flightHubSettings->flightHubDeviceToken()->rawValueString(),
-                                            flightHubSettings->authServerHostAddress()->rawValueString(),
-                                            flightHubSettings->flightHubUserName()->rawValueString(),
-                                            flightHubSettings->flightHubPasswd()->rawValueString(),
-                                            flightHubSettings->deviceCode()->rawValueString()
-                                            );
-            _flightHubHttpClient->moveToThread(&_clientThread);
-            connect(&_clientThread, &QThread::started, _flightHubHttpClient, &FlightHubHttpClient::init);
-
-            connect(_flightHubHttpClient, &FlightHubHttpClient::parameterReadyClientAvailableChanged, this, &FlightHubManager::_onClientReady);
-
-            // connect(this, &FlightHubManager::publishMsg, _flightHubMQtt, &FlightHubMqtt::publishMsg);
-
-            _clientThread.start();
-            startTimer(5000);
+            startConnectFlightHubTimer(0);
         }
     }
 }
@@ -126,12 +114,17 @@ void FlightHubManager::_onClientReady(bool isReady)
 {
     if (isReady)
     {
+        _clientReady =true;
         qgcApp()->showAppMessage("Connected", "Flighthub");
         qCWarning(FlightHubManagerLog) << "Client ready";
         connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_onVehicleCoordinatedChanged);
         connect(_vehicle, &Vehicle::missionCompleted, this, &FlightHubManager::_onVehicelMissionCompleted);
         connect(this, &FlightHubManager::publishTelemetry, _flightHubHttpClient, &FlightHubHttpClient::publishTelemetry);
         connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
+        startTimer(5000);
+    }
+    else {
+        startConnectFlightHubTimer(10000);
     }
 }
 
@@ -139,6 +132,49 @@ void FlightHubManager::startTimer(int interval)
 {
     QTimer::singleShot(interval, this, &FlightHubManager::timerSlot);
 }
+
+void FlightHubManager::startUploadOfflineStatTimer(int interval) {
+    QTimer::singleShot(interval, this, &FlightHubManager::uploadOfflineStatTimerSlot);
+}
+
+
+void FlightHubManager::startConnectFlightHubTimer(int interval){
+    QTimer::singleShot(interval, this, &FlightHubManager:: connectFlightHubTimerSlot);
+}
+
+void FlightHubManager::connectFlightHubTimerSlot() {
+    qCWarning(FlightHubManagerLog) << "init client";
+    _clientReady = false;
+    FlightHubSettings *flightHubSettings = qgcApp()->toolbox()->settingsManager()->flightHubSettings();
+    delete _flightHubHttpClient;
+    _flightHubHttpClient = nullptr;
+    _flightHubHttpClient = new FlightHubHttpClient(nullptr);
+    _flightHubHttpClient->setParams(flightHubSettings->flightHubServerHostAddress()->rawValueString(),
+                                    flightHubSettings->flightHubDeviceToken()->rawValueString(),
+                                    flightHubSettings->authServerHostAddress()->rawValueString(),
+                                    flightHubSettings->flightHubUserName()->rawValueString(),
+                                    flightHubSettings->flightHubPasswd()->rawValueString(),
+                                    flightHubSettings->deviceCode()->rawValueString());
+    _flightHubHttpClient->moveToThread(&_clientThread);
+    connect(&_clientThread, &QThread::started, _flightHubHttpClient, &FlightHubHttpClient::init);
+
+    connect(_flightHubHttpClient, &FlightHubHttpClient::parameterReadyClientAvailableChanged, this, &FlightHubManager::_onClientReady);
+
+    // connect(this, &FlightHubManager::publishMsg, _flightHubMQtt, &FlightHubMqtt::publishMsg);
+
+    _clientThread.start();
+
+
+
+}
+void FlightHubManager::uploadOfflineStatTimerSlot() {
+    auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
+    qCWarning(FlightHubManagerLog) << "upload offline stat";
+    startUploadOfflineStatTimer(10000);
+}
+
+
+
 
 void FlightHubManager::timerSlot()
 {
@@ -152,8 +188,9 @@ void FlightHubManager::timerSlot()
         _positionArray = QJsonArray();
         qCWarning(FlightHubManagerLog) << "publish";
     }
-    else {
-         qCWarning(FlightHubManagerLog) << "Array is empty";
+    else
+    {
+        qCWarning(FlightHubManagerLog) << "Array is empty";
     }
 
     startTimer(5000);
@@ -163,10 +200,10 @@ void FlightHubManager::timerSlot()
 void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordinate)
 {
     //-- Only pay attention to camera components, as identified by their compId
-//        qCWarning(FlightHubManagerLog) << "Mavlink received-" << _vehicle->coordinate().longitude()
-//                                       << _vehicle->coordinate().latitude()
-//                                       << _vehicle->heading()->rawValue().toDouble()
-//                                       << _vehicle->vehicleUIDStr();
+    //        qCWarning(FlightHubManagerLog) << "Mavlink received-" << _vehicle->coordinate().longitude()
+    //                                       << _vehicle->coordinate().latitude()
+    //                                       << _vehicle->heading()->rawValue().toDouble()
+    //                                       << _vehicle->vehicleUIDStr();
     QJsonObject newObj = QJsonObject();
     newObj.insert("longitude", _vehicle->coordinate().longitude());
     newObj.insert("latitude", _vehicle->coordinate().latitude());
@@ -176,7 +213,6 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
     additinalInformationObj.insert("airspeed", _vehicle->airSpeed()->rawValue().toDouble());
     additinalInformationObj.insert("groundspeed", _vehicle->groundSpeed()->rawValue().toDouble());
     additinalInformationObj.insert("climbRate", _vehicle->climbRate()->rawValue().toDouble());
-
 
     newObj.insert("additionalInformation", additinalInformationObj);
     _positionArray.append(newObj);

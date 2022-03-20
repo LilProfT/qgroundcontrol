@@ -23,6 +23,7 @@
 #include "QJsonObject"
 #include "QJsonArray"
 #include "MissionItem.h"
+#include <QNetworkAccessManager>
 Q_DECLARE_LOGGING_CATEGORY(FlightHubManagerLog)
 
 class Vehicle;
@@ -47,6 +48,8 @@ public:
     /// Signals downloadComplete, commandError, commandProgress
     // bool download(const QString& fromURI, const QString& toDir);
     void startTimer(int interval);
+    void startUploadOfflineStatTimer(int interval);
+    void startConnectFlightHubTimer(int interval);
 
     void uploadStatistic(QList<MissionItem *> items);
 
@@ -55,12 +58,15 @@ signals:
     void publishStat(QJsonObject obj);
 public slots:
     void timerSlot();
-
+    void uploadOfflineStatTimerSlot();
+    void connectFlightHubTimerSlot();
 private slots:
     void _onVehicleCoordinatedChanged(const QGeoCoordinate& coordinate);
     void _onVehicleReady(bool isReady);
     void _onClientReady(bool isReady);
     void _onVehicelMissionCompleted();
+
+
 private:
 
     QString _handleAltitude(const mavlink_message_t &message);
@@ -72,6 +78,9 @@ private:
     Vehicle *_vehicle;
     // FlightHubMqtt   *_flightHubMQtt     = nullptr;
     FlightHubHttpClient *_flightHubHttpClient = nullptr;
+    bool _clientReady = false;
     QThread _clientThread;
     QJsonArray _positionArray;
+
+
 };
