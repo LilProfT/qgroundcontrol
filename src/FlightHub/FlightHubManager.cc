@@ -17,7 +17,7 @@
 QGC_LOGGING_CATEGORY(FlightHubManagerLog, "FlightHubManagerLog")
 
 FlightHubManager::FlightHubManager(QGCApplication *app, QGCToolbox *toolbox)
-    : QGCTool(app, toolbox)
+    : QGCTool(app, toolbox), _uploadOfflineManager(new QNetworkAccessManager(this))
 {
 
 }
@@ -29,7 +29,7 @@ void FlightHubManager::setToolbox(QGCToolbox *toolbox)
 
     connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::parameterReadyVehicleAvailableChanged, this, &FlightHubManager::_onVehicleReady);
 
-
+    connect(_uploadOfflineManager, &QNetworkAccessManager::finished, this, &FlightHubManager::_uploadOfflineFinished);
     startUploadOfflineStatTimer(0);
 }
 
@@ -163,16 +163,69 @@ void FlightHubManager::connectFlightHubTimerSlot() {
     // connect(this, &FlightHubManager::publishMsg, _flightHubMQtt, &FlightHubMqtt::publishMsg);
 
     _clientThread.start();
-
-
-
 }
 void FlightHubManager::uploadOfflineStatTimerSlot() {
     auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
-    qCWarning(FlightHubManagerLog) << "upload offline stat";
+    QDir  dir(folderPath);
+    dir.cdUp();
+    auto filePath = dir.filePath("offline_stats.json");
+    QFile readFile (filePath);
+    QString text = "[]";
+    if (readFile.exists()){
+        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+            text = readFile.readAll();
+        }
+    }
+
+    QJsonDocument reaadDoc = QJsonDocument::fromJson(text.toUtf8());
+    QJsonArray array = reaadDoc.array();
+    if (array.isEmpty()){
+
+        startUploadOfflineStatTimer(10000);
+        return;
+    }
+    qWarning() << "upload offline";
+    QJsonObject  uploadObj;
+    uploadObj["data"] =  array;
+
+    QJsonDocument uploadDoc;
+    uploadDoc.setObject(uploadObj);
+    QNetworkRequest request;
+
+    QString domain = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubServerHostAddress()->rawValueString();
+    auto url = domain + "/devices/uploadofflinestats";
+    request.setUrl(QUrl(url));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QByteArray data = uploadDoc.toJson();
+    _uploadOfflineManager->post(request, data);
+
     startUploadOfflineStatTimer(10000);
 }
 
+void FlightHubManager::_uploadOfflineFinished(QNetworkReply * reply)
+{
+    auto response = reply->readAll();
+    qCWarning(FlightHubManagerLog) << "reply offline stat" << response;
+    if (!reply->error()){
+
+        auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
+        QDir  dir(folderPath);
+        dir.cdUp();
+        auto filePath = dir.filePath("offline_stats.json");
+        QFile writeFile(filePath);
+
+
+        if (writeFile.open(QIODevice::WriteOnly)){
+            QJsonArray array;
+            QJsonDocument writeDoc;
+            writeDoc.setArray(array);
+            QTextStream stream(&writeFile);
+
+            qCWarning(FlightHubHttpClientLog) << "Writing file"<< writeDoc.toJson();
+            stream << writeDoc.toJson();
+        }
+    }
+}
 
 
 

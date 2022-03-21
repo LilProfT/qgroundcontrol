@@ -66,10 +66,11 @@ private slots:
     void _onClientReady(bool isReady);
     void _onVehicelMissionCompleted();
 
+    void _uploadOfflineFinished(QNetworkReply * reply);
 
-private:
+    private:
 
-    QString _handleAltitude(const mavlink_message_t &message);
+        QString _handleAltitude(const mavlink_message_t &message);
     QString _handleGpsRawInt(const mavlink_message_t &message);
     QString _handleBatteryStatus(const mavlink_message_t &message);
     void _handleHighLatency(const mavlink_message_t &message);
@@ -81,6 +82,8 @@ private:
     bool _clientReady = false;
     QThread _clientThread;
     QJsonArray _positionArray;
+
+    QNetworkAccessManager* _uploadOfflineManager = nullptr;
 
 
 };
