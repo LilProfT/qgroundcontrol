@@ -28,6 +28,8 @@ const char* VehicleBatteryFactGroup::_chargeStateFactName           = "chargeSta
 
 const char* VehicleBatteryFactGroup::_cellVoltageMinFactName        = "cellVoltageMin";
 const char* VehicleBatteryFactGroup::_cellVoltageMaxFactName        = "cellVoltageMax";
+const char* VehicleBatteryFactGroup::_serialNumberFactName          = "serialNumber";
+const char* VehicleBatteryFactGroup::_deviceNameFactName            = "deviceName";
 
 const char* VehicleBatteryFactGroup::_settingsGroup =                       "Vehicle.battery";
 
@@ -112,6 +114,8 @@ void VehicleBatteryFactGroup::handleMessage(Vehicle* vehicle, mavlink_message_t&
     case MAVLINK_MSG_ID_BATTERY_STATUS:
         _handleBatteryStatus(vehicle, message);
         break;
+    case MAVLINK_MSG_ID_SMART_BATTERY_INFO:
+        _handlerSmartBatteryInfo(vehicle, message);
     }
 }
 
@@ -133,6 +137,17 @@ void VehicleBatteryFactGroup::_handleHighLatency2(Vehicle* vehicle, mavlink_mess
     VehicleBatteryFactGroup* group = _findOrAddBatteryGroupById(vehicle, 0);
     group->percentRemaining()->setRawValue(highLatency2.battery == -1 ? qQNaN() : highLatency2.battery);
     group->_setTelemetryAvailable(true);
+}
+
+void VehicleBatteryFactGroup::_handlerSmartBatteryInfo(Vehicle* vehicle, mavlink_message_t& message){
+    mavlink_smart_battery_info_t smartBatteryInfo;
+    mavlink_msg_smart_battery_info_decode(&message, &smartBatteryInfo);
+
+    VehicleBatteryFactGroup* group = _findOrAddBatteryGroupById(vehicle, smartBatteryInfo.id);
+
+    group->cycleCount()->setRawValue(smartBatteryInfo.cycle_count);
+    group->serialNumber()->setRawValue(smartBatteryInfo.serial_number);
+    group->deviceName()->setRawValue(smartBatteryInfo.device_name);
 }
 
 void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_message_t& message)

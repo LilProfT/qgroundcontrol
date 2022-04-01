@@ -37,6 +37,10 @@ public:
     //Mismart: New stuff
     Q_PROPERTY(Fact* cellVoltageMin     READ cellVoltageMin     CONSTANT)
     Q_PROPERTY(Fact* cellVoltageMax     READ cellVoltageMax     CONSTANT)
+    Q_PROPERTY(Fact* cycleCount         READ cycleCount         CONSTANT)
+    Q_PROPERTY(Fact* serialNumber       READ serialNumber       CONSTANT)
+    Q_PROPERTY(Fact* deviceName         READ deviceName         CONSTANT)
+
 
     Fact* id                        () { return &_batteryIdFact; }
     Fact* function                  () { return &_batteryFunctionFact; }
@@ -53,6 +57,9 @@ public:
 
     Fact* cellVoltageMin            () { return &_cellVoltageMinFact; }
     Fact* cellVoltageMax            () { return &_cellVoltageMaxFact; }
+    Fact* cycleCount                () { return &_cycleCountFact;   }
+    Fact* serialNumber              () { return &_serialNumberFact; }
+    Fact* deviceName                () { return &_deviceNameFact; }
 
     static const char* _batteryIdFactName;
     static const char* _batteryFunctionFactName;
@@ -67,8 +74,12 @@ public:
     static const char* _chargeStateFactName;
     static const char* _instantPowerFactName;
 
+    //Mismart handle smart batter
     static const char* _cellVoltageMinFactName;
     static const char* _cellVoltageMaxFactName;
+    static const char* _cycleCountFactName;
+    static const char* _serialNumberFactName;
+    static const char* _deviceNameFactName;
 
     static const char* _settingsGroup;
 
@@ -85,6 +96,8 @@ private:
     static void                     _handleHighLatency          (Vehicle* vehicle, mavlink_message_t& message);
     static void                     _handleHighLatency2         (Vehicle* vehicle, mavlink_message_t& message);
     static void                     _handleBatteryStatus        (Vehicle* vehicle, mavlink_message_t& message);
+    // MiSmart handle smart battery status
+    static void                     _handlerSmartBatteryInfo    (Vehicle* vehicle, mavlink_message_t& message);
     static VehicleBatteryFactGroup* _findOrAddBatteryGroupById  (Vehicle* vehicle, uint8_t batteryId);
 
     Fact            _batteryIdFact;
@@ -102,6 +115,9 @@ private:
 
     Fact            _cellVoltageMinFact;
     Fact            _cellVoltageMaxFact;
+    Fact            _cycleCountFact;
+    Fact            _serialNumberFact;
+    Fact            _deviceNameFact;
 
     static const char* _batteryFactGroupNamePrefix;
 };

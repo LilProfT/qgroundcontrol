@@ -13,6 +13,7 @@
 //#include "QGCLoggingCategory.h"
 #include "FlightHubSettings.h"
 #include "SettingsManager.h"
+#include "VehicleBatteryFactGroup.h"
 
 QGC_LOGGING_CATEGORY(FlightHubManagerLog, "FlightHubManagerLog")
 
@@ -269,11 +270,11 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
 
     newObj.insert("additionalInformation", additinalInformationObj);
     _positionArray.append(newObj);
-    //        //telemetry = "{\"longitude\":106.6137614, \"latitude\":10.6137614}";
-    //        if (!telemetry.isEmpty()) {
-    //            qWarning() << telemetry;
-    //            emit publishMsg(telemetry.toUtf8());
-    //        }
+    QmlObjectListModel* batteries = _vehicle->batteries();
+    for(int i=0;i< batteries->count(); i++){
+        VehicleBatteryFactGroup* group = batteries->value<VehicleBatteryFactGroup*>(i);
+        qCWarning(FlightHubManagerLog) << "Mavlink received-" << group->cycleCount()->rawValueString() << group->serialNumber()->rawValueString();
+    }
 }
 
 QString FlightHubManager::_handleAltitude(const mavlink_message_t &message)
