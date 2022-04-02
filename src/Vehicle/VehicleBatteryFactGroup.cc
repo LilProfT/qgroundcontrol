@@ -115,7 +115,8 @@ void VehicleBatteryFactGroup::handleMessage(Vehicle* vehicle, mavlink_message_t&
         _handleBatteryStatus(vehicle, message);
         break;
     case MAVLINK_MSG_ID_SMART_BATTERY_INFO:
-        _handlerSmartBatteryInfo(vehicle, message);
+        _handleSmartBatteryInfo(vehicle, message);
+        break;
     }
 }
 
@@ -139,7 +140,7 @@ void VehicleBatteryFactGroup::_handleHighLatency2(Vehicle* vehicle, mavlink_mess
     group->_setTelemetryAvailable(true);
 }
 
-void VehicleBatteryFactGroup::_handlerSmartBatteryInfo(Vehicle* vehicle, mavlink_message_t& message){
+void VehicleBatteryFactGroup::_handleSmartBatteryInfo(Vehicle* vehicle, mavlink_message_t& message){
     mavlink_smart_battery_info_t smartBatteryInfo;
     mavlink_msg_smart_battery_info_decode(&message, &smartBatteryInfo);
 

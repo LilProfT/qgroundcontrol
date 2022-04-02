@@ -97,7 +97,7 @@ private:
     static void                     _handleHighLatency2         (Vehicle* vehicle, mavlink_message_t& message);
     static void                     _handleBatteryStatus        (Vehicle* vehicle, mavlink_message_t& message);
     // MiSmart handle smart battery status
-    static void                     _handlerSmartBatteryInfo    (Vehicle* vehicle, mavlink_message_t& message);
+    static void                     _handleSmartBatteryInfo    (Vehicle* vehicle, mavlink_message_t& message);
     static VehicleBatteryFactGroup* _findOrAddBatteryGroupById  (Vehicle* vehicle, uint8_t batteryId);
 
     Fact            _batteryIdFact;
