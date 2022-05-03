@@ -82,6 +82,7 @@ private slots:
     bool _clientReady = false;
     QThread _clientThread;
     QJsonArray _positionArray;
+    QJsonArray _batteryArray;
 
     QNetworkAccessManager* _uploadOfflineManager = nullptr;
 

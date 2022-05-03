@@ -211,7 +211,7 @@ Item {
                                 QGCLabel { text: object.current.valueString + " " + object.current.units;                   visible: batteryValuesAvailable.currentAvailable }
                                 QGCLabel { text: object.temperature.valueString + " " + object.temperature.units;           visible: batteryValuesAvailable.temperatureAvailable }
                                 QGCLabel { text: object.function.enumStringValue;                                           visible: batteryValuesAvailable.functionAvailable }
-                                QGCLabel { text: object.mahConsumed.valueString;                                            visible: batteryValuesAvailable.mahConsumedAvailable } //Dirty code, using it as a buffer variable for battery cycle count
+                                QGCLabel { text: object.cycleCount.valueString;                                            visible: batteryValuesAvailable.cycleCountAvailable } //Dirty code, using it as a buffer variable for battery cycle count
                                 QGCLabel { text: object.cellVoltageMin.valueString + " " + object.cellVoltageMin.units;           visible: batteryValuesAvailable.cellVoltageMinAvailable }
                                 QGCLabel { text: object.cellVoltageMax.valueString + " " + object.cellVoltageMax.units;           visible: batteryValuesAvailable.cellVoltageMaxAvailable }
                                 QGCLabel { text: object.serialNumber.valueString;                                             visible: batteryValuesAvailable.serialNumberAvailable }

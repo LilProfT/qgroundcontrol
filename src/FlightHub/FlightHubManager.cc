@@ -20,7 +20,6 @@ QGC_LOGGING_CATEGORY(FlightHubManagerLog, "FlightHubManagerLog")
 FlightHubManager::FlightHubManager(QGCApplication *app, QGCToolbox *toolbox)
     : QGCTool(app, toolbox), _uploadOfflineManager(new QNetworkAccessManager(this))
 {
-
 }
 
 void FlightHubManager::setToolbox(QGCToolbox *toolbox)
@@ -33,7 +32,6 @@ void FlightHubManager::setToolbox(QGCToolbox *toolbox)
     connect(_uploadOfflineManager, &QNetworkAccessManager::finished, this, &FlightHubManager::_uploadOfflineFinished);
     startUploadOfflineStatTimer(0);
 }
-
 
 FlightHubManager::~FlightHubManager()
 {
@@ -115,7 +113,7 @@ void FlightHubManager::_onClientReady(bool isReady)
 {
     if (isReady)
     {
-        _clientReady =true;
+        _clientReady = true;
         qgcApp()->showAppMessage("Connected", "Flighthub");
         qCWarning(FlightHubManagerLog) << "Client ready";
         connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_onVehicleCoordinatedChanged);
@@ -124,7 +122,8 @@ void FlightHubManager::_onClientReady(bool isReady)
         connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
         startTimer(5000);
     }
-    else {
+    else
+    {
         startConnectFlightHubTimer(10000);
     }
 }
@@ -134,16 +133,18 @@ void FlightHubManager::startTimer(int interval)
     QTimer::singleShot(interval, this, &FlightHubManager::timerSlot);
 }
 
-void FlightHubManager::startUploadOfflineStatTimer(int interval) {
+void FlightHubManager::startUploadOfflineStatTimer(int interval)
+{
     QTimer::singleShot(interval, this, &FlightHubManager::uploadOfflineStatTimerSlot);
 }
 
-
-void FlightHubManager::startConnectFlightHubTimer(int interval){
-    QTimer::singleShot(interval, this, &FlightHubManager:: connectFlightHubTimerSlot);
+void FlightHubManager::startConnectFlightHubTimer(int interval)
+{
+    QTimer::singleShot(interval, this, &FlightHubManager::connectFlightHubTimerSlot);
 }
 
-void FlightHubManager::connectFlightHubTimerSlot() {
+void FlightHubManager::connectFlightHubTimerSlot()
+{
     qCWarning(FlightHubManagerLog) << "init client";
     _clientReady = false;
     FlightHubSettings *flightHubSettings = qgcApp()->toolbox()->settingsManager()->flightHubSettings();
@@ -165,29 +166,33 @@ void FlightHubManager::connectFlightHubTimerSlot() {
 
     _clientThread.start();
 }
-void FlightHubManager::uploadOfflineStatTimerSlot() {
+void FlightHubManager::uploadOfflineStatTimerSlot()
+{
     auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
-    QDir  dir(folderPath);
+    QDir dir(folderPath);
     dir.cdUp();
     auto filePath = dir.filePath("offline_stats.json");
-    QFile readFile (filePath);
+    QFile readFile(filePath);
     QString text = "[]";
-    if (readFile.exists()){
-        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+    if (readFile.exists())
+    {
+        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
             text = readFile.readAll();
         }
     }
 
     QJsonDocument reaadDoc = QJsonDocument::fromJson(text.toUtf8());
     QJsonArray array = reaadDoc.array();
-    if (array.isEmpty()){
+    if (array.isEmpty())
+    {
 
         startUploadOfflineStatTimer(10000);
         return;
     }
     qWarning() << "upload offline";
-    QJsonObject  uploadObj;
-    uploadObj["data"] =  array;
+    QJsonObject uploadObj;
+    uploadObj["data"] = array;
 
     QJsonDocument uploadDoc;
     uploadDoc.setObject(uploadObj);
@@ -203,32 +208,31 @@ void FlightHubManager::uploadOfflineStatTimerSlot() {
     startUploadOfflineStatTimer(10000);
 }
 
-void FlightHubManager::_uploadOfflineFinished(QNetworkReply * reply)
+void FlightHubManager::_uploadOfflineFinished(QNetworkReply *reply)
 {
     auto response = reply->readAll();
     qCWarning(FlightHubManagerLog) << "reply offline stat" << response;
-    if (!reply->error()){
+    if (!reply->error())
+    {
 
         auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
-        QDir  dir(folderPath);
+        QDir dir(folderPath);
         dir.cdUp();
         auto filePath = dir.filePath("offline_stats.json");
         QFile writeFile(filePath);
 
-
-        if (writeFile.open(QIODevice::WriteOnly)){
+        if (writeFile.open(QIODevice::WriteOnly))
+        {
             QJsonArray array;
             QJsonDocument writeDoc;
             writeDoc.setArray(array);
             QTextStream stream(&writeFile);
 
-            qCWarning(FlightHubHttpClientLog) << "Writing file"<< writeDoc.toJson();
+            qCWarning(FlightHubHttpClientLog) << "Writing file" << writeDoc.toJson();
             stream << writeDoc.toJson();
         }
     }
 }
-
-
 
 void FlightHubManager::timerSlot()
 {
@@ -237,9 +241,11 @@ void FlightHubManager::timerSlot()
     {
         QJsonObject dataObj;
         dataObj.insert("data", _positionArray);
+        dataObj.insert("batteryLogs", _batteryArray);
 
         emit publishTelemetry(dataObj);
         _positionArray = QJsonArray();
+        _batteryArray = QJsonArray();
         qCWarning(FlightHubManagerLog) << "publish";
     }
     else
@@ -270,10 +276,30 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
 
     newObj.insert("additionalInformation", additinalInformationObj);
     _positionArray.append(newObj);
-    QmlObjectListModel* batteries = _vehicle->batteries();
-    for(int i=0;i< batteries->count(); i++){
-        VehicleBatteryFactGroup* group = batteries->value<VehicleBatteryFactGroup*>(i);
-        qCWarning(FlightHubManagerLog) << "Mavlink received-" << group->cycleCount()->rawValueString() << group->serialNumber()->rawValueString();
+    QmlObjectListModel *batteries = _vehicle->batteries();
+    for (int i = 0; i < batteries->count(); i++)
+    {
+        VehicleBatteryFactGroup *group = batteries->value<VehicleBatteryFactGroup *>(i);
+        QString serialNumber = group->serialNumber()->rawValueString();
+        if (serialNumber != "0")
+        {
+            QJsonObject batteryObj;
+            batteryObj["actualID"] = serialNumber;
+            batteryObj["cycleCount"] = group->cycleCount()->rawValueString();
+            batteryObj["percentRemaining"] = group->percentRemaining()->rawValueString();
+            // batteryObj["temperature"] = group->temperature()->rawValueString();
+            // batteryObj["temperatureUnit"] = group->cycleCount()->rawValueString();
+            batteryObj["cellMinimumVoltage"] = group->cellVoltageMin()->rawValueString();
+            batteryObj["cellMinimumVoltageUnit"] = "V";
+            batteryObj["cellMaximumVoltage"] = group->cellVoltageMax()->rawValueString();
+            batteryObj["cellMaximumVoltageUnit"] = "V";
+            batteryObj["current"] = group->current()->rawValueString();
+            batteryObj["currentUnit"] = "A";
+
+            _batteryArray.append(batteryObj);
+
+            qCWarning(FlightHubManagerLog) << "Mavlink received-" << group->cycleCount()->rawValueString() << group->serialNumber()->rawValueString();
+        }
     }
 }
 
@@ -329,8 +355,8 @@ void FlightHubManager::_handleHighLatency(const mavlink_message_t &message)
         const double altitude;
     } coordinate{
         highLatency.latitude / (double)1E7,
-                highLatency.longitude / (double)1E7,
-                static_cast<double>(highLatency.altitude_amsl)};
+        highLatency.longitude / (double)1E7,
+        static_cast<double>(highLatency.altitude_amsl)};
 
     QGeoCoordinate newPosition(coordinate.latitude, coordinate.longitude, coordinate.altitude);
 
