@@ -300,6 +300,25 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
 
             qCWarning(FlightHubManagerLog) << "Mavlink received-" << group->cycleCount()->rawValueString() << group->serialNumber()->rawValueString();
         }
+        else
+        {
+            QJsonObject batteryObj;
+            batteryObj["actualID"] = "TestBattery";
+            batteryObj["cycleCount"] = group->cycleCount()->rawValueString();
+            batteryObj["percentRemaining"] = group->percentRemaining()->rawValueString();
+            // batteryObj["temperature"] = group->temperature()->rawValueString();
+            // batteryObj["temperatureUnit"] = group->cycleCount()->rawValueString();
+            batteryObj["cellMinimumVoltage"] = group->cellVoltageMin()->rawValueString();
+            batteryObj["cellMinimumVoltageUnit"] = "V";
+            batteryObj["cellMaximumVoltage"] = group->cellVoltageMax()->rawValueString();
+            batteryObj["cellMaximumVoltageUnit"] = "V";
+            batteryObj["current"] = group->current()->rawValueString();
+            batteryObj["currentUnit"] = "A";
+
+            _batteryArray.append(batteryObj);
+
+            qCWarning(FlightHubManagerLog) << "Mavlink received-" << group->cycleCount()->rawValueString() << group->serialNumber()->rawValueString();
+        }
     }
 }
 
