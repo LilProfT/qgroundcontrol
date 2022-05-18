@@ -467,9 +467,11 @@ public:
 
     //Mismart: Area sprayed update function
     void updateAreaSprayed(double distance);
+
     void updateAreaSprayedFromFile(double area);
 
     //Mismart: Custom Area Sprayed Start and Stop function
+    TrajectoryPoints* trajectoryPoints (void) const {return _trajectoryPoints;}
     bool _areaSprayedStart              ();
     double fuelPercentRemaining              ();
 

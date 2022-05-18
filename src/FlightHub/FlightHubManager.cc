@@ -14,6 +14,7 @@
 #include "FlightHubSettings.h"
 #include "SettingsManager.h"
 #include "VehicleBatteryFactGroup.h"
+#include "TrajectoryPoints.h"
 
 QGC_LOGGING_CATEGORY(FlightHubManagerLog, "FlightHubManagerLog")
 
@@ -58,49 +59,27 @@ void FlightHubManager::_onVehicleReady(bool isReady)
         {
             _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
             startConnectFlightHubTimer(0);
+            _oldAreaValue = _vehicle->areaSprayed()->rawValue().toDouble();
         }
     }
 }
-void FlightHubManager::_onVehicelMissionCompleted()
+void FlightHubManager::_onVehicleMissionCompleted()
 {
-    qCWarning(FlightHubManagerLog) << "mission completed -----------------------";
-    auto missionManager = _vehicle->missionManager();
-    auto items = missionManager->missionItems();
+
+    auto sprayedIndexes = _vehicle->trajectoryPoints()->sprayedIndexes();
+
+    qCWarning(FlightHubManagerLog) << "mission completed -----------------------" << _oldAreaValue;
+    qCWarning(FlightHubManagerLog) << "mission completed -----------------------" << sprayedIndexes;
+
     auto flightTime = _vehicle->flightTime()->rawValue().toDouble();
     flightTime = flightTime / 3600;
-    double distance = 0.0;
-    QList<MissionItem *> selectedItems;
-    foreach (auto item, items)
-    {
 
-        if (item->commandInt() == 16)
-        {
-            selectedItems.append(item);
-        }
-    }
-
-    for (auto i = 0; i < selectedItems.count() - 1; i++)
-    {
-        auto currentItem = selectedItems[i];
-        auto nextItem = selectedItems[i + 1];
-        {
-            auto additionalDistance = currentItem->coordinate().distanceTo(nextItem->coordinate());
-            distance += additionalDistance;
-        }
-    }
-    distance = distance + 1;
     QJsonObject obj;
     obj["flightDuration"] = flightTime;
     obj["flights"] = 1;
     obj["taskArea"] = _vehicle->areaSprayed()->rawValue().toDouble();
     QJsonArray flywayPoints;
-    foreach (auto item, selectedItems)
-    {
-        QJsonObject value;
-        value["longitude"] = item->coordinate().longitude();
-        value["latitude"] = item->coordinate().latitude();
-        flywayPoints.append(value);
-    }
+
     obj["flywayPoints"] = flywayPoints;
     obj["taskLocation"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
     obj["fieldName"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
@@ -117,7 +96,7 @@ void FlightHubManager::_onClientReady(bool isReady)
         qgcApp()->showAppMessage("Connected", "Flighthub");
         qCWarning(FlightHubManagerLog) << "Client ready";
         connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_onVehicleCoordinatedChanged);
-        connect(_vehicle, &Vehicle::missionCompleted, this, &FlightHubManager::_onVehicelMissionCompleted);
+        connect(_vehicle, &Vehicle::missionCompleted, this, &FlightHubManager::_onVehicleMissionCompleted);
         connect(this, &FlightHubManager::publishTelemetry, _flightHubHttpClient, &FlightHubHttpClient::publishTelemetry);
         connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
         startTimer(5000);
@@ -182,8 +161,8 @@ void FlightHubManager::uploadOfflineStatTimerSlot()
         }
     }
 
-    QJsonDocument reaadDoc = QJsonDocument::fromJson(text.toUtf8());
-    QJsonArray array = reaadDoc.array();
+    QJsonDocument readDoc = QJsonDocument::fromJson(text.toUtf8());
+    QJsonArray array = readDoc.array();
     if (array.isEmpty())
     {
 
@@ -250,7 +229,7 @@ void FlightHubManager::timerSlot()
     }
     else
     {
-        qCWarning(FlightHubManagerLog) << "Array is empty";
+
     }
 
     startTimer(5000);
@@ -269,12 +248,12 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
     newObj.insert("latitude", _vehicle->coordinate().latitude());
     newObj.insert("direction", _vehicle->heading()->rawValue().toDouble());
 
-    QJsonObject additinalInformationObj;
-    additinalInformationObj.insert("airspeed", _vehicle->airSpeed()->rawValue().toDouble());
-    additinalInformationObj.insert("groundspeed", _vehicle->groundSpeed()->rawValue().toDouble());
-    additinalInformationObj.insert("climbRate", _vehicle->climbRate()->rawValue().toDouble());
+    QJsonObject additionalInformationObj;
+    additionalInformationObj.insert("airspeed", _vehicle->airSpeed()->rawValue().toDouble());
+    additionalInformationObj.insert("groundspeed", _vehicle->groundSpeed()->rawValue().toDouble());
+    additionalInformationObj.insert("climbRate", _vehicle->climbRate()->rawValue().toDouble());
 
-    newObj.insert("additionalInformation", additinalInformationObj);
+    newObj.insert("additionalInformation", additionalInformationObj);
     _positionArray.append(newObj);
     QmlObjectListModel *batteries = _vehicle->batteries();
     for (int i = 0; i < batteries->count(); i++)
@@ -298,7 +277,6 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
 
             _batteryArray.append(batteryObj);
 
-            qCWarning(FlightHubManagerLog) << "Mavlink received-" << group->cycleCount()->rawValueString() << group->serialNumber()->rawValueString();
         }
         else
         {
@@ -317,95 +295,6 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
 
             _batteryArray.append(batteryObj);
 
-            qCWarning(FlightHubManagerLog) << "Mavlink received-" << group->cycleCount()->rawValueString() << group->serialNumber()->rawValueString();
         }
     }
-}
-
-QString FlightHubManager::_handleAltitude(const mavlink_message_t &message)
-{
-    mavlink_altitude_t altitude;
-    mavlink_msg_altitude_decode(&message, &altitude);
-    QJsonObject jsonObj = QJsonObject();
-
-    jsonObj.insert("altitude_amsl", altitude.altitude_amsl);
-
-    return "";
-}
-
-QString FlightHubManager::_handleGpsRawInt(const mavlink_message_t &message)
-{
-    mavlink_gps_raw_int_t gpsRawInt;
-    mavlink_msg_gps_raw_int_decode(&message, &gpsRawInt);
-    QGeoCoordinate newPosition(gpsRawInt.lat / (double)1E7, gpsRawInt.lon / (double)1E7, gpsRawInt.alt / 1000.0);
-    QJsonObject jsonObj = QJsonObject();
-
-    jsonObj.insert("longitude", newPosition.longitude());
-    jsonObj.insert("latitude", newPosition.latitude());
-
-    return "";
-}
-
-QString FlightHubManager::_handleBatteryStatus(const mavlink_message_t &message)
-{
-    mavlink_battery_status_t batteryStatus;
-    mavlink_msg_battery_status_decode(&message, &batteryStatus);
-    QJsonObject jsonObj = QJsonObject();
-
-    if (batteryStatus.id == 0)
-    {
-        jsonObj.insert("battery_pct", batteryStatus.battery_remaining);
-    }
-
-    return "";
-}
-
-void FlightHubManager::_handleHighLatency(const mavlink_message_t &message)
-{
-    QJsonObject newObj = QJsonObject();
-
-    mavlink_high_latency_t highLatency;
-    mavlink_msg_high_latency_decode(&message, &highLatency);
-
-    struct
-    {
-        const double latitude;
-        const double longitude;
-        const double altitude;
-    } coordinate{
-        highLatency.latitude / (double)1E7,
-        highLatency.longitude / (double)1E7,
-        static_cast<double>(highLatency.altitude_amsl)};
-
-    QGeoCoordinate newPosition(coordinate.latitude, coordinate.longitude, coordinate.altitude);
-
-    newObj.insert("longitude", (double)newPosition.longitude());
-    newObj.insert("latitude", (double)newPosition.latitude());
-    newObj.insert("altitude", (double)newPosition.latitude());
-    newObj.insert("airspeed", (double)highLatency.airspeed);
-    newObj.insert("groundspeed", (double)highLatency.groundspeed);
-    newObj.insert("climb_rate", (double)highLatency.climb_rate);
-    newObj.insert("heading", (double)highLatency.heading);
-    qCWarning(FlightHubManagerLog) << "latency"
-                                   << "lng" << newPosition.longitude() << "heading" << (double)highLatency.heading;
-    _positionArray.append(newObj);
-}
-
-void FlightHubManager::_handleHighLatency2(const mavlink_message_t &message)
-{
-    QJsonObject newObj = QJsonObject();
-    mavlink_high_latency2_t highLatency2;
-    mavlink_msg_high_latency2_decode(&message, &highLatency2);
-
-    newObj.insert("longitude", (double)highLatency2.longitude);
-    newObj.insert("latitude", (double)highLatency2.latitude);
-    newObj.insert("altitude", (double)highLatency2.altitude);
-    newObj.insert("airspeed", (double)highLatency2.airspeed);
-    newObj.insert("groundspeed", (double)highLatency2.groundspeed);
-    newObj.insert("climb_rate", (double)highLatency2.climb_rate);
-    newObj.insert("heading", (double)highLatency2.heading);
-    qCWarning(FlightHubManagerLog) << "latency2"
-                                   << "lng" << (double)highLatency2.longitude << "heading" << (double)highLatency2.heading;
-
-    _positionArray.append(newObj);
 }

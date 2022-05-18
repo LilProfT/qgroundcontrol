@@ -64,20 +64,13 @@ private slots:
     void _onVehicleCoordinatedChanged(const QGeoCoordinate& coordinate);
     void _onVehicleReady(bool isReady);
     void _onClientReady(bool isReady);
-    void _onVehicelMissionCompleted();
+    void _onVehicleMissionCompleted();
 
     void _uploadOfflineFinished(QNetworkReply * reply);
 
     private:
-
-        QString _handleAltitude(const mavlink_message_t &message);
-    QString _handleGpsRawInt(const mavlink_message_t &message);
-    QString _handleBatteryStatus(const mavlink_message_t &message);
-    void _handleHighLatency(const mavlink_message_t &message);
-    void _handleHighLatency2(const mavlink_message_t &message);
-
     Vehicle *_vehicle;
-    // FlightHubMqtt   *_flightHubMQtt     = nullptr;
+    
     FlightHubHttpClient *_flightHubHttpClient = nullptr;
     bool _clientReady = false;
     QThread _clientThread;
@@ -86,5 +79,6 @@ private slots:
 
     QNetworkAccessManager* _uploadOfflineManager = nullptr;
 
+    int _oldAreaValue = 0;
 
 };

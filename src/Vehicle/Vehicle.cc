@@ -4058,11 +4058,11 @@ void Vehicle::updateFlightDistance(double distance)
 // A better method should be considered
 void Vehicle::updateAreaSprayed(double distance)
 {
-    qCWarning(VehicleLog) << "updateAreaSprayed- _areaSprayedFact before: " << _areaSprayedFact.rawValue().toDouble() << ", distance: " << distance;
+   // qCWarning(VehicleLog) << "updateAreaSprayed- _areaSprayedFact before: " << _areaSprayedFact.rawValue().toDouble() << ", distance: " << distance;
 
     _areaSprayedFact.setRawValue(_areaSprayedFact.rawValue().toDouble() + distance * _spacingFact.rawValue().toDouble());
 
-    qCWarning(VehicleLog) << "updateAreaSprayed- _areaSprayedFact after: " << _areaSprayedFact.rawValue().toDouble();
+   // qCWarning(VehicleLog) << "updateAreaSprayed- _areaSprayedFact after: " << _areaSprayedFact.rawValue().toDouble();
 
 }
 

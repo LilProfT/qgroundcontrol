@@ -63,7 +63,7 @@ Item {
 
 
         } else {
-//            _activeVehicle.publishMissionCompleted()
+            _activeVehicle.publishMissionCompleted()
 
 
             console.log("showMissionComplete")
@@ -90,7 +90,7 @@ Item {
             //Mismart: Checking if the mission is really completed
             if (_sprayComplete) {
 
-                 _activeVehicle.publishMissionCompleted()
+            //     _activeVehicle.publishMissionCompleted()
                 _readyToResetAreaSprayed = true
             }
 

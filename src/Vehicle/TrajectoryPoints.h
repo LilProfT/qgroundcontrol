@@ -12,6 +12,7 @@
 #include "QmlObjectListModel.h"
 
 #include <QGeoCoordinate>
+#include <QList>
 
 class Vehicle;
 
@@ -24,6 +25,10 @@ public:
 
     Q_INVOKABLE QVariantList list(void) const { return _points; }
     Q_INVOKABLE void sprayTrigger();
+
+    // MiSmart get sprayedIndexes
+    Q_INVOKABLE QList<int> sprayedIndexes(void)  const { return _sprayedIndexes;}
+    
 
     void start  (void);
     void stop   (void);
@@ -65,4 +70,8 @@ private:
 
     static constexpr double _distanceTolerance = 2.0;
     static constexpr double _azimuthTolerance = 1.5;
+
+
+    // MiSmart sprayed trajectory
+    QList<int> _sprayedIndexes;
 };

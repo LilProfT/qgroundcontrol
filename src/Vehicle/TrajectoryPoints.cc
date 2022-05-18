@@ -54,6 +54,9 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
                 _lastAzimuth = _lastPoint.azimuthTo(coordinate);
                 _lastPoint = coordinate;
                 _points.append(QVariant::fromValue(coordinate));
+                  if (_isSprayTrigger) {
+                _sprayedIndexes.append(_points.count() - 1);
+            }
                 emit pointAdded(coordinate);
             } else {
                 // The new position IS colinear with the last segment. Don't add a new point, just update
@@ -62,6 +65,7 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
                 _points[_points.count() - 1] = QVariant::fromValue(coordinate);
                 emit updateLastPoint(coordinate);
             }
+          
         }
     } else {
         // Add the very first trajectory point to the list
@@ -172,6 +176,7 @@ void TrajectoryPoints::updateResumePoint(QGeoCoordinate coordinate)
 void TrajectoryPoints::clear(void)
 {
     _points.clear();
+    _sprayedIndexes.clear();
     _lastPoint = QGeoCoordinate();
     _lastAzimuth = qQNaN();
     emit pointsCleared();
