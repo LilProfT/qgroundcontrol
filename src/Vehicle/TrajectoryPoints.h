@@ -27,8 +27,8 @@ public:
     Q_INVOKABLE void sprayTrigger();
 
     // MiSmart get sprayedIndexes
-    Q_INVOKABLE QList<int> sprayedIndexes(void)  const { return _sprayedIndexes;}
-    
+    QList<int> sprayedIndexes(void)  const { return _sprayedIndexes;}
+    QVariantList trajectoryPoints(void) const { return _trajectoryPoints; }
 
     void start  (void);
     void stop   (void);
@@ -38,6 +38,9 @@ public:
     void updateResumePoint(QGeoCoordinate coordinate) ;
     void updatePausePoint(QGeoCoordinate coordinate) ;
     bool isSprayTrigger();
+
+    //MiSmart clear sprayed trajectory point for fixing duplicated points
+    void clearSprayedPointsData();
 public slots:
     void clear  (void);
 
@@ -51,6 +54,11 @@ signals:
     void updateExitLastPoint(QGeoCoordinate coordinate);
     void exitPointsCleared  (void);
     void pointSprayTrigger     (bool trigger, QGeoCoordinate coordinate);
+
+
+
+
+
 private slots:
     void _vehicleCoordinateChanged(QGeoCoordinate coordinate);
 
@@ -73,5 +81,6 @@ private:
 
 
     // MiSmart sprayed trajectory
+    QVariantList    _trajectoryPoints;
     QList<int> _sprayedIndexes;
 };

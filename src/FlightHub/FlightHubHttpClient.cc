@@ -47,7 +47,6 @@ void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
                     text = readFile.readAll();
                 }
             }
-            qWarning() << "text---" << text;
             QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
             QJsonArray array = doc.array();
             _currentStat["deviceAccessToken"] =  _deviceAccessToken;
@@ -151,7 +150,6 @@ void FlightHubHttpClient::publishStat(QJsonObject obj)
     request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
 
     QByteArray data = doc.toJson();
-    qCWarning(FlightHubHttpClientLog) << "publish -----------------------------" << data;
     QDateTime date = QDateTime::currentDateTime();
     QString formattedTime = date.toString("dd.MM.yyyy hh:mm:ss");
     QByteArray formattedTimeMsg = formattedTime.toLocal8Bit();
@@ -207,7 +205,6 @@ void FlightHubHttpClient::_onGetDeviceAccessTokenFinished(QNetworkReply *reply)
 
 void FlightHubHttpClient::_onPublishTelemetryFinished(QNetworkReply *reply)
 {
-    qCWarning(FlightHubHttpClientLog) << "publish -----------------------------" << reply->readAll();
 }
 
 QString FlightHubHttpClient::_getDeviceAccessToken()

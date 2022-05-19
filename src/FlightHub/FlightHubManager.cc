@@ -65,11 +65,13 @@ void FlightHubManager::_onVehicleReady(bool isReady)
 }
 void FlightHubManager::_onVehicleMissionCompleted()
 {
-
     auto sprayedIndexes = _vehicle->trajectoryPoints()->sprayedIndexes();
+    auto selectedItems =  _vehicle->trajectoryPoints()->list();
 
     qCWarning(FlightHubManagerLog) << "mission completed -----------------------" << _oldAreaValue;
     qCWarning(FlightHubManagerLog) << "mission completed -----------------------" << sprayedIndexes;
+
+
 
     auto flightTime = _vehicle->flightTime()->rawValue().toDouble();
     flightTime = flightTime / 3600;
@@ -77,15 +79,30 @@ void FlightHubManager::_onVehicleMissionCompleted()
     QJsonObject obj;
     obj["flightDuration"] = flightTime;
     obj["flights"] = 1;
-    obj["taskArea"] = _vehicle->areaSprayed()->rawValue().toDouble();
+    obj["taskArea"] = _vehicle->areaSprayed()->rawValue().toDouble() - _oldAreaValue;
     QJsonArray flywayPoints;
 
+    foreach(QVariant item , selectedItems){
+        QGeoCoordinate coor = qvariant_cast<QGeoCoordinate>(item);
+        QJsonObject value;
+        value["longitude"] = coor.longitude();
+        value["latitude"] = coor.latitude();
+        flywayPoints.append(value);
+    }
+    QJsonArray sprayedIndexesJsonArray;
+    foreach(auto index , sprayedIndexes){
+        sprayedIndexesJsonArray.append(index);
+    }
+    obj["sprayedIndexes"] = sprayedIndexesJsonArray;
     obj["flywayPoints"] = flywayPoints;
     obj["taskLocation"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
     obj["fieldName"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
 
     qCWarning(FlightHubManagerLog) << "publish stat";
     emit publishStat(obj);
+
+     _oldAreaValue =  _vehicle->areaSprayed()->rawValue().toDouble();
+     _vehicle->trajectoryPoints()->clearSprayedPointsData();
 }
 
 void FlightHubManager::_onClientReady(bool isReady)
@@ -225,7 +242,6 @@ void FlightHubManager::timerSlot()
         emit publishTelemetry(dataObj);
         _positionArray = QJsonArray();
         _batteryArray = QJsonArray();
-        qCWarning(FlightHubManagerLog) << "publish";
     }
     else
     {

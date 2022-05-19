@@ -207,13 +207,11 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
             }
             newControllerMissionItems->append(simpleItem);
 
-            qDebug() << "[parse mission] " << simpleItem->missionItem().commandInt();
             if ((simpleItem->missionItem().commandInt() == 216 /* MAV_CMD_DO_SPRAYER */)
                  && (lastWaypoint)) {
                 if (enterMarked == false) {
                     lastWaypoint->setVisualType(MissionItem::VisualType::ENTER);
                     enterMarked = true;
-                    qDebug() << "[parse mission] entering waypoint found";
                 };
             }
             exitWaypoint = lastWaypoint;
@@ -221,7 +219,6 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
         }
         if (exitWaypoint) {
             exitWaypoint->setVisualType(MissionItem::VisualType::EXIT);
-            qDebug() << "[parse mission] exit waypoint found";
             _masterController->loadPolygonFromRecentFile();
             emit updateSurveyAreaPolygon();
         }
@@ -1430,7 +1427,6 @@ void MissionController::_recalcFlightPathSegments(void)
                     }
                 }
                 firstCoordinateNotFound = false;
-                qWarning(MissionManagerLog) << "_waypointPath coordinate :" << visualItem->coordinate();
 
                 _waypointPath.append(QVariant::fromValue(visualItem->coordinate()));
                 geoList.append(visualItem->coordinate());

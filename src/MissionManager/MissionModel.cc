@@ -387,7 +387,6 @@ void MissionModel::_integrateTrim()
                 WaypointStep* curr = qobject_cast<WaypointStep*>(step);
                 double prevLength = length;
                 length += prev->coord.distanceTo(curr->coord);
-                qDebug() << "trim count length: " << length;
 
 
                 if (length > trimStartAtMeter) {

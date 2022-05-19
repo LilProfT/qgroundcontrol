@@ -26,6 +26,11 @@ TrajectoryPoints::TrajectoryPoints(Vehicle* vehicle, QObject* parent)
     _reachEnterPoint = false;
 }
 
+void TrajectoryPoints::clearSprayedPointsData(){
+    _trajectoryPoints.clear();
+    _sprayedIndexes.clear();
+}
+
 void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
 {   
     if (isSprayTrigger() != _isSprayTrigger) {
@@ -43,8 +48,10 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
             _vehicle->updateFlightDistance(distance);
 
             //Mismart: Throw in a sprayed area update function
+            _trajectoryPoints.append(QVariant::fromValue(coordinate));
             if (_isSprayTrigger) {
                 _vehicle->updateAreaSprayed(distance);
+                _sprayedIndexes.append(_trajectoryPoints.count() - 1);
             }
 
             // Vehicle has moved far enough from previous point for an update
@@ -54,9 +61,7 @@ void TrajectoryPoints::_vehicleCoordinateChanged(QGeoCoordinate coordinate)
                 _lastAzimuth = _lastPoint.azimuthTo(coordinate);
                 _lastPoint = coordinate;
                 _points.append(QVariant::fromValue(coordinate));
-                  if (_isSprayTrigger) {
-                _sprayedIndexes.append(_points.count() - 1);
-            }
+
                 emit pointAdded(coordinate);
             } else {
                 // The new position IS colinear with the last segment. Don't add a new point, just update
@@ -175,6 +180,7 @@ void TrajectoryPoints::updateResumePoint(QGeoCoordinate coordinate)
 }
 void TrajectoryPoints::clear(void)
 {
+    _trajectoryPoints.clear();
     _points.clear();
     _sprayedIndexes.clear();
     _lastPoint = QGeoCoordinate();
