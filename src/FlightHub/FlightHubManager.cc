@@ -66,7 +66,7 @@ void FlightHubManager::_onVehicleReady(bool isReady)
 void FlightHubManager::_onVehicleMissionCompleted()
 {
     auto sprayedIndexes = _vehicle->trajectoryPoints()->sprayedIndexes();
-    auto selectedItems =  _vehicle->trajectoryPoints()->list();
+    auto selectedItems =  _vehicle->trajectoryPoints()->trajectoryPoints();
 
     qCWarning(FlightHubManagerLog) << "mission completed -----------------------" << _oldAreaValue;
     qCWarning(FlightHubManagerLog) << "mission completed -----------------------" << sprayedIndexes;
