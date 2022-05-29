@@ -491,6 +491,8 @@ void Vehicle::_commonInit()
         }
     }
 
+     qCWarning(VehicleLog) << "_common init";
+
     _flightDistanceFact.setRawValue(0);
 
     // Mismart: Custom areaSprayed init fact
@@ -4070,6 +4072,7 @@ void Vehicle::updateAreaSprayedFromFile(double area)
 {
     _areaSprayedFact.setRawValue(area);
 
+    emit sprayAreaChanged(area);
     qCWarning(VehicleLog) << "updateAreaSprayedFromFile- _areaSprayedFact after: " << _areaSprayedFact.rawValue().toDouble();
 }
 

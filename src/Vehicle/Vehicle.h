@@ -877,8 +877,10 @@ signals:
     void clearTrajectoryPoint              (void);
     void resumeCoordinateChanged               (void);
 
-    // Mismart: create signal on mission completed
+    // MiSmart: create signal on mission completed
     void missionCompleted                   (void);
+    // MiSmart: create signal after setting sprayed area
+    void sprayAreaChanged(double area);
 
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
