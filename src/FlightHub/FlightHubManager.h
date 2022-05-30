@@ -66,6 +66,8 @@ private slots:
     void _onClientReady(bool isReady);
     void _onVehicleMissionCompleted();
 
+    void _onVehicleSetSprayedArea(double area);
+
     void _uploadOfflineFinished(QNetworkReply * reply);
 
     private:
