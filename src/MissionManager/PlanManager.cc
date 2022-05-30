@@ -15,6 +15,8 @@
 #include "MissionCommandTree.h"
 #include "MissionCommandUIInfo.h"
 
+
+
 QGC_LOGGING_CATEGORY(PlanManagerLog, "PlanManagerLog")
 
 PlanManager::PlanManager(Vehicle* vehicle, MAV_MISSION_TYPE planType)
@@ -72,6 +74,10 @@ void PlanManager::writeMissionItems(const QList<MissionItem*>& missionItems)
         qCDebug(PlanManagerLog) << QStringLiteral("writeMissionItems %1 called while transaction in progress").arg(_planTypeString());
         return;
     }
+
+    //MiSmart: generate flight uid
+    _flightUID = QUuid::createUuid();
+    qCWarning(PlanManagerLog)<<"Generate flight uuid" << _flightUID;
 
     _clearAndDeleteWriteMissionItems();
 

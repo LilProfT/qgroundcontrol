@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QLoggingCategory>
 #include <QTimer>
+#include <QUuid>
 
 #include "MissionItem.h"
 #include "QGCMAVLink.h"
@@ -75,6 +76,10 @@ public:
     // When actively retrying to request mission items, use a shorter timeout instead.
     static const int _retryTimeoutMilliseconds = 500;
     static const int _maxRetryCount = 5;
+
+
+    // MiSmart: get flightId to send to server
+    QUuid flightUID(void) const {return _flightUID;}
 
 signals:
     void newMissionItemsAvailable   (bool removeAllRequested);
@@ -158,4 +163,8 @@ protected:
 
 private:
     void _setTransactionInProgress(TransactionType_t type);
+
+
+    // MiSmart generate uuid to merge multiple received plans
+    QUuid _flightUID = QUuid::createUuid();
 };

@@ -75,8 +75,9 @@ void FlightHubManager::_onVehicleMissionCompleted()
 
     auto flightTime = _vehicle->flightTime()->rawValue().toDouble();
     flightTime = flightTime / 3600;
-
+    auto flightUID = _vehicle->missionManager()->flightUID();
     QJsonObject obj;
+    obj["flightUID"] =  flightUID.toString(QUuid::StringFormat::WithoutBraces);
     obj["flightDuration"] = flightTime;
     obj["flights"] = 1;
     obj["taskArea"] = _vehicle->areaSprayed()->rawValue().toDouble() - _oldAreaValue;
@@ -101,8 +102,8 @@ void FlightHubManager::_onVehicleMissionCompleted()
     qCWarning(FlightHubManagerLog) << "publish stat";
     emit publishStat(obj);
 
-     _oldAreaValue =  _vehicle->areaSprayed()->rawValue().toDouble();
-     _vehicle->trajectoryPoints()->clearSprayedPointsData();
+    _oldAreaValue =  _vehicle->areaSprayed()->rawValue().toDouble();
+    _vehicle->trajectoryPoints()->clearSprayedPointsData();
 }
 
 void FlightHubManager::_onClientReady(bool isReady)
