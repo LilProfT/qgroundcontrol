@@ -63,14 +63,19 @@ void FlightHubManager::_onVehicleReady(bool isReady)
 
         if (_vehicle){
             _oldAreaValue = _vehicle->areaSprayed()->rawValue().toDouble();
+            connect(_vehicle, &Vehicle::sprayAreaChanged, this, &FlightHubManager::_onVehicleSetSprayedArea);
             qCWarning(FlightHubManagerLog) << "start oldValue -----------------------" << _oldAreaValue;
         }
     }
 }
 
 void FlightHubManager::_onVehicleSetSprayedArea(double area){
-    _oldAreaValue = _vehicle->areaSprayed()->rawValue().toDouble();
-    qCWarning(FlightHubManagerLog) << "update oldValue -----------------------" << _oldAreaValue;
+
+    if (area < _oldAreaValue){
+        qCWarning(FlightHubManagerLog) << "update -----------------------" << area<<_oldAreaValue;
+        _oldAreaValue =  area;
+    }
+
 }
 
 void FlightHubManager::_onVehicleMissionCompleted()
@@ -109,10 +114,18 @@ void FlightHubManager::_onVehicleMissionCompleted()
     obj["taskLocation"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
     obj["fieldName"] = qgcApp()->toolbox()->settingsManager()->flightHubSettings()->flightHubLocation()->rawValueString();
 
+    QJsonObject additionalInformation;
+    additionalInformation["oldValue"] = _oldAreaValue;
+    additionalInformation["currentValue"] =   _vehicle->areaSprayed()->rawValue().toDouble();
+
+    obj["additionalInformation"]  = additionalInformation;
+    obj["gcsVersion"] = "1.2.2";
+
     qCWarning(FlightHubManagerLog) << "publish stat";
     emit publishStat(obj);
 
     _oldAreaValue =  _vehicle->areaSprayed()->rawValue().toDouble();
+    qCWarning(FlightHubManagerLog) << "after finished -----------------------" << _oldAreaValue;
     _vehicle->trajectoryPoints()->clearSprayedPointsData();
 }
 
@@ -125,7 +138,7 @@ void FlightHubManager::_onClientReady(bool isReady)
         qCWarning(FlightHubManagerLog) << "Client ready";
         connect(_vehicle, &Vehicle::coordinateChanged, this, &FlightHubManager::_onVehicleCoordinatedChanged);
         connect(_vehicle, &Vehicle::missionCompleted, this, &FlightHubManager::_onVehicleMissionCompleted);
-        connect(_vehicle, &Vehicle::sprayAreaChanged, this, &FlightHubManager::_onVehicleSetSprayedArea);
+
         connect(this, &FlightHubManager::publishTelemetry, _flightHubHttpClient, &FlightHubHttpClient::publishTelemetry);
         connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
         startTimer(5000);
