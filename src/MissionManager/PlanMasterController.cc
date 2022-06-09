@@ -903,7 +903,7 @@ void PlanMasterController::saveToFlightHub(const QString& filename, QGeoCoordina
 
     QJsonDocument json = saveToJson();
     auto uploadArea =  area();
-    qCWarning(PlanMasterControllerLog) << "upload area" << uploadArea;
+    qCWarning(PlanMasterControllerLog) << "upload area" << uploadArea << json.toJson().length();
     qgcApp()->toolbox()->flightHubManager()->uploadPlanFile(json, coordinate, uploadArea, planFilename);
 }
 

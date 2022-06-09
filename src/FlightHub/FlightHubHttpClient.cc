@@ -73,12 +73,27 @@ void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
 
 void FlightHubHttpClient::_onPublishPlanFinished(QNetworkReply * reply) {
     qCWarning(FlightHubHttpClientLog) << reply->readAll();
+
     if (reply->error())
     {
         if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError)
         {
+            QString uploadFileName = _currentPlan["filename"].toString();
             auto folderPath =  qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
-            qCWarning(FlightHubHttpClientLog) << "Writing file"<< folderPath;
+            QDir  dir(folderPath);
+            if (!dir.exists()){
+                dir.mkpath(".");
+            }
+
+            auto filePath =  dir .filePath(uploadFileName +"." + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".json");
+            qCWarning(FlightHubHttpClientLog) << "Writing file"<< filePath << folderPath << dir.absolutePath();
+            QFile writeFile(filePath);
+            if (writeFile.open(QIODevice::WriteOnly)){
+                QTextStream stream(&writeFile);
+                QJsonDocument doc;
+                doc.setObject(_currentPlan);
+                stream << doc.toJson() <<Qt::endl;
+            }
 
         }
     }
@@ -180,53 +195,51 @@ void FlightHubHttpClient::publishPlan(const QJsonDocument& json,const QGeoCoordi
     //     Upload plan file to server
 
     QFileInfo fileInfo (filename);
-
+    QString uploadFileName  = fileInfo.fileName();
     QJsonObject plan;
     plan["data"] = json.object();
     plan["longitude"] =  coordinate.longitude();
     plan["latitude"] =  coordinate.latitude();
     plan["area"] =  area;
-    plan["filename"] = filename;
+    plan["filename"] = uploadFileName;
 
     _currentPlan = plan;
 
-    QString uploadFileName  = fileInfo.fileName();
 
-    QNetworkRequest  request;
-    auto token = "Bearer " + _getDeviceAccessToken();
-    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
-    QString domain = _hostAddress;
-    QString url = domain + "/authorizeddevices/me/plans";
-    request.setUrl(QUrl(url));
-    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    QHttpPart longitudePart;
-    longitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"longitude\""));
-    longitudePart.setBody(QByteArray::number(coordinate.longitude()));
+    //    QNetworkRequest  request;
+    //    auto token = "Bearer " + _getDeviceAccessToken();
+    //    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
+    //    QString domain = _hostAddress;
+    //    QString url = domain + "/authorizeddevices/me/plans";
+    //    request.setUrl(QUrl(url));
+    //    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    QHttpPart latitudePart;
-    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"latitude\""));
-    latitudePart.setBody(QByteArray::number(coordinate.latitude()));
+    //    QHttpPart longitudePart;
+    //    longitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"longitude\""));
+    //    longitudePart.setBody(QByteArray::number(coordinate.longitude()));
 
-    QHttpPart areaPart;
-    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"area\""));
-    latitudePart.setBody(QByteArray::number(area));
+    //    QHttpPart latitudePart;
+    //    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"latitude\""));
+    //    latitudePart.setBody(QByteArray::number(coordinate.latitude()));
 
-    QHttpPart filePart;
-    filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
-    QString fileDesc ="form-data; name=\"file\"; filename=\""+uploadFileName+"\"";
-     qCWarning(FlightHubHttpClientLog) << "publish plan" << fileInfo.fileName() << uploadFileName << fileDesc;
-    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(fileDesc));
+    //    QHttpPart areaPart;
+    //    areaPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"area\""));
+    //    areaPart.setBody(QByteArray::number(area));
 
-     qCWarning(FlightHubHttpClientLog) << "publish plan"  << json.toJson();
-    filePart.setBody(json.toJson());
+    //    QHttpPart filePart;
+    //    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\""+uploadFileName+"\""));
+    //    filePart.setBody(json.toJson());
 
-    multiPart->append(longitudePart);
-    multiPart->append(latitudePart);
-    multiPart->append(filePart);
-    multiPart->append(areaPart);
+    //    multiPart->append(filePart);
+    //    multiPart->append(longitudePart);
+    //    multiPart->append(latitudePart);
+    //    multiPart->append(areaPart);
 
-    _publishPlanManager->post(request,multiPart);
+    //    _publishPlanManager->post(request,multiPart);
+
+
+
 
 }
 

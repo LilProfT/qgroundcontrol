@@ -34,6 +34,9 @@ void FlightHubManager::setToolbox(QGCToolbox *toolbox)
     startUploadOfflineStatTimer(0);
 }
 
+
+
+
 FlightHubManager::~FlightHubManager()
 {
     if (_flightHubHttpClient)
@@ -70,7 +73,7 @@ void FlightHubManager::_onVehicleReady(bool isReady)
 }
 
 void FlightHubManager::uploadPlanFile(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename ){
-
+    qCWarning(FlightHubManagerLog) << "publish plan" << json.toJson().length() << coordinate << area<<filename;
     emit publishPlan(json,coordinate, area,filename);
 }
 
@@ -148,6 +151,8 @@ void FlightHubManager::_onClientReady(bool isReady)
         connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
         connect(this, &FlightHubManager::publishPlan, _flightHubHttpClient, &FlightHubHttpClient::publishPlan);
         startTimer(5000);
+
+        startUploadOfflinePlanTimer(0);
     }
     else
     {
@@ -158,6 +163,11 @@ void FlightHubManager::_onClientReady(bool isReady)
 void FlightHubManager::startTimer(int interval)
 {
     QTimer::singleShot(interval, this, &FlightHubManager::timerSlot);
+}
+
+
+void FlightHubManager::startUploadOfflinePlanTimer(int interval){
+    QTimer::singleShot(interval, this, &FlightHubManager::uploadOfflinePlanTimerSlot);
 }
 
 void FlightHubManager::startUploadOfflineStatTimer(int interval)
@@ -193,6 +203,43 @@ void FlightHubManager::connectFlightHubTimerSlot()
 
     _clientThread.start();
 }
+
+void FlightHubManager::uploadOfflinePlanTimerSlot(){
+    auto folderPath =  qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
+    QDir dir(folderPath);
+    if (!dir.exists()){
+        return;
+    }
+
+    auto files = dir.entryInfoList(QStringList()<<"*.json", QDir::Files);
+    qCWarning(FlightHubManagerLog) << "upload offline plan " << files.length() << dir.absolutePath();
+    foreach(auto file , files){
+
+        QString text = "";
+        QFile readFile(file.absoluteFilePath());
+        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+            text = readFile.readAll();
+        }
+        else{
+            continue;
+        }
+
+        qCWarning(FlightHubManagerLog) << "upload offline plan 1" << text << file.absoluteFilePath();
+        QJsonDocument readDoc =  QJsonDocument::fromJson(text.toUtf8());
+        auto docObj = readDoc.object();
+        auto data = docObj["data"].toObject();
+
+        auto longitude =  docObj["longitude"].toDouble();
+        auto latitude =  docObj["latitude"].toDouble();
+        auto area =  docObj["area"].toDouble();
+        auto filename =  docObj["filename"].toString();
+        QJsonDocument doc;
+        doc.setObject(data);
+        qCWarning(FlightHubManagerLog) << "upload offline plan 2" << file.fileName() << longitude<<latitude<<area<<filename << doc.toJson().length();
+    }
+    startUploadOfflinePlanTimer(600000);
+}
+
 void FlightHubManager::uploadOfflineStatTimerSlot()
 {
     auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();

@@ -50,6 +50,7 @@ public:
     void startTimer(int interval);
     void startUploadOfflineStatTimer(int interval);
     void startConnectFlightHubTimer(int interval);
+    void startUploadOfflinePlanTimer(int interval);
 
     void uploadStatistic(QList<MissionItem *> items);
 
@@ -63,6 +64,8 @@ public slots:
     void timerSlot();
     void uploadOfflineStatTimerSlot();
     void connectFlightHubTimerSlot();
+    void uploadOfflinePlanTimerSlot();
+
 private slots:
     void _onVehicleCoordinatedChanged(const QGeoCoordinate& coordinate);
     void _onVehicleReady(bool isReady);
