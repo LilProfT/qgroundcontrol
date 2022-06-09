@@ -18,6 +18,7 @@ QGC_LOGGING_CATEGORY(FlightHubHttpClientLog, "FlightHubHttpClientLog")
 
 
 FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _getAccessTokenManager(new QNetworkAccessManager(this)), _getUserAccessTokenManager(new QNetworkAccessManager(this)), _publishTelemetryManager(new QNetworkAccessManager(this)), _publishStatManager(new QNetworkAccessManager(this))
+  , _publishPlanManager(new QNetworkAccessManager(this))
 
 {
 
@@ -27,6 +28,7 @@ FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _ge
 
     connect(_getUserAccessTokenManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onGetUserAccessTokenFinished);
     connect(_publishStatManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishStatFinished);
+    connect(_publishPlanManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishPlanFinished);
 }
 void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
 {
@@ -60,7 +62,7 @@ void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
                 QTextStream stream(&writeFile);
                 QJsonDocument doc;
                 doc.setArray(array);
-                qCWarning(FlightHubHttpClientLog) << "Writing file"<< doc.toJson();
+
                 stream << doc.toJson() <<Qt::endl;
             }
 
@@ -68,6 +70,21 @@ void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
         }
     }
 }
+
+void FlightHubHttpClient::_onPublishPlanFinished(QNetworkReply * reply) {
+    qCWarning(FlightHubHttpClientLog) << reply->readAll();
+    if (reply->error())
+    {
+        if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError)
+        {
+            auto folderPath =  qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
+            qCWarning(FlightHubHttpClientLog) << "Writing file"<< folderPath;
+
+        }
+    }
+}
+
+
 void FlightHubHttpClient::_onGetUserAccessTokenFinished(QNetworkReply *reply)
 {
 
@@ -153,9 +170,64 @@ void FlightHubHttpClient::publishStat(QJsonObject obj)
     QDateTime date = QDateTime::currentDateTime();
     QString formattedTime = date.toString("dd.MM.yyyy hh:mm:ss");
     QByteArray formattedTimeMsg = formattedTime.toLocal8Bit();
-    auto conn = std::make_shared<QMetaObject::Connection>();
+
     _currentStat = obj;
     _publishStatManager->post(request, data);
+}
+void FlightHubHttpClient::publishPlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename ){
+
+
+    //     Upload plan file to server
+
+    QFileInfo fileInfo (filename);
+
+    QJsonObject plan;
+    plan["data"] = json.object();
+    plan["longitude"] =  coordinate.longitude();
+    plan["latitude"] =  coordinate.latitude();
+    plan["area"] =  area;
+    plan["filename"] = filename;
+
+    _currentPlan = plan;
+
+    QString uploadFileName  = fileInfo.fileName();
+
+    QNetworkRequest  request;
+    auto token = "Bearer " + _getDeviceAccessToken();
+    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
+    QString domain = _hostAddress;
+    QString url = domain + "/authorizeddevices/me/plans";
+    request.setUrl(QUrl(url));
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+    QHttpPart longitudePart;
+    longitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"longitude\""));
+    longitudePart.setBody(QByteArray::number(coordinate.longitude()));
+
+    QHttpPart latitudePart;
+    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"latitude\""));
+    latitudePart.setBody(QByteArray::number(coordinate.latitude()));
+
+    QHttpPart areaPart;
+    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"area\""));
+    latitudePart.setBody(QByteArray::number(area));
+
+    QHttpPart filePart;
+    filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
+    QString fileDesc ="form-data; name=\"file\"; filename=\""+uploadFileName+"\"";
+     qCWarning(FlightHubHttpClientLog) << "publish plan" << fileInfo.fileName() << uploadFileName << fileDesc;
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(fileDesc));
+
+     qCWarning(FlightHubHttpClientLog) << "publish plan"  << json.toJson();
+    filePart.setBody(json.toJson());
+
+    multiPart->append(longitudePart);
+    multiPart->append(latitudePart);
+    multiPart->append(filePart);
+    multiPart->append(areaPart);
+
+    _publishPlanManager->post(request,multiPart);
+
 }
 
 void FlightHubHttpClient::publishTelemetry(QJsonObject obj)

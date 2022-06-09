@@ -69,6 +69,11 @@ void FlightHubManager::_onVehicleReady(bool isReady)
     }
 }
 
+void FlightHubManager::uploadPlanFile(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename ){
+
+    emit publishPlan(json,coordinate, area,filename);
+}
+
 void FlightHubManager::_onVehicleSetSprayedArea(double area){
 
     if (area < _oldAreaValue){
@@ -141,6 +146,7 @@ void FlightHubManager::_onClientReady(bool isReady)
 
         connect(this, &FlightHubManager::publishTelemetry, _flightHubHttpClient, &FlightHubHttpClient::publishTelemetry);
         connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
+        connect(this, &FlightHubManager::publishPlan, _flightHubHttpClient, &FlightHubHttpClient::publishPlan);
         startTimer(5000);
     }
     else

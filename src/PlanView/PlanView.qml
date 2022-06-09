@@ -113,9 +113,9 @@ Item {
         if(visible) {
             editorMap.zoomLevel = QGroundControl.flightMapZoom
             editorMap.center    = QGroundControl.flightMapPosition
-//            if (!_planMasterController.containsItems) {
-//                toolStrip.simulateClick(toolStrip.fileButtonIndex)
-//            }
+            //            if (!_planMasterController.containsItems) {
+            //                toolStrip.simulateClick(toolStrip.fileButtonIndex)
+            //            }
         }
     }
 
@@ -190,9 +190,9 @@ Item {
         id: firmwareOrVehicleMismatchUploadDialogComponent
         QGCViewMessage {
             message: qsTr("This Plan was created for a different firmware or vehicle type than the firmware/vehicle type of vehicle you are uploading to. " +
-                            "This can lead to errors or incorrect behavior. " +
-                            "It is recommended to recreate the Plan for the correct firmware/vehicle type.\n\n" +
-                            "Click 'Ok' to upload the Plan anyway.")
+                          "This can lead to errors or incorrect behavior. " +
+                          "It is recommended to recreate the Plan for the correct firmware/vehicle type.\n\n" +
+                          "Click 'Ok' to upload the Plan anyway.")
 
             function accept() {
                 _planMasterController.sendToVehicle()
@@ -263,8 +263,8 @@ Item {
             if (isMissionChange()) {
                 mainWindow.showComponentDialog(createSaveCurrentPromptDialog, qsTr("Save"), mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
                 return
-//                _planMasterController.saveToCurrentInBackground()
-           }
+                //                _planMasterController.saveToCurrentInBackground()
+            }
 
             if (!checkReadyForSaveUpload(false /* save */)) {
                 return
@@ -273,16 +273,16 @@ Item {
             _missionController.clearTrajectoryPoints()
 
             switch (_missionController.sendToVehiclePreCheck()) {
-                case MissionController.SendToVehiclePreCheckStateOk:
-                    _planMasterController.setParam()
-                    sendToVehicle()
-                    break
-                case MissionController.SendToVehiclePreCheckStateActiveMission:
-                    mainWindow.showMessageDialog(qsTr("Send To Vehicle"), qsTr("Current mission must be paused prior to uploading a new Plan"))
-                    break
-                case MissionController.SendToVehiclePreCheckStateFirwmareVehicleMismatch:
-                    mainWindow.showComponentDialog(firmwareOrVehicleMismatchUploadDialogComponent, qsTr("Plan Upload"), mainWindow.showDialogDefaultWidth, StandardButton.Ok | StandardButton.Cancel)
-                    break
+            case MissionController.SendToVehiclePreCheckStateOk:
+                _planMasterController.setParam()
+                sendToVehicle()
+                break
+            case MissionController.SendToVehiclePreCheckStateActiveMission:
+                mainWindow.showMessageDialog(qsTr("Send To Vehicle"), qsTr("Current mission must be paused prior to uploading a new Plan"))
+                break
+            case MissionController.SendToVehiclePreCheckStateFirwmareVehicleMismatch:
+                mainWindow.showComponentDialog(firmwareOrVehicleMismatchUploadDialogComponent, qsTr("Plan Upload"), mainWindow.showDialogDefaultWidth, StandardButton.Ok | StandardButton.Cancel)
+                break
             }
         }
 
@@ -392,6 +392,21 @@ Item {
 
         onAcceptedForSave: {
             if (planFiles) {
+                var coordinate = null;
+                for (var i=0; i< _visualItems.count ; i++){
+                    var item = _visualItems.get(i)
+                    console.log(item.commandName)
+                    if (item.commandName === "Survey"){
+                        coordinate = item.coordinate
+                    }
+
+                }
+
+                if (coordinate){
+                    console.log(coordinate);
+                    _planMasterController.saveToFlightHub(file, coordinate)
+                }
+
                 _planMasterController.saveToFile(file)
             } else {
                 _planMasterController.saveToKml(file)
@@ -1291,11 +1306,11 @@ Item {
                     enabled:            !_planMasterController.syncInProgress
                     onClicked: {
                         dropPanel.hide()
-//                        if (_planMasterController.dirty) {
-//                            mainWindow.showComponentDialog(syncLoadFromFileOverwrite, columnHolder._overwriteText, mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
-//                        } else {
+                        //                        if (_planMasterController.dirty) {
+                        //                            mainWindow.showComponentDialog(syncLoadFromFileOverwrite, columnHolder._overwriteText, mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.Cancel)
+                        //                        } else {
                         _planMasterController.loadFromSelectedFile()
-//                        }
+                        //                        }
                     }
                 }
 
@@ -1331,10 +1346,10 @@ Item {
                     enabled:            !_planMasterController.syncInProgress
                     onClicked: {
                         // First point does not count
-//                        if (_visualItems.count < 2) {
-//                            mainWindow.showComponentDialog(noItemForKML, qsTr("KML"), mainWindow.showDialogDefaultWidth, StandardButton.Cancel)
-//                            return
-//                        }
+                        //                        if (_visualItems.count < 2) {
+                        //                            mainWindow.showComponentDialog(noItemForKML, qsTr("KML"), mainWindow.showDialogDefaultWidth, StandardButton.Cancel)
+                        //                            return
+                        //                        }
                         dropPanel.hide()
                         _planMasterController.loadFromSelectedFileInResume()
                     }

@@ -53,9 +53,12 @@ public:
 
     void uploadStatistic(QList<MissionItem *> items);
 
+    void uploadPlanFile(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename );
+
 signals:
     void publishTelemetry(QJsonObject obj);
     void publishStat(QJsonObject obj);
+    void publishPlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename );
 public slots:
     void timerSlot();
     void uploadOfflineStatTimerSlot();
@@ -70,7 +73,7 @@ private slots:
 
     void _uploadOfflineFinished(QNetworkReply * reply);
 
-    private:
+private:
     Vehicle *_vehicle;
     
     FlightHubHttpClient *_flightHubHttpClient = nullptr;

@@ -16,6 +16,7 @@
 #include <QJsonObject>
 #include <QNetworkAccessManager>
 #include "QGCLoggingCategory.h"
+#include <QGeoCoordinate>
 Q_DECLARE_LOGGING_CATEGORY(FlightHubHttpClientLog)
 
 
@@ -31,12 +32,13 @@ public slots:
     void init();
     void publishTelemetry(QJsonObject obj);
     void publishStat(QJsonObject obj);
-
+    void publishPlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename );
 private slots:
     void _onGetDeviceAccessTokenFinished(QNetworkReply * reply);
     void _onPublishTelemetryFinished(QNetworkReply * reply);
     void _onGetUserAccessTokenFinished(QNetworkReply * reply);
     void _onPublishStatFinished(QNetworkReply * reply);
+    void _onPublishPlanFinished(QNetworkReply * reply);
 signals:
     void parameterReadyClientAvailableChanged(bool isReady);
 
@@ -49,6 +51,7 @@ private:
     QNetworkAccessManager *_getUserAccessTokenManager = nullptr;
     QNetworkAccessManager *_publishTelemetryManager = nullptr;
     QNetworkAccessManager *_publishStatManager = nullptr;
+    QNetworkAccessManager *_publishPlanManager = nullptr;
     QString _hostAddress;
     QString _deviceCode;
     QString _userHostAddress;
@@ -62,6 +65,7 @@ private:
     QJsonObject _user;
 
     QJsonObject _currentStat;
+    QJsonObject _currentPlan;
 
     bool _triedGetToken = false;
     bool _triedGetUserToken = false;

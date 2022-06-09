@@ -890,6 +890,23 @@ void PlanMasterController::saveToFile(const QString& filename)
     }
 }
 
+void PlanMasterController::saveToFlightHub(const QString& filename, QGeoCoordinate coordinate){
+    if (filename.isEmpty()) {
+        return;
+    }
+
+    QString planFilename = filename;
+
+    if (!QFileInfo(filename).fileName().contains(".")) {
+        planFilename += QString(".%1").arg(fileExtension());
+    }
+
+    QJsonDocument json = saveToJson();
+    auto uploadArea =  area();
+    qCWarning(PlanMasterControllerLog) << "upload area" << uploadArea;
+    qgcApp()->toolbox()->flightHubManager()->uploadPlanFile(json, coordinate, uploadArea, planFilename);
+}
+
 void PlanMasterController::saveToKml(const QString& filename)
 {
     if (filename.isEmpty()) {

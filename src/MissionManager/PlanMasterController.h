@@ -90,6 +90,7 @@ public:
     Q_INVOKABLE void saveToCurrent();
     Q_INVOKABLE void saveToCurrentInBackground();
     Q_INVOKABLE void saveToFile(const QString& filename);
+    Q_INVOKABLE void saveToFlightHub(const QString& filename, QGeoCoordinate coordinate);   //MiSmart: Save to flighthub
     Q_INVOKABLE void saveToKml(const QString& filename);
     Q_INVOKABLE void removeAll(void);                       ///< Removes all from controller only, synce required to remove from vehicle
     Q_INVOKABLE void removeAllFromVehicle(void);            ///< Removes all from vehicle and controller
@@ -97,6 +98,8 @@ public:
     Q_INVOKABLE void setParam(void);
     Q_INVOKABLE void clearResumeFile(void);
     Q_INVOKABLE void deleteFileInResume(void);
+
+
 
 
 
