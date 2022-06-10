@@ -60,6 +60,8 @@ void QGroundControlQmlGlobal::setToolbox(QGCToolbox* toolbox)
     _airspaceManager        = toolbox->airspaceManager();
     _adsbVehicleManager     = toolbox->adsbVehicleManager();
     _globalPalette          = new QGCPalette(this);
+
+    _flightHubManager       = toolbox->flightHubManager();
 #if defined(QGC_ENABLE_PAIRING)
     _pairingManager         = toolbox->pairingManager();
 #endif

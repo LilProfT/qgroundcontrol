@@ -24,7 +24,11 @@
 #include "QJsonArray"
 #include "MissionItem.h"
 #include <QNetworkAccessManager>
+#include <QVariantList>
+#include "PlanItem.h"
+
 Q_DECLARE_LOGGING_CATEGORY(FlightHubManagerLog)
+
 
 class Vehicle;
 
@@ -40,6 +44,8 @@ public:
     ~FlightHubManager();
     void setToolbox(QGCToolbox *toolbox) final;
 
+    Q_PROPERTY(QVariantList  planNames READ planNames CONSTANT)
+
     /// Downloads the specified file.
     ///     @param fromURI  File to download from vehicle, fully qualified path. May be in the format "mftp://[;comp=<id>]..." where the component id is specified.
     ///                     If component id is not specified MAV_COMP_ID_AUTOPILOT1 is used.
@@ -54,12 +60,18 @@ public:
 
     void uploadStatistic(QList<MissionItem *> items);
 
+    QVariantList planNames(void) const {return _planNames;};
+
+
     void uploadPlanFile(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename );
 
 signals:
     void publishTelemetry(QJsonObject obj);
     void publishStat(QJsonObject obj);
     void publishPlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename );
+    void publishOfflinePlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename, const QString& localFilename );
+    void fetchPlans(const QString& search,double longitude, double latitude);
+    void planNamesChanged                 (QVariantList planNames);
 public slots:
     void timerSlot();
     void uploadOfflineStatTimerSlot();
@@ -67,6 +79,7 @@ public slots:
     void uploadOfflinePlanTimerSlot();
 
 private slots:
+    void _onFetchedPlans(const QList<PlanItem*> plans);
     void _onVehicleCoordinatedChanged(const QGeoCoordinate& coordinate);
     void _onVehicleReady(bool isReady);
     void _onClientReady(bool isReady);
@@ -78,7 +91,7 @@ private slots:
 
 private:
     Vehicle *_vehicle;
-    
+
     FlightHubHttpClient *_flightHubHttpClient = nullptr;
     bool _clientReady = false;
     QThread _clientThread;
@@ -88,5 +101,6 @@ private:
     QNetworkAccessManager* _uploadOfflineManager = nullptr;
 
     int _oldAreaValue = 0;
-
+    QVariantList _planNames;
+    QList<PlanItem*> _planList;
 };

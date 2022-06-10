@@ -437,6 +437,7 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 #
 
 HEADERS += \
+    src/FlightHub/PlanItem.h \
     src/MissionManager/MissionModel.h \
     src/QmlControls/QmlUnitsConversion.h \
     src/Settings/AgriSettings.h \
@@ -454,6 +455,7 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 }
 
 SOURCES += \
+    src/FlightHub/PlanItem.cpp \
     src/MissionManager/MissionModel.cc \
     src/MissionManager/MissionModel.fence.cc \
     src/MissionManager/SurveyComplexItem.mismart.cc \

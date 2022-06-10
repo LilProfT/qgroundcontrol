@@ -54,6 +54,7 @@ Item {
     property var    _appSettings:                       QGroundControl.settingsManager.appSettings
     property var    _planViewSettings:                  QGroundControl.settingsManager.planViewSettings
     property bool   _promptForPlanUsageShowing:         false
+    property var    _flighthubManager:                  QGroundControl.flightHubManager
 
     //Mismart stuffs:
     property bool   _missionEditorTabVisible:           true
@@ -384,7 +385,125 @@ Item {
 
     property int _moveDialogMissionItemIndex
 
+    Component {
+        id: downloadDialog
+
+        QGCViewDialog {
+            Row {
+                id:             header
+                anchors.top:    parent.top
+                anchors.left:   parent.left
+                anchors.right:  parent.right
+                spacing:        ScreenTools.defaultFontPixelWidth / 2
+
+                QGCLabel {
+                    id:                     searchLabel
+                    anchors.verticalCenter: searchText.verticalCenter
+                    text:                   qsTr("Search:") }
+
+                QGCTextField {
+                    id:                     searchText
+                }
+            }
+
+            QGCFlickable {
+                anchors.top:        header.bottom
+                anchors.bottom:     parent.bottom
+                anchors.left:       parent.left
+                anchors.right:      parent.right
+                clip:               true
+                pixelAligned:       true
+                contentHeight:      fileOpenColumn.height
+                flickableDirection: Flickable.VerticalFlick
+
+                Column {
+                    id:             fileOpenColumn
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    spacing:        ScreenTools.defaultFontPixelHeight / 2
+
+                    Repeater {
+                        id:     fileRepeater
+                        model:  _flighthubManager.planNames
+
+                        Rectangle {
+                            anchors.left:   parent.left
+                            anchors.right:  parent.right
+                            implicitWidth:  ScreenTools.implicitButtonWidth
+                            implicitHeight: ScreenTools.implicitButtonHeight
+                            color:          highlight ? qgcPal.buttonHighlight : qgcPal.button
+                            border.color:   highlight ? qgcPal.buttonHighlightText : qgcPal.buttonText
+                            property real _margins: ScreenTools.defaultFontPixelWidth / 2
+                            property bool   highlight:  false
+
+                            QGCLabel {
+                                id:                     label
+                                text: modelData
+                                anchors.margins:         _margins
+                                anchors.left:           parent.left
+                                anchors.right:          parent.right
+                                anchors.top:            parent.top
+                                anchors.bottom:         parent.bottom
+                                verticalAlignment:      Text.AlignVCenter
+                                horizontalAlignment:    Text.AlignHCenter
+                                color:                  highlight ? qgcPal.buttonHighlightText : qgcPal.buttonText
+                                elide:                  Text.ElideRight
+                            }
+                            QGCMouseArea {
+                                anchors.fill:   parent
+                                onClicked:      {
+                                    console.log(index)
+                                }
+                            }
+
+                        }
+
+                        //                                FileButton {
+                        //                                    id:             fileButton
+                        //                                    anchors.left:   parent.left
+                        //                                    anchors.right:  parent.right
+                        //                                    text:           modelData
+
+                        //                                    onClicked: {
+                        //                                        hideDialog()
+                        //                                        _root.acceptedForLoad(controller.fullyQualifiedFilename(folder, modelData))
+                        //                                    }
+
+                        //                                    onHamburgerClicked: {
+                        //                                        highlight = true
+                        //                                        hamburgerMenu.fileToDelete = controller.fullyQualifiedFilename(folder, modelData)
+                        //                                        hamburgerMenu.popup()
+                        //                                    }
+
+                        //                                    QGCMenu {
+                        //                                        id: hamburgerMenu
+
+                        //                                        property string fileToDelete
+
+                        //                                        onAboutToHide: fileButton.highlight = false
+
+                        //                                        QGCMenuItem {
+                        //                                            text:           qsTr("Delete")
+                        //                                            onTriggered: {
+                        //                                                controller.deleteFile(hamburgerMenu.fileToDelete)
+                        //                                                _bufferList = controller.getFiles(folder, _rgExtensions)
+                        //                                            }
+                        //                                        }
+                        //                                    }
+                        //                                }
+                    }
+
+                    QGCLabel {
+                        text:       qsTr("No files")
+                        visible:   !fileRepeater.model ||  fileRepeater.model.length === 0
+                    }
+                }
+            }
+        }
+    }
+
     QGCFileDialog {
+
         id:             fileDialog
         folder:         _appSettings ?  _appSettings.missionSavePath : ""
 
@@ -1335,6 +1454,19 @@ Item {
                     onClicked: {
                         dropPanel.hide()
                         _planMasterController.saveToSelectedFile()
+                    }
+                }
+
+                QGCButton {
+
+                    Layout.columnSpan:  3
+                    Layout.fillWidth:   true
+                    visible: true
+                    text:               qsTr("Download mission...")
+                    enabled:            !_planMasterController.syncInProgress
+                    onClicked: {
+                        dropPanel.hide()
+                        mainWindow.showComponentDialog(downloadDialog, qsTr("Download from server "), mainWindow.showDialogDefaultWidth, StandardButton.Cancel);
                     }
                 }
 

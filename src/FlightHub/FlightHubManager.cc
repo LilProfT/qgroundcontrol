@@ -21,6 +21,7 @@ QGC_LOGGING_CATEGORY(FlightHubManagerLog, "FlightHubManagerLog")
 FlightHubManager::FlightHubManager(QGCApplication *app, QGCToolbox *toolbox)
     : QGCTool(app, toolbox), _uploadOfflineManager(new QNetworkAccessManager(this))
 {
+    qRegisterMetaType<QList<PlanItem*>>();
 }
 
 void FlightHubManager::setToolbox(QGCToolbox *toolbox)
@@ -33,9 +34,6 @@ void FlightHubManager::setToolbox(QGCToolbox *toolbox)
     connect(_uploadOfflineManager, &QNetworkAccessManager::finished, this, &FlightHubManager::_uploadOfflineFinished);
     startUploadOfflineStatTimer(0);
 }
-
-
-
 
 FlightHubManager::~FlightHubManager()
 {
@@ -61,10 +59,10 @@ void FlightHubManager::_onVehicleReady(bool isReady)
         {
             _vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
             startConnectFlightHubTimer(0);
-
         }
 
-        if (_vehicle){
+        if (_vehicle)
+        {
             _oldAreaValue = _vehicle->areaSprayed()->rawValue().toDouble();
             connect(_vehicle, &Vehicle::sprayAreaChanged, this, &FlightHubManager::_onVehicleSetSprayedArea);
             qCWarning(FlightHubManagerLog) << "start oldValue -----------------------" << _oldAreaValue;
@@ -72,41 +70,54 @@ void FlightHubManager::_onVehicleReady(bool isReady)
     }
 }
 
-void FlightHubManager::uploadPlanFile(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename ){
-    qCWarning(FlightHubManagerLog) << "publish plan" << json.toJson().length() << coordinate << area<<filename;
-    emit publishPlan(json,coordinate, area,filename);
+void FlightHubManager::uploadPlanFile(const QJsonDocument &json, const QGeoCoordinate &coordinate, const double &area, const QString &filename)
+{
+    qCWarning(FlightHubManagerLog) << "publish plan" << json.toJson().length() << coordinate << area << filename;
+    emit publishPlan(json, coordinate, area, filename);
 }
 
-void FlightHubManager::_onVehicleSetSprayedArea(double area){
+void FlightHubManager::_onVehicleSetSprayedArea(double area)
+{
 
-    if (area < _oldAreaValue){
-        qCWarning(FlightHubManagerLog) << "update -----------------------" << area<<_oldAreaValue;
-        _oldAreaValue =  area;
+    if (area < _oldAreaValue)
+    {
+        qCWarning(FlightHubManagerLog) << "update -----------------------" << area << _oldAreaValue;
+        _oldAreaValue = area;
     }
+}
 
+void FlightHubManager::_onFetchedPlans(const QList<PlanItem*> plans){
+
+    _planList=  plans;
+    _planNames.clear();
+    QVariantList array;
+    foreach(auto plan , plans){
+        qCWarning(FlightHubManagerLog) << "plan" << plan->id() << plan->name() << plan;
+        array.append(plan->name());
+    }
+    _planNames = array;
+    qCWarning(FlightHubManagerLog) << "total" << plans.length();
 }
 
 void FlightHubManager::_onVehicleMissionCompleted()
 {
     auto sprayedIndexes = _vehicle->trajectoryPoints()->sprayedIndexes();
-    auto selectedItems =  _vehicle->trajectoryPoints()->trajectoryPoints();
-
-
+    auto selectedItems = _vehicle->trajectoryPoints()->trajectoryPoints();
 
     qCWarning(FlightHubManagerLog) << "mission completed -----------------------" << _oldAreaValue;
-
 
     auto flightTime = _vehicle->flightTime()->rawValue().toDouble();
     flightTime = flightTime / 3600;
     auto flightUID = _vehicle->missionManager()->flightUID();
     QJsonObject obj;
-    obj["flightUID"] =  flightUID.toString(QUuid::StringFormat::WithoutBraces);
+    obj["flightUID"] = flightUID.toString(QUuid::StringFormat::WithoutBraces);
     obj["flightDuration"] = flightTime;
     obj["flights"] = 1;
     obj["taskArea"] = _vehicle->areaSprayed()->rawValue().toDouble() - _oldAreaValue;
     QJsonArray flywayPoints;
 
-    foreach(QVariant item , selectedItems){
+    foreach (QVariant item, selectedItems)
+    {
         QGeoCoordinate coor = qvariant_cast<QGeoCoordinate>(item);
         QJsonObject value;
         value["longitude"] = coor.longitude();
@@ -114,7 +125,8 @@ void FlightHubManager::_onVehicleMissionCompleted()
         flywayPoints.append(value);
     }
     QJsonArray sprayedIndexesJsonArray;
-    foreach(auto index , sprayedIndexes){
+    foreach (auto index, sprayedIndexes)
+    {
         sprayedIndexesJsonArray.append(index);
     }
     obj["sprayedIndexes"] = sprayedIndexesJsonArray;
@@ -124,15 +136,15 @@ void FlightHubManager::_onVehicleMissionCompleted()
 
     QJsonObject additionalInformation;
     additionalInformation["oldValue"] = _oldAreaValue;
-    additionalInformation["currentValue"] =   _vehicle->areaSprayed()->rawValue().toDouble();
+    additionalInformation["currentValue"] = _vehicle->areaSprayed()->rawValue().toDouble();
 
-    obj["additionalInformation"]  = additionalInformation;
+    obj["additionalInformation"] = additionalInformation;
     obj["gcsVersion"] = "1.2.2";
 
     qCWarning(FlightHubManagerLog) << "publish stat";
     emit publishStat(obj);
 
-    _oldAreaValue =  _vehicle->areaSprayed()->rawValue().toDouble();
+    _oldAreaValue = _vehicle->areaSprayed()->rawValue().toDouble();
     qCWarning(FlightHubManagerLog) << "after finished -----------------------" << _oldAreaValue;
     _vehicle->trajectoryPoints()->clearSprayedPointsData();
 }
@@ -150,9 +162,14 @@ void FlightHubManager::_onClientReady(bool isReady)
         connect(this, &FlightHubManager::publishTelemetry, _flightHubHttpClient, &FlightHubHttpClient::publishTelemetry);
         connect(this, &FlightHubManager::publishStat, _flightHubHttpClient, &FlightHubHttpClient::publishStat);
         connect(this, &FlightHubManager::publishPlan, _flightHubHttpClient, &FlightHubHttpClient::publishPlan);
+        connect(this, &FlightHubManager::publishOfflinePlan, _flightHubHttpClient, &FlightHubHttpClient::publishOfflinePlan);
+        connect(this, &FlightHubManager::fetchPlans, _flightHubHttpClient, &FlightHubHttpClient::fetchPlans);
+        connect(_flightHubHttpClient, &FlightHubHttpClient::fetchedPlans, this, &FlightHubManager::_onFetchedPlans, Qt::QueuedConnection);
+
+        emit fetchPlans("", 0,0);
         startTimer(5000);
 
-        startUploadOfflinePlanTimer(0);
+        startUploadOfflinePlanTimer(1000);
     }
     else
     {
@@ -165,8 +182,8 @@ void FlightHubManager::startTimer(int interval)
     QTimer::singleShot(interval, this, &FlightHubManager::timerSlot);
 }
 
-
-void FlightHubManager::startUploadOfflinePlanTimer(int interval){
+void FlightHubManager::startUploadOfflinePlanTimer(int interval)
+{
     QTimer::singleShot(interval, this, &FlightHubManager::uploadOfflinePlanTimerSlot);
 }
 
@@ -204,38 +221,41 @@ void FlightHubManager::connectFlightHubTimerSlot()
     _clientThread.start();
 }
 
-void FlightHubManager::uploadOfflinePlanTimerSlot(){
-    auto folderPath =  qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
+void FlightHubManager::uploadOfflinePlanTimerSlot()
+{
+    auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
     QDir dir(folderPath);
-    if (!dir.exists()){
+    if (!dir.exists())
+    {
         return;
     }
-
-    auto files = dir.entryInfoList(QStringList()<<"*.json", QDir::Files);
-    qCWarning(FlightHubManagerLog) << "upload offline plan " << files.length() << dir.absolutePath();
-    foreach(auto file , files){
+    auto files = dir.entryInfoList(QStringList() << "*.json", QDir::Files);
+    foreach (auto file, files)
+    {
 
         QString text = "";
         QFile readFile(file.absoluteFilePath());
-        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
             text = readFile.readAll();
         }
-        else{
+        else
+        {
             continue;
         }
-
-        qCWarning(FlightHubManagerLog) << "upload offline plan 1" << text << file.absoluteFilePath();
-        QJsonDocument readDoc =  QJsonDocument::fromJson(text.toUtf8());
+        QJsonDocument readDoc = QJsonDocument::fromJson(text.toUtf8());
         auto docObj = readDoc.object();
         auto data = docObj["data"].toObject();
 
-        auto longitude =  docObj["longitude"].toDouble();
-        auto latitude =  docObj["latitude"].toDouble();
-        auto area =  docObj["area"].toDouble();
-        auto filename =  docObj["filename"].toString();
+        auto longitude = docObj["longitude"].toDouble();
+        auto latitude = docObj["latitude"].toDouble();
+        auto area = docObj["area"].toDouble();
+        auto filename = docObj["filename"].toString();
         QJsonDocument doc;
         doc.setObject(data);
-        qCWarning(FlightHubManagerLog) << "upload offline plan 2" << file.fileName() << longitude<<latitude<<area<<filename << doc.toJson().length();
+        qCWarning(FlightHubManagerLog) << "upload offline plan 2" << file.fileName() << longitude << latitude << area << filename << doc.toJson().length();
+
+        emit publishOfflinePlan(doc, QGeoCoordinate(latitude, longitude), area, filename, file.absoluteFilePath());
     }
     startUploadOfflinePlanTimer(600000);
 }
@@ -323,7 +343,6 @@ void FlightHubManager::timerSlot()
     }
     else
     {
-
     }
 
     startTimer(5000);
@@ -370,7 +389,6 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
             batteryObj["currentUnit"] = "A";
 
             _batteryArray.append(batteryObj);
-
         }
         else
         {
@@ -388,7 +406,6 @@ void FlightHubManager::_onVehicleCoordinatedChanged(const QGeoCoordinate &coordi
             batteryObj["currentUnit"] = "A";
 
             _batteryArray.append(batteryObj);
-
         }
     }
 }

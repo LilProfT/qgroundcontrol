@@ -15,10 +15,10 @@
 #include <QFile>
 QGC_LOGGING_CATEGORY(FlightHubHttpClientLog, "FlightHubHttpClientLog")
 
-
-
-FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _getAccessTokenManager(new QNetworkAccessManager(this)), _getUserAccessTokenManager(new QNetworkAccessManager(this)), _publishTelemetryManager(new QNetworkAccessManager(this)), _publishStatManager(new QNetworkAccessManager(this))
-  , _publishPlanManager(new QNetworkAccessManager(this))
+FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _getAccessTokenManager(new QNetworkAccessManager(this)), _getUserAccessTokenManager(new QNetworkAccessManager(this)),
+    _publishTelemetryManager(new QNetworkAccessManager(this)), _publishStatManager(new QNetworkAccessManager(this)), _publishPlanManager(new QNetworkAccessManager(this)),
+    _publishOfflinePlanManager(new QNetworkAccessManager(this)),
+    _fetchPlansManager(new QNetworkAccessManager(this))
 
 {
 
@@ -29,6 +29,55 @@ FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _ge
     connect(_getUserAccessTokenManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onGetUserAccessTokenFinished);
     connect(_publishStatManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishStatFinished);
     connect(_publishPlanManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishPlanFinished);
+    connect(_fetchPlansManager, &QNetworkAccessManager::finished, this , &FlightHubHttpClient::_onFetchPlansFinished);
+}
+
+void FlightHubHttpClient::_onFetchPlansFinished(QNetworkReply *reply){
+    QByteArray body =reply->readAll();
+    qCWarning(FlightHubHttpClientLog) << "fetched plans" <<body;
+    QList<PlanItem*> array{};
+    if (!reply->error()){
+        QJsonDocument doc = QJsonDocument::fromJson(body);
+        auto resp = doc.object();
+        auto data = resp["data"].toArray();
+
+        foreach(auto item, data){
+            auto itemObj = item.toObject();
+            auto id = itemObj["id"].toInt();
+            auto name = itemObj["fileName"].toString();
+
+            PlanItem planItem(id, name);
+            array.append(&planItem);
+            qCWarning(FlightHubHttpClientLog) << "fetched plans" << &planItem;
+
+        }
+
+    }
+
+            emit fetchedPlans(array);
+}
+
+
+void FlightHubHttpClient::fetchPlans(const QString& search,double longitude, double latitude) {
+    qCWarning(FlightHubHttpClientLog) << "fetch plans";
+    QString domain = _hostAddress;
+    auto url =QUrl( domain + "/authorizeddevices/retrieveplans");
+    QUrlQuery query;
+    query.addQueryItem("search", search);
+    if (longitude>0){
+        query.addQueryItem("longitude", QString::number(longitude));
+    }
+    if (latitude>0){
+        query.addQueryItem("latitude", QString::number(latitude));
+    }
+    url.setQuery(query.query());
+    QNetworkRequest request;
+    request.setUrl(url);
+    auto token = "Bearer " + _getDeviceAccessToken();
+    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
+
+    _fetchPlansManager->get(request);
+
 }
 void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
 {
@@ -38,40 +87,41 @@ void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
         if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError)
         {
             auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
-            QDir  dir(folderPath);
+            QDir dir(folderPath);
             dir.cdUp();
             auto filePath = dir.filePath("offline_stats.json");
 
-            QFile readFile (filePath);
+            QFile readFile(filePath);
             QString text = "[]";
-            if (readFile.exists()){
-                if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+            if (readFile.exists())
+            {
+                if (readFile.open(QIODevice::ReadOnly | QIODevice::Text))
+                {
                     text = readFile.readAll();
                 }
             }
             QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
             QJsonArray array = doc.array();
-            _currentStat["deviceAccessToken"] =  _deviceAccessToken;
+            _currentStat["deviceAccessToken"] = _deviceAccessToken;
 
             array.append(_currentStat);
 
             QFile writeFile(filePath);
 
-
-            if (writeFile.open(QIODevice::WriteOnly)){
+            if (writeFile.open(QIODevice::WriteOnly))
+            {
                 QTextStream stream(&writeFile);
                 QJsonDocument doc;
                 doc.setArray(array);
 
-                stream << doc.toJson() <<Qt::endl;
+                stream << doc.toJson() << Qt::endl;
             }
-
-
         }
     }
 }
 
-void FlightHubHttpClient::_onPublishPlanFinished(QNetworkReply * reply) {
+void FlightHubHttpClient::_onPublishPlanFinished(QNetworkReply *reply)
+{
     qCWarning(FlightHubHttpClientLog) << reply->readAll();
 
     if (reply->error())
@@ -79,26 +129,26 @@ void FlightHubHttpClient::_onPublishPlanFinished(QNetworkReply * reply) {
         if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError)
         {
             QString uploadFileName = _currentPlan["filename"].toString();
-            auto folderPath =  qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
-            QDir  dir(folderPath);
-            if (!dir.exists()){
+            auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
+            QDir dir(folderPath);
+            if (!dir.exists())
+            {
                 dir.mkpath(".");
             }
 
-            auto filePath =  dir .filePath(uploadFileName +"." + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".json");
-            qCWarning(FlightHubHttpClientLog) << "Writing file"<< filePath << folderPath << dir.absolutePath();
+            auto filePath = dir.filePath(uploadFileName + "." + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".json");
+            qCWarning(FlightHubHttpClientLog) << "Writing file" << filePath << folderPath << dir.absolutePath();
             QFile writeFile(filePath);
-            if (writeFile.open(QIODevice::WriteOnly)){
+            if (writeFile.open(QIODevice::WriteOnly))
+            {
                 QTextStream stream(&writeFile);
                 QJsonDocument doc;
                 doc.setObject(_currentPlan);
-                stream << doc.toJson() <<Qt::endl;
+                stream << doc.toJson() << Qt::endl;
             }
-
         }
     }
 }
-
 
 void FlightHubHttpClient::_onGetUserAccessTokenFinished(QNetworkReply *reply)
 {
@@ -189,58 +239,101 @@ void FlightHubHttpClient::publishStat(QJsonObject obj)
     _currentStat = obj;
     _publishStatManager->post(request, data);
 }
-void FlightHubHttpClient::publishPlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename ){
-
+void FlightHubHttpClient::publishPlan(const QJsonDocument &json, const QGeoCoordinate &coordinate, const double &area, const QString &filename)
+{
 
     //     Upload plan file to server
 
-    QFileInfo fileInfo (filename);
-    QString uploadFileName  = fileInfo.fileName();
+    QFileInfo fileInfo(filename);
+    QString uploadFileName = fileInfo.fileName();
     QJsonObject plan;
     plan["data"] = json.object();
-    plan["longitude"] =  coordinate.longitude();
-    plan["latitude"] =  coordinate.latitude();
-    plan["area"] =  area;
+    plan["longitude"] = coordinate.longitude();
+    plan["latitude"] = coordinate.latitude();
+    plan["area"] = area;
     plan["filename"] = uploadFileName;
 
     _currentPlan = plan;
 
+    QNetworkRequest request;
+    auto token = "Bearer " + _getDeviceAccessToken();
+    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
+    QString domain = _hostAddress;
+    QString url = domain + "/authorizeddevices/me/plans";
+    request.setUrl(QUrl(url));
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
+    QHttpPart longitudePart;
+    longitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"longitude\""));
+    longitudePart.setBody(QByteArray::number(coordinate.longitude()));
 
-    //    QNetworkRequest  request;
-    //    auto token = "Bearer " + _getDeviceAccessToken();
-    //    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
-    //    QString domain = _hostAddress;
-    //    QString url = domain + "/authorizeddevices/me/plans";
-    //    request.setUrl(QUrl(url));
-    //    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpPart latitudePart;
+    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"latitude\""));
+    latitudePart.setBody(QByteArray::number(coordinate.latitude()));
 
-    //    QHttpPart longitudePart;
-    //    longitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"longitude\""));
-    //    longitudePart.setBody(QByteArray::number(coordinate.longitude()));
+    QHttpPart areaPart;
+    areaPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"area\""));
+    areaPart.setBody(QByteArray::number(area));
 
-    //    QHttpPart latitudePart;
-    //    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"latitude\""));
-    //    latitudePart.setBody(QByteArray::number(coordinate.latitude()));
+    QHttpPart filePart;
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + uploadFileName + "\""));
+    filePart.setBody(json.toJson());
 
-    //    QHttpPart areaPart;
-    //    areaPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"area\""));
-    //    areaPart.setBody(QByteArray::number(area));
+    multiPart->append(filePart);
+    multiPart->append(longitudePart);
+    multiPart->append(latitudePart);
+    multiPart->append(areaPart);
 
-    //    QHttpPart filePart;
-    //    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\""+uploadFileName+"\""));
-    //    filePart.setBody(json.toJson());
+    _publishPlanManager->post(request, multiPart);
+}
+void FlightHubHttpClient::publishOfflinePlan(const QJsonDocument &json, const QGeoCoordinate &coordinate, const double &area, const QString &filename, const QString &localFilename)
+{
+    //     Upload plan file to server
+    qCWarning(FlightHubHttpClientLog) << "client publish offline" << localFilename;
+    QString uploadFileName = filename;
+    QNetworkRequest request;
+    auto token = "Bearer " + _getDeviceAccessToken();
+    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
+    QString domain = _hostAddress;
+    QString url = domain + "/authorizeddevices/me/plans";
+    request.setUrl(QUrl(url));
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    //    multiPart->append(filePart);
-    //    multiPart->append(longitudePart);
-    //    multiPart->append(latitudePart);
-    //    multiPart->append(areaPart);
+    QHttpPart longitudePart;
+    longitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"longitude\""));
+    longitudePart.setBody(QByteArray::number(coordinate.longitude()));
 
-    //    _publishPlanManager->post(request,multiPart);
+    QHttpPart latitudePart;
+    latitudePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"latitude\""));
+    latitudePart.setBody(QByteArray::number(coordinate.latitude()));
 
+    QHttpPart areaPart;
+    areaPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"area\""));
+    areaPart.setBody(QByteArray::number(area));
 
+    QHttpPart filePart;
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + uploadFileName + "\""));
+    filePart.setBody(json.toJson());
 
+    multiPart->append(filePart);
+    multiPart->append(longitudePart);
+    multiPart->append(latitudePart);
+    multiPart->append(areaPart);
+    auto conn = std::make_shared<QMetaObject::Connection>();
+    *conn = connect(_publishOfflinePlanManager, &QNetworkAccessManager::finished, this, [ conn, localFilename](QNetworkReply *reply)
+    {
+        QObject::disconnect(*conn);
+        qCWarning(FlightHubHttpClientLog) << reply->readAll() << localFilename;
 
+        if (!reply -> error()) {
+            QFileInfo fileInfo(localFilename);
+            if (fileInfo.exists()){
+                QFile file(fileInfo.absoluteFilePath());
+                file.remove();
+            }
+        }
+    });
+    _publishOfflinePlanManager->post(request, multiPart);
 }
 
 void FlightHubHttpClient::publishTelemetry(QJsonObject obj)

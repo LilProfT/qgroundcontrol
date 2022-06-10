@@ -19,6 +19,7 @@
 #include "ADSBVehicleManager.h"
 #include "QGCPalette.h"
 #include "QmlUnitsConversion.h"
+#include "FlightHubManager.h"
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"
 #endif
@@ -109,6 +110,11 @@ public:
     Q_PROPERTY(bool     hasMAVLinkInspector     READ hasMAVLinkInspector        CONSTANT)
 
 
+    //Mismart: for render plan
+
+    Q_PROPERTY(FlightHubManager* flightHubManager READ flightHubManager CONSTANT)
+
+
 #if defined(QGC_ENABLE_PAIRING)
     Q_PROPERTY(PairingManager*      pairingManager          READ pairingManager         CONSTANT)
 #endif
@@ -162,6 +168,8 @@ public:
     AirspaceManager*        airspaceManager     ()  { return _airspaceManager; }
     ADSBVehicleManager*     adsbVehicleManager  ()  { return _adsbVehicleManager; }
     QmlUnitsConversion*     unitsConversion     ()  { return &_unitsConversion; }
+
+    FlightHubManager* flightHubManager(void) const  {return _flightHubManager;}
 #if defined(QGC_ENABLE_PAIRING)
     bool                    supportsPairing     ()  { return true; }
     PairingManager*         pairingManager      ()  { return _pairingManager; }
@@ -261,6 +269,9 @@ private:
     ADSBVehicleManager*     _adsbVehicleManager     = nullptr;
     QGCPalette*             _globalPalette          = nullptr;
     QmlUnitsConversion      _unitsConversion;
+
+    //MiSmart: for render plan
+    FlightHubManager*       _flightHubManager       = nullptr;
 #if defined(QGC_ENABLE_PAIRING)
     PairingManager*         _pairingManager         = nullptr;
 #endif
