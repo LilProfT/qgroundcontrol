@@ -44,7 +44,8 @@ public:
     ~FlightHubManager();
     void setToolbox(QGCToolbox *toolbox) final;
 
-    Q_PROPERTY(QVariantList  planNames READ planNames CONSTANT)
+    Q_PROPERTY(QmlObjectListModel*  planList MEMBER _planList NOTIFY planListChanged)
+    Q_PROPERTY(QString  downloadedFile MEMBER _downloadedFile NOTIFY donwloadedFileChanged)
 
     /// Downloads the specified file.
     ///     @param fromURI  File to download from vehicle, fully qualified path. May be in the format "mftp://[;comp=<id>]..." where the component id is specified.
@@ -60,10 +61,9 @@ public:
 
     void uploadStatistic(QList<MissionItem *> items);
 
-    QVariantList planNames(void) const {return _planNames;};
-
-
     void uploadPlanFile(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename );
+
+    Q_INVOKABLE   void downloadPlanFileFromPlanView(const int index);
 
 signals:
     void publishTelemetry(QJsonObject obj);
@@ -71,7 +71,10 @@ signals:
     void publishPlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename );
     void publishOfflinePlan(const QJsonDocument& json,const QGeoCoordinate& coordinate,const double& area,const QString &filename, const QString& localFilename );
     void fetchPlans(const QString& search,double longitude, double latitude);
-    void planNamesChanged                 (QVariantList planNames);
+    void planListChanged                 (QmlObjectListModel* _planList);
+    void donwloadedFileChanged(QString file);
+
+    void downloadPlanFile(const int id);
 public slots:
     void timerSlot();
     void uploadOfflineStatTimerSlot();
@@ -89,6 +92,8 @@ private slots:
 
     void _uploadOfflineFinished(QNetworkReply * reply);
 
+    void _downloadPlanFileFinished(const QString file);
+
 private:
     Vehicle *_vehicle;
 
@@ -101,6 +106,7 @@ private:
     QNetworkAccessManager* _uploadOfflineManager = nullptr;
 
     int _oldAreaValue = 0;
-    QVariantList _planNames;
-    QList<PlanItem*> _planList;
+
+    QmlObjectListModel* _planList = nullptr;
+    QString _downloadedFile = "";
 };

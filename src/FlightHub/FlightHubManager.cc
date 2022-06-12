@@ -22,6 +22,7 @@ FlightHubManager::FlightHubManager(QGCApplication *app, QGCToolbox *toolbox)
     : QGCTool(app, toolbox), _uploadOfflineManager(new QNetworkAccessManager(this))
 {
     qRegisterMetaType<QList<PlanItem*>>();
+
 }
 
 void FlightHubManager::setToolbox(QGCToolbox *toolbox)
@@ -86,16 +87,29 @@ void FlightHubManager::_onVehicleSetSprayedArea(double area)
     }
 }
 
+void FlightHubManager::downloadPlanFileFromPlanView(const int index){
+    if (index < _planList->count()){
+        PlanItem* item = static_cast<PlanItem*>(_planList->get(index));
+        qCWarning(FlightHubManagerLog) << "download file id" << item->id();
+        emit downloadPlanFile(item->id());
+    }
+}
+
 void FlightHubManager::_onFetchedPlans(const QList<PlanItem*> plans){
 
-    _planList=  plans;
-    _planNames.clear();
-    QVariantList array;
-    foreach(auto plan , plans){
-        qCWarning(FlightHubManagerLog) << "plan" << plan->id() << plan->name() << plan;
-        array.append(plan->name());
+    //    _planList->clear();
+
+    //    foreach(auto plan , plans){
+    //        _p/lanList->append(plan);
+    //    }
+    if (!_planList){
+        _planList = new QmlObjectListModel(this);
     }
-    _planNames = array;
+    _planList->clear();
+    foreach(auto plan, plans){
+        _planList->append(plan);
+    }
+    emit planListChanged(_planList);
     qCWarning(FlightHubManagerLog) << "total" << plans.length();
 }
 
@@ -153,6 +167,8 @@ void FlightHubManager::_onClientReady(bool isReady)
 {
     if (isReady)
     {
+
+
         _clientReady = true;
         qgcApp()->showAppMessage("Connected", "Flighthub");
         qCWarning(FlightHubManagerLog) << "Client ready";
@@ -166,7 +182,10 @@ void FlightHubManager::_onClientReady(bool isReady)
         connect(this, &FlightHubManager::fetchPlans, _flightHubHttpClient, &FlightHubHttpClient::fetchPlans);
         connect(_flightHubHttpClient, &FlightHubHttpClient::fetchedPlans, this, &FlightHubManager::_onFetchedPlans, Qt::QueuedConnection);
 
-        emit fetchPlans("", 0,0);
+        connect(this, &FlightHubManager::downloadPlanFile, _flightHubHttpClient, &FlightHubHttpClient::downloadPlanFile);
+        connect(_flightHubHttpClient, &FlightHubHttpClient::downloadPlanFileFinished, this, &FlightHubManager::_downloadPlanFileFinished);
+
+
         startTimer(5000);
 
         startUploadOfflinePlanTimer(1000);
@@ -175,6 +194,12 @@ void FlightHubManager::_onClientReady(bool isReady)
     {
         startConnectFlightHubTimer(10000);
     }
+}
+
+void FlightHubManager::_downloadPlanFileFinished(const QString file){
+    qCWarning(FlightHubManagerLog) << "download plan file finished" << file;
+    _downloadedFile =  file;
+    emit donwloadedFileChanged(_downloadedFile);
 }
 
 void FlightHubManager::startTimer(int interval)

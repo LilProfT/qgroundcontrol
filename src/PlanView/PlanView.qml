@@ -55,6 +55,7 @@ Item {
     property var    _planViewSettings:                  QGroundControl.settingsManager.planViewSettings
     property bool   _promptForPlanUsageShowing:         false
     property var    _flighthubManager:                  QGroundControl.flightHubManager
+    property var    _downloadedFile:        _flighthubManager.downloadedFile
 
     //Mismart stuffs:
     property bool   _missionEditorTabVisible:           true
@@ -73,6 +74,11 @@ Item {
         coordinate.longitude = coordinate.longitude.toFixed(_decimalPlaces)
         coordinate.altitude  = coordinate.altitude.toFixed(_decimalPlaces)
         return coordinate
+    }
+
+    on_DownloadedFileChanged: {
+        _planMasterController.loadFromFile(_downloadedFile);
+
     }
 
     function updateAirspace(reset) {
@@ -96,6 +102,7 @@ Item {
         usePlannedHomePosition:     true
         planMasterController:       _planMasterController
     }
+
 
     on_AirspaceEnabledChanged: {
         if(QGroundControl.airmapSupported) {
@@ -385,6 +392,7 @@ Item {
 
     property int _moveDialogMissionItemIndex
 
+
     Component {
         id: downloadDialog
 
@@ -400,10 +408,20 @@ Item {
                     id:                     searchLabel
                     anchors.verticalCenter: searchText.verticalCenter
                     text:                   qsTr("Search:") }
+//                TextField {
+//                    onEditingFinished : {
+//                         console.log("asfasfasfasf",text)
+//                    }
+//                }
 
                 QGCTextField {
-                    id:                     searchText
+                    onAccepted : {
+                       var centerPoint = getCenterCoordinate()
+
+                        _flighthubManager.fetchPlans(text, centerPoint.longitude, centerPoint.latitude)
+                    }
                 }
+
             }
 
             QGCFlickable {
@@ -424,7 +442,7 @@ Item {
 
                     Repeater {
                         id:     fileRepeater
-                        model:  _flighthubManager.planNames
+                        model:  _flighthubManager.planList
 
                         Rectangle {
                             anchors.left:   parent.left
@@ -438,7 +456,7 @@ Item {
 
                             QGCLabel {
                                 id:                     label
-                                text: modelData
+                                text: object.name
                                 anchors.margins:         _margins
                                 anchors.left:           parent.left
                                 anchors.right:          parent.right
@@ -452,7 +470,8 @@ Item {
                             QGCMouseArea {
                                 anchors.fill:   parent
                                 onClicked:      {
-                                    console.log(index)
+                                   _flighthubManager.downloadPlanFileFromPlanView(index);
+                                      hideDialog();
                                 }
                             }
 
@@ -502,6 +521,7 @@ Item {
         }
     }
 
+
     QGCFileDialog {
 
         id:             fileDialog
@@ -522,7 +542,7 @@ Item {
                 }
 
                 if (coordinate){
-                    console.log(coordinate);
+
                     _planMasterController.saveToFlightHub(file, coordinate)
                 }
 
@@ -1306,6 +1326,13 @@ Item {
         } // Column
     }
 
+    function getCenterCoordinate(){
+        var centerPoint = Qt.point(editorMap.centerViewport.left + (editorMap.centerViewport.width / 2), editorMap.centerViewport.top + (editorMap.centerViewport.height / 2))
+                                    var centerCoordinate = editorMap.toCoordinate(centerPoint, false)
+        return centerCoordinate;
+
+    }
+
     Component {
         id: syncDropPanel
 
@@ -1466,6 +1493,8 @@ Item {
                     enabled:            !_planMasterController.syncInProgress
                     onClicked: {
                         dropPanel.hide()
+                        var centerPoint =  getCenterCoordinate();
+                        _flighthubManager.fetchPlans("", centerPoint.longitude, centerPoint.latitude)
                         mainWindow.showComponentDialog(downloadDialog, qsTr("Download from server "), mainWindow.showDialogDefaultWidth, StandardButton.Cancel);
                     }
                 }

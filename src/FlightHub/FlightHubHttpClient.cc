@@ -18,7 +18,8 @@ QGC_LOGGING_CATEGORY(FlightHubHttpClientLog, "FlightHubHttpClientLog")
 FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _getAccessTokenManager(new QNetworkAccessManager(this)), _getUserAccessTokenManager(new QNetworkAccessManager(this)),
     _publishTelemetryManager(new QNetworkAccessManager(this)), _publishStatManager(new QNetworkAccessManager(this)), _publishPlanManager(new QNetworkAccessManager(this)),
     _publishOfflinePlanManager(new QNetworkAccessManager(this)),
-    _fetchPlansManager(new QNetworkAccessManager(this))
+    _fetchPlansManager(new QNetworkAccessManager(this)),
+    _downloadPlanFileManager(new QNetworkAccessManager(this))
 
 {
 
@@ -30,11 +31,11 @@ FlightHubHttpClient::FlightHubHttpClient(QObject *parent) : QObject(parent), _ge
     connect(_publishStatManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishStatFinished);
     connect(_publishPlanManager, &QNetworkAccessManager::finished, this, &FlightHubHttpClient::_onPublishPlanFinished);
     connect(_fetchPlansManager, &QNetworkAccessManager::finished, this , &FlightHubHttpClient::_onFetchPlansFinished);
+    connect(_downloadPlanFileManager, &QNetworkAccessManager::finished, this , &FlightHubHttpClient::_onDownloadPlanFileFinished);
 }
 
 void FlightHubHttpClient::_onFetchPlansFinished(QNetworkReply *reply){
     QByteArray body =reply->readAll();
-    qCWarning(FlightHubHttpClientLog) << "fetched plans" <<body;
     QList<PlanItem*> array{};
     if (!reply->error()){
         QJsonDocument doc = QJsonDocument::fromJson(body);
@@ -46,15 +47,84 @@ void FlightHubHttpClient::_onFetchPlansFinished(QNetworkReply *reply){
             auto id = itemObj["id"].toInt();
             auto name = itemObj["fileName"].toString();
 
-            PlanItem planItem(id, name);
-            array.append(&planItem);
-            qCWarning(FlightHubHttpClientLog) << "fetched plans" << &planItem;
+            PlanItem* planItem = new PlanItem(id, name);
+            array.append(planItem);
+
 
         }
 
     }
 
-            emit fetchedPlans(array);
+
+
+    emit fetchedPlans(array);
+}
+
+QString FlightHubHttpClient:: _getFilename(const std::string header) {
+    std::string ascii;
+    const std::string q1 { R"(filename=")" };
+    if (const auto pos = header.find(q1) ; pos != std::string::npos){
+        const auto len =  pos + q1.size();
+        const std::string q2 { R"(")" };
+        if ( const auto pos = header.find(q2, len); pos != std::string::npos )
+        {
+            ascii = header.substr(len, pos - len);
+        }
+    }
+    std::string utf8;
+
+    const std::string u { R"(UTF-8'')" };
+    if ( const auto pos = header.find(u); pos != std::string::npos )
+    {
+        utf8 = header.substr(pos + u.size());
+    }
+
+    return QString::fromStdString(ascii);
+}
+
+void FlightHubHttpClient::_onDownloadPlanFileFinished(QNetworkReply *reply){
+    auto content =  reply->readAll();
+
+    if (!reply->error()){
+
+        auto folderPath =  qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath();
+        QDir dir(folderPath);
+        auto  header =  reply->rawHeader("Content-Disposition");
+        auto filename = _getFilename(QString::fromLatin1(header).toStdString());
+        auto fileInfo =  dir.filePath(filename);
+
+        QFile writeFile(fileInfo);
+        if (writeFile.open(QIODevice::WriteOnly))
+        {
+            QTextStream stream(&writeFile);
+
+
+            stream << content << Qt::endl;
+        }
+        emit downloadPlanFileFinished(fileInfo);
+    }
+
+    reply->deleteLater();
+}
+
+void FlightHubHttpClient::downloadPlanFile(const int id) {
+    qCWarning(FlightHubHttpClientLog) << "fetched plans client id" <<id;
+    QString domain = _hostAddress;
+    auto url =QUrl( domain + "/authorizeddevices/retrieveplanfile");
+    QNetworkRequest request;
+    request.setUrl(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    auto token = "Bearer " + _getDeviceAccessToken();
+    request.setRawHeader(QString("Authorization").toUtf8(), token.toUtf8());
+    QJsonObject dataRequest;
+    dataRequest["planID"] = id;
+
+    QJsonDocument doc;
+    doc.setObject(dataRequest);
+
+    QByteArray data =  doc.toJson();
+
+    _downloadPlanFileManager->post(request, data);
 }
 
 

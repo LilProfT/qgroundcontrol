@@ -35,6 +35,8 @@ public slots:
     void publishPlan(const QJsonDocument &json, const QGeoCoordinate &coordinate, const double &area, const QString &filename);
     void publishOfflinePlan(const QJsonDocument &json, const QGeoCoordinate &coordinate, const double &area, const QString &filename, const QString &localFilename);
     void fetchPlans(const QString& search,double longitude, double latitude);
+    void downloadPlanFile(const int id);
+
 private slots:
     void _onGetDeviceAccessTokenFinished(QNetworkReply *reply);
     void _onPublishTelemetryFinished(QNetworkReply *reply);
@@ -42,10 +44,11 @@ private slots:
     void _onPublishStatFinished(QNetworkReply *reply);
     void _onPublishPlanFinished(QNetworkReply *reply);
     void _onFetchPlansFinished(QNetworkReply *reply);
+    void _onDownloadPlanFileFinished(QNetworkReply * reply);
 signals:
     void parameterReadyClientAvailableChanged(bool isReady);
     void fetchedPlans(const QList<PlanItem*> plans);
-
+    void downloadPlanFileFinished(const QString file);
 private:
     QString _getDeviceAccessToken();
     QString _getUserAccessToken();
@@ -56,6 +59,7 @@ private:
     QNetworkAccessManager *_publishPlanManager = nullptr;
     QNetworkAccessManager *_publishOfflinePlanManager = nullptr;
     QNetworkAccessManager *_fetchPlansManager = nullptr;
+    QNetworkAccessManager *_downloadPlanFileManager=nullptr;
     QString _hostAddress;
     QString _deviceCode;
     QString _userHostAddress;
@@ -73,4 +77,6 @@ private:
 
     bool _triedGetToken = false;
     bool _triedGetUserToken = false;
+
+    QString _getFilename(const std::string header);
 };
