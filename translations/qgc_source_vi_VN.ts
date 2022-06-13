@@ -12568,6 +12568,16 @@ Click &apos;Ok&apos; to upload the Plan anyway.</source>
         <translation>Mở...</translation>
     </message>
     <message>
+        <location filename="../src/PlanView/PlanView.qml" line="1145"/>
+        <source>Download mission...</source>
+        <translation>Tải nhiệm vụ từ internet</translation>
+    </message>
+    <message>
+        <location filename="../src/PlanView/PlanView.qml" line="1145"/>
+        <source>Download from server</source>
+        <translation>Tải nhiệm vụ</translation>
+    </message>
+    <message>
         <location filename="../src/PlanView/PlanView.qml" line="232"/>
         <location filename="../src/PlanView/PlanView.qml" line="237"/>
         <location filename="../src/PlanView/PlanView.qml" line="1159"/>

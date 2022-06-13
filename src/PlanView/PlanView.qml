@@ -415,12 +415,25 @@ Item {
 //                }
 
                 QGCTextField {
+                    id: searchText
                     onAccepted : {
                        var centerPoint = getCenterCoordinate()
 
-                        _flighthubManager.fetchPlans(text, centerPoint.longitude, centerPoint.latitude)
+                        _flighthubManager.fetchPlans(text, centerPoint.longitude, centerPoint.latitude, allCheck.checked)
                     }
                 }
+
+                QGCCheckBox {
+                    id: allCheck
+                    checked: false
+                    anchors.verticalCenter: searchText.verticalCenter
+                    onCheckedChanged : {
+                        var centerPoint = getCenterCoordinate()
+
+                         _flighthubManager.fetchPlans(text, centerPoint.longitude, centerPoint.latitude, checked)
+                    }
+                }
+
 
             }
 
@@ -530,17 +543,19 @@ Item {
         property bool planFiles: true    ///< true: working with plan files, false: working with kml file
 
         onAcceptedForSave: {
+            console.log('save file',file, planFiles)
             if (planFiles) {
                 var coordinate = null;
                 for (var i=0; i< _visualItems.count ; i++){
                     var item = _visualItems.get(i)
-                    console.log(item.commandName)
-                    if (item.commandName === "Survey"){
+
+                    if (item.isSurveyItem){
+                        console.log('commandName',item.commandName)
                         coordinate = item.coordinate
                     }
 
                 }
-
+                console.log('save file',coordinate)
                 if (coordinate){
 
                     _planMasterController.saveToFlightHub(file, coordinate)
@@ -1494,8 +1509,8 @@ Item {
                     onClicked: {
                         dropPanel.hide()
                         var centerPoint =  getCenterCoordinate();
-                        _flighthubManager.fetchPlans("", centerPoint.longitude, centerPoint.latitude)
-                        mainWindow.showComponentDialog(downloadDialog, qsTr("Download from server "), mainWindow.showDialogDefaultWidth, StandardButton.Cancel);
+                        _flighthubManager.fetchPlans("", centerPoint.longitude, centerPoint.latitude, false)
+                        mainWindow.showComponentDialog(downloadDialog, qsTr("Download from server"), mainWindow.showDialogDefaultWidth, StandardButton.Cancel);
                     }
                 }
 

@@ -34,7 +34,7 @@ public slots:
     void publishStat(QJsonObject obj);
     void publishPlan(const QJsonDocument &json, const QGeoCoordinate &coordinate, const double &area, const QString &filename);
     void publishOfflinePlan(const QJsonDocument &json, const QGeoCoordinate &coordinate, const double &area, const QString &filename, const QString &localFilename);
-    void fetchPlans(const QString& search,double longitude, double latitude);
+    void fetchPlans(const QString& search,double longitude, double latitude, bool isGetAll);
     void downloadPlanFile(const int id);
 
 private slots:

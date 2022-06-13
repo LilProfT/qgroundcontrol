@@ -153,7 +153,7 @@ void FlightHubManager::_onVehicleMissionCompleted()
     additionalInformation["currentValue"] = _vehicle->areaSprayed()->rawValue().toDouble();
 
     obj["additionalInformation"] = additionalInformation;
-    obj["gcsVersion"] = "1.2.2";
+    obj["gcsVersion"] = "1.2.3";
 
     qCWarning(FlightHubManagerLog) << "publish stat";
     emit publishStat(obj);

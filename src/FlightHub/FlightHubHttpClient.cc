@@ -71,13 +71,19 @@ QString FlightHubHttpClient:: _getFilename(const std::string header) {
             ascii = header.substr(len, pos - len);
         }
     }
-    std::string utf8;
 
-    const std::string u { R"(UTF-8'')" };
-    if ( const auto pos = header.find(u); pos != std::string::npos )
-    {
-        utf8 = header.substr(pos + u.size());
+    if (ascii == "") {
+        const std::string q3 { R"(filename=)" };
+        if (const auto pos = header.find(q3) ; pos != std::string::npos){
+            const auto len =  pos + q3.size();
+            const std::string q2 { R"(;)" };
+            if ( const auto pos = header.find(q2, len); pos != std::string::npos )
+            {
+                ascii = header.substr(len, pos - len);
+            }
+        }
     }
+
 
     return QString::fromStdString(ascii);
 }
@@ -92,7 +98,7 @@ void FlightHubHttpClient::_onDownloadPlanFileFinished(QNetworkReply *reply){
         auto  header =  reply->rawHeader("Content-Disposition");
         auto filename = _getFilename(QString::fromLatin1(header).toStdString());
         auto fileInfo =  dir.filePath(filename);
-
+            qCWarning(FlightHubHttpClientLog) << "fetched plans client id" <<header << filename;
         QFile writeFile(fileInfo);
         if (writeFile.open(QIODevice::WriteOnly))
         {
@@ -128,19 +134,22 @@ void FlightHubHttpClient::downloadPlanFile(const int id) {
 }
 
 
-void FlightHubHttpClient::fetchPlans(const QString& search,double longitude, double latitude) {
-    qCWarning(FlightHubHttpClientLog) << "fetch plans";
+void FlightHubHttpClient::fetchPlans(const QString& search,double longitude, double latitude, bool isGetAll) {
+    qCWarning(FlightHubHttpClientLog) << "fetch plans" << longitude<< latitude;
     QString domain = _hostAddress;
     auto url =QUrl( domain + "/authorizeddevices/retrieveplans");
-    QUrlQuery query;
-    query.addQueryItem("search", search);
-    if (longitude>0){
+    if (!isGetAll){
+        QUrlQuery query;
+
+        query.addQueryItem("search", search);
+
         query.addQueryItem("longitude", QString::number(longitude));
-    }
-    if (latitude>0){
+
+
         query.addQueryItem("latitude", QString::number(latitude));
+
+        url.setQuery(query.query());
     }
-    url.setQuery(query.query());
     QNetworkRequest request;
     request.setUrl(url);
     auto token = "Bearer " + _getDeviceAccessToken();
@@ -154,7 +163,7 @@ void FlightHubHttpClient::_onPublishStatFinished(QNetworkReply *reply)
     qCWarning(FlightHubHttpClientLog) << reply->readAll();
     if (reply->error())
     {
-        if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError)
+        if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError  || reply->error() == QNetworkReply::NetworkError::UnknownNetworkError|| reply->error() == QNetworkReply::NetworkError::TimeoutError)
         {
             auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->resumeSavePath();
             QDir dir(folderPath);
@@ -195,10 +204,12 @@ void FlightHubHttpClient::_onPublishPlanFinished(QNetworkReply *reply)
     qCWarning(FlightHubHttpClientLog) << reply->readAll();
 
     if (reply->error())
-    {
-        if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError)
+    {qCWarning(FlightHubHttpClientLog) << "Writing file" << reply->error();
+        if (reply->error() == QNetworkReply::NetworkError::HostNotFoundError || reply->error() == QNetworkReply::NetworkError::UnknownNetworkError || reply->error() == QNetworkReply::NetworkError::TimeoutError)
         {
+
             QString uploadFileName = _currentPlan["filename"].toString();
+             qCWarning(FlightHubHttpClientLog) << "Writing file" << uploadFileName;
             auto folderPath = qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath() + "/sync";
             QDir dir(folderPath);
             if (!dir.exists())
