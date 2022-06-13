@@ -31,4 +31,7 @@ void SurveyPlanCreator::createPlan(const QGeoCoordinate& mapCenterCoord)
     _missionController->insertComplexMissionItem(SurveyComplexItem::name, mapCenterCoord, -1);
     _missionController->insertLandItem(mapCenterCoord, -1);
     _missionController->setCurrentPlanViewSeqNum(takeoffItem->sequenceNumber(), true);
+
+    _missionController->setProperty("isTreeSprayingMission", false);
+    _missionController->setProperty("isSurveyMission", true);
 }

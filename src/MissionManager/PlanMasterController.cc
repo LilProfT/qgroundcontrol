@@ -1073,9 +1073,8 @@ void PlanMasterController::_updatePlanCreatorsList(void)
     if (!_flyView) {
         if (!_planCreators) {
             _planCreators = new QmlObjectListModel(this);
-            _planCreators->append(new BlankPlanCreator(this, this));
             _planCreators->append(new SurveyPlanCreator(this, this));
-            _planCreators->append(new CorridorScanPlanCreator(this, this));
+            _planCreators->append(new BlankPlanCreator(this, this));
             emit planCreatorsChanged(_planCreators);
         }
 
@@ -1084,7 +1083,7 @@ void PlanMasterController::_updatePlanCreatorsList(void)
                 _planCreators->removeAt(_planCreators->count() - 1);
             }
         } else {
-            if (_planCreators->count() != 4) {
+            if (_planCreators->count() < 2) {
                 _planCreators->append(new StructureScanPlanCreator(this, this));
             }
         }
@@ -1106,6 +1105,7 @@ void PlanMasterController::showPlanFromManagerVehicle(void)
 
 void PlanMasterController::setParam()
 {
+    if (!_surveyComplexItem) return;
     AgriSettings *agriSettings = qgcApp()->toolbox()->settingsManager()->agriSettings();
     bool isCentrifugal = (agriSettings->sprayOption()->rawValue() == agriSettings->sprayCentrifugalType());
 
@@ -1176,13 +1176,11 @@ void PlanMasterController::setParam()
 
 double PlanMasterController::area()
 {
-    double surveyArea = _surveyComplexItem ?
-            _surveyComplexItem->realCoveredArea() :
-            0.0;
-        double result = surveyArea;
-        for (int i=0; i<_geoFenceController.polygons()->count(); i++) {
-            result -= _geoFenceController.polygons()->value<QGCFencePolygon*>(i)->area();
-        }
-        return result;
-
+    if (!(_missionController.property("isSurveyMission").toBool() && _surveyComplexItem)) return 0.0;
+    double surveyArea = _surveyComplexItem->realCoveredArea();
+    double result = surveyArea;
+    for (int i=0; i<_geoFenceController.polygons()->count(); i++) {
+        result -= _geoFenceController.polygons()->value<QGCFencePolygon*>(i)->area();
+    }
+    return result;
 }

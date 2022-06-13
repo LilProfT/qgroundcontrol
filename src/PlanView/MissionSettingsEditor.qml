@@ -129,6 +129,52 @@ Rectangle {
             }
         }
 
+        GridLayout {
+            visible:        _missionController.isTreeSprayingMission
+            anchors.left:   parent.left
+            anchors.right:  parent.right
+            rows:           5
+            columns:        2
+
+            QGCLabel {
+                Layout.fillWidth:   true
+                Layout.columnSpan:  2
+                text:           qsTr("Default Tree")
+                font.pointSize: ScreenTools.smallFontPointSize
+            }
+
+            QGCLabel { text:  missionItem.volume.name }
+
+            FactTextField {
+                showUnits:          true
+                fact:               missionItem.volume
+                Layout.fillWidth:   true
+            }
+
+            QGCLabel { text:  missionItem.flowRate.name }
+
+            FactTextField {
+                showUnits:          true
+                fact:               missionItem.flowRate
+                Layout.fillWidth:   true
+            }
+
+            QGCLabel { text: qsTr("Spray Time") }
+
+            QGCLabel {
+                text:               missionItem.sprayTime + " s"
+                font.pointSize:     ScreenTools.largeFontPointSize
+                color:              qgcPal.globalTheme !== QGCPalette.Light ? "deepskyblue" : "forestgreen"
+                Layout.alignment:   Qt.AlignHCenter
+            }
+            QGCButton {
+                text:               qsTr("Apply")
+                Layout.fillWidth:   true
+                Layout.columnSpan:  2
+                onClicked:          missionItem.applyDefaultTree();
+            }
+        }
+
         Column {
             Layout.fillWidth:   true
             spacing:            _margin
