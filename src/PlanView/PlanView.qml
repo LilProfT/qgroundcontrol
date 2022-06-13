@@ -353,6 +353,11 @@ Item {
         _missionController.insertSimpleMissionItem(coordinate, nextIndex, true /* makeCurrentItem */)
     }
 
+    function insertTreeSprayingItemsAfterCurrent(coordinate) {
+        var nextIndex = _missionController.currentPlanViewVIIndex + 1
+        _missionController.insertTreeSprayingMissionItems(coordinate, nextIndex, true /* makeCurrentItem */)
+    }
+
     function insertROIAfterCurrent(coordinate) {
         var nextIndex = _missionController.currentPlanViewVIIndex + 1
         _missionController.insertROIMissionItem(coordinate, nextIndex, true /* makeCurrentItem */)
@@ -680,7 +685,7 @@ Item {
                     switch (_editingLayer) {
                     case _layerMission:
                         if (_addWaypointOnClick) {
-                            insertSimpleItemAfterCurrent(coordinate)
+                            insertTreeSprayingItemsAfterCurrent(coordinate)
                         } else if (_addROIOnClick) {
                             insertROIAfterCurrent(coordinate)
                             _addROIOnClick = false
@@ -845,6 +850,12 @@ Item {
             }
         }
 
+        TreeSprayingToolbar {
+            mapControl: editorMap
+            missionController: _missionController
+            addWaypointOnClick: _addWaypointOnClick
+        }
+
         //-----------------------------------------------------------
         // Left tool strip
         ToolStrip {
@@ -897,11 +908,10 @@ Item {
                         }
                     },
                     ToolStripAction {
-                        text:               _editingLayer == _layerRallyPoints ? qsTr("Rally Point") : qsTr("Waypoint")
+                        text:               _editingLayer == _layerRallyPoints ? qsTr("Rally Point") : qsTr("Tree")
                         iconSource:         "/qmlimages/MapAddMission.svg"
                         enabled:            toolStrip._isRallyLayer ? true : _missionController.flyThroughCommandsAllowed
-                        //visible:            toolStrip._isRallyLayer || toolStrip._isMissionLayer
-                        visible:            false
+                        visible:            toolStrip._isRallyLayer || toolStrip._isMissionLayer
                         checkable:          true
                         onCheckedChanged:   _addWaypointOnClick = checked
                         property bool myAddWaypointOnClick: _addWaypointOnClick

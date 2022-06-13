@@ -1,0 +1,27 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+    {
+        "name":             "FlowRate",
+        "shortDesc": "Time the vehicle staying on top of tree to spray.",
+        "type":             "double",
+        "units":            "l/m",
+        "min":              0.0,
+        "max":              10.0,
+        "decimalPlaces":    1,
+        "default":     3.0
+    },
+    {
+        "name":             "Volume",
+        "shortDesc": "Pest volume to spray.",
+        "type":             "double",
+        "units":            "lit",
+        "min":              0.0,
+        "max":              5.0,
+        "decimalPlaces":    1,
+        "default":     3.0
+    }
+]
+}

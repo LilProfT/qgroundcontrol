@@ -230,6 +230,10 @@ void GeoFenceController::save(QJsonObject& json)
 void GeoFenceController::removeAll(void)
 {    
     setBreachReturnPoint(QGeoCoordinate());
+
+    disconnect(&_polygons, &QmlObjectListModel::countChanged, nullptr, nullptr);
+    disconnect(&_circles,  &QmlObjectListModel::countChanged, nullptr, nullptr);
+
     _polygons.clearAndDeleteContents();
     _circles.clearAndDeleteContents();
 }

@@ -16,14 +16,17 @@
 #include "AppSettings.h"
 #include "MissionCommandUIInfo.h"
 #include "PlanMasterController.h"
+#include "TreeSprayComplexItem.h"
 
 #include <QPolygonF>
 
 QGC_LOGGING_CATEGORY(MissionSettingsComplexItemLog, "MissionSettingsComplexItemLog")
 
 const char* MissionSettingsItem::_plannedHomePositionAltitudeName = "PlannedHomePositionAltitude";
+const char* MissionSettingsItem::settingsGroup = "Tree";
+const char* MissionSettingsItem::flowRateName  = "FlowRate";
+const char* MissionSettingsItem::volumeName    = "Volume";
 
-QMap<QString, FactMetaData*> MissionSettingsItem::_metaDataMap;
 
 MissionSettingsItem::MissionSettingsItem(PlanMasterController* masterController, bool flyView)
     : ComplexMissionItem                (masterController, flyView)
@@ -31,6 +34,9 @@ MissionSettingsItem::MissionSettingsItem(PlanMasterController* masterController,
     , _plannedHomePositionAltitudeFact  (0, _plannedHomePositionAltitudeName,   FactMetaData::valueTypeDouble)
     , _cameraSection                    (masterController)
     , _speedSection                     (masterController)
+    , _metaDataMap       (FactMetaData::createMapFromJsonFile(QStringLiteral(":/json/Tree.SettingsGroup.json"), this))
+    , _flowRateFact                     (settingsGroup, _metaDataMap[flowRateName])
+    , _volumeFact                       (settingsGroup, _metaDataMap[volumeName])
 {
     _isIncomplete = false;
     _editorQml = "qrc:/qml/MissionSettingsEditor.qml";
@@ -63,6 +69,10 @@ MissionSettingsItem::MissionSettingsItem(PlanMasterController* masterController,
     connect(&_plannedHomePositionAltitudeFact,  &Fact::rawValueChanged,                 this, &MissionSettingsItem::_updateAltitudeInCoordinate);
 
     connect(_managerVehicle, &Vehicle::homePositionChanged, this, &MissionSettingsItem::_updateHomePosition);
+
+    connect(&_flowRateFact, &SettingsFact::valueChanged, this, &MissionSettingsItem::sprayTimeChanged);
+    connect(&_volumeFact,   &SettingsFact::valueChanged, this, &MissionSettingsItem::sprayTimeChanged);
+
     _updateHomePosition(_managerVehicle->homePosition());
 }
 
@@ -296,5 +306,19 @@ void MissionSettingsItem::_updateHomePosition(const QGeoCoordinate& homePosition
 {
     if (_flyView) {
         setCoordinate(homePosition);
+    }
+}
+
+void MissionSettingsItem::applyDefaultTree() {
+    auto visualItems = _masterController->missionController()->visualItems();
+    for (int i=0; i<visualItems->count(); i++) {
+        TreeSprayComplexItem* treeSprayItem = qobject_cast<TreeSprayComplexItem*>(visualItems->get(i));
+        if (treeSprayItem) {
+            treeSprayItem->blockLoseDefault = true;
+            treeSprayItem->flowRate()->setRawValue(QVariant::fromValue(_flowRateFact.rawValue()));
+            treeSprayItem->volume()->setRawValue(QVariant::fromValue(_volumeFact.rawValue()));
+            treeSprayItem->blockLoseDefault = false;
+            treeSprayItem->setIsDefault(true);
+        }
     }
 }

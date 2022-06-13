@@ -100,6 +100,8 @@ public:
     Q_PROPERTY(QString              surveyComplexItemName           READ surveyComplexItemName          CONSTANT)
     Q_PROPERTY(QString              corridorScanComplexItemName     READ corridorScanComplexItemName    CONSTANT)
     Q_PROPERTY(QString              structureScanComplexItemName    READ structureScanComplexItemName   CONSTANT)
+    Q_PROPERTY(bool                 isTreeSprayingMission           MEMBER _isTreeSprayingMission       NOTIFY isTreeSprayingMissionChanged)
+    Q_PROPERTY(bool                 isSurveyMission                 MEMBER _isSurveyMission             NOTIFY isSurveyMissionChanged)
     Q_PROPERTY(bool                 onlyInsertTakeoffValid          MEMBER _onlyInsertTakeoffValid      NOTIFY onlyInsertTakeoffValidChanged)
     Q_PROPERTY(bool                 isInsertTakeoffValid            MEMBER _isInsertTakeoffValid        NOTIFY isInsertTakeoffValidChanged)
     Q_PROPERTY(bool                 isInsertLandValid               MEMBER _isInsertLandValid           NOTIFY isInsertLandValidChanged)
@@ -120,6 +122,8 @@ public:
     ///     @param makeCurrentItem: true: Make this item the current item
     /// @return Newly created item
     Q_INVOKABLE VisualMissionItem* insertSimpleMissionItem(QGeoCoordinate coordinate, int visualItemIndex, bool makeCurrentItem = false);
+
+    Q_INVOKABLE void insertTreeSprayingMissionItems(QGeoCoordinate coordinate, int visualItemIndex, bool makeCurrentItem = false);
 
     /// Add a new takeoff item to the list
     ///     @param coordinate: Coordinate for item
@@ -294,6 +298,8 @@ signals:
     void takeoffMissionItemChanged          (void);
     void missionBoundingCubeChanged         (void);
     void missionItemCountChanged            (int missionItemCount);
+    void isTreeSprayingMissionChanged       (void);
+    void isSurveyMissionChanged             (void);
     void onlyInsertTakeoffValidChanged      (void);
     void isInsertTakeoffValidChanged        (void);
     void isInsertLandValidChanged           (void);
@@ -400,6 +406,8 @@ private:
     QGeoCoordinate              _takeoffCoordinate;
     QGeoCoordinate              _previousCoordinate;
     FlightPathSegment*          _splitSegment =                 nullptr;
+    bool                        _isTreeSprayingMission =        false;
+    bool                        _isSurveyMission =        false;
     bool                        _onlyInsertTakeoffValid =       true;
     bool                        _isInsertTakeoffValid =         true;
     bool                        _isInsertLandValid =            false;

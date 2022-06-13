@@ -18,7 +18,9 @@ import QGroundControl.Palette       1.0
 
 /// Toolbar used for things like Polygon editing tools
 Item {
-    width:  Math.min(toolsRowLayout.width + (_margins * 2), availableWidth)
+    property bool vertical: false
+
+    width:  Math.min(toolsGridLayout.width + (_margins * 2), availableWidth)
     height: toolsFlickable.y + toolsFlickable.height + _margins
     z:      QGroundControl.zOrderMapItems + 2
 
@@ -35,7 +37,7 @@ Item {
             moveList.push(children[i])
         }
         for (i = 0; i < moveList.length; i++) {
-            moveList[i].parent = toolsRowLayout
+            moveList[i].parent = toolsGridLayout
         }
         instructionComponent.createObject(toolsRowLayout)
     }
@@ -52,14 +54,18 @@ Item {
         anchors.top:        parent.top
         anchors.left:       parent.left
         anchors.right:      parent.right
-        height:             toolsRowLayout.height
+        height:             toolsGridLayout.height
         clip:               true
-        flickableDirection: Flickable.HorizontalFlick
-        contentWidth:       toolsRowLayout.width
+        flickableDirection: vertical ? Flickable.VerticalFlick : Flickable.HorizontalFlick
+        contentWidth:       toolsGridLayout.width
 
-        RowLayout {
-            id:                 toolsRowLayout
-            spacing:            _margins
+        GridLayout {
+            id:                 toolsGridLayout
+            rowSpacing:         _margins
+            columnSpacing:      _margins
+            rows:               vertical ? undefined : 1
+            columns:            vertical ? 1 : undefined
+            flow:               vertical ? GridLayout.TopToBottom : GridLayout.LeftToRight
         }
     }
 

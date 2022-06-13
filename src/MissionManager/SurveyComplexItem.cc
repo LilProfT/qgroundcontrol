@@ -26,7 +26,7 @@
 
 QGC_LOGGING_CATEGORY(SurveyComplexItemLog, "SurveyComplexItemLog")
 
-const QString SurveyComplexItem::name(tr("Tạo bản đồ"));
+const QString SurveyComplexItem::name(tr("Tưới lúa"));
 
 const char* SurveyComplexItem::jsonComplexItemTypeValue =   "survey";
 const char* SurveyComplexItem::jsonV3ComplexItemTypeValue = "survey";
