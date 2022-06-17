@@ -28,6 +28,7 @@ const char* VehicleBatteryFactGroup::_chargeStateFactName           = "chargeSta
 
 const char* VehicleBatteryFactGroup::_cellVoltageMinFactName        = "cellVoltageMin";
 const char* VehicleBatteryFactGroup::_cellVoltageMaxFactName        = "cellVoltageMax";
+const char* VehicleBatteryFactGroup::_cycleCountFactName            = "cycleCount";
 const char* VehicleBatteryFactGroup::_serialNumberFactName          = "serialNumber";
 const char* VehicleBatteryFactGroup::_deviceNameFactName            = "deviceName";
 
@@ -50,6 +51,9 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
 
     , _cellVoltageMinFact   (0, _cellVoltageMinFactName,            FactMetaData::valueTypeDouble)
     , _cellVoltageMaxFact   (0, _cellVoltageMaxFactName,            FactMetaData::valueTypeDouble)
+    , _cycleCountFact       (0, _cycleCountFactName,                FactMetaData::valueTypeInt16)
+    , _serialNumberFact     (0, _serialNumberFactName,              FactMetaData::valueTypeString)
+    , _deviceNameFact       (0, _deviceNameFactName,                FactMetaData::valueTypeString)
 {
     _addFact(&_batteryIdFact,               _batteryIdFactName);
     _addFact(&_batteryFunctionFact,         _batteryFunctionFactName);
@@ -145,10 +149,12 @@ void VehicleBatteryFactGroup::_handleSmartBatteryInfo(Vehicle* vehicle, mavlink_
     mavlink_msg_smart_battery_info_decode(&message, &smartBatteryInfo);
 
     VehicleBatteryFactGroup* group = _findOrAddBatteryGroupById(vehicle, smartBatteryInfo.id);
-
+    QString serial =  QString::fromLatin1(smartBatteryInfo.serial_number);
+    QString name =  QString::fromLatin1(smartBatteryInfo.device_name);
     group->cycleCount()->setRawValue(smartBatteryInfo.cycle_count);
-    group->serialNumber()->setRawValue(smartBatteryInfo.serial_number);
-    group->deviceName()->setRawValue(smartBatteryInfo.device_name);
+    group->serialNumber()->setRawValue(serial);
+    group->deviceName()->setRawValue(name);
+
 }
 
 void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_message_t& message)

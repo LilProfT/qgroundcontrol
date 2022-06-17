@@ -123,6 +123,7 @@ Item {
             property bool chargeStateAvailable:     battery.chargeState.rawValue !== MAVLink.MAV_BATTERY_CHARGE_STATE_UNDEFINED
             property bool cellVoltageMinAvailable:  !isNaN(battery.cellVoltageMin.rawValue)
             property bool cellVoltageMaxAvailable:  !isNaN(battery.cellVoltageMax.rawValue)
+            property bool cycleCountAvailable: !isNaN(battery.cycleCount.rawValue)
         }
     }
 
@@ -180,7 +181,7 @@ Item {
                                 QGCLabel { text: qsTr("Cycle count");                          visible: batteryValuesAvailable.mahConsumedAvailable } //Dirty code, using it as a buffer variable for battery cycle count
                                 QGCLabel { text: qsTr("Min Cell Volt");                         visible: batteryValuesAvailable.cellVoltageMinAvailable}
                                 QGCLabel { text: qsTr("Max Cell Volt");                         visible: batteryValuesAvailable.cellVoltageMaxAvailable}
-                              //  QGCLabel { text: qsTr("Serial number");                         visible: batteryValuesAvailable.serialNumberAvailable}
+//                                QGCLabel { text: qsTr("Serial number");                         visible: batteryValuesAvailable.serialNumberAvailable}
                             }
                         }
                     }
@@ -214,7 +215,7 @@ Item {
                                 QGCLabel { text: object.cycleCount.valueString;                                            visible: batteryValuesAvailable.cycleCountAvailable } //Dirty code, using it as a buffer variable for battery cycle count
                                 QGCLabel { text: object.cellVoltageMin.valueString + " " + object.cellVoltageMin.units;           visible: batteryValuesAvailable.cellVoltageMinAvailable }
                                 QGCLabel { text: object.cellVoltageMax.valueString + " " + object.cellVoltageMax.units;           visible: batteryValuesAvailable.cellVoltageMaxAvailable }
-                           //     QGCLabel { text: object.serialNumber.valueString;                                             visible: batteryValuesAvailable.serialNumberAvailable }
+//                                QGCLabel { text: object.serialNumber.valueString;                                             visible: batteryValuesAvailable.serialNumberAvailable }
                             }
                         }
                     }
