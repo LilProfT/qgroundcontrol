@@ -439,7 +439,6 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 HEADERS += \
     src/FlightHub/PlanItem.h \
     src/MissionManager/MissionModel.h \
-    src/MissionManager/TreeSprayComplexItem.h \
     src/QmlControls/QmlUnitsConversion.h \
     src/Settings/AgriSettings.h \
     src/Settings/FlightHubSettings.h \
@@ -461,7 +460,6 @@ SOURCES += \
     src/MissionManager/MissionModel.fence.cc \
     src/MissionManager/SurveyComplexItem.mismart.cc \
     src/Settings/AgriSettings.cc \
-    src/MissionManager/TreeSprayComplexItem.cc \
     src/Settings/FlightHubSettings.cc \
     src/Vehicle/VehicleEscStatusFactGroup.cc \
     src/api/QGCCorePlugin.cc \
@@ -1542,7 +1540,6 @@ contains (CONFIG, QGC_DISABLE_INSTALLER_SETUP) {
 }
 
 DISTFILES += \
-    src/PlanView/TreeSprayingToolbar.qml \
     src/QmlControls/QGroundControl/Specific/qmldir
 
 # QT += mqtt

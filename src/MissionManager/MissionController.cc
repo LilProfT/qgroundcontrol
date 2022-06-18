@@ -16,7 +16,6 @@
 #include "QGCApplication.h"
 #include "SimpleMissionItem.h"
 #include "SurveyComplexItem.h"
-#include "TreeSprayComplexItem.h"
 #include "FixedWingLandingComplexItem.h"
 #include "VTOLLandingComplexItem.h"
 #include "StructureScanComplexItem.h"
@@ -380,13 +379,6 @@ VisualMissionItem* MissionController::insertSimpleMissionItem(QGeoCoordinate coo
     return _insertSimpleMissionItemWorker(coordinate, MAV_CMD_NAV_WAYPOINT, visualItemIndex, makeCurrentItem);
 }
 
-void MissionController::insertTreeSprayingMissionItems(QGeoCoordinate coordinate, int visualItemIndex, bool makeCurrentItem)
-{
-    TreeSprayComplexItem* newItem = new TreeSprayComplexItem(masterController());
-    newItem->setCoordinate(coordinate);
-    _insertComplexMissionItemWorker(coordinate, newItem, visualItemIndex, makeCurrentItem);
-    newItem->setWizardMode(false);
-}
 
 VisualMissionItem* MissionController::insertTakeoffItem(QGeoCoordinate /*coordinate*/, int visualItemIndex, bool makeCurrentItem)
 {
@@ -887,15 +879,6 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
                 nextSequenceNumber = surveyItem->lastSequenceNumber() + 1;
                 qCDebug(MissionControllerLog) << "Survey load complete: nextSequenceNumber" << nextSequenceNumber;
                 visualItems->append(surveyItem);
-            } else if (complexItemType == TreeSprayComplexItem::jsonComplexItemTypeValue) {
-                qCDebug(MissionControllerLog) << "Loading TreeSpray: nextSequenceNumber" << nextSequenceNumber;
-                TreeSprayComplexItem* treeItem = new TreeSprayComplexItem(_masterController);
-                if (!treeItem->load(itemObject, nextSequenceNumber++, errorString)) {
-                    return false;
-                }
-                nextSequenceNumber = treeItem->lastSequenceNumber() + 1;
-                qCDebug(MissionControllerLog) << "TreeSpray load complete: nextSequenceNumber" << nextSequenceNumber;
-                visualItems->append(treeItem);
             } else if (complexItemType == FixedWingLandingComplexItem::jsonComplexItemTypeValue) {
                 qCDebug(MissionControllerLog) << "Loading Fixed Wing Landing Pattern: nextSequenceNumber" << nextSequenceNumber;
                 FixedWingLandingComplexItem* landingItem = new FixedWingLandingComplexItem(_masterController, _flyView);
@@ -2342,12 +2325,7 @@ QStringList MissionController::complexMissionItemNames(void) const
 
 void MissionController::resumeMission(int resumeIndex)
 {
-    if (_masterController->missionController()->property("isSurveyMission").toBool()) {
-        _missionManager->generateResumeMission(resumeIndex);
-    } else {
-        return;
-    }
-
+    _missionManager->generateResumeMission(resumeIndex);
 }
 
 void MissionController::resumeMissionFromFile()

@@ -31,19 +31,10 @@ public:
     Q_PROPERTY(Fact*    plannedHomePositionAltitude READ plannedHomePositionAltitude                            CONSTANT)
     Q_PROPERTY(QObject* cameraSection               READ cameraSection                                          CONSTANT)
     Q_PROPERTY(QObject* speedSection                READ speedSection                                           CONSTANT)
-    Q_PROPERTY(Fact* flowRate               READ flowRate               CONSTANT)
-    Q_PROPERTY(Fact* volume                 READ volume                 CONSTANT)
-    Q_PROPERTY(double sprayTime             READ sprayTime              NOTIFY sprayTimeChanged)
 
-    Q_INVOKABLE void applyDefaultTree();
-
-    Fact* flowRate (void) { return &_flowRateFact; };
-    Fact* volume   (void) { return &_volumeFact; };
     Fact*           plannedHomePositionAltitude (void) { return &_plannedHomePositionAltitudeFact; }
     CameraSection*  cameraSection               (void) { return &_cameraSection; }
     SpeedSection*   speedSection                (void) { return &_speedSection; }
-
-    double sprayTime (void) { return _volumeFact.rawValue().toDouble() / _flowRateFact.rawValue().toDouble() * 60; }
 
     /// Scans the loaded items for settings items
     bool scanForMissionSettings(QmlObjectListModel* visualItems, int scanIndex);
@@ -102,13 +93,8 @@ public:
     double          minAMSLAltitude             (void) const final { return amslEntryAlt(); }
     double          maxAMSLAltitude             (void) const final { return amslEntryAlt(); }
 
-    static const char* settingsGroup;
-    static const char* flowRateName;
-    static const char* volumeName;
-
 signals:
     void specifyMissionFlightSpeedChanged   (bool specifyMissionFlightSpeed);
-    void sprayTimeChanged                   (void);
 
 private slots:
     void _setDirtyAndUpdateLastSequenceNumber   (void);
@@ -129,10 +115,7 @@ private:
     CameraSection   _cameraSection;
     SpeedSection    _speedSection;
 
-    QMap<QString, FactMetaData*> _metaDataMap;
-
-    SettingsFact _flowRateFact;
-    SettingsFact _volumeFact;
+    static QMap<QString, FactMetaData*> _metaDataMap;
 
     static const char* _plannedHomePositionAltitudeName;
 };

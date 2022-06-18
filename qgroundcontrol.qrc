@@ -141,7 +141,6 @@
         <file alias="QGroundControl/Controls/QGCMapLabel.qml">src/QmlControls/QGCMapLabel.qml</file>
         <file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">src/MissionManager/QGCMapPolygonVisuals.qml</file>
         <file alias="QGroundControl/Controls/QGCMapPolylineVisuals.qml">src/MissionManager/QGCMapPolylineVisuals.qml</file>
-        <file alias="QGroundControl/Controls/TreeSprayingToolbar.qml">src/QmlControls/TreeSprayingToolbar.qml</file>
         <file alias="QGroundControl/Controls/QGCMenu.qml">src/QmlControls/QGCMenu.qml</file>
         <file alias="QGroundControl/Controls/QGCMenuItem.qml">src/QmlControls/QGCMenuItem.qml</file>
         <file alias="QGroundControl/Controls/QGCMenuSeparator.qml">src/QmlControls/QGCMenuSeparator.qml</file>
@@ -277,7 +276,6 @@
         <file alias="SimpleItemEditor.qml">src/PlanView/SimpleItemEditor.qml</file>
         <file alias="StructureScanEditor.qml">src/PlanView/StructureScanEditor.qml</file>
         <file alias="SurveyItemEditor.qml">src/PlanView/SurveyItemEditor.qml</file>
-        <file alias="TreeItemEditor.qml">src/PlanView/TreeItemEditor.qml</file>
         <file alias="SyslinkComponent.qml">src/AutoPilotPlugins/Common/SyslinkComponent.qml</file>
         <file alias="TaisyncSettings.qml">src/Taisync/TaisyncSettings.qml</file>
         <file alias="TcpSettings.qml">src/ui/preferences/TcpSettings.qml</file>
@@ -348,7 +346,6 @@
         <file alias="Vehicle/WindFact.json">src/Vehicle/WindFact.json</file>
         <file alias="Video.SettingsGroup.json">src/Settings/Video.SettingsGroup.json</file>
         <file alias="VTOLLandingPattern.FactMetaData.json">src/MissionManager/VTOLLandingPattern.FactMetaData.json</file>
-        <file alias="Tree.SettingsGroup.json">src/MissionManager/Tree.SettingsGroup.json</file>
     </qresource>
     <qresource prefix="/audio">
         <file alias="audioMap.json">resources/audio/audioMap.json</file>

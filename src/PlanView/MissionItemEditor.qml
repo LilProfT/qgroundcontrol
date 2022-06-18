@@ -17,12 +17,7 @@ import QGroundControl.Palette       1.0
 Rectangle {
     id:             _root
     height:         editorLoader.visible ? (editorLoader.y + editorLoader.height + _innerMargin) : (topRowLayout.y + topRowLayout.height + _margin)
-    color:          getColor()
-    function getColor() {
-        if (_currentItem) return qgcPal.missionItemEditor;
-        if (_missionController.isTreeSprayingMission && (missionItem.isDefault === false)) return "darkgreen";
-        return qgcPal.windowShade;
-    }
+    color:          _currentItem ? qgcPal.missionItemEditor : qgcPal.windowShade
 
     radius:         _radius
     opacity:        _currentItem ? 1.0 : 0.7
