@@ -115,6 +115,9 @@ void FlightHubManager::_onFetchedPlans(const QList<PlanItem*> plans){
 
 void FlightHubManager::_onVehicleMissionCompleted()
 {
+
+
+
     auto sprayedIndexes = _vehicle->trajectoryPoints()->sprayedIndexes();
     auto selectedItems = _vehicle->trajectoryPoints()->trajectoryPoints();
 
@@ -128,6 +131,12 @@ void FlightHubManager::_onVehicleMissionCompleted()
     obj["flightDuration"] = flightTime;
     obj["flights"] = 1;
     obj["taskArea"] = _vehicle->areaSprayed()->rawValue().toDouble() - _oldAreaValue;
+    QmlObjectListModel *batteries = _vehicle->batteries();
+    if (batteries->count() > 0){
+        VehicleBatteryFactGroup *group = batteries->value<VehicleBatteryFactGroup *>(0);
+        auto batteryPercentRemaining=  group->percentRemaining()->rawValue().toDouble();
+        obj["batteryPercentRemaining"] = batteryPercentRemaining;
+    }
     QJsonArray flywayPoints;
 
     foreach (QVariant item, selectedItems)
@@ -153,7 +162,7 @@ void FlightHubManager::_onVehicleMissionCompleted()
     additionalInformation["currentValue"] = _vehicle->areaSprayed()->rawValue().toDouble();
 
     obj["additionalInformation"] = additionalInformation;
-    obj["gcsVersion"] = "1.3.1";
+    obj["gcsVersion"] = "1.3.2";
 
     qCWarning(FlightHubManagerLog) << "publish stat";
     emit publishStat(obj);
