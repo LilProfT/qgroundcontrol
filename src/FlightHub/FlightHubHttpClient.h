@@ -41,7 +41,6 @@ private slots:
     void _onGetDeviceAccessTokenFinished(QNetworkReply *reply);
     void _onPublishTelemetryFinished(QNetworkReply *reply);
     void _onGetUserAccessTokenFinished(QNetworkReply *reply);
-    void _onPublishStatFinished(QNetworkReply *reply);
     void _onPublishPlanFinished(QNetworkReply *reply);
     void _onFetchPlansFinished(QNetworkReply *reply);
     void _onDownloadPlanFileFinished(QNetworkReply * reply);
@@ -71,8 +70,6 @@ private:
     const QString _nullToken = QString();
 
     QJsonObject _user;
-
-    QJsonObject _currentStat;
     QJsonObject _currentPlan;
 
     bool _triedGetToken = false;

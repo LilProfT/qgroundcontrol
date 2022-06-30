@@ -162,7 +162,7 @@ void FlightHubManager::_onVehicleMissionCompleted()
     additionalInformation["currentValue"] = _vehicle->areaSprayed()->rawValue().toDouble();
 
     obj["additionalInformation"] = additionalInformation;
-    obj["gcsVersion"] = "1.3.2";
+    obj["gcsVersion"] = "1.3.3";
 
     qCWarning(FlightHubManagerLog) << "publish stat";
     emit publishStat(obj);
@@ -333,13 +333,12 @@ void FlightHubManager::uploadOfflineStatTimerSlot()
     QByteArray data = uploadDoc.toJson();
     _uploadOfflineManager->post(request, data);
 
-    startUploadOfflineStatTimer(10000);
+
 }
 
 void FlightHubManager::_uploadOfflineFinished(QNetworkReply *reply)
 {
     auto response = reply->readAll();
-    qCWarning(FlightHubManagerLog) << "reply offline stat" << response;
     if (!reply->error())
     {
 
@@ -355,11 +354,10 @@ void FlightHubManager::_uploadOfflineFinished(QNetworkReply *reply)
             QJsonDocument writeDoc;
             writeDoc.setArray(array);
             QTextStream stream(&writeFile);
-
-            qCWarning(FlightHubHttpClientLog) << "Writing file" << writeDoc.toJson();
             stream << writeDoc.toJson();
         }
     }
+    startUploadOfflineStatTimer(10000);
 }
 
 void FlightHubManager::timerSlot()
