@@ -50,6 +50,10 @@ ColumnLayout {
                                                                              "")
                 }
                 else if (instrumentValueData.text === "VOL" || instrumentValueData.icon === "tank.svg") {
+                    //0.2 = 20L/100
+//                    return (instrumentValueData.fact.rawValue * 0.3).toFixed(1) + (instrumentValueData.showUnits ?
+//                                                                             (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
+//                                                                             "")
                     return (instrumentValueData.fact.rawValue * 0.2).toFixed(1) + (instrumentValueData.showUnits ?
                                                                              (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
                                                                              "")

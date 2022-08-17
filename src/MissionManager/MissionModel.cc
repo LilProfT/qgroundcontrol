@@ -199,12 +199,21 @@ void MissionModel::_processSprays()
 {
     bool spraying = false;
     bool passed = false;
+    bool relayBackOn = true; //servo 8 is back, servo 9 is front
     Step* lastWaypoint = nullptr;
 
-    int max = 1750;
-    int min  = 1050;
-    double ratio = (max - min) / 100;
-    int pwm = min + (int) (_centrifugalRPM * ratio);
+    int maxFront = 1900;
+    int minFront  = 1500;
+    int maxBack = 1500;
+    int minBack  = 1100;
+    int relayBack = 0;
+    int relayFront = 2;
+    double ratioFront = (maxFront - minFront) / 100;
+    double ratioBack = (maxBack - minBack) / 100;
+
+    int pwmFront = minFront + (int) (_centrifugalRPM * ratioFront);
+    int pwmBack = minBack + (int) (_centrifugalRPM * ratioBack);
+    int pwmDisable = 1000;
 
     // find out the correct firstWaypoint
     Step* firstWaypoint = nullptr;
@@ -214,15 +223,28 @@ void MissionModel::_processSprays()
             break;
         }
     }
-    MissionItem* setServoItem = new MissionItem(0,   // set it later
+
+    MissionItem* enableServoBack= new MissionItem(0,   // set it later
                                                 MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
                                                 _mavFrame,
-                                                9, // servo 9
-                                                pwm, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                //9, // servo 9
+                                                8, // servo 8
+                                                pwmBack, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
                                                 true,                                        // autoContinue
                                                 false,                                       // isCurrentItem
                                                 _missionItemParent);
-    if (firstWaypoint) firstWaypoint->items.append(setServoItem);
+
+    if (firstWaypoint) firstWaypoint->items.append(enableServoBack);
+
+//    MissionItem* enableRelayItemBack = new MissionItem(0,   // set it later
+//                                                MAV_CMD_DO_SET_RELAY, // MAV_CMD_DO_SET_SERVO,
+//                                                _mavFrame,
+//                                                relayBack, // servo 12
+//                                                1, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+//                                                true,                                        // autoContinue
+//                                                false,                                       // isCurrentItem
+//                                                _missionItemParent);
+//    firstWaypoint->items.append(enableRelayItemBack);
 
     for (Step* step: _steps) {
         if ((!spraying) && (step->type() == Step::Type::SPRAY)) {
@@ -237,6 +259,77 @@ void MissionModel::_processSprays()
             step->items.append(enableItem);
             spraying = true;
             passed = false;
+
+            if (relayBackOn) {
+                MissionItem* enableRelayItemBack = new MissionItem(0,   // set it later
+                                                            MAV_CMD_DO_SET_RELAY, // MAV_CMD_DO_SET_SERVO,
+                                                            _mavFrame,
+                                                            relayBack, // servo 12
+                                                            1, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                            true,                                        // autoContinue
+                                                            false,                                       // isCurrentItem
+                                                            _missionItemParent);
+                step->items.append(enableRelayItemBack);
+
+                MissionItem* enableServoBack = new MissionItem(0,   // set it later
+                                                            MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
+                                                            _mavFrame,
+                                                            //9, // servo 9
+                                                            8, // servo 8
+                                                            pwmBack, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                            true,                                        // autoContinue
+                                                            false,                                       // isCurrentItem
+                                                            _missionItemParent);
+                step->items.append(enableServoBack);
+
+                /* front */
+                MissionItem* disableRelayItemFront = new MissionItem(0,   // set it later
+                                                            MAV_CMD_DO_SET_RELAY, // MAV_CMD_DO_SET_SERVO,
+                                                            _mavFrame,
+                                                            relayFront, // servo 9
+                                                            0, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                            true,                                        // autoContinue
+                                                            false,                                       // isCurrentItem
+                                                            _missionItemParent);
+                step->items.append(disableRelayItemFront);
+
+                relayBackOn = false;
+
+            } else {
+                MissionItem* disableRelayItemBack = new MissionItem(0,   // set it later
+                                                            MAV_CMD_DO_SET_RELAY, // MAV_CMD_DO_SET_SERVO,
+                                                            _mavFrame,
+                                                            relayBack, // servo 12
+                                                            0, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                            true,                                        // autoContinue
+                                                            false,                                       // isCurrentItem
+                                                            _missionItemParent);
+                step->items.append(disableRelayItemBack);
+
+                /* front */
+                MissionItem* enableRelayItemFront = new MissionItem(0,   // set it later
+                                                            MAV_CMD_DO_SET_RELAY, // MAV_CMD_DO_SET_SERVO,
+                                                            _mavFrame,
+                                                            relayFront, // servo 9
+                                                            1, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                            true,                                        // autoContinue
+                                                            false,                                       // isCurrentItem
+                                                            _missionItemParent);
+                step->items.append(enableRelayItemFront);
+
+                MissionItem* enableServoFront= new MissionItem(0,   // set it later
+                                                            MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
+                                                            _mavFrame,
+                                                            //9, // servo 9
+                                                            8, // servo 8
+                                                            pwmFront, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                            true,                                        // autoContinue
+                                                            false,                                       // isCurrentItem
+                                                            _missionItemParent);
+                step->items.append(enableServoFront);
+
+                relayBackOn = true;
+            }
         }
 
         if (spraying && passed && (step->type() == Step::Type::WAYPOINT)) {
@@ -250,6 +343,17 @@ void MissionModel::_processSprays()
                                                 _missionItemParent);
             lastWaypoint->items.append(disableItem);
             spraying = false;
+
+            // disable servo 8
+            MissionItem* disableServoItem8 = new MissionItem(0,   // set it later
+                                                            MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
+                                                            _mavFrame,
+                                                            8, // servo 8
+                                                            pwmDisable, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                            true,                                        // autoContinue
+                                                            false,                                       // isCurrentItem
+                                                            _missionItemParent);
+            lastWaypoint->items.append(disableServoItem8);
         }
 
         if (spraying && (step->type() == Step::Type::WAYPOINT)) {
@@ -282,15 +386,67 @@ void MissionModel::_processSprays()
                                         _missionItemParent);
     if (lastWaypoint) lastWaypoint->items.append(disableItem);
 
-    setServoItem = new MissionItem(0,   // set it later
+
+    // disable centrifugal servo 8
+    MissionItem *disableServoItem8 = new MissionItem(1,   // set it later
                                    MAV_CMD_DO_SET_SERVO, // MAV_CMD_DO_SET_SERVO,
                                    _mavFrame,
-                                   9, // servo 9
-                                   min, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                   //9, // servo 9
+                                   8, // servo 8
+                                   pwmDisable, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
                                    true,                                        // autoContinue
                                    false,                                       // isCurrentItem
                                    _missionItemParent);
-    _steps[_steps.count() - 1]->items.append(setServoItem);
+    if (lastWaypoint) lastWaypoint->items.append(disableServoItem8);
+
+    // disable relay 9
+    MissionItem* disableRelayItemFront = new MissionItem(2,   // set it later
+                                                    MAV_CMD_DO_SET_RELAY, // MAV_CMD_DO_SET_SERVO,
+                                                    _mavFrame,
+                                                    relayFront, // servo 9
+                                                    0, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                    true,                                        // autoContinue
+                                                    false,                                       // isCurrentItem
+                                                    _missionItemParent);
+    if (lastWaypoint) lastWaypoint->items.append(disableRelayItemFront);
+
+    // disable relay 12
+    MissionItem* disableRelayItemBack = new MissionItem(3,   // set it later
+                                                    MAV_CMD_DO_SET_RELAY, // MAV_CMD_DO_SET_SERVO,
+                                                    _mavFrame,
+                                                    relayBack, // servo 9
+                                                    0, 0.0, 0.0, 0.0, 0.0, 0.0,           // empty
+                                                    true,                                        // autoContinue
+                                                    false,                                       // isCurrentItem
+                                                    _missionItemParent);
+    if (lastWaypoint) lastWaypoint->items.append(disableRelayItemBack);
+
+    MissionItem* toCopy = nullptr;
+    for (int i=0; i<lastWaypoint->items.count(); i++) {
+        if (lastWaypoint->items[i]->command() == MAV_CMD_NAV_WAYPOINT) {
+            toCopy = lastWaypoint->items[i];
+            break;
+        }
+    }
+
+    if (lastWaypoint && toCopy) {
+        MissionItem* realLastWPItem = new MissionItem(
+                    0,   // set it later
+                    MAV_CMD_NAV_WAYPOINT,
+                    _mavFrame,
+                    0.0, // hold time
+                    0.0,                                         // No acceptance radius specified
+                    0.0,                                         // Pass through waypoint
+                    std::numeric_limits<double>::quiet_NaN(),    // Yaw unchanged
+                    toCopy->param5(),
+                    toCopy->param6(),
+                    toCopy->param7(),
+                    true,                                        // autoContinue
+                    false,                                       // isCurrentItem
+                    _missionItemParent
+                    );
+        lastWaypoint->items.append(realLastWPItem);
+    }
 }
 
 void MissionModel::_processHoldAltitudes()
