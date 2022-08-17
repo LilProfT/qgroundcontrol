@@ -116,7 +116,7 @@ Rectangle {
         anchors.margins:        ScreenTools.defaultFontPixelHeight * 0.66
         id:                 showVideo
         text:               qsTr("Turn Centrifugal Off")
-        visible:            false
+        visible:            true
         onClicked: {
             _activeVehicle.updateCentrifugal(0);
         }

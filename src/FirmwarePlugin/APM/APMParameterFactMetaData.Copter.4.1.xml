@@ -2987,6 +2987,21 @@
       <param humanName="Battery monitor options" name="BATT_OPTIONS" documentation="This sets options to change the behaviour of the battery monitor" user="Advanced">
         <field name="Bitmask">0:Ignore UAVCAN SoC</field>
       </param>
+      <param humanName="Battery low SOC" name="BATT_LOW_SOC" documentation="Battery SOC at which the low battery failsafe is triggered. Set to 0 to disable battery SOC failsafe. If the battery SOC drops below this level the vehicle will perform the failsafe specified by the BATT__FS_LOW_ACT parameter." user="Standard">
+        <field name="Units">%</field>
+        <field name="UnitText">percentage</field>
+        <field name="Increment">1</field>
+      </param>
+      <param humanName="Battery critical SOC" name="BATT_CRT_SOC" documentation="Battery SOC at which the critical battery failsafe is triggered. Set to 0 to disable battery SOC failsafe. If the battery SOC drops below this level the vehicle will perform the failsafe specified by the BATT__FS_CRT_ACT parameter." user="Standard">
+        <field name="Units">%</field>
+        <field name="UnitText">percentage</field>
+        <field name="Increment">1</field>
+      </param>
+      <param humanName="Required arming remaining SOC" name="BATT_ARM_SOC" documentation="Battery SOC at which is required to arm the aircraft. Set to 0 to allow arming at any SOC." user="Advanced">
+        <field name="Units">%</field>
+        <field name="UnitText">percentage</field>
+        <field name="Increment">1</field>
+      </param>
     </parameters>
     <parameters name="BCN">
       <param humanName="Beacon based position estimation device type" name="BCN_TYPE" documentation="What type of beacon based position estimation device is connected" user="Advanced">

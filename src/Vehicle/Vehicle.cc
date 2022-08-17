@@ -2310,7 +2310,9 @@ double Vehicle::fuelPercentRemaining()
 {
     if (batteries()->count() == 3) //Mismart AGR drone config, 3 batteries
     {
-       return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.2;
+        // 0.2 = 20l/ 100;
+       //return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.3;
+        return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.2;
     }
     return 0;
 }
@@ -3970,19 +3972,26 @@ void Vehicle::gimbalYawStep(int direction)
 }
 
 void Vehicle::updateCentrifugal(double percent)
-{
-    int max = 1750;
-    int min  = 1050;
-    double ratio = (max - min) / 100;
-    int pwm = min + (int) (percent * ratio);
-    qDebug() << "setServoCentrifugal pwm:" << pwm;
-    _toolbox->ntrip()->syncInProgressChanged(true);
+{   
+    int pwmDisable = 1000;
+    qDebug() << "setServoCentrifugal pwm:" << pwmDisable;
+    //_toolbox->ntrip()->syncInProgressChanged(true);
     sendMavCommand(_defaultComponentId,    // target component
                              MAV_CMD_DO_SET_SERVO,             // command id
                              false,                              // showError
-                             9, pwm);  // servo 9
-
-    QTimer::singleShot(1000, this, &Vehicle::_resetCentrifugal);
+                             //9, pwm);  // servo 9
+                            8, pwmDisable);  // servo 8
+    sendMavCommand(_defaultComponentId,    // target component
+                             MAV_CMD_DO_SET_RELAY,             // command id
+                             false,                              // showError
+                             0, 0);  // servo 9
+                            //8, pwm);  // servo 8
+    sendMavCommand(_defaultComponentId,    // target component
+                             MAV_CMD_DO_SET_RELAY,             // command id
+                             false,                              // showError
+                             2, 0);  // servo 9
+                            //8, pwm);  // servo 8
+//    QTimer::singleShot(1000, this, &Vehicle::_resetCentrifugal);
 }
 
 //void Vehicle::_centrifugalRPMSettingChanged     (QVariant value)

@@ -1115,18 +1115,49 @@ void PlanMasterController::setParam()
         float velocity = this->_surveyComplexItem->velocity()->property("value").toFloat();
         float x = this->_surveyComplexItem->sprayFlowRate()->property("value").toFloat();
         float y = 0;
-        if (x >= 6.74) {
-            y = 53;
-        } else if (x < 2.38) {
-            y = 13;
-        } else {
-            if (x < 4.62)
-                y = (4.4068 * qPow(x, 5.0)) + (- 76.658 * qPow(x, 4.0)) + (527.93 * qPow(x, 3.0)) + (- 1799 * qPow(x, 2.0))  +  (3039.1 * x) + (- 2022.9);
-            else
-                y = (-8.2058 * qPow(x, 6.0)) + (274.96 * qPow(x, 5.0)) + (- 3821.5 * qPow(x, 4.0)) + (28196 * qPow(x, 3.0)) + (- 116470 * qPow(x, 2.0))  +  (255383 * x) + (- 232201);
-        }
 
+        /* VS20 */
+        if (x > 4.5) {
+            y = 88;
+        } else if(x <= 0.6486) {
+            y = 10;
+        } else if (x > 0.6486 && x <= 2.29) {
+            y = 11.816 * x + 6.1831;
+            //y = 0.0838 * x - 0.5043;
+        } else if (x > 2.29 && x <= 2.77) {
+            y = 25.632 * x - 24.968;
+        } else if (x>2.77 && x <= 3.14) {
+            y = 10.758 * x + 16.123;
+        } else if (x > 3.14 && x <=4.5) {
+            y = 23.132 * x - 23.041;
+        }
         y = y / velocity;
+
+//        if (x > 6.75) {
+//            y = 54;
+//        } else if (x < 2.38) {
+//            y = 13;
+//        } else {
+//            y = (-0.1109 * qPow(x, 4.0)) + (2.1912 * qPow(x, 3.0)) + (-14.92 * qPow(x, 2.0)) + (48.746 * x)  + (-42.971);
+////            if (x < 4.62)
+////                y = (4.4068 * qPow(x, 5.0)) + (- 76.658 * qPow(x, 4.0)) + (527.93 * qPow(x, 3.0)) + (- 1799 * qPow(x, 2.0))  +  (3039.1 * x) + (- 2022.9);
+////            else
+////                y = (-8.2058 * qPow(x, 6.0)) + (274.96 * qPow(x, 5.0)) + (- 3821.5 * qPow(x, 4.0)) + (28196 * qPow(x, 3.0)) + (- 116470 * qPow(x, 2.0))  +  (255383 * x) + (- 232201);
+//        }
+
+//        /* VS30 */
+//        if (x > 8.8) {
+//            y = 72;
+//        } else if (x < 2.1) {
+//            y = 13;
+//        } else {
+//            y = (0.219 * qPow(x, 2.0)) + (6.0809 * x)  + (-0.7371);
+////            if (x < 4.62)
+////                y = (4.4068 * qPow(x, 5.0)) + (- 76.658 * qPow(x, 4.0)) + (527.93 * qPow(x, 3.0)) + (- 1799 * qPow(x, 2.0))  +  (3039.1 * x) + (- 2022.9);
+////            else
+////                y = (-8.2058 * qPow(x, 6.0)) + (274.96 * qPow(x, 5.0)) + (- 3821.5 * qPow(x, 4.0)) + (28196 * qPow(x, 3.0)) + (- 116470 * qPow(x, 2.0))  +  (255383 * x) + (- 232201);
+//        }
+//      y = y / velocity;
         this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "SPRAY_PUMP_RATE")->setProperty("value", y);
         this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WPNAV_SPEED")->setProperty("value", (100 * velocity));
         this->_multiVehicleMgr->activeVehicle()->parameterManager()->getParameter(MAV_COMP_ID_AUTOPILOT1, "WP_YAW_BEHAVIOR")->setProperty("value", 0);
