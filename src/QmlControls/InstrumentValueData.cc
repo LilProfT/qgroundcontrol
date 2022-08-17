@@ -116,6 +116,7 @@ void InstrumentValueData::_setFactWorker(void)
         }
         _fact = factGroup->getFact(nonEmptyFactName);
     }
+    qDebug()<<"fact data "<<_factGroupName << _factName;
 
     if (_fact) {
         _factName = nonEmptyFactName;
