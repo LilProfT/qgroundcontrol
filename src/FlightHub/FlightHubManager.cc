@@ -365,11 +365,11 @@ void FlightHubManager::timerSlot()
 
     if (!_positionArray.isEmpty())
     {
-        QJsonObject dataObj;
-        dataObj.insert("data", _positionArray);
-        dataObj.insert("batteryLogs", _batteryArray);
+        // QJsonObject dataObj;
+        // dataObj.insert("data", _positionArray);
+        // dataObj.insert("batteryLogs", _batteryArray);
 
-        emit publishTelemetry(dataObj);
+        // emit publishTelemetry(dataObj);
         _positionArray = QJsonArray();
         _batteryArray = QJsonArray();
     }
