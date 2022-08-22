@@ -3979,7 +3979,7 @@ void Vehicle::gimbalYawStep(int direction)
 
 void Vehicle::updateCentrifugal(double percent)
 {   
-    int pwmDisable = 1000;
+    int pwmDisable = 1000 + (int)(percent  * 750.0 /  100.0);
     qDebug() << "setServoCentrifugal pwm:" << pwmDisable;
     //_toolbox->ntrip()->syncInProgressChanged(true);
     sendMavCommand(_defaultComponentId,    // target component
