@@ -54,7 +54,10 @@ ColumnLayout {
 //                    return (instrumentValueData.fact.rawValue * 0.3).toFixed(1) + (instrumentValueData.showUnits ?
 //                                                                             (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
 //                                                                             "")
-                    return (instrumentValueData.fact.rawValue * 0.2).toFixed(1) + (instrumentValueData.showUnits ?
+                    // return (instrumentValueData.fact.rawValue * 0.2).toFixed(1) + (instrumentValueData.showUnits ?
+                    //                                                          (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
+                    //                                                          "")
+                    return (instrumentValueData.fact.rawValue * 0.3).toFixed(1) + (instrumentValueData.showUnits ?
                                                                              (instrumentValueData.customUnits !== "" ? " " + instrumentValueData.customUnits : " " + instrumentValueData.fact.units ) :
                                                                              "")
                 } else {

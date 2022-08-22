@@ -2317,8 +2317,8 @@ double Vehicle::fuelPercentRemaining()
     if (batteries()->count() == 3) //Mismart AGR drone config, 3 batteries
     {
         // 0.2 = 20l/ 100;
-       //return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.3;
-        return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.2;
+       return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.3;
+        // return batteries()->value<VehicleBatteryFactGroup*>(1)->percentRemaining()->rawValue().toDouble() * 0.2;
     }
     return 0;
 }
