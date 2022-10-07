@@ -1465,7 +1465,7 @@ property int _marginSlider : Math.round(ScreenTools.defaultFontPixelWidth *  (Sc
                         Layout.alignment:   Qt.AlignHCenter
                     }
                     QGCLabel {
-                        text:               QGroundControl.qgcVersion + " 1.3.4"
+                        text:               QGroundControl.qgcVersion + " 1.3.4" + " 2022-09-22"
                         Layout.alignment:   Qt.AlignHCenter
                     }
                 } // settingsColumn
