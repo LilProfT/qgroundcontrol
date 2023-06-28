@@ -21,7 +21,7 @@ void SurveyComplexItem::_updateSprayFlowRate(void)
     double gridSpacing = _cameraCalc.adjustedFootprintSide()->rawValue().toDouble();
     double applicationRate = _applicationRateFact.property("value").toFloat();
     double velocity = _velocityFact.property("value").toFloat();
-    _sprayFlowRateFact.setProperty("value", 0.006 * applicationRate * gridSpacing * velocity);
+    _sprayFlowRateFact.setProperty("value", 0.06 * applicationRate * gridSpacing * velocity);
 }
 
 void SurveyComplexItem::_optimize_Angle_EntryPoint(void)
