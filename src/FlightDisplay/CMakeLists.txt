@@ -49,5 +49,8 @@ add_custom_target(FligthDisplayQml
 		ObstacleDistanceOverlay.qml
 		ObstacleDistanceOverlayMap.qml
 		ObstacleDistanceOverlayVideo.qml
+		SprayDeviceInfo.qml
+		SprayDeviceInfoPopup.qml
+		SprayCalibrationPopup.qml
 )
 

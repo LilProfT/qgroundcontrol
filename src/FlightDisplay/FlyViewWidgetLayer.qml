@@ -199,6 +199,8 @@ Item {
             _missionController.injectDrainedWaterPoint(0)
         }
 
+        onDisplayDeviceInfo: mainWindow.showIndicatorPopup(toolStrip,sprayDeviceInfoPopup)
+
         property real leftInset: x + width
     }
 
@@ -232,7 +234,6 @@ Item {
         FlyViewPreFlightChecklistPopup {
         }
     }
-
     Component {
         id: resumePointPopup
 
@@ -274,5 +275,10 @@ Item {
             }
         }
 
+    }    
+    Component {
+        id:sprayDeviceInfoPopup
+        SprayDeviceInfoPopup{
+        }
     }
 }

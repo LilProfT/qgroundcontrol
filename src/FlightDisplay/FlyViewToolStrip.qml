@@ -19,13 +19,14 @@ ToolStrip {
 
     signal displayPreFlightChecklist
     signal displayResumePoint
+    signal displayDeviceInfo
 
     FlyViewToolStripActionList {
         id: flyViewToolStripActionList
 
         onDisplayPreFlightChecklist: _root.displayPreFlightChecklist()
         onDisplayResumePoint: _root.displayResumePoint()
-
+        onDisplayDeviceInfo: _root.displayDeviceInfo()
     }
 
     model: flyViewToolStripActionList.model

@@ -82,6 +82,8 @@ add_library(Vehicle
 	VehicleObjectAvoidance.h
 	VehicleSetpointFactGroup.cc
 	VehicleSetpointFactGroup.h
+	VehicleSprayInfoFactGroup.cc
+	VehicleSprayInfoFactGroup.h
 	VehicleTemperatureFactGroup.cc
 	VehicleTemperatureFactGroup.h
 	VehicleVibrationFactGroup.cc

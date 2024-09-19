@@ -35,6 +35,7 @@
 #include "VehicleGPSFactGroup.h"
 #include "VehicleGPS2FactGroup.h"
 #include "VehicleSetpointFactGroup.h"
+#include "VehicleSprayInfoFactGroup.h"
 #include "VehicleTemperatureFactGroup.h"
 #include "VehicleVibrationFactGroup.h"
 #include "VehicleEscStatusFactGroup.h"
@@ -327,6 +328,8 @@ public:
     Q_PROPERTY(FactGroup*           localPositionSetpoint READ localPositionSetpointFactGroup CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  batteries       READ batteries                  CONSTANT)
 
+    Q_PROPERTY(FactGroup*           vcu             READ sprayInfoFactGroup         CONSTANT)
+
     Q_PROPERTY(int      firmwareMajorVersion        READ firmwareMajorVersion       NOTIFY firmwareVersionChanged)
     Q_PROPERTY(int      firmwareMinorVersion        READ firmwareMinorVersion       NOTIFY firmwareVersionChanged)
     Q_PROPERTY(int      firmwarePatchVersion        READ firmwarePatchVersion       NOTIFY firmwareVersionChanged)
@@ -443,6 +446,9 @@ public:
 
     // Mismart publish mission
     Q_INVOKABLE void publishMissionCompleted(void);
+
+    //Trigger zero calibration
+    Q_INVOKABLE void triggerSprayCalibration(bool sprayerEnable, int calibType);
 
 #if !defined(NO_ARDUPILOT_DIALECT)
     Q_INVOKABLE void flashBootloader();
@@ -693,6 +699,8 @@ public:
     FactGroup* estimatorStatusFactGroup     () { return &_estimatorStatusFactGroup; }
     FactGroup* terrainFactGroup             () { return &_terrainFactGroup; }
     QmlObjectListModel* batteries           () { return &_batteryFactGroupListModel; }
+
+    FactGroup* sprayInfoFactGroup           () { return &_sprayInfoFactGroup; }
 
     MissionManager*                 missionManager      () { return _missionManager; }
     GeoFenceManager*                geoFenceManager     () { return _geoFenceManager; }
@@ -1382,6 +1390,7 @@ private:
     VehicleEstimatorStatusFactGroup _estimatorStatusFactGroup;
     TerrainFactGroup                _terrainFactGroup;
     QmlObjectListModel              _batteryFactGroupListModel;
+    VehicleSprayInfoFactGroup       _sprayInfoFactGroup;
 
     TerrainProtocolHandler* _terrainProtocolHandler = nullptr;
 
@@ -1436,6 +1445,7 @@ private:
     static const char* _escStatusFactGroupName;
     static const char* _estimatorStatusFactGroupName;
     static const char* _terrainFactGroupName;
+    static const char* _sprayInfoFactGroupName;
 
     static const int _vehicleUIUpdateRateMSecs      = 100;
 

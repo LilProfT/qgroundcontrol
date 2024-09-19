@@ -744,6 +744,7 @@ HEADERS += \
     src/Vehicle/VehicleGPS2FactGroup.h \
     src/Vehicle/VehicleLinkManager.h \
     src/Vehicle/VehicleSetpointFactGroup.h \
+    src/Vehicle/VehicleSprayInfoFactGroup.h \
     src/Vehicle/VehicleTemperatureFactGroup.h \
     src/Vehicle/VehicleVibrationFactGroup.h \
     src/Vehicle/VehicleWindFactGroup.h \
@@ -986,6 +987,7 @@ SOURCES += \
     src/Vehicle/VehicleGPS2FactGroup.cc \
     src/Vehicle/VehicleLinkManager.cc \
     src/Vehicle/VehicleSetpointFactGroup.cc \
+    src/Vehicle/VehicleSprayInfoFactGroup.cc \
     src/Vehicle/VehicleTemperatureFactGroup.cc \
     src/Vehicle/VehicleVibrationFactGroup.cc \
     src/Vehicle/VehicleWindFactGroup.cc \
@@ -1140,6 +1142,7 @@ APMFirmwarePlugin {
         src/AutoPilotPlugins/APM/APMSensorsComponentController.h \
         src/AutoPilotPlugins/APM/APMSubMotorComponentController.h \
         src/AutoPilotPlugins/APM/APMTuningComponent.h \
+        src/AutoPilotPlugins/APM/APMSprayCalibrationController.h\
         src/FirmwarePlugin/APM/APMFirmwarePlugin.h \
         src/FirmwarePlugin/APM/APMParameterMetaData.h \
         src/FirmwarePlugin/APM/ArduCopterFirmwarePlugin.h \
@@ -1168,6 +1171,7 @@ APMFirmwarePlugin {
         src/AutoPilotPlugins/APM/APMSensorsComponentController.cc \
         src/AutoPilotPlugins/APM/APMSubMotorComponentController.cc \
         src/AutoPilotPlugins/APM/APMTuningComponent.cc \
+        src/AutoPilotPlugins/APM/APMSprayCalibrationController.cc\
         src/FirmwarePlugin/APM/APMFirmwarePlugin.cc \
         src/FirmwarePlugin/APM/APMParameterMetaData.cc \
         src/FirmwarePlugin/APM/ArduCopterFirmwarePlugin.cc \

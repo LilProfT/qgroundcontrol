@@ -187,6 +187,7 @@
         <file alias="QGroundControl/Controls/VehicleRotationCal.qml">src/QmlControls/VehicleRotationCal.qml</file>
         <file alias="QGroundControl/Controls/VehicleSummaryRow.qml">src/QmlControls/VehicleSummaryRow.qml</file>
         <file alias="QGroundControl/Controls/SprayIndicator.qml">src/QmlControls/SprayIndicator.qml</file>
+        <file alias="QGroundControl/Controls/SprayImgCal.qml">src/QmlControls/SprayImgCal.qml</file>
         <file alias="QGroundControl/Controls/VTOLLandingPatternMapVisual.qml">src/PlanView/VTOLLandingPatternMapVisual.qml</file>
         <file alias="QGroundControl/FactControls/AltitudeFactTextField.qml">src/FactSystem/FactControls/AltitudeFactTextField.qml</file>
         <file alias="QGroundControl/FactControls/FactBitmask.qml">src/FactSystem/FactControls/FactBitmask.qml</file>
@@ -241,6 +242,9 @@
         <file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlay.qml">src/FlightDisplay/ObstacleDistanceOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlayMap.qml">src/FlightDisplay/ObstacleDistanceOverlayMap.qml</file>
         <file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlayVideo.qml">src/FlightDisplay/ObstacleDistanceOverlayVideo.qml</file>
+        <file alias="QGroundControl/FlightDisplay/SprayDeviceInfo.qml">src/FlightDisplay/SprayDeviceInfo.qml</file>
+        <file alias="QGroundControl/FlightDisplay/SprayDeviceInfoPopup.qml">src/FlightDisplay/SprayDeviceInfoPopup.qml</file>
+        <file alias="QGroundControl/FlightDisplay/SprayCalibrationPopup.qml">src/FlightDisplay/SprayCalibrationPopup.qml</file>
         <file alias="QGroundControl/FlightDisplay/qmldir">src/QmlControls/QGroundControl/FlightDisplay/qmldir</file>
         <file alias="QGroundControl/FlightMap/CameraTriggerIndicator.qml">src/FlightMap/MapItems/CameraTriggerIndicator.qml</file>
         <file alias="QGroundControl/FlightMap/CenterMapDropButton.qml">src/FlightMap/Widgets/CenterMapDropButton.qml</file>
@@ -339,6 +343,7 @@
         <file alias="Vehicle/LocalPositionFact.json">src/Vehicle/LocalPositionFact.json</file>
         <file alias="Vehicle/LocalPositionSetpointFact.json">src/Vehicle/LocalPositionFact.json</file>
         <file alias="Vehicle/SubmarineFact.json">src/Vehicle/SubmarineFact.json</file>
+        <file alias="Vehicle/SprayInfoFact.json">src/Vehicle/SprayInfoFact.json</file>
         <file alias="Vehicle/TemperatureFact.json">src/Vehicle/TemperatureFact.json</file>
         <file alias="Vehicle/TerrainFactGroup.json">src/Vehicle/TerrainFactGroup.json</file>
         <file alias="Vehicle/VehicleFact.json">src/Vehicle/VehicleFact.json</file>

@@ -28,6 +28,8 @@
 #include "ArduSubFirmwarePlugin.h"
 #include "LinkManager.h"
 
+#include "APMSprayCalibrationController.h"
+
 #include <QTcpSocket>
 
 QGC_LOGGING_CATEGORY(APMFirmwarePluginLog, "APMFirmwarePluginLog")
@@ -68,6 +70,7 @@ APMFirmwarePlugin::APMFirmwarePlugin(void)
     qmlRegisterType<APMSensorsComponentController>      ("QGroundControl.Controllers", 1, 0, "APMSensorsComponentController");
     qmlRegisterType<APMFollowComponentController>       ("QGroundControl.Controllers", 1, 0, "APMFollowComponentController");
     qmlRegisterType<APMSubMotorComponentController>     ("QGroundControl.Controllers", 1, 0, "APMSubMotorComponentController");
+    qmlRegisterType<APMSprayCalibrationController>      ("QGroundControl.Controllers", 1, 0, "APMSprayCalibrationController");
 }
 
 AutoPilotPlugin* APMFirmwarePlugin::autopilotPlugin(Vehicle* vehicle)

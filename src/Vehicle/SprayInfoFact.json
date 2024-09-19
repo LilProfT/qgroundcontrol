@@ -1,0 +1,89 @@
+{
+    "version": 1,
+    "fileType": "FactMetaData",
+    "QGC.MetaData.Facts": [
+        {
+            "name": "pumpRPMFirstChannel",
+            "shortDesc": "Pump speed on first channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "pumpRPMSecondChannel",
+            "shortDesc": "Pump speed on second channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "centrifugalRPMFirstChannel",
+            "shortDesc": "Centrifugal speed on first channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "centrifugalRPMSecondChannel",
+            "shortDesc": "Centrifugal speed on second channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "flowspeedFirstChannel",
+            "shortDesc": "Flowrate speed on first channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L/min"
+        },
+        {
+            "name": "flowspeedSecondChannel",
+            "shortDesc": "Flowrate speed on second channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L/min"
+        },
+        {
+            "name": "sVolFirstChannel",
+            "shortDesc": "Total volume on first channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L"
+        },
+        {
+            "name": "sVolSecondChannel",
+            "shortDesc": "Total volume on second channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L"
+        },
+        {
+            "name": "fuelTankPct",
+            "shortDesc": "Remaining percent on fuel tank",
+            "type": "int8",
+            "units": "%"
+        },
+        {
+            "name": "weightADCValue",
+            "shortDesc": "Analog weight sensor value",
+            "type": "uint16"
+        },
+        {
+            "name": "armFirst",
+            "shortDesc": "Arm first position lock status",
+            "type": "int8"
+        },
+        {
+            "name": "armSecond",
+            "shortDesc": "Arm second position lock status",
+            "type": "int8"
+        },
+        {
+            "name": "armThird",
+            "shortDesc": "Arm third position lock status",
+            "type": "int8"
+        },
+        {
+            "name": "armFourth",
+            "shortDesc": "Arm fourth position lock status",
+            "type": "int8"
+        }
+    ]
+}

@@ -17,6 +17,7 @@ ToolStripActionList {
 
     signal displayPreFlightChecklist
     signal displayResumePoint
+    signal displayDeviceInfo
 
     model: [
         ToolStripAction {
@@ -31,6 +32,7 @@ ToolStripActionList {
         GuidedActionPause { },
         GuidedActionActionList { },
         ResumeMission { },
+        SprayDeviceInfo { onTriggered: displayDeviceInfo()},
         ToolStripAction {
             text:        qsTr("Estimate")
             iconSource:  "/qmlimages/Eraser.svg"

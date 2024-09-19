@@ -127,6 +127,7 @@ add_custom_target(QmlControlsQml
 		ToolStrip.qml
 		VehicleRotationCal.qml
 		VehicleSummaryRow.qml
+		SprayImgCal.qml
 )
 
 target_link_libraries(QmlControls

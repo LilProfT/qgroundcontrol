@@ -114,6 +114,8 @@ const char* Vehicle::_escStatusFactGroupName =          "escStatus";
 const char* Vehicle::_estimatorStatusFactGroupName =    "estimatorStatus";
 const char* Vehicle::_terrainFactGroupName =            "terrain";
 
+const char* Vehicle::_sprayInfoFactGroupName =          "vcu";
+
 // Standard connected vehicle
 Vehicle::Vehicle(LinkInterface*             link,
                  int                        vehicleId,
@@ -180,6 +182,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _escStatusFactGroup           (this)
     , _estimatorStatusFactGroup     (this)
     , _terrainFactGroup             (this)
+    , _sprayInfoFactGroup           (this)
     , _terrainProtocolHandler       (new TerrainProtocolHandler(this, &_terrainFactGroup, this))
 {
     _linkManager = _toolbox->linkManager();
@@ -314,12 +317,12 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _altitudeTuningSetpointFact       (0, _altitudeTuningSetpointFactName, FactMetaData::valueTypeDouble)
     , _xTrackErrorFact                  (0, _xTrackErrorFactName,       FactMetaData::valueTypeDouble)
     , _flightDistanceFact               (0, _flightDistanceFactName,    FactMetaData::valueTypeDouble)
+    , _areaSprayedFact                  (0, _areaSprayedFactName,       FactMetaData::valueTypeDouble)
 
     //Mismart: Custom areaSprayed and spacing fact
-    , _areaSprayedFact                  (0, _areaSprayedFactName,       FactMetaData::valueTypeDouble)
     , _spacingFact                      (0, _spacingFactName,           FactMetaData::valueTypeDouble)
-
     , _flightTimeFact                   (0, _flightTimeFactName,        FactMetaData::valueTypeElapsedTimeInSeconds)
+
     , _distanceToHomeFact               (0, _distanceToHomeFactName,    FactMetaData::valueTypeDouble)
     , _missionItemIndexFact             (0, _missionItemIndexFactName,  FactMetaData::valueTypeUint16)
     , _headingToNextWPFact              (0, _headingToNextWPFactName,   FactMetaData::valueTypeDouble)
@@ -335,6 +338,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _distanceSensorFactGroup          (this)
     , _localPositionFactGroup           (this)
     , _localPositionSetpointFactGroup   (this)
+    , _sprayInfoFactGroup               (this)
 {
     _linkManager = _toolbox->linkManager();
 
@@ -480,6 +484,7 @@ void Vehicle::_commonInit()
     _addFactGroup(&_escStatusFactGroup,         _escStatusFactGroupName);
     _addFactGroup(&_estimatorStatusFactGroup,   _estimatorStatusFactGroupName);
     _addFactGroup(&_terrainFactGroup,           _terrainFactGroupName);
+    _addFactGroup(&_sprayInfoFactGroup,         _sprayInfoFactGroupName);
 
     // Add firmware-specific fact groups, if provided
     QMap<QString, FactGroup*>* fwFactGroups = _firmwarePlugin->factGroups();
@@ -4216,4 +4221,23 @@ void Vehicle::_saveResumeCoordinate(const QString& flightMode) {
 
 void Vehicle::setUseAltimeter(bool valid) {
     _useAltimeter   = valid;
+}
+
+void Vehicle::triggerSprayCalibration(bool sprayerEnable, int calibType) {
+    //Sanity Check
+    if (calibType == 0) {
+        return;
+    }
+    //calib type action: 1 = Zero calib, 2 = Tank calib
+    sendMavCommand(_defaultComponentId,
+                   MAV_CMD_DO_SPRAYER,
+                   false,
+                   sprayerEnable,      //Normally false, add for just in case
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   calibType);
+    qDebug() << "Do sprayer calibration, type: " << calibType;
 }
