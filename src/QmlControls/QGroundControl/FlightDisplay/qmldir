@@ -21,6 +21,9 @@ FlyViewVideo                    1.0 FlyViewVideo.qml
 FlyViewWidgetLayer              1.0 FlyViewWidgetLayer.qml
 GripperMenu                     1.0 GripperMenu.qml
 FlyViewAdditionalActionsButton  1.0 FlyViewAdditionalActionsButton.qml
+ThermalMock                     1.0 ThermalMock.qml
+FuelMock                        1.0 FuelMock.qml
+RelayKeyMock                    1.0 RelayKeyMock.qml
 GuidedActionConfirm             1.0 GuidedActionConfirm.qml
 GuidedActionGripper             1.0 GuidedActionGripper.qml
 GuidedActionLand                1.0 GuidedActionLand.qml
