@@ -82,6 +82,14 @@ Rectangle {
             visible:        !usedByMultipleVehicleList
         }
 
+        CameraHeadingIndicator {
+            compassSize: size
+            cameraHeading: _heading
+            simplified: usedByMultipleVehicleList
+            cameraFOV: 60
+            opacity: 0.5
+        }
+
         CompassHeadingIndicator {
             compassSize:    size
             heading:        _heading

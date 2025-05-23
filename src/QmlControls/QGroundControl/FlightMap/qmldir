@@ -18,6 +18,7 @@ QGCArtificialHorizon        1.0 QGCArtificialHorizon.qml
 QGCAttitudeWidget           1.0 QGCAttitudeWidget.qml
 QGCCompassWidget            1.0 QGCCompassWidget.qml
 QGCPitchIndicator           1.0 QGCPitchIndicator.qml
+CameraHeadingIndicator      1.0 CameraHeadingIndicator.qml
 
 # Map items
 CameraTriggerIndicator      1.0 CameraTriggerIndicator.qml
