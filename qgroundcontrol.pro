@@ -63,13 +63,13 @@ WindowsBuild {
 #QGC_APP_DESCRIPTION = "Open source ground control app provided by QGroundControl dev team"
 #QGC_APP_COPYRIGHT   = "Copyright (C) 2019 QGroundControl Development Team. All rights reserved."
 
-QGC_APP_NAME        = "MiSmart GCS"
-QGC_BINARY_NAME     = "MiSmartGroundStation"
-QGC_ORG_NAME        = "MiSmart"
-QGC_ORG_DOMAIN      = "ai.mismart"
-QGC_APP_DESCRIPTION = "Mismart Ground Station (Desc)"
-QGC_APP_COPYRIGHT   = "Copyright (C) 2020 Mismart Inc. All rights reserved."
-QGC_APPLICATION_NAME = "MiSmart GCS"
+QGC_APP_NAME        = "SMT GCS"
+QGC_BINARY_NAME     = "SMTGroundStation"
+QGC_ORG_NAME        = "SMT"
+QGC_ORG_DOMAIN      = "ai.smt"
+QGC_APP_DESCRIPTION = "SMT Ground Station (Desc)"
+QGC_APP_COPYRIGHT   = "Copyright (C) 2023 SMT Inc. All rights reserved."
+QGC_APPLICATION_NAME = "SMT GCS"
 
 WindowsBuild {
     QGC_INSTALLER_SCRIPT        = "$$SOURCE_DIR\\deploy\\windows\\nullsoft_installer.nsi"
@@ -362,9 +362,9 @@ CustomBuild {
         RESOURCES += $$PWD/resources/InstrumentValueIcons/InstrumentValueIcons.qrc
     }
 } else {
-    DEFINES += QGC_APPLICATION_NAME=\"\\\"MiSmart GCS\\\"\"
-    DEFINES += QGC_ORG_NAME=\"\\\"MiSmart.ai\\\"\"
-    DEFINES += QGC_ORG_DOMAIN=\"\\\"ai.mismart\\\"\"
+    DEFINES += QGC_APPLICATION_NAME=\"\\\"SMT GCS\\\"\"
+    DEFINES += QGC_ORG_NAME=\"\\\"smt.ai\\\"\"
+    DEFINES += QGC_ORG_DOMAIN=\"\\\"ai.smt\\\"\"
     RESOURCES += \
         $$PWD/qgroundcontrol.qrc \
         $$PWD/qgcresources.qrc \

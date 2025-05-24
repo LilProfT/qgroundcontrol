@@ -27,18 +27,18 @@ message(Custom QGC Version: $${CUSTOM_QGC_VERSION})
 DEFINES += CUSTOMHEADER=\"\\\"QGCCorePlugin.h\\\"\"
 DEFINES += CUSTOMCLASS=QGCCorePlugin
 
-TARGET   = MismartGCS
-DEFINES += QGC_APPLICATION_NAME='"\\\"MismartGCS\\\""'
+TARGET   = SmtGCS
+DEFINES += QGC_APPLICATION_NAME='"\\\"SMTGCS\\\""'
 
 DEFINES += QGC_ORG_NAME=\"\\\"gcs.ai\\\"\"
 DEFINES += QGC_ORG_DOMAIN=\"\\\"ai.gcs\\\"\"
 
-QGC_APP_NAME        = "MiSmart GCS"
-QGC_BINARY_NAME     = "MiSmartGroundStation"
-QGC_ORG_NAME        = "MiSmart"
-QGC_ORG_DOMAIN      = "ai.mismart"
-QGC_ANDROID_PACKAGE = "ai.mismart.gcs"
-QGC_APP_DESCRIPTION = "Mismart Ground Station (Desc)"
+QGC_APP_NAME        = "SMT GCS"
+QGC_BINARY_NAME     = "SMTGroundStation"
+QGC_ORG_NAME        = "SMT"
+QGC_ORG_DOMAIN      = "ai.smt"
+QGC_ANDROID_PACKAGE = "ai.smt.gcs"
+QGC_APP_DESCRIPTION = "SMT Ground Station (Desc)"
 QGC_APP_COPYRIGHT   = "Copyright (C) 2020 Mismart Inc. All rights reserved."
 
 # Our own, custom resources
