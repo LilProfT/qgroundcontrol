@@ -21,7 +21,7 @@ import QGroundControl.Palette
 ColumnLayout {
     id:         root
     spacing:    ScreenTools.defaultFontPixelHeight / 4
-    width:      Math.min(_defaultWidth, _maxWidth)
+    width:      Math.min(_defaultWidth, _maxWidth) * 1.5
 
     property real extraInset:           0
     property real extraValuesWidth:     _outerRadius
