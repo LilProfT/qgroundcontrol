@@ -44,6 +44,7 @@
 #include "VehicleTemperatureFactGroup.h"
 #include "VehicleVibrationFactGroup.h"
 #include "VehicleWindFactGroup.h"
+#include "VehicleVcuInfoFactGroup.h"
 #include "GimbalController.h"
 
 class Actuators;
@@ -73,6 +74,7 @@ class TerrainAtCoordinateQuery;
 class TerrainProtocolHandler;
 class TrajectoryPoints;
 class VehicleBatteryFactGroup;
+class VehicleVcuInfoFactGroup;
 class VehicleObjectAvoidance;
 class GimbalController;
 #ifdef QGC_UTM_ADAPTER
@@ -253,6 +255,7 @@ public:
     // FactGroup object model properties
 
     Q_PROPERTY(FactGroup*           vehicle         READ vehicleFactGroup           CONSTANT)
+    Q_PROPERTY(FactGroup*           vcu             READ vcuInfoFactGroup           CONSTANT)
     Q_PROPERTY(FactGroup*           gps             READ gpsFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           gps2            READ gps2FactGroup              CONSTANT)
     Q_PROPERTY(FactGroup*           wind            READ windFactGroup              CONSTANT)
@@ -382,6 +385,11 @@ public:
     ///     @param percent 0-no power, 100-full power
     ///     @param timeoutSec Disabled motor after this amount of time
     Q_INVOKABLE void motorTest(int motor, int percent, int timeoutSecs, bool showError);
+
+    /// Restart Mission
+    Q_INVOKABLE void restartMission();
+
+    Q_INVOKABLE void setZeroCameraAngle(float value);
 
     enum PIDTuningTelemetryMode {
         ModeDisabled,
@@ -610,6 +618,7 @@ public:
     FactGroup* generatorFactGroup           () { return &_generatorFactGroup; }
     FactGroup* efiFactGroup                 () { return &_efiFactGroup; }
     FactGroup* rpmFactGroup                 () { return &_rpmFactGroup; }
+    FactGroup* vcuInfoFactGroup             () { return &_vcuInfoFactGroup; }
     QmlObjectListModel* batteries           () { return &_batteryFactGroupListModel; }
 
     MissionManager*                 missionManager      () { return _missionManager; }
@@ -1251,7 +1260,7 @@ private:
     const QString _generatorFactGroupName =          QStringLiteral("generator");
     const QString _efiFactGroupName =                QStringLiteral("efi");
     const QString _rpmFactGroupName =                QStringLiteral("rpm");
-
+    const QString _vcuInfoFactGroupName =           QStringLiteral("vcu");
     VehicleFactGroup*               _vehicleFactGroup;
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleGPS2FactGroup            _gps2FactGroup;
@@ -1269,6 +1278,7 @@ private:
     VehicleGeneratorFactGroup       _generatorFactGroup;
     VehicleEFIFactGroup             _efiFactGroup;
     VehicleRPMFactGroup             _rpmFactGroup;
+    VehicleVcuInfoFactGroup         _vcuInfoFactGroup;
     TerrainFactGroup                _terrainFactGroup;
     QmlObjectListModel              _batteryFactGroupListModel;
 

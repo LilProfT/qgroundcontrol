@@ -119,17 +119,77 @@ MapQuickItem {
             }
         }
 
-        Image {
+        // Image {
+        //     id:                 vehicleIcon
+        //     source:             _adsbVehicle ? (alert ? "/qmlimages/AlertAircraft.svg" : "/qmlimages/AwarenessAircraft.svg") : vehicle.vehicleImageOpaque
+        //     mipmap:             true
+        //     width:              _root.size
+        //     sourceSize.width:   _root.size
+        //     fillMode:           Image.PreserveAspectFit
+        //     transform: Rotation {
+        //         origin.x:       vehicleIcon.width  / 2
+        //         origin.y:       vehicleIcon.height / 2
+        //         angle:          isNaN(heading) ? 0 : heading
+        //     }
+        // }
+
+        Canvas {
             id:                 vehicleIcon
-            source:             _adsbVehicle ? (alert ? "/qmlimages/AlertAircraft.svg" : "/qmlimages/AwarenessAircraft.svg") : vehicle.vehicleImageOpaque
-            mipmap:             true
-            width:              _root.size
-            sourceSize.width:   _root.size
-            fillMode:           Image.PreserveAspectFit
+            width:              _root.size * 1.5
+            height:             width
+
+            property bool simplified:    false
+
+            onPaint: {
+                var ctx = getContext("2d")
+                var cX = width/2
+                var cY = height/2
+                context.clearRect(0, 0, width, height);
+
+                ctx.strokeStyle = "#000000"
+                ctx.fillStyle = "#C4C213"
+                ctx.lineWidth = 1
+
+                //Boat shape
+                ctx.beginPath()
+                ctx.moveTo(cX - 0.01*width , 0)
+                ctx.lineTo(cX - 0.117*width, height*0.318)
+                ctx.lineTo(cX - 0.153*width, height*0.54)
+                ctx.lineTo(cX - 0.165*width, height*0.704)
+                ctx.lineTo(cX - 0.165*width, height*0.948)
+                ctx.lineTo(cX - 0.11*width, height)
+                ctx.lineTo(cX + 0.11*width, height)
+                ctx.lineTo(cX + 0.165*width, height*0.948)
+                ctx.lineTo(cX + 0.165*width, height*0.704)
+                ctx.lineTo(cX + 0.153*width, height*0.54)
+                ctx.lineTo(cX + 0.117*width, height*0.318)
+                ctx.lineTo(cX +0.01*width , 0)
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
+
+                //Bottom rectangle (Antenna)
+                ctx.fillStyle = "#DC0808"
+                ctx.beginPath()
+                ctx.moveTo(cX - 0.1*width ,height*0.7)
+                ctx.lineTo(cX - 0.1*width, height*0.89)
+                ctx.lineTo(cX + 0.1*width, height*0.89)
+                ctx.lineTo(cX + 0.1*width, height*0.7)
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
+
+                //Top arc (Camera)
+                ctx.beginPath()
+                ctx.arc(cX, height*0.3, width*0.06, 0, 2*Math.PI,false)
+                ctx.fill()
+                ctx.stroke()
+            }
+
             transform: Rotation {
-                origin.x:       vehicleIcon.width  / 2
-                origin.y:       vehicleIcon.height / 2
-                angle:          isNaN(heading) ? 0 : heading
+                origin.x:   vehicleIcon.width / 2
+                origin.y:   vehicleIcon.height / 2
+                angle:      heading
             }
         }
 

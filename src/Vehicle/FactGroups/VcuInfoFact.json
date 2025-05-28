@@ -1,0 +1,89 @@
+{
+    "version": 1,
+    "fileType": "FactMetaData",
+    "QGC.MetaData.Facts": [
+        {
+            "name": "coolantWaterInletTempChannel",
+            "shortDesc": "Pump speed on first channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "coolantWaterOutletTempChannel",
+            "shortDesc": "Pump speed on second channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "engineCabinTempChannel",
+            "shortDesc": "Centrifugal speed on first channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "fuelCabinTempChannel",
+            "shortDesc": "Centrifugal speed on second channel",
+            "type": "uint16",
+            "units": "rpm"
+        },
+        {
+            "name": "exhaustPipeTempChannel",
+            "shortDesc": "Flowrate speed on first channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L/min"
+        },
+        {
+            "name": "throttlePercent",
+            "shortDesc": "Flowrate speed on second channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L/min"
+        },
+        {
+            "name": "steeringAngle",
+            "shortDesc": "Total volume on first channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L"
+        },
+        {
+            "name": "contactorState",
+            "shortDesc": "Total volume on second channel",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L"
+        },
+        {
+            "name": "fuelTankPct",
+            "shortDesc": "Remaining percent on fuel tank",
+            "type": "int8",
+            "units": "%"
+        },
+        {
+            "name": "thermoErrorMask",
+            "shortDesc": "Analog weight sensor value",
+            "type": "uint16"
+        },
+        {
+            "name": "cameraPanPosition",
+            "shortDesc": "Arm first position lock status",
+            "type": "float"
+        },
+        {
+            "name": "cameraTiltPosition",
+            "shortDesc": "Arm second position lock status",
+            "type": "float"
+        },
+        {
+            "name": "cameraZoomPosition",
+            "shortDesc": "Arm third position lock status",
+            "type": "float"
+        },
+        {
+            "name": "cameraDeltaYaw",
+            "shortDesc": "Arm fourth position lock status",
+            "type": "float"
+        }
+    ]
+}

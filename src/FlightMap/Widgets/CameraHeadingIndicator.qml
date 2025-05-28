@@ -31,15 +31,22 @@ Canvas {
         var endAngle = (cameraHeading - 90 + cameraFOV/2) * Math.PI/180
 
         ctx.clearRect(0, 0, width, height) // Clear canvas
-        ctx.fillStyle = "#2E90D0" // Light green fill
+        ctx.fillStyle = "#13F608" // Light green fill
         ctx.strokeStyle = _qgcPal.text // Theme-aware outline
 
         ctx.beginPath()
-        ctx.lineWidth = 2
+        ctx.lineWidth = 1
         ctx.arc(cX, cY, radius, startAngle, endAngle, false) // Draw camera FOV arc
         ctx.lineTo(cX, cY) // Connect to center for filled sector
         ctx.closePath()
         ctx.fill()
+        ctx.stroke()
+
+        ctx.strokeStyle = "#AE0800" // Theme-aware outline
+        ctx.beginPath()
+        ctx.lineWidth = 5
+        ctx.moveTo(cX, cY)
+        ctx.lineTo(cX, 0)
         ctx.stroke()
     }
 

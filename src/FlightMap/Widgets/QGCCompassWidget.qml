@@ -33,6 +33,7 @@ Rectangle {
     property real _sizeRatio:                   (usedByMultipleVehicleList || ScreenTools.isTinyScreen) ? (size / _defaultSize) * 0.5 : size / _defaultSize
     property int  _fontSize:                    ScreenTools.defaultFontPointSize * _sizeRatio < 8 ? 8 : ScreenTools.defaultFontPointSize * _sizeRatio
     property real _heading:                     vehicle ? vehicle.heading.rawValue : 0
+    property real _cam_heading:                 vehicle ? vehicle.vcu.cameraPanPosition.rawValue : 0
     property real _headingToHome:               vehicle ? vehicle.headingToHome.rawValue : 0
     property real _groundSpeed:                 vehicle ? vehicle.groundSpeed.rawValue : 0
     property real _headingToNextWP:             vehicle ? vehicle.headingToNextWP.rawValue : 0
@@ -82,15 +83,42 @@ Rectangle {
             visible:        !usedByMultipleVehicleList
         }
 
+        //Camera Heading line
+        Canvas {
+            id:                 control
+            anchors.centerIn:   parent
+            width:              size*1.1
+            height:             width
+
+            onPaint: {
+                var ctx = getContext("2d")
+                var cX = width/2
+                var cY = height/2
+
+                ctx.strokeStyle = "#0c0663" // Theme-aware outline
+                ctx.beginPath()
+                ctx.lineWidth = 3
+                ctx.moveTo(cX, cY)
+                ctx.lineTo(cX, 0)
+                ctx.stroke()
+            }
+
+            transform: Rotation {
+                origin.x:   control.width / 2
+                origin.y:   control.height / 2
+                angle:     _cam_heading
+            }
+        }
+
         CameraHeadingIndicator {
             compassSize: size
-            cameraHeading: _heading
+            cameraHeading: _cam_heading
             simplified: usedByMultipleVehicleList
             cameraFOV: 60
             opacity: 0.5
         }
 
-        CompassHeadingIndicator {
+        CompassUSVHeadingIndicator {
             compassSize:    size
             heading:        _heading
             simplified:     usedByMultipleVehicleList
