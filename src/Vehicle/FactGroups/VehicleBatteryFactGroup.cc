@@ -85,7 +85,10 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle *vehicle, const mavli
 {
     mavlink_battery_status_t batteryStatus{};
     mavlink_msg_battery_status_decode(&message, &batteryStatus);
-
+    if (batteryStatus.id == 2) {
+        //VCU handle
+        return;
+    }
     VehicleBatteryFactGroup *const group = _findOrAddBatteryGroupById(vehicle, batteryStatus.id);
 
     double totalVoltage = qQNaN();

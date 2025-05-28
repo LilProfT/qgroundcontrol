@@ -49,3 +49,4 @@ QGCVideoBackground              1.0 QGCVideoBackground.qml
 TelemetryValuesBar              1.0 TelemetryValuesBar.qml
 TerrainProgress                 1.0 TerrainProgress.qml
 VehicleWarnings                 1.0 VehicleWarnings.qml
+FlyViewRestartMissionButton     1.0 FlyViewRestartMissionButton.qml

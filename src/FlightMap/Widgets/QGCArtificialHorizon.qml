@@ -36,8 +36,8 @@ Item {
             smooth: true
             antialiasing: true
             gradient: Gradient {
-                GradientStop { position: 0.25; color: Qt.hsla(0.57, 0.97, 0.25) }
-                GradientStop { position: 0.5;  color: Qt.hsla(0.57, 0.97, 0.55) }
+                GradientStop { position: 0.25; color: Qt.hsla(0.53, 0.96, 0.67) }
+                GradientStop { position: 0.5;  color: Qt.hsla(0.53, 1, 0.8) }
             }
         }
         Rectangle {

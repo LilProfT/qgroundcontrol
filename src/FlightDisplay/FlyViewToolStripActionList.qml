@@ -50,6 +50,29 @@ ToolStripActionList {
         GuidedActionRTL { },
         GuidedActionPause { },
         FlyViewAdditionalActionsButton { },
-        GuidedActionGripper { }
+        GuidedActionGripper { },
+        FlyViewRestartMissionButton{ },
+
+        ToolStripAction {
+            property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
+            id:         calibPTZCameraIcon
+            text:       qsTr("Calib Camera")
+            iconSource: "/qmlimages/camera_photo.svg"
+            visible:    true
+            enabled:    true
+            onTriggered:{
+                _activeVehicle.setZeroCameraAngle(_activeVehicle.vcu.cameraDeltaYaw.rawValue)
+            }
+        },
+        ToolStripAction {
+            id:         customButton
+            text:       qsTr("Custom")
+            iconSource: "/qmlimages/Gears.svg"
+            visible:    true
+            enabled:    true
+            onTriggered:{
+
+            }
+        }
     ]
 }

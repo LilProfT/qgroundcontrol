@@ -18,7 +18,7 @@ import QGroundControl.Controls
 Rectangle {
     id:         _root
     color:      qgcPal.toolbarBackground
-    width:      ScreenTools.defaultFontPixelWidth * 8
+    width:      ScreenTools.defaultFontPixelWidth * 10
     height:     Math.min(maxHeight, toolStripColumn.height + (flickable.anchors.margins * 2))
     radius:     ScreenTools.defaultFontPixelWidth / 2
 

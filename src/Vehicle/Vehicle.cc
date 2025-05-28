@@ -117,6 +117,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _efiFactGroup                 (this)
     , _rpmFactGroup                 (this)
     , _terrainFactGroup             (this)
+    , _vcuInfoFactGroup             (this)
     , _terrainProtocolHandler       (new TerrainProtocolHandler(this, &_terrainFactGroup, this))
 {
     connect(JoystickManager::instance(), &JoystickManager::activeJoystickChanged, this, &Vehicle::_loadJoystickSettings);
@@ -219,6 +220,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _distanceSensorFactGroup          (this)
     , _localPositionFactGroup           (this)
     , _localPositionSetpointFactGroup   (this)
+    , _vcuInfoFactGroup                 (this)
 {
     // This will also set the settings based firmware/vehicle types. So it needs to happen first.
     if (_firmwareType == MAV_AUTOPILOT_TRACK) {
@@ -338,7 +340,7 @@ void Vehicle::_commonInit()
     _addFactGroup(&_efiFactGroup,               _efiFactGroupName);
     _addFactGroup(&_rpmFactGroup,               _rpmFactGroupName);
     _addFactGroup(&_terrainFactGroup,           _terrainFactGroupName);
-
+    _addFactGroup(&_vcuInfoFactGroup,         _vcuInfoFactGroupName);
     // Add firmware-specific fact groups, if provided
     QMap<QString, FactGroup*>* fwFactGroups = _firmwarePlugin->factGroups();
     if (fwFactGroups) {
@@ -2316,6 +2318,38 @@ void Vehicle::abortLanding(double climbOutAltitude)
                 MAV_CMD_DO_GO_AROUND,
                 true,        // show error if fails
                 static_cast<float>(climbOutAltitude));
+}
+
+void Vehicle::restartMission()
+{
+    // sendMavCommand(defaultComponentId(),
+    //                MAV_CMD_DO_JUMP,
+    //                true,1,0,0,0,0,0,0);
+    setCurrentMissionSequence(1);
+}
+
+void Vehicle::setZeroCameraAngle(float value)
+{
+// lambda function which uses the deprecated mission_set_current
+    SharedLinkInterfacePtr sharedLink = vehicleLinkManager()->primaryLink().lock();
+    if (!sharedLink) {
+        qCDebug(VehicleLog) << "setCurrentMissionSequence: primary link gone!";
+        return;
+    }
+
+    mavlink_message_t       msg;
+
+            // send mavlink message (deprecated since Aug 2022).
+    mavlink_msg_param_set_pack_chan(static_cast<uint8_t>(MAVLinkProtocol::instance()->getSystemId()),
+                                    static_cast<uint8_t>(MAVLinkProtocol::instance()->getComponentId()),
+                                    sharedLink->mavlinkChannel(),
+                                    &msg,
+                                    static_cast<uint8_t>(id()),
+                                    _compID,
+                                    "VCU_CAM_ZERO",
+                                    value,
+                                    MAV_PARAM_TYPE_REAL32);
+    sendMessageOnLinkThreadSafe(sharedLink.get(), msg);
 }
 
 bool Vehicle::guidedMode() const

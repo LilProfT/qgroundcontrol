@@ -359,6 +359,8 @@
         <file alias="MockLink.qml">src/UI/preferences/MockLink.qml</file>
         <file alias="MockLinkSettings.qml">src/UI/preferences/MockLinkSettings.qml</file>
         <file alias="QGroundControl/FlightMap/CameraHeadingIndicator.qml">src/FlightMap/Widgets/CameraHeadingIndicator.qml</file>
+        <file alias="QGroundControl/FlightMap/CompassUSVHeadingIndicator.qml">src/FlightMap/Widgets/CompassUSVHeadingIndicator.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewRestartMissionButton.qml">src/FlightDisplay/FlyViewRestartMissionButton.qml</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>
