@@ -24,6 +24,7 @@
 
 // Release languages are 90%+ complete
 QList<QLocale::Language> AppSettings::_rgReleaseLanguages = {
+    // QLocale::Vietnamese,
     QLocale::English,
     QLocale::Azerbaijani,    
     QLocale::Chinese,
@@ -43,6 +44,7 @@ AppSettings::LanguageInfo_t AppSettings::_rgLanguageInfo[] = {
     { QLocale::Azerbaijani,     "Azerbaijani (Azerbaijani)" },
     { QLocale::Bulgarian,       "български (Bulgarian)" },
     { QLocale::Chinese,         "中文 (Chinese)" },
+    { QLocale::Vietnamese,      "Tieng Viet (Vietnamese)" },
     { QLocale::Dutch,           "Nederlands (Dutch)" },
     { QLocale::English,         "English" },
     { QLocale::Finnish,         "Suomi (Finnish)" },

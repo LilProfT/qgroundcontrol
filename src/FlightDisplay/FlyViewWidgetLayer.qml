@@ -125,6 +125,33 @@ Item {
         utmspSliderTrigger:         utmspActTrigger
     }
 
+    ThermalMock {
+        id: thermalMock
+        anchors.right: parent.right
+        anchors.bottom: bottomRightRowLayout.top
+        anchors.rightMargin: 5
+        anchors.bottomMargin: 5
+    }
+
+
+    RelayKeyMock {
+        id: relayKeyMock
+        anchors.right: thermalMock.left
+        anchors.rightMargin: 7
+
+        anchors.bottom: bottomRightRowLayout.top
+        anchors.bottomMargin: 5
+    }
+
+    FuelMock {
+        id: fuelMock
+        anchors.right: relayKeyMock.left
+        anchors.rightMargin: 7
+
+        anchors.bottom: bottomRightRowLayout.top
+        anchors.bottomMargin: 5
+    }
+
     //-- Virtual Joystick
     Loader {
         id:                         virtualJoystickMultiTouch
