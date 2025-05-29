@@ -108,6 +108,8 @@ public:
         throttleFunction,
         gimbalPitchFunction,
         gimbalYawFunction,
+        aux1Function,
+        aux2Function,
         maxFunction
     };
 

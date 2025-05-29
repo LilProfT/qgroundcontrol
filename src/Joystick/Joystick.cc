@@ -132,6 +132,8 @@ void Joystick::_setDefaultCalibration()
     _rgFunctionAxis[gimbalPitchFunction] = 4;
     _rgFunctionAxis[gimbalYawFunction] = 5;
 
+    _rgFunctionAxis[aux1Function] = 6;
+    _rgFunctionAxis[aux2Function] = 7;
     _exponential = 0;
     _accumulator = false;
     _deadband = false;
@@ -620,6 +622,18 @@ void Joystick::_handleAxis()
         gimbalYaw = _adjustRange(_rgAxisValues[axis],   _rgCalibration[axis],_deadband);
     }
 
+    float aux1 = 0.0f;
+    if (_axisCount > 6) {
+        axis = _rgFunctionAxis[aux1Function];
+        aux1 = _adjustRange(_rgAxisValues[axis],   _rgCalibration[axis],_deadband);
+    }
+
+    float aux2 = 0.0f;
+    if (_axisCount > 7) {
+        axis = _rgFunctionAxis[aux2Function];
+        aux2 = _adjustRange(_rgAxisValues[axis],   _rgCalibration[axis],_deadband);
+    }
+
     if (_accumulator) {
         static float throttle_accu = 0.f;
         throttle_accu += (throttle * (40 / 1000.f)); // for throttle to change from min to max it will take 1000ms (40ms is a loop time)
@@ -658,7 +672,7 @@ void Joystick::_handleAxis()
         throttle = (throttle + 1.0f) / 2.0f;
     }
 
-    qCDebug(JoystickValuesLog) << "name:roll:pitch:yaw:throttle:gimbalPitch:gimbalYaw" << name() << roll << -pitch << yaw << throttle << gimbalPitch << gimbalYaw;
+    qCDebug(JoystickValuesLog) << "name:roll:pitch:yaw:throttle:gimbalPitch:gimbalYaw:aux1:aux2" << name() << roll << -pitch << yaw << throttle << gimbalPitch << gimbalYaw << aux1 << aux2;
 
     // NOTE: The buttonPressedBits going to MANUAL_CONTROL are currently used by ArduSub (and it only handles 16 bits)
     // Set up button bitmap
@@ -673,7 +687,7 @@ void Joystick::_handleAxis()
     emit axisValues(roll, pitch, yaw, throttle);
 
     const uint16_t shortButtons = static_cast<uint16_t>(buttonPressedBits & 0xFFFF);
-    _activeVehicle->sendJoystickDataThreadSafe(roll, pitch, yaw, throttle, shortButtons);
+    _activeVehicle->sendJoystickDataThreadSafe(roll, pitch, yaw, throttle, shortButtons,gimbalPitch, gimbalYaw, aux1, aux2);
 }
 
 void Joystick::startPolling(Vehicle* vehicle)

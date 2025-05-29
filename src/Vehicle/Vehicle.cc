@@ -1909,7 +1909,7 @@ void Vehicle::virtualTabletJoystickValue(double roll, double pitch, double yaw, 
                     static_cast<float>(pitch),
                     static_cast<float>(yaw),
                     static_cast<float>(thrust),
-                    0);
+                    0,0,0,0,0);
     }
 }
 
@@ -3900,7 +3900,7 @@ void Vehicle::clearAllParamMapRC(void)
     }
 }
 
-void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, float thrust, quint16 buttons)
+void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, float thrust, quint16 buttons, float axis5, float axis6, float axis7, float axis8)
 {
     SharedLinkInterfacePtr sharedLink = vehicleLinkManager()->primaryLink().lock();
     if (!sharedLink) {
@@ -3920,6 +3920,13 @@ void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, flo
     float newPitchCommand  =    pitch * axesScaling;    // Joystick data is reverse of mavlink values
     float newYawCommand    =    yaw * axesScaling;
     float newThrustCommand =    thrust * axesScaling;
+    float newAxis5Command = axis5 * axesScaling;
+    float newAxis6Command = axis6 * axesScaling;
+    float newAxis7Command = axis7 * axesScaling;
+    float newAxis8Command = axis8 * axesScaling;
+
+    //Enabled axis extension
+    uint8_t enabled_extension = 255; //enable all 8 bits
 
     mavlink_msg_manual_control_pack_chan(
         static_cast<uint8_t>(MAVLinkProtocol::instance()->getSystemId()),
@@ -3932,9 +3939,12 @@ void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, flo
         static_cast<int16_t>(newThrustCommand),
         static_cast<int16_t>(newYawCommand),
         buttons, 0,
-        0,
-        0, 0,
-        0, 0, 0, 0, 0, 0
+        enabled_extension,
+        static_cast<int16_t>(newAxis5Command),
+        static_cast<int16_t>(newAxis6Command),
+        static_cast<int16_t>(newAxis7Command),
+        static_cast<int16_t>(newAxis8Command),
+        0, 0, 0, 0
     );
     sendMessageOnLinkThreadSafe(sharedLink.get(), message);
 }
