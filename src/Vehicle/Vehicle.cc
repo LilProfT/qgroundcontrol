@@ -1909,7 +1909,7 @@ void Vehicle::virtualTabletJoystickValue(double roll, double pitch, double yaw, 
                     static_cast<float>(pitch),
                     static_cast<float>(yaw),
                     static_cast<float>(thrust),
-                    0,0,0,0,0);
+                    0,0,0,0,0,0);
     }
 }
 
@@ -3900,7 +3900,7 @@ void Vehicle::clearAllParamMapRC(void)
     }
 }
 
-void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, float thrust, quint16 buttons, float axis5, float axis6, float axis7, float axis8)
+void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, float thrust, quint16 buttons, float axis5, float axis6, float axis7, float axis8, float axis9)
 {
     SharedLinkInterfacePtr sharedLink = vehicleLinkManager()->primaryLink().lock();
     if (!sharedLink) {
@@ -3924,6 +3924,7 @@ void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, flo
     float newAxis6Command = axis6 * axesScaling;
     float newAxis7Command = axis7 * axesScaling;
     float newAxis8Command = axis8 * axesScaling;
+    float newAxis9Command = axis9 * axesScaling;
 
     //Enabled axis extension
     uint8_t enabled_extension = 255; //enable all 8 bits
@@ -3944,7 +3945,8 @@ void Vehicle::sendJoystickDataThreadSafe(float roll, float pitch, float yaw, flo
         static_cast<int16_t>(newAxis6Command),
         static_cast<int16_t>(newAxis7Command),
         static_cast<int16_t>(newAxis8Command),
-        0, 0, 0, 0
+        static_cast<int16_t>(newAxis9Command),
+        0, 0, 0
     );
     sendMessageOnLinkThreadSafe(sharedLink.get(), message);
 }

@@ -607,7 +607,8 @@ bool JoystickConfigController::yawAxisReversed()
 bool JoystickConfigController::throttleAxisReversed()
 {
     if (_rgFunctionAxisMapping[Joystick::throttleFunction] != _axisNoAxis) {
-        return _rgAxisInfo[_rgFunctionAxisMapping[Joystick::throttleFunction]].reversed;
+        auto result = _rgAxisInfo[_rgFunctionAxisMapping[Joystick::throttleFunction]].reversed;
+        return result;
     } else {
         return false;
     }

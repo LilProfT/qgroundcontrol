@@ -132,8 +132,8 @@ void Joystick::_setDefaultCalibration()
     _rgFunctionAxis[gimbalPitchFunction] = 4;
     _rgFunctionAxis[gimbalYawFunction] = 5;
 
-    _rgFunctionAxis[aux1Function] = 6;
-    _rgFunctionAxis[aux2Function] = 7;
+    // _rgFunctionAxis[aux1Function] = 6;
+    // _rgFunctionAxis[aux2Function] = 7;
     _exponential = 0;
     _accumulator = false;
     _deadband = false;
@@ -262,7 +262,6 @@ void Joystick::_loadSettings()
     }
 
     badSettings |= (workingAxis < 4);
-
     // FunctionAxis mappings are always stored in TX mode 2
     // Remap to stored TX mode in settings
     _remapAxes (2, _transmitterMode, _rgFunctionAxis);
@@ -581,6 +580,14 @@ void Joystick::_handleButtons()
 void Joystick::_handleAxis()
 {
     const int axisDelay = static_cast<int>(1000.0f / _axisFrequencyHz);
+    struct Calibration_t rgExtAxisCalibration = {
+        .min = -32767,
+        .max = 32767,
+        .center = 0,
+        .deadband = 0,
+        .reversed = false
+    };
+
     if (_axisTime.elapsed() <= axisDelay) {
         return;
     }
@@ -597,7 +604,6 @@ void Joystick::_handleAxis()
     if (!_activeVehicle->joystickEnabled() || _calibrationMode || !_calibrated) {
         return;
     }
-
     int axis = _rgFunctionAxis[rollFunction];
     float roll = _adjustRange(_rgAxisValues[axis], _rgCalibration[axis], _deadband);
 
@@ -612,26 +618,32 @@ void Joystick::_handleAxis()
 
     float gimbalPitch = 0.0f;
     if (_axisCount > 4) {
-        axis = _rgFunctionAxis[gimbalPitchFunction];
-        gimbalPitch = _adjustRange(_rgAxisValues[axis], _rgCalibration[axis],_deadband);
+        axis = static_cast<int> (AxisFunction_t::gimbalPitchFunction);
+        gimbalPitch = _adjustRange(_rgAxisValues[axis], rgExtAxisCalibration,_deadband);
     }
 
     float gimbalYaw = 0.0f;
     if (_axisCount > 5) {
-        axis = _rgFunctionAxis[gimbalYawFunction];
-        gimbalYaw = _adjustRange(_rgAxisValues[axis],   _rgCalibration[axis],_deadband);
+        axis = static_cast<int> (AxisFunction_t::gimbalYawFunction);
+        gimbalYaw = _adjustRange(_rgAxisValues[axis], rgExtAxisCalibration,_deadband);
     }
 
     float aux1 = 0.0f;
     if (_axisCount > 6) {
-        axis = _rgFunctionAxis[aux1Function];
-        aux1 = _adjustRange(_rgAxisValues[axis],   _rgCalibration[axis],_deadband);
+        axis = static_cast<int> (AxisFunction_t::aux1Function);;
+        aux1 = _adjustRange(_rgAxisValues[axis], rgExtAxisCalibration,_deadband);
     }
 
     float aux2 = 0.0f;
     if (_axisCount > 7) {
-        axis = _rgFunctionAxis[aux2Function];
-        aux2 = _adjustRange(_rgAxisValues[axis],   _rgCalibration[axis],_deadband);
+        axis = static_cast<int> (AxisFunction_t::aux2Function);;
+        aux2 = _adjustRange(_rgAxisValues[axis], rgExtAxisCalibration,_deadband);
+    }
+
+    float aux3 = 0.0f;
+    if (_axisCount > 8) {
+        axis = static_cast<int> (AxisFunction_t::aux3Function);;
+        aux3 = _adjustRange(_rgAxisValues[axis], rgExtAxisCalibration,_deadband);
     }
 
     if (_accumulator) {
@@ -672,7 +684,7 @@ void Joystick::_handleAxis()
         throttle = (throttle + 1.0f) / 2.0f;
     }
 
-    qCDebug(JoystickValuesLog) << "name:roll:pitch:yaw:throttle:gimbalPitch:gimbalYaw:aux1:aux2" << name() << roll << -pitch << yaw << throttle << gimbalPitch << gimbalYaw << aux1 << aux2;
+    qCDebug(JoystickValuesLog) << "name:roll:pitch:yaw:throttle:gimbalPitch:gimbalYaw:aux1:aux2:aux3" << name() << roll << -pitch << yaw << throttle << gimbalPitch << gimbalYaw << aux1 << aux2 << aux3;
 
     // NOTE: The buttonPressedBits going to MANUAL_CONTROL are currently used by ArduSub (and it only handles 16 bits)
     // Set up button bitmap
@@ -684,10 +696,9 @@ void Joystick::_handleAxis()
         }
     }
 
-    emit axisValues(roll, pitch, yaw, throttle);
-
+    emit axisValues(roll, pitch, yaw, throttle, gimbalPitch, gimbalYaw);
     const uint16_t shortButtons = static_cast<uint16_t>(buttonPressedBits & 0xFFFF);
-    _activeVehicle->sendJoystickDataThreadSafe(roll, pitch, yaw, throttle, shortButtons,gimbalPitch, gimbalYaw, aux1, aux2);
+    _activeVehicle->sendJoystickDataThreadSafe(roll, pitch, yaw, throttle, shortButtons,gimbalPitch, gimbalYaw, aux1, aux2,aux3);
 }
 
 void Joystick::startPolling(Vehicle* vehicle)
