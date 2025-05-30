@@ -751,6 +751,7 @@ void Joystick::startPolling(Vehicle* vehicle)
             (void) connect(this, &Joystick::landingGearRetract, _activeVehicle, &Vehicle::landingGearRetract);
             (void) connect(this, &Joystick::motorInterlock, _activeVehicle, &Vehicle::motorInterlock);
             (void) connect(_activeVehicle, &Vehicle::flightModesChanged, this, &Joystick::_flightModesChanged);
+            (void) connect(this, &Joystick::setServoHighLow, _activeVehicle, &Vehicle::setServoHighLow);
         }
     }
 
@@ -782,6 +783,8 @@ void Joystick::stopPolling()
         (void) disconnect(this, &Joystick::landingGearRetract, _activeVehicle, &Vehicle::landingGearRetract);
         (void) disconnect(this, &Joystick::motorInterlock, _activeVehicle, &Vehicle::motorInterlock);
         (void) disconnect(_activeVehicle, &Vehicle::flightModesChanged, this, &Joystick::_flightModesChanged);
+        (void) disconnect(this, &Joystick::setServoHighLow, _activeVehicle, &Vehicle::setServoHighLow);
+
         _activeVehicle = nullptr;
     }
 
@@ -1142,7 +1145,36 @@ void Joystick::_executeButtonAction(const QString &action, bool buttonDown)
         if (buttonDown) {
             emit motorInterlock(false);
         }
-    } else {
+    } else if (action == _buttonActionEngineTurnOn) {
+        if (buttonDown) {
+            emit setServoHighLow(7, true);
+        }
+    } else if (action == _buttonActionEngineTurnOff) {
+        if (buttonDown) {
+            emit setServoHighLow(7, false);
+        }
+    }
+    else if (action == _buttonActionBombControlTurnOn) {
+        if (buttonDown) {
+            emit setServoHighLow(5, true);
+        }
+    }
+    else if (action == _buttonActionBombControlTurnOff) {
+        if (buttonDown) {
+            emit setServoHighLow(5, false);
+        }
+    }
+    else if (action == _buttonActionBombActivate) {
+        if (buttonDown) {
+            emit setServoHighLow(6, true);
+        }
+    }
+    else if (action == _buttonActionBombDeactivate) {
+        if (buttonDown) {
+            emit setServoHighLow(6, false);
+        }
+    }
+    else {
         if (buttonDown && _activeVehicle) {
             emit unknownAction(action);
             for (int i = 0; i<_mavlinkActionManager->actions()->count(); i++) {
@@ -1236,6 +1268,15 @@ void Joystick::_buildActionList(Vehicle *activeVehicle)
     _assignableButtonActions->append(new AssignableButtonAction(_buttonActionMotorInterlockEnable));
     _assignableButtonActions->append(new AssignableButtonAction(_buttonActionMotorInterlockDisable));
 #endif
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionEngineTurnOn));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionEngineTurnOff));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionBombControlTurnOn));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionBombControlTurnOff));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionBombActivate));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionBombDeactivate));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionShifterHigh));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionShifterMiddle));
+    _assignableButtonActions->append(new AssignableButtonAction(_buttonActionShifterLow));
 
     const auto customActions = QGCCorePlugin::instance()->joystickActions();
     for (const auto &action : customActions) {

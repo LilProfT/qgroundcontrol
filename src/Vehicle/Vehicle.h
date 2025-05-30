@@ -479,6 +479,8 @@ public:
 
     bool armed              () const{ return _armed; }
     void setArmed           (bool armed, bool showError);
+    void setServoHighLow(uint8_t numServo, bool high_low);
+
     void setArmedShowError  (bool armed) { setArmed(armed, true); }
 
     bool flightModeSetAvailable             ();

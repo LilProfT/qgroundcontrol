@@ -1619,6 +1619,15 @@ void Vehicle::forceArm(void)
                    2989);   // force arm
 }
 
+void Vehicle::setServoHighLow(uint8_t numServo, bool high_low)
+{
+    sendMavCommand(defaultComponentId(),
+                   MAV_CMD_DO_SET_SERVO,
+                   true,
+                    numServo,
+                   (high_low) ? 1900 : 1100);
+}
+
 bool Vehicle::flightModeSetAvailable()
 {
     return _firmwarePlugin->isCapable(this, FirmwarePlugin::SetFlightModeCapability);

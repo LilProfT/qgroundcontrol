@@ -226,7 +226,7 @@ signals:
     void landingGearRetract();
     void motorInterlock(bool enable);
     void unknownAction(const QString &action);
-
+    void setServoHighLow(uint8_t numServo, bool high_low);
 protected:
     void _setDefaultCalibration();
 
@@ -369,4 +369,14 @@ private:
     static constexpr const char *_buttonActionLandingGearRetract=  QT_TR_NOOP("Landing gear retract");
     static constexpr const char *_buttonActionMotorInterlockEnable=   QT_TR_NOOP("Motor Interlock enable");
     static constexpr const char *_buttonActionMotorInterlockDisable=  QT_TR_NOOP("Motor Interlock disable");
+    static constexpr const char *_buttonActionEngineTurnOn=  QT_TR_NOOP("Engine Turn ON");
+    static constexpr const char *_buttonActionEngineTurnOff=  QT_TR_NOOP("Engine Turn OFF");
+    static constexpr const char *_buttonActionBombControlTurnOn=  QT_TR_NOOP("Bomb control Turn ON");
+    static constexpr const char *_buttonActionBombControlTurnOff=  QT_TR_NOOP("Bomb control Turn OFF");
+    static constexpr const char *_buttonActionBombActivate=  QT_TR_NOOP("Bomb ACTIVATE");
+    static constexpr const char *_buttonActionBombDeactivate=  QT_TR_NOOP("Bomb DEACTIVATE");
+    static constexpr const char *_buttonActionShifterHigh=  QT_TR_NOOP("Shifter High");
+    static constexpr const char *_buttonActionShifterMiddle=  QT_TR_NOOP("Shifter Middle");
+    static constexpr const char *_buttonActionShifterLow=  QT_TR_NOOP("Shifter Low");
+
 };
