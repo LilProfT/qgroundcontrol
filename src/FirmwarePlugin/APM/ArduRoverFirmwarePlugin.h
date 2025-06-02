@@ -55,21 +55,21 @@ public:
 protected:
     uint32_t _convertToCustomFlightModeEnum(uint32_t val) const override;
 
-    const QString _manualFlightMode = tr("Manual");
-    const QString _acroFlightMode = tr("Acro");
+    const QString _manualFlightMode = tr("Thủ công");
+    const QString _acroFlightMode = tr("Bù 1");
     const QString _learningFlightMode = tr("Learning");
-    const QString _steeringFlightMode = tr("Steering");
-    const QString _holdFlightMode = tr("Hold");
-    const QString _loiterFlightMode = tr("Loiter");
+    const QString _steeringFlightMode = tr("Bù 2");
+    const QString _holdFlightMode = tr("Giữ");
+    const QString _loiterFlightMode = tr("Số 8");
     const QString _followFlightMode = tr("Follow");
-    const QString _simpleFlightMode = tr("Simple");
-    const QString _dockFlightMode = tr("Dock");
-    const QString _circleFlightMode = tr("Circle");
-    const QString _autoFlightMode = tr("Auto");
-    const QString _rtlFlightMode = tr("RTL");
-    const QString _smartRtlFlightMode = tr("Smart RTL");
-    const QString _guidedFlightMode = tr("Guided");
-    const QString _initializingFlightMode = tr("Initializing");
+    const QString _simpleFlightMode = tr("Đơn giản");
+    const QString _dockFlightMode = tr("Neo đậu");
+    const QString _circleFlightMode = tr("Vòng tròn");
+    const QString _autoFlightMode = tr("Hành trình");
+    const QString _rtlFlightMode = tr("Quay về trạm");
+    const QString _smartRtlFlightMode = tr("Quay về trạm thông minh");
+    const QString _guidedFlightMode = tr("Theo lệnh");
+    const QString _initializingFlightMode = tr("Đang khởi tạo");
 
 private:
     static bool _remapParamNameIntialized;

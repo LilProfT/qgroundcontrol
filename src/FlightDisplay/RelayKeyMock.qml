@@ -2,9 +2,17 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.15
 
+import QGroundControl
+import QGroundControl.ScreenTools
+import QGroundControl.Controls
+import QGroundControl.Palette
+import QGroundControl.Vehicle
+import QGroundControl.FlightMap
 Column {
     spacing: 0
     width: 110
+    property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
+    property var _vcuInfo: (_activeVehicle.vcu) ? _activeVehicle.vcu : 0
 
     // Top label
     Item {
@@ -47,11 +55,29 @@ Column {
     // Metric data model
     ListModel {
         id: metricModel
-        ListElement { name: "Dung\nlượng"; bgColor: "black";  value: "38"; unit: "%" }
-        ListElement { name: "Điện\náp";   bgColor: "orange"; value: "22"; unit: "V" }
-        ListElement { name: "Dòng\ntải";  bgColor: "black";    value: "8"; unit: "A" }
-        ListElement { name: "Nhiệt\nđộ";  bgColor: "black";  value: "40";  unit: "°C" }
-        ListElement { name: "Ống\nxả";    bgColor: "black";    value: "100"; unit: "°C" }
+        property bool completed: false
+        property bool contactorState: _vcuInfo.contactorState.rawValue
+
+        Component.onCompleted: {
+            append({name:"Dung\nlượng", bgColor: "black", value: "38", unit: "%"});
+            append({name:"Điện\náp", bgColor: "orange", value: "22", unit: "V"});
+            append({name:"Dòng\ntải", bgColor: "black", value: "7", unit: "A"});
+            append({name:"Nhiệt\nđộ", bgColor: "black", value: "48", unit: "°C"});
+            append({name:"Khóa\ntừ", bgColor: "#42ff2b", value: "Mở", unit: ""});
+            completed = true;
+        }
+
+        onContactorStateChanged:
+            if (completed) {
+                setProperty(4,"value",contactorState ? "Ngắt" : "Đóng");
+                setProperty(4,"bgColor",contactorState ? "#c50202" : "#42ff2b");
+            }
+
+        // ListElement { name: "Dung\nlượng"; bgColor: "black";  value: "38"; unit: "%" }
+        // ListElement { name: "Điện\náp";   bgColor: "orange"; value: "22"; unit: "V" }
+        // ListElement { name: "Dòng\ntải";  bgColor: "black";    value: "8"; unit: "A" }
+        // ListElement { name: "Nhiệt\nđộ";  bgColor: "black";  value: "40";  unit: "°C" }
+        // ListElement { name: "Khóa\ntừ";    bgColor: "black";    value: "100"; unit: "°C" }
     }
 
     // Metric display template

@@ -2072,7 +2072,7 @@
         <location filename="../src/AutoPilotPlugins/APM/APMSafetyComponent.qml" line="135"/>
         <location filename="../src/AutoPilotPlugins/APM/APMSafetyComponent.qml" line="135"/>
         <source>Reboot vehicle</source>
-        <translation type="unfinished">Reboot vehicle</translation>
+        <translation>Khởi động lại USV</translation>
     </message>
     <message>
         <location filename="../src/AutoPilotPlugins/APM/APMSafetyComponent.qml" line="146"/>
@@ -5848,12 +5848,12 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="40"/>
         <source>Set to vehicle heading</source>
-        <translation type="unfinished">Set to vehicle heading</translation>
+        <translation>Đưa về hướng mũi xuồng</translation>
     </message>
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="41"/>
         <source>Set to vehicle location</source>
-        <translation type="unfinished">Set to vehicle location</translation>
+        <translation>Đưa về tọa độ xuồng</translation>
     </message>
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="97"/>
@@ -5864,12 +5864,12 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="107"/>
         <source>Flight Speed</source>
-        <translation type="unfinished">Flight Speed</translation>
+        <translation>Tốc độ</translation>
     </message>
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="118"/>
         <source>Radius</source>
-        <translation type="unfinished">Radius</translation>
+        <translation>Bán kính</translation>
     </message>
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="132"/>
@@ -5905,7 +5905,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="361"/>
         <source>Done</source>
-        <translation type="unfinished">Done</translation>
+        <translation>Hoàn thành</translation>
     </message>
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="230"/>
@@ -5925,7 +5925,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="181"/>
         <source>Distance</source>
-        <translation type="unfinished">Distance</translation>
+        <translation>Khoảng cách</translation>
     </message>
     <message>
         <location filename="../src/PlanView/FWLandingPatternEditor.qml" line="268"/>
@@ -6917,12 +6917,12 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/FlyViewMissionCompleteDialog.qml" line="115"/>
         <source>Resume Mission From Waypoint %1</source>
-        <translation type="unfinished">Tiếp tục hành trình từ Điểm dừng %1</translation>
+        <translation>Tiếp tục hành trình từ Điểm dừng %1</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/FlyViewMissionCompleteDialog.qml" line="126"/>
         <source>Resume Mission will rebuild the current mission from the last flown waypoint and upload it to the vehicle for the next flight.</source>
-        <translation type="unfinished">Resume Mission will rebuild the current mission from the last flown waypoint and upload it to the vehicle for the next flight.</translation>
+        <translation>Tiếp tục hành trình sẽ tạo lại hành trình mới bắt đầu từ điểm dừng cuối cùng đã đi qua và tải tệp hành trình lên USV trong chuyến đi tiếp theo.</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/FlyViewMissionCompleteDialog.qml" line="134"/>
@@ -7210,18 +7210,18 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="37"/>
         <source>Vehicle GPS Status</source>
-        <translation type="unfinished">Vehicle GPS Status</translation>
+        <translation>Trạng thái GPS</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="41"/>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="75"/>
         <source>Satellites</source>
-        <translation type="unfinished">Satellites</translation>
+        <translation>Vệ tinh</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="46"/>
         <source>GPS Lock</source>
-        <translation type="unfinished">GPS Lock</translation>
+        <translation>Khóa GPS</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="51"/>
@@ -7241,7 +7241,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="67"/>
         <source>RTK GPS Status</source>
-        <translation type="unfinished">RTK GPS Status</translation>
+        <translation>Trạng thái RTK</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="71"/>
@@ -7261,7 +7261,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="85"/>
         <source>Accuracy</source>
-        <translation type="unfinished">Accuracy</translation>
+        <translation>Độ chính xác</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="85"/>
@@ -7306,7 +7306,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="166"/>
         <source>Save</source>
-        <translation type="unfinished">Save</translation>
+        <translation>Lưu</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/GPSIndicatorPage.qml" line="166"/>
@@ -7922,7 +7922,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="41"/>
         <source>Takeoff</source>
-        <translation type="unfinished">Takeoff</translation>
+        <translation>Khởi hành</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="43"/>
@@ -7977,7 +7977,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="55"/>
         <source>Set Waypoint</source>
-        <translation type="unfinished">Set Waypoint</translation>
+        <translation>Tạo điểm dừng</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="56"/>
@@ -8032,12 +8032,12 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="61"/>
         <source>Set Flight Mode</source>
-        <translation type="unfinished">Set Flight Mode</translation>
+        <translation>Chọn chế độ lái</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="62"/>
         <source>Change Heading</source>
-        <translation type="unfinished">Change Heading</translation>
+        <translation>Thay đổi hướng mũi xuồng</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="64"/>
@@ -8052,7 +8052,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="66"/>
         <source>WARNING: This will force arming of the vehicle bypassing any safety checks.</source>
-        <translation type="unfinished">WARNING: This will force arming of the vehicle bypassing any safety checks.</translation>
+        <translation type="unfinished">CẢNH BÁO: This will force arming of the vehicle bypassing any safety checks.</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="67"/>
@@ -8072,7 +8072,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="70"/>
         <source>Takeoff from ground and hold position.</source>
-        <translation type="unfinished">Takeoff from ground and hold position.</translation>
+        <translation>Khởi hành từ vị trí hiện tại và giữ vị trí.</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="71"/>
@@ -8082,7 +8082,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="72"/>
         <source>Takeoff from ground and start the current mission.</source>
-        <translation type="unfinished">Takeoff from ground and start the current mission.</translation>
+        <translation>Khởi hành tại vị trí hiện tại và bắt đầu hành trình.</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="73"/>
@@ -8092,7 +8092,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="74"/>
         <source>Continue the mission from the current waypoint.</source>
-        <translation type="unfinished">Continue the mission from the current waypoint.</translation>
+        <translation>Tiếp tục hành trình từ điểm dừng hiện tại.</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="75"/>
@@ -8102,7 +8102,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="76"/>
         <source>Land the vehicle at the current position.</source>
-        <translation type="unfinished">Land the vehicle at the current position.</translation>
+        <translation>Kết thúc hành trình tại vị trí hiện tại.</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="78"/>
@@ -8127,7 +8127,7 @@ Click Ok to start the auto-tuning process.
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="82"/>
         <source>Adjust current waypoint to %1.</source>
-        <translation type="unfinished">Adjust current waypoint to %1.</translation>
+        <translation>Điều chỉnh điểm dừng hiện tại thành %1.</translation>
     </message>
     <message>
         <location filename="../src/FlightDisplay/GuidedActionsController.qml" line="83"/>
@@ -11020,27 +11020,27 @@ Is this really what you want?</translation>
     <message>
         <location filename="../src/FirmwarePlugin/PX4/PX4BatteryIndicator.qml" line="28"/>
         <source>Low Battery Failsafe</source>
-        <translation type="unfinished">Low Battery Failsafe</translation>
+        <translation>An toàn pin yếu</translation>
     </message>
     <message>
         <location filename="../src/FirmwarePlugin/PX4/PX4BatteryIndicator.qml" line="33"/>
         <source>Vehicle Action</source>
-        <translation type="unfinished">Vehicle Action</translation>
+        <translation>Hành động</translation>
     </message>
     <message>
         <location filename="../src/FirmwarePlugin/PX4/PX4BatteryIndicator.qml" line="40"/>
         <source>Warning Level</source>
-        <translation type="unfinished">Warning Level</translation>
+        <translation>Mức cảnh báo</translation>
     </message>
     <message>
         <location filename="../src/FirmwarePlugin/PX4/PX4BatteryIndicator.qml" line="47"/>
         <source>Critical Level</source>
-        <translation type="unfinished">Critical Level</translation>
+        <translation>Mức nghiêm trọng</translation>
     </message>
     <message>
         <location filename="../src/FirmwarePlugin/PX4/PX4BatteryIndicator.qml" line="54"/>
         <source>Emergency Level</source>
-        <translation type="unfinished">Emergency Level</translation>
+        <translation>Mức khẩn cấp</translation>
     </message>
 </context>
 <context>
@@ -13001,7 +13001,7 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="210"/>
         <source>Plan Upload</source>
-        <translation type="unfinished">Plan Upload</translation>
+        <translation>Tải hành trình lên</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="222"/>
@@ -13021,12 +13021,12 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="578"/>
         <source>File</source>
-        <translation type="unfinished">File</translation>
+        <translation>Tệps</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="599"/>
         <source>Waypoint</source>
-        <translation type="unfinished">Điểm dừng</translation>
+        <translation>Điểm dừng</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="606"/>
@@ -13036,7 +13036,7 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="622"/>
         <source>Pattern</source>
-        <translation type="unfinished">Pattern</translation>
+        <translation>Khung HT</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="649"/>
@@ -13081,17 +13081,17 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="136"/>
         <source>Load New Plan From Vehicle</source>
-        <translation type="unfinished">Load New Plan From Vehicle</translation>
+        <translation>Tải hành trình mới từ USV</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="147"/>
         <source>Keep Current Plan</source>
-        <translation type="unfinished">Keep Current Plan</translation>
+        <translation>Giữ lại hành trình hiện tại</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="148"/>
         <source>Keep Current Plan, Don&apos;t Update From Vehicle</source>
-        <translation type="unfinished">Keep Current Plan, Don&apos;t Update From Vehicle</translation>
+        <translation>Giữ hành trình hiện tại, không cập nhật từ xuồng</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="211"/>
@@ -13115,7 +13115,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="587"/>
         <source>Takeoff</source>
-        <translation type="unfinished">Takeoff</translation>
+        <translation>Khởi hành</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="599"/>
@@ -13130,7 +13130,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="636"/>
         <source>Return</source>
-        <translation type="unfinished">Return</translation>
+        <translation>Quay về trạm</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="638"/>
@@ -13140,7 +13140,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="639"/>
         <source>Land</source>
-        <translation type="unfinished">Land</translation>
+        <translation>Kết thúc</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="709"/>
@@ -13177,7 +13177,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="878"/>
         <source>You have unsaved/unsent changes. Loading from a file will lose these changes. Are you sure you want to load from a file?</source>
-        <translation type="unfinished">You have unsaved/unsent changes. Loading from a file will lose these changes. Are you sure you want to load from a file?</translation>
+        <translation>Các thay đổi chưa được lưu. Mở tệp sẽ làm mất các thay đổi đó, vẫn mở tệp tin?</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="899"/>
@@ -13188,7 +13188,7 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="900"/>
         <source>Are you sure you want to remove all mission items and clear the mission from the vehicle?</source>
-        <translation type="unfinished">Are you sure you want to remove all mission items and clear the mission from the vehicle?</translation>
+        <translation>Xóa mọi dữ liệu hành trình trên trạm bờ và cả trên USV?</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="934"/>
@@ -13226,17 +13226,17 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="888"/>
         <source>Are you sure you want to remove current plan and create a new plan? </source>
-        <translation type="unfinished">Are you sure you want to remove current plan and create a new plan? </translation>
+        <translation>Hủy bỏ hành trình hiện tại và tạo hành trình mới? </translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="970"/>
         <source>Plan overwrite</source>
-        <translation type="unfinished">Plan overwrite</translation>
+        <translation>Ghi đè hành trình</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="977"/>
         <source>You have unsaved changes. You should upload to your vehicle, or save to a file.</source>
-        <translation type="unfinished">You have unsaved changes. You should upload to your vehicle, or save to a file.</translation>
+        <translation>Thay đổi chưa được lưu. Nên tải lên USV hoặc lưu thành tệp.</translation>
     </message>
     <message>
         <location filename="../src/PlanView/PlanView.qml" line="887"/>
@@ -13315,22 +13315,22 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/UI/toolbar/PlanViewToolBar.qml" line="58"/>
         <source>Exit Plan</source>
-        <translation type="unfinished">Exit Plan</translation>
+        <translation>Thoát thiết lập hành trình</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/PlanViewToolBar.qml" line="131"/>
         <source>Syncing Mission</source>
-        <translation type="unfinished">Syncing Mission</translation>
+        <translation>Đang đồng bộ hành dữ liệu hành trình</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/PlanViewToolBar.qml" line="138"/>
         <source>Done</source>
-        <translation type="unfinished">Done</translation>
+        <translation>Hoàn thành</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/PlanViewToolBar.qml" line="147"/>
         <source>Click anywhere to hide</source>
-        <translation type="unfinished">Click anywhere to hide</translation>
+        <translation>Nhấn bất kỳ đâu để ẩn</translation>
     </message>
 </context>
 <context>
@@ -14741,12 +14741,12 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
     <message>
         <location filename="../src/UI/toolbar/RCRSSIIndicator.qml" line="39"/>
         <source>RC RSSI Status</source>
-        <translation type="unfinished">RC RSSI Status</translation>
+        <translation>Trạng thái tín hiệu ĐK</translation>
     </message>
     <message>
         <location filename="../src/UI/toolbar/RCRSSIIndicator.qml" line="42"/>
         <source>RSSI</source>
-        <translation type="unfinished">RSSI</translation>
+        <translation>RSSI</translation>
     </message>
 </context>
 <context>
@@ -16283,17 +16283,17 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/UI/SettingsPagesModel.qml" line="17"/>
         <source>General</source>
-        <translation type="unfinished">General</translation>
+        <translation>Chung</translation>
     </message>
     <message>
         <location filename="../src/UI/SettingsPagesModel.qml" line="24"/>
         <source>Fly View</source>
-        <translation type="unfinished">Fly View</translation>
+        <translation>Màn hình điều khiển</translation>
     </message>
     <message>
         <location filename="../src/UI/SettingsPagesModel.qml" line="31"/>
         <source>Plan View</source>
-        <translation type="unfinished">Plan View</translation>
+        <translation>Màn hình thiết lập hành trình</translation>
     </message>
     <message>
         <location filename="../src/UI/SettingsPagesModel.qml" line="38"/>
@@ -16318,7 +16318,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/UI/SettingsPagesModel.qml" line="66"/>
         <source>Maps</source>
-        <translation type="unfinished">Maps</translation>
+        <translation>Bản đồ</translation>
     </message>
     <message>
         <location filename="../src/UI/SettingsPagesModel.qml" line="73"/>
@@ -16495,7 +16495,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/PlanView/SimpleItemEditor.qml" line="77"/>
         <source>Takeoff</source>
-        <translation type="unfinished">Takeoff</translation>
+        <translation>Khởi hành</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SimpleItemEditor.qml" line="78"/>
@@ -16520,7 +16520,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/PlanView/SimpleItemEditor.qml" line="93"/>
         <source>Done</source>
-        <translation type="unfinished">Done</translation>
+        <translation type="unfinished">Hoàn thành</translation>
     </message>
     <message>
         <location filename="../src/PlanView/SimpleItemEditor.qml" line="104"/>
@@ -16545,7 +16545,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/PlanView/SimpleItemEditor.qml" line="242"/>
         <source>Flight Speed</source>
-        <translation type="unfinished">Flight Speed</translation>
+        <translation>Tốc độ</translation>
     </message>
 </context>
 <context>
@@ -16563,12 +16563,12 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/MissionManager/SimpleMissionItem.cc" line="386"/>
         <source>Takeoff</source>
-        <translation type="unfinished">Takeoff</translation>
+        <translation>Khởi hành</translation>
     </message>
     <message>
         <location filename="../src/MissionManager/SimpleMissionItem.cc" line="388"/>
         <source>Land</source>
-        <translation type="unfinished">Land</translation>
+        <translation>Kết thúc</translation>
     </message>
     <message>
         <location filename="../src/MissionManager/SimpleMissionItem.cc" line="390"/>
@@ -16604,42 +16604,42 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="194"/>
         <source>EMERGENCY</source>
-        <translation type="unfinished">EMERGENCY</translation>
+        <translation>KHẨN CẤP</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="198"/>
         <source>ALERT</source>
-        <translation type="unfinished">ALERT</translation>
+        <translation>BÁO ĐỘNG</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="202"/>
         <source>Critical</source>
-        <translation type="unfinished">Critical</translation>
+        <translation>Nghiêm trọng</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="206"/>
         <source>Error</source>
-        <translation type="unfinished">Error</translation>
+        <translation>Lỗi</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="210"/>
         <source>Warning</source>
-        <translation type="unfinished">Warning</translation>
+        <translation>Cảnh báo</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="214"/>
         <source>Notice</source>
-        <translation type="unfinished">Notice</translation>
+        <translation>Chú ý</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="218"/>
         <source>Info</source>
-        <translation type="unfinished">Info</translation>
+        <translation>Thông tin</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="222"/>
         <source>Debug</source>
-        <translation type="unfinished">Debug</translation>
+        <translation>Sửa lỗi</translation>
     </message>
     <message>
         <location filename="../src/MAVLink/StatusTextHandler.cc" line="332"/>
@@ -18122,7 +18122,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
         <location filename="../src/Vehicle/Vehicle.cc" line="1035"/>
         <source>battery %1 level is critical</source>
-        <translation type="unfinished">battery %1 level is critical</translation>
+        <translation>Mức pin %1 đang nghiêm trọng</translation>
     </message>
     <message>
         <location filename="../src/Vehicle/Vehicle.cc" line="1041"/>

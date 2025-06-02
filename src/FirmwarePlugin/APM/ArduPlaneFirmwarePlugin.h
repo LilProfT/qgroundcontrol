@@ -64,17 +64,17 @@ public:
 protected:
     uint32_t _convertToCustomFlightModeEnum(uint32_t val) const override;
 
-    const QString _manualFlightMode = tr("Manual");
+    const QString _manualFlightMode = tr("Thủ công");
     const QString _circleFlightMode = tr("Circle");
     const QString _stabilizeFlightMode = tr("Stabilize");
     const QString _trainingFlightMode = tr("Training");
-    const QString _acroFlightMode = tr("Acro");
+    const QString _acroFlightMode = tr("Bù 1");
     const QString _flyByWireAFlightMode = tr("FBW A");
     const QString _flyByWireBFlightMode = tr("FBW B");
     const QString _cruiseFlightMode = tr("Cruise");
     const QString _autoTuneFlightMode = tr("Autotune");
-    const QString _autoFlightMode = tr("Auto");
-    const QString _rtlFlightMode = tr("RTL");
+    const QString _autoFlightMode = tr("Hành trình");
+    const QString _rtlFlightMode = tr("Quay về trạm");
     const QString _loiterFlightMode = tr("Loiter");
     const QString _takeoffFlightMode = tr("Takeoff");
     const QString _avoidADSBFlightMode = tr("Avoid ADSB");
