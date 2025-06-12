@@ -60,10 +60,10 @@ Column {
 
         Component.onCompleted: {
             append({name:"Dung\nlượng", bgColor: "black", value: "38", unit: "%"});
-            append({name:"Điện\náp", bgColor: "orange", value: "22", unit: "V"});
-            append({name:"Dòng\ntải", bgColor: "black", value: "7", unit: "A"});
-            append({name:"Nhiệt\nđộ", bgColor: "black", value: "48", unit: "°C"});
-            append({name:"Khóa\ntừ", bgColor: "#42ff2b", value: "Mở", unit: ""});
+            append({name:"FSU", bgColor: "orange", value: "22", unit: "V"});
+            append({name:"VCU", bgColor: "black", value: "7", unit: "A"});
+            append({name:"Khóa từ\nFSU", bgColor: "black", value: "Mở", unit: ""});
+            append({name:"Khóa từ\nVCU", bgColor: "#42ff2b", value: "Mở", unit: ""});
             completed = true;
         }
 

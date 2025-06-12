@@ -137,7 +137,7 @@ Item {
     RelayKeyMock {
         id: relayKeyMock
         anchors.right: thermalMock.left
-        anchors.rightMargin: 7
+        anchors.rightMargin: 4
 
         anchors.bottom: bottomRightRowLayout.top
         anchors.bottomMargin: 5
@@ -145,6 +145,7 @@ Item {
 
     FuelMock {
         id: fuelMock
+        visible: false
         anchors.right: relayKeyMock.left
         anchors.rightMargin: 7
 
