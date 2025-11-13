@@ -49,7 +49,21 @@
         },
         {
             "name": "contactorState",
-            "shortDesc": "Total volume on second channel",
+            "shortDesc": "State of the contactor relay",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L"
+        },
+        {
+            "name": "relayDetonatorState",
+            "shortDesc": "State of the detonator relay",
+            "type": "float",
+            "decimalPlaces": 1,
+            "units": "L"
+        },
+        {
+            "name": "relayExplodeState",
+            "shortDesc": "State of the explode relay",
             "type": "float",
             "decimalPlaces": 1,
             "units": "L"

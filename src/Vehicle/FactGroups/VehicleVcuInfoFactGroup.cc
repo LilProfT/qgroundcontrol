@@ -15,6 +15,8 @@ const char* VehicleVcuInfoFactGroup::_cameraPanPositionFactName =               
 const char* VehicleVcuInfoFactGroup::_cameraTiltPositionFactName =                           "cameraTiltPosition";
 const char* VehicleVcuInfoFactGroup::_cameraZoomPositionFactName =                            "cameraZoomPosition";
 const char* VehicleVcuInfoFactGroup::_cameraDeltaYawFactName =                           "cameraDeltaYaw";
+const char* VehicleVcuInfoFactGroup::_relayDetonatorStateFactName =                      "relayDetonatorState";
+const char* VehicleVcuInfoFactGroup::_relayExplodeStateFactName =                      "relayExplodeState";
 
 //Constructor
 VehicleVcuInfoFactGroup::VehicleVcuInfoFactGroup(QObject *parent)
@@ -29,10 +31,12 @@ VehicleVcuInfoFactGroup::VehicleVcuInfoFactGroup(QObject *parent)
     , _steeringAngleFact                        (0, _steeringAngleFactName,                         FactMetaData::valueTypeFloat)
     , _fuelTankPctFact                          (0, _fuelTankPctFactName,                           FactMetaData::valueTypeInt8)
     , _contactorStateFact                       (0, _contactorStateFactName,                        FactMetaData::valueTypeUint16)
-    , _cameraPanPositionFact                             (0, _cameraPanPositionFactName,                              FactMetaData::valueTypeInt8)
-    , _cameraTiltPositionFact                            (0, _cameraTiltPositionFactName,                             FactMetaData::valueTypeInt8)
-    , _cameraZoomPositionFact                             (0, _cameraZoomPositionFactName,                              FactMetaData::valueTypeInt8)
-    , _cameraDeltaYawFact                            (0, _cameraDeltaYawFactName,                             FactMetaData::valueTypeInt8)
+    , _cameraPanPositionFact                    (0, _cameraPanPositionFactName,                     FactMetaData::valueTypeInt8)
+    , _cameraTiltPositionFact                   (0, _cameraTiltPositionFactName,                    FactMetaData::valueTypeInt8)
+    , _cameraZoomPositionFact                   (0, _cameraZoomPositionFactName,                    FactMetaData::valueTypeInt8)
+    , _cameraDeltaYawFact                       (0, _cameraDeltaYawFactName,                        FactMetaData::valueTypeInt8)
+    , _relayDetonatorStateFact                  (0, _relayDetonatorStateFactName,                   FactMetaData::valueTypeUint16)
+    , _relayExplodeStateFact                    (0, _relayExplodeStateFactName,                     FactMetaData::valueTypeUint16)
 {
     //Init fact with a single value and name
     _addFact(&_coolantWaterInletTempChannelFact,         _coolantWaterInletTempChannelFactName);
@@ -49,6 +53,8 @@ VehicleVcuInfoFactGroup::VehicleVcuInfoFactGroup(QObject *parent)
     _addFact(&_cameraTiltPositionFact,                           _cameraTiltPositionFactName);
     _addFact(&_cameraZoomPositionFact,                            _cameraZoomPositionFactName);
     _addFact(&_cameraDeltaYawFact,                           _cameraDeltaYawFactName);
+    _addFact(&_relayDetonatorStateFact,                      _relayDetonatorStateFactName);
+    _addFact(&_relayExplodeStateFact,                      _relayExplodeStateFactName);
 
     //Initialize with value not available "--.--"
     _coolantWaterInletTempChannelFact.setRawValue(qQNaN());
@@ -65,6 +71,8 @@ VehicleVcuInfoFactGroup::VehicleVcuInfoFactGroup(QObject *parent)
     _cameraTiltPositionFact.setRawValue(qQNaN());
     _cameraZoomPositionFact.setRawValue(qQNaN());
     _cameraDeltaYawFact.setRawValue(qQNaN());
+    _relayDetonatorStateFact.setRawValue(qQNaN());
+    _relayExplodeStateFact.setRawValue(qQNaN());
 }
 
 void VehicleVcuInfoFactGroup::handleMessage(Vehicle *vehicle, const mavlink_message_t &message)
@@ -116,6 +124,14 @@ void VehicleVcuInfoFactGroup::_handleVcuInfo(const mavlink_message_t &msg)
     thermoErrorMask()->setRawValue(batteryStatus.fault_bitmask);
     throttlePercent()->setRawValue(batteryStatus.temperature);
     steeringAngle()->setRawValue(batteryStatus.current_battery);
-    contactorState()->setRawValue(batteryStatus.charge_state);
+    // contactorState()->setRawValue(batteryStatus.charge_state);
     fuelTankPct()->setRawValue(batteryStatus.battery_remaining);
+    _handleRelayState(batteryStatus.charge_state);
+}
+
+void VehicleVcuInfoFactGroup::_handleRelayState(uint8_t state) {
+    contactorState()->setRawValue(((state>>0)& 0x01));
+    relayDetonatorState()->setRawValue(((state>>1)& 0x01));
+    relayExplodeState()->setRawValue(((state>>2)& 0x01));
+
 }

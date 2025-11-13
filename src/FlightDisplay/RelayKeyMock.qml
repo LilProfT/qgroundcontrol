@@ -57,12 +57,14 @@ Column {
         id: metricModel
         property bool completed: false
         property bool contactorState: _vcuInfo.contactorState.rawValue
+        property bool relayDetonatorState: _vcuInfo.relayDetonatorState.rawValue
+        property bool relayExplodeState: _vcuInfo.relayExplodeState.rawValue
 
         Component.onCompleted: {
             append({name:"Dung\nlượng", bgColor: "black", value: "38", unit: "%"});
             append({name:"FSU", bgColor: "orange", value: "22", unit: "V"});
-            append({name:"VCU", bgColor: "black", value: "7", unit: "A"});
-            append({name:"Khóa từ\nFSU", bgColor: "black", value: "Mở", unit: ""});
+            append({name:"Điểm hỏa", bgColor: "#42ff2b", value: "Mở", unit: ""});
+            append({name:"Mở khóa 1", bgColor: "#42ff2b", value: "Mở", unit: ""});
             append({name:"Khóa từ\nVCU", bgColor: "#42ff2b", value: "Mở", unit: ""});
             completed = true;
         }
@@ -72,7 +74,16 @@ Column {
                 setProperty(4,"value",contactorState ? "Ngắt" : "Đóng");
                 setProperty(4,"bgColor",contactorState ? "#c50202" : "#42ff2b");
             }
-
+        onRelayDetonatorStateChanged:
+            if (completed) {
+                setProperty(3,"value",relayDetonatorState ? "Ngắt" : "Đóng");
+                setProperty(3,"bgColor",relayDetonatorState ? "#c50202" : "#42ff2b");
+            }
+        onRelayExplodeStateChanged:
+            if (completed) {
+                setProperty(2,"value",relayExplodeState ? "Ngắt" : "Đóng");
+                setProperty(2,"bgColor",relayExplodeState ? "#c50202" : "#42ff2b");
+            }
         // ListElement { name: "Dung\nlượng"; bgColor: "black";  value: "38"; unit: "%" }
         // ListElement { name: "Điện\náp";   bgColor: "orange"; value: "22"; unit: "V" }
         // ListElement { name: "Dòng\ntải";  bgColor: "black";    value: "8"; unit: "A" }

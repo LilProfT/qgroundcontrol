@@ -25,6 +25,8 @@ public:
     Q_PROPERTY(Fact* cameraTiltPosition                      READ cameraTiltPosition                      CONSTANT)
     Q_PROPERTY(Fact* cameraZoomPosition                       READ cameraZoomPosition                       CONSTANT)
     Q_PROPERTY(Fact* cameraDeltaYaw                      READ cameraDeltaYaw                      CONSTANT)
+    Q_PROPERTY(Fact* relayDetonatorState                 READ relayDetonatorState                 CONSTANT)
+    Q_PROPERTY(Fact* relayExplodeState                 READ relayExplodeState                 CONSTANT)
 
     Fact* coolantWaterInletTempChannel               () { return &_coolantWaterInletTempChannelFact; }
     Fact* coolantWaterOutletTempChannel              () { return &_coolantWaterOutletTempChannelFact; }
@@ -40,6 +42,8 @@ public:
     Fact* cameraTiltPosition                         () { return &_cameraTiltPositionFact; }
     Fact* cameraZoomPosition                          () { return &_cameraZoomPositionFact; }
     Fact* cameraDeltaYaw                         () { return &_cameraDeltaYawFact; }
+    Fact* relayDetonatorState                    () { return &_relayDetonatorStateFact; }
+    Fact* relayExplodeState                    () { return &_relayExplodeStateFact; }
 
     //Overrides from FactGroup. Call by vehicle factgroup class
     void handleMessage(Vehicle *vehicle, const mavlink_message_t &message) override;
@@ -58,6 +62,8 @@ public:
     static const char* _cameraTiltPositionFactName;
     static const char* _cameraZoomPositionFactName;
     static const char* _cameraDeltaYawFactName;
+    static const char* _relayDetonatorStateFactName;
+    static const char* _relayExplodeStateFactName;
 
 protected:
     //Handle vcu telemetry data
@@ -66,6 +72,7 @@ protected:
     //Handle camera telemetry data
     void _handleCameraInfo(const mavlink_message_t &msg);
 
+    void _handleRelayState(uint8_t state);
     //Fact variables define
     Fact _coolantWaterInletTempChannelFact;
     Fact _coolantWaterOutletTempChannelFact;
@@ -81,5 +88,7 @@ protected:
     Fact _cameraTiltPositionFact;
     Fact _cameraZoomPositionFact;
     Fact _cameraDeltaYawFact;
+    Fact _relayDetonatorStateFact;
+    Fact _relayExplodeStateFact;
 };
 
